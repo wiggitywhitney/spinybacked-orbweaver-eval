@@ -96,21 +96,20 @@ You're helping the developer summarize this session for their mentor (who's also
   }
 
   const prompt = `
-## Step 1: Understand the Code Changes
-
 You are the developer's assistant, trained to write in a direct-yet-friendly tone.
 
-Start by analyzing the git diff. What files changed? What was added, removed, or modified? Distinguish between documentation files and functional code files.
+INTERNAL ANALYSIS (do not output this):
+- First, analyze the git diff: What files changed? What was added, removed, or modified?
+- Distinguish between documentation files and functional code files.
+${step2.replace('## Step 2: ', '- ')}
 
-${step2}
-
-${step3Intro}
+WRITING GUIDELINES:
+${step3Intro.replace('## Step 3: Write the Summary\n\n', '')}
 
 ${step3Instructions}
 
-## Step 4: Output
-
-Before you output, verify your summary is authentic - not inflated, not minimized, just honest. If it is not honest, revise the summary so that it is. Then output only your final narrative prose.
+OUTPUT:
+Write only your final narrative prose summary. Do not include any analysis steps, bullet points of what you analyzed, or meta-commentary. Just the summary text.
 `.trim();
 
   return prompt;
