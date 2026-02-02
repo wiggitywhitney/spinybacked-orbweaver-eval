@@ -7,6 +7,29 @@
  */
 
 /**
+ * Detect if a message is system noise (bash output, commands, system tags)
+ *
+ * These are automatically generated messages from Claude Code that contain
+ * command output, not actual human dialogue.
+ *
+ * @param {string} content - Text content of the message
+ * @returns {boolean} True if this is system noise
+ */
+function isSystemNoiseMessage(content) {
+  if (!content) return false;
+
+  // System noise patterns - these are not genuine dialogue
+  const noisePatterns = [
+    /^<bash-stdout>/,
+    /^<bash-input>/,
+    /^<local-command-caveat>/,
+    /^\[Request interrupted/,
+  ];
+
+  return noisePatterns.some((pattern) => pattern.test(content));
+}
+
+/**
  * Detect if a message is a plan-injection (AI-generated plan pasted as user message)
  *
  * When plan mode exits, Claude Code injects the approved plan as a `type: "user"` message.
@@ -148,6 +171,7 @@ export function filterMessages(messages) {
       toolUse: 0,
       toolResult: 0,
       planInjection: 0,
+      systemNoise: 0,
     },
   };
 
@@ -177,8 +201,17 @@ export function filterMessages(messages) {
         }
       }
     } else {
-      // Additional check for plan-injection messages (only applies to user messages)
+      // Additional checks for user messages
       const textContent = extractTextContent(message);
+
+      // Filter system noise (bash output, commands, system tags)
+      if (message.type === 'user' && isSystemNoiseMessage(textContent)) {
+        stats.filtered++;
+        stats.byReason.systemNoise++;
+        continue;
+      }
+
+      // Filter plan-injection messages (AI-generated plans pasted as user messages)
       if (message.type === 'user' && isPlanInjectionMessage(textContent)) {
         stats.filtered++;
         stats.byReason.planInjection++;
