@@ -129,7 +129,7 @@ function hasSubstantialChat(messages) {
   const substantialMessages = messages.filter((msg) => {
     if (msg.type !== 'user') return false;
 
-    const content = msg.content || '';
+    const content = (msg.content || '').trim();
     // Skip very short messages (likely commands or acknowledgments)
     if (content.length < 50) return false;
 
@@ -141,7 +141,7 @@ function hasSubstantialChat(messages) {
     ];
 
     for (const pattern of simplePatterns) {
-      if (pattern.test(content.trim())) return false;
+      if (pattern.test(content)) return false;
     }
 
     return true;
@@ -165,7 +165,8 @@ function formatChatMessages(messages) {
   return messages
     .map((msg) => {
       const type = msg.type === 'user' ? 'user' : 'assistant';
-      const time = new Date(msg.timestamp).toLocaleTimeString();
+      const date = msg.timestamp ? new Date(msg.timestamp) : null;
+      const time = date && !Number.isNaN(date.getTime()) ? date.toLocaleTimeString() : '';
       return `{"type":"${type}", "time":"${time}", "content":"${escapeForJson(msg.content)}"}`;
     })
     .join('\n\n');
