@@ -86,17 +86,46 @@ This is a routine documentation update with minimal discussion. Write a brief fa
     // Scenarios 1, 2, 3: Normal framing
     step3Intro = `## Step 3: Write the Summary
 
-You're helping the developer summarize this session for their mentor (who's also a friend). The developer wants to acknowledge both successes and challenges honestly. Write the summary as natural conversational prose, no bullet points, no section headers.
+Write for someone unfamiliar with the project who has no prior context. Write the summary as natural conversational prose, no bullet points, no section headers.
+
+**Voice & Tone:**
+Write casually but clearly, like explaining to a friend. Use third person ("the developer") to keep it universal.
+
+TOO FORMAL (avoid):
+"The authentication module was refactored to implement a more maintainable architecture."
+"The journal output architecture was restructured to prevent reasoning artifacts."
+
+GOOD (aim for this):
+"The developer cleaned up the authentication code - it was getting tangled, so they restructured it."
+"The prompts were leaking internal reasoning into the final output, so the developer changed them to keep that internal."
+
+Key voice markers:
+- Use contractions (wasn't, it's, didn't, they're)
+- Refer to "the developer" (third person, universal)
+- Acknowledge problems casually ("it was getting messy", "kept breaking")
+- Direct language over corporate-speak
+- Brief is fine - don't pad with filler
 
 **Important guidelines:**
-- Never mention the mentor in your output.
 - Use accurate verbs: "planned/designed/documented" for planning work, "implemented/built/coded" for functional code
 - Be honest - some work is interesting, some is routine. Both deserve accurate description without inflation or minimization
 - Avoid subjective qualifiers like "successfully", "significant", "major progress"`;
   }
 
   const prompt = `
-You are the developer's assistant, trained to write in a direct-yet-friendly tone.
+You are writing a journal entry about a development session. Write in third person using "the developer" to keep it universal.
+
+VOICE REQUIREMENT (CRITICAL):
+- Write casually, like explaining to a friend who codes
+- Use "the developer" (third person) not "I" or passive voice
+- Use contractions: "didn't", "wasn't", "it's", "they're"
+- Keep it brief and direct
+
+BAD: "The journal output architecture was restructured to prevent reasoning artifacts."
+GOOD: "The developer restructured the journal output to stop it from leaking internal reasoning."
+
+BAD: "The core problem was that the previous prompts used step-by-step instructions."
+GOOD: "The prompts were walking through steps out loud, so the developer changed them to keep that internal."
 
 INTERNAL ANALYSIS (do not output this):
 - First, analyze the git diff: What files changed? What was added, removed, or modified?
@@ -109,7 +138,7 @@ ${step3Intro.replace('## Step 3: Write the Summary\n\n', '')}
 ${step3Instructions}
 
 OUTPUT:
-Write only your final narrative prose summary. Do not include any analysis steps, bullet points of what you analyzed, or meta-commentary. Just the summary text.
+Write only your final narrative prose summary in third person. No bullet points, no numbered lists - prose paragraphs only. Do not include any analysis steps or meta-commentary. Just the summary text.
 `.trim();
 
   return prompt;

@@ -1,9 +1,40 @@
 /**
  * Message Filter - Filters noisy messages from chat context
  *
- * Removes tool calls, tool results, meta messages, and empty content
+ * Removes tool calls, tool results, meta messages, empty content,
+ * and plan-injection messages (AI-generated plans pasted as user messages)
  * while preserving human/assistant dialogue and context capture tool calls.
  */
+
+/**
+ * Detect if a message is a plan-injection (AI-generated plan pasted as user message)
+ *
+ * When plan mode exits, Claude Code injects the approved plan as a `type: "user"` message.
+ * This content is AI-generated (markdown structure, analysis, reasoning) but appears
+ * as a user message. We filter these to prevent the dialogue extractor from quoting
+ * AI-generated content as human speech.
+ *
+ * @param {string} content - Text content of the message
+ * @returns {boolean} True if this looks like a plan-injection message
+ */
+function isPlanInjectionMessage(content) {
+  // Plan injections are typically long and structured
+  if (!content || content.length < 500) {
+    return false;
+  }
+
+  // Check for plan markers - patterns that indicate AI-generated plan content
+  const planMarkers = [
+    /^Implement the following plan:/i,
+    /^# .+\n\n## /m, // Markdown doc structure (# Title\n\n## Section)
+    /\n\| .+ \| .+ \|/, // Markdown tables
+    /\*\*Root cause\*\*:/i,
+    /\*\*Problem\*\*:/i,
+    /^## (Problem|Solution|Implementation|Verification)/m,
+  ];
+
+  return planMarkers.some((marker) => marker.test(content));
+}
 
 /**
  * Check if a message should be filtered out
@@ -116,6 +147,7 @@ export function filterMessages(messages) {
       emptyContent: 0,
       toolUse: 0,
       toolResult: 0,
+      planInjection: 0,
     },
   };
 
@@ -145,13 +177,21 @@ export function filterMessages(messages) {
         }
       }
     } else {
+      // Additional check for plan-injection messages (only applies to user messages)
+      const textContent = extractTextContent(message);
+      if (message.type === 'user' && isPlanInjectionMessage(textContent)) {
+        stats.filtered++;
+        stats.byReason.planInjection++;
+        continue;
+      }
+
       stats.preserved++;
       filtered.push({
         uuid: message.uuid,
         sessionId: message.sessionId,
         type: message.type,
         timestamp: message.timestamp,
-        content: extractTextContent(message),
+        content: textContent,
         // Preserve context capture info if present
         isContextCapture: Array.isArray(message.message?.content)
           ? message.message.content.some(

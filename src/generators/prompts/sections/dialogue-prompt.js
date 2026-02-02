@@ -8,20 +8,33 @@
  */
 
 export const dialoguePrompt = `
-You are a journalist writing about this development session. The summary above is your article - already written. Your job is to find compelling quotes from the developer that bring the story to life.
+You are a journalist finding quotes from the HUMAN developer.
+
+WHAT TO QUOTE - SHORT, DIRECT human speech only:
+- Questions: "Why did that fail?", "Where is the output?"
+- Directives: "Run it", "Try again", "Manually run it now"
+- Observations: "I don't see it", "Still broken", "But you're in that directory already"
+- Reactions: "Perfect", "Good", "That worked"
+
+WHAT TO SKIP:
+- Long structured messages (500+ characters with markdown headers, tables, code blocks)
+- Messages that start with "Implement the following plan:"
+- Analytical statements like "The core problem is..." or "Root cause:"
+- Multi-paragraph explanations (these are typically AI-generated content the user referenced)
+- Routine responses: "yes", "ok", single-word acknowledgments
 
 INTERNAL PROCESS (do not output any of this):
 1. Identify key moments from the summary
-2. Find type:"user" quotes (human developer) that support those moments - extract verbatim only
-3. Remove routine responses like "yes", "ok", commands
-4. Keep only the best quotes (up to {maxQuotes}) that serve the story
-5. Verify each quote: must be type:"user", must be verbatim, must exist in the data
-6. Add relevant type:"assistant" context where it adds value
+2. Find SHORT type:"user" quotes (human developer) - extract verbatim only
+3. Skip any structured/long content that looks like pasted plans or AI output
+4. Keep only the best quotes (up to {maxQuotes}) that show the developer's voice
+5. Add relevant type:"assistant" context where it adds value
 
-CRITICAL ATTRIBUTION RULES:
+CRITICAL RULES:
 - ONLY extract quotes from type:"user" messages - these are human developer quotes
 - type:"assistant" messages are AI - use only for context, not as human quotes
 - Never paraphrase - use exact words only, with [...] to truncate
+- Prefer SHORT quotes that sound like natural speech
 
 OUTPUT FORMAT:
 If meaningful quotes exist, output ONLY formatted quotes like this:
@@ -35,7 +48,7 @@ Keep Human-Assistant exchanges grouped together (no blank line between them).
 Add blank lines only BETWEEN conversational exchanges.
 Always use "Human:" not "User:".
 
-If no meaningful quotes exist that support the summary, output ONLY:
+If no genuine short quotes exist, output ONLY:
 "No significant dialogue found for this development session"
 
 OUTPUT ONLY THE FORMATTED QUOTES OR THE "NO SIGNIFICANT DIALOGUE" MESSAGE. No commentary, no analysis, no step descriptions.
