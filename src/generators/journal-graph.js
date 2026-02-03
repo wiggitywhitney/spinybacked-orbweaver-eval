@@ -28,6 +28,7 @@ const DialogueSchema = z.object({
       human: z.string().describe('Exact verbatim quote from the human developer'),
       assistant: z
         .string()
+        .optional()
         .nullable()
         .describe('Optional relevant assistant response for context'),
     })
