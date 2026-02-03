@@ -24,20 +24,20 @@
 ## Milestones
 
 ### Milestone 1: Research - Weaver Deep Dive
-**Status**: Not Started
+**Status**: ✅ Complete
 
 Research OpenTelemetry Weaver in depth to understand:
-- Registry structure and YAML format
-- How to define custom attribute groups
-- How to import official OTel conventions as dependencies
-- How `weaver registry resolve` outputs machine-readable data
-- What an AI agent needs to parse from the resolved registry
+- [x] Registry structure and YAML format
+- [x] How to define custom attribute groups
+- [x] How to import official OTel conventions as dependencies
+- [x] How `weaver registry resolve` outputs machine-readable data
+- [x] What an AI agent needs to parse from the resolved registry
 
 **Deliverable**: `docs/research/weaver-schema-research.md` with:
-- Weaver registry YAML structure (annotated examples)
-- Custom registry setup with OTel dependencies
-- Resolved registry output format (what the AI will read)
-- Recommended schema structure for commit-story
+- [x] Weaver registry YAML structure (annotated examples)
+- [x] Custom registry setup with OTel dependencies
+- [x] Resolved registry output format (what the AI will read)
+- [x] Recommended schema structure for commit-story
 
 **Done when**: Research document exists and answers all questions above
 
@@ -127,9 +127,12 @@ This PRD delivers:
 ## Open Questions
 
 1. Should the registry live in `telemetry/registry/` or a different location?
+   - **Answer**: `telemetry/registry/` - keeps schema close to code it describes
 2. What version of OTel semantic conventions should we pin to?
+   - **Answer**: v1.37.0 - aligns with existing research and Datadog LLM Observability
 3. Should we create a separate repo for the schema (for true cross-codebase use) or keep it in commit-story-v2?
+   - **Answer**: Keep in commit-story-v2 for now; can extract later if needed
 
 ## Progress Log
 
-_No progress yet - PRD just created_
+- **2026-02-03**: Milestone 1 complete - Created `docs/research/weaver-schema-research.md` with comprehensive Weaver deep-dive covering registry structure, custom attributes, OTel dependencies, resolved output format, and recommended schema for commit-story
