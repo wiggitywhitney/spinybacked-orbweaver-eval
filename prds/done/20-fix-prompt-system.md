@@ -160,7 +160,7 @@ Verified the fix works by testing with commit 8bd4b7f in cluster-whisperer.
 - [x] No "I'll", "Let me", "Great question" in any section
 - [x] Dialogue quotes appear verbatim in original type:"user" messages
 - [x] Technical decisions reference actual chat discussion
-- [x] Third person voice ("the developer") maintained throughout
+- [x] Third-person voice ("the developer") maintained throughout
 - [x] Empty results returned when insufficient context (not hallucinated content)
 
 **Done when**: Generated journal entries pass all checklist items.
