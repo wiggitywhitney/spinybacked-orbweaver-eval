@@ -20,7 +20,7 @@ Claude successfully identified the registry structure:
 | Component | Discovered | Details |
 |-----------|------------|---------|
 | Attribute Groups | ✅ | 5 groups found |
-| Attribute Names | ✅ | 33 total attributes |
+| Attribute Names | ✅ | 32 total attributes |
 | Attribute Types | ✅ | Primitives and enums |
 | Requirement Levels | ✅ | required vs recommended |
 | Enum Members | ✅ | Full value lists with descriptions |
@@ -31,7 +31,7 @@ Claude successfully identified the registry structure:
 
 | Group | Display Name | Count | Custom | OTel |
 |-------|--------------|-------|--------|------|
-| `commit_story.ai` | AI Generation | 11 | 1 | 10 |
+| `commit_story.ai` | AI Generation | 10 | 1 | 9 |
 | `commit_story.commit` | Commit | 7 | 5 | 2 |
 | `commit_story.context` | Context Collection | 5 | 5 | 0 |
 | `commit_story.filter` | Filter | 5 | 5 | 0 |
@@ -63,7 +63,7 @@ commit_story.journal.sections         string[] recommended
 commit_story.journal.word_count       int     recommended
 ```
 
-### OTel Semantic Convention Attributes (12 total)
+### OTel Semantic Convention Attributes (11 total)
 
 ```text
 gen_ai.operation.name      enum    required   (from attributes.gen_ai.common.client)
@@ -82,6 +82,7 @@ vcs.ref.head.revision      string  recommended (from entity.vcs.ref)
 ### Enum Values Discovered
 
 #### commit_story.ai.section_type
+
 | Value | Description |
 |-------|-------------|
 | `summary` | Daily summary section generation |
@@ -90,6 +91,7 @@ vcs.ref.head.revision      string  recommended (from entity.vcs.ref)
 | `context_synthesis` | Multi-source context synthesis |
 
 #### commit_story.context.source
+
 | Value | Description |
 |-------|-------------|
 | `claude_code` | Claude Code chat history from ~/.claude/projects/ |
@@ -97,6 +99,7 @@ vcs.ref.head.revision      string  recommended (from entity.vcs.ref)
 | `mcp` | MCP tool context capture |
 
 #### commit_story.filter.type
+
 | Value | Description |
 |-------|-------------|
 | `token_budget` | Filtering based on token limits |
@@ -105,6 +108,7 @@ vcs.ref.head.revision      string  recommended (from entity.vcs.ref)
 | `relevance` | Filtering by relevance to commit |
 
 #### gen_ai.operation.name (OTel)
+
 | Value | Description |
 |-------|-------------|
 | `chat` | Chat completion operation |
@@ -116,6 +120,7 @@ vcs.ref.head.revision      string  recommended (from entity.vcs.ref)
 | `execute_tool` | Execute a tool |
 
 #### gen_ai.provider.name (OTel)
+
 | Value | Description |
 |-------|-------------|
 | `anthropic` | Anthropic |

@@ -124,8 +124,15 @@ Or cached between runs using GitHub Actions cache.
 
 Use path filters to only run Weaver validation when registry files change:
 ```yaml
+- uses: step-security/paths-filter@v3
+  id: changes
+  with:
+    filters: |
+      registry:
+        - 'telemetry/registry/**'
+
 - name: Validate Weaver Schema
-  if: contains(github.event.pull_request.changed_files, 'telemetry/registry')
+  if: steps.changes.outputs.registry == 'true'
   run: weaver registry check -r ./telemetry/registry
 ```
 

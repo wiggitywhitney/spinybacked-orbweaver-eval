@@ -575,7 +575,8 @@ function tryRecoverFromParsingError(error, arrayField) {
         arrayStr = arrayStr.substring(startIdx, endIdx + 1);
       }
 
-      parsed[arrayField] = JSON.parse(arrayStr);
+      const recovered = JSON.parse(arrayStr);
+      parsed[arrayField] = Array.isArray(recovered) ? recovered : [];
     }
 
     return parsed;
