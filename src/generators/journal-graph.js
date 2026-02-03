@@ -229,8 +229,23 @@ function escapeForJson(content) {
 }
 
 /**
+ * Normalize text for quote verification
+ * Lowercases, collapses whitespace, converts ellipsis markers to standard form
+ * @param {string} text - Text to normalize
+ * @returns {string} Normalized text
+ */
+function normalizeForVerification(text) {
+  return (text || '')
+    .toLowerCase()
+    .replace(/\[\.\.\.\]/g, '…')
+    .replace(/\[…\]/g, '…')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+/**
  * Verify dialogue quotes exist in actual user messages
- * Filters out any quotes that don't appear in type:"user" messages
+ * Uses exact substring matching with ellipsis segment support
  * @param {object} result - Structured output from AI with quotes array
  * @param {object[]} messages - Original chat messages
  * @returns {object} Verified result with invalid quotes removed
@@ -240,29 +255,28 @@ function verifyDialogueQuotes(result, messages) {
     return result;
   }
 
-  // Get all user message content for verification
+  // Get all user message content for verification (normalized)
   const userMessages = messages
     .filter((m) => m.type === 'user')
-    .map((m) => (m.content || '').toLowerCase());
+    .map((m) => normalizeForVerification(m.content));
 
   // Filter to quotes that actually appear in user messages
   const verifiedQuotes = result.quotes.filter((quote) => {
-    // Remove [...] truncation markers and normalize
-    const quoteText = quote.human
-      .replace(/\[\.\.\.\]/g, '')
-      .replace(/\[…\]/g, '')
-      .trim()
-      .toLowerCase();
+    const quoteText = normalizeForVerification(quote.human);
+    if (!quoteText) return false;
 
-    // Check if any substantial part of the quote exists in user messages
-    // Split into words and check if a significant portion matches
-    const words = quoteText.split(/\s+/).filter((w) => w.length > 3);
-    if (words.length === 0) return false;
+    // Support truncated quotes by matching each segment in order
+    // Ellipsis markers (...) split the quote into segments that must appear in order
+    const segments = quoteText.split('…').filter(Boolean);
 
-    // Quote must have at least 60% of its significant words in a user message
     return userMessages.some((msg) => {
-      const matchingWords = words.filter((word) => msg.includes(word));
-      return matchingWords.length >= Math.ceil(words.length * 0.6);
+      let searchIndex = 0;
+      for (const segment of segments) {
+        const foundIndex = msg.indexOf(segment, searchIndex);
+        if (foundIndex === -1) return false;
+        searchIndex = foundIndex + segment.length;
+      }
+      return true;
     });
   });
 
@@ -270,8 +284,8 @@ function verifyDialogueQuotes(result, messages) {
 }
 
 /**
- * Verify technical decisions have backing in chat messages
- * Filters out decisions where reasoning doesn't appear in chat
+ * Verify technical decisions have backing in user chat messages
+ * Filters out decisions where reasoning only appears in assistant messages
  * @param {object} result - Structured output from AI with decisions array
  * @param {object[]} messages - Original chat messages
  * @returns {object} Verified result with unverified decisions removed
@@ -281,12 +295,20 @@ function verifyTechnicalDecisions(result, messages) {
     return result;
   }
 
-  // Combine all message content for searching
-  const allContent = messages.map((m) => (m.content || '').toLowerCase()).join(' ');
+  // Only use user message content for verification (not assistant messages)
+  // This prevents AI-only reasoning from passing as "developer decisions"
+  const userContent = messages
+    .filter((m) => m.type === 'user')
+    .map((m) => (m.content || '').toLowerCase())
+    .join(' ');
 
-  // Filter to decisions where reasoning appears in chat
+  if (!userContent) {
+    return { decisions: [] };
+  }
+
+  // Filter to decisions where reasoning appears in user messages
   const verifiedDecisions = result.decisions.filter((decision) => {
-    // Decision must have at least one reasoning point that appears in chat
+    // Decision must have at least one reasoning point that appears in user chat
     return decision.reasoning.some((reason) => {
       // Extract significant words from reasoning (4+ chars)
       const words = reason
@@ -296,8 +318,8 @@ function verifyTechnicalDecisions(result, messages) {
 
       if (words.length === 0) return false;
 
-      // At least 50% of significant words should appear in chat
-      const matchingWords = words.filter((word) => allContent.includes(word));
+      // At least 50% of significant words should appear in user messages
+      const matchingWords = words.filter((word) => userContent.includes(word));
       return matchingWords.length >= Math.ceil(words.length * 0.5);
     });
   });
