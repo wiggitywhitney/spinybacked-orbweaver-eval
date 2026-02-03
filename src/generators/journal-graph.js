@@ -13,10 +13,40 @@
 import { StateGraph, START, END, Annotation } from '@langchain/langgraph';
 import { ChatAnthropic } from '@langchain/anthropic';
 import { SystemMessage, HumanMessage } from '@langchain/core/messages';
+import { z } from 'zod';
 import { getAllGuidelines } from './prompts/guidelines/index.js';
 import { summaryPrompt } from './prompts/sections/summary-prompt.js';
 import { dialoguePrompt } from './prompts/sections/dialogue-prompt.js';
 import { technicalDecisionsPrompt } from './prompts/sections/technical-decisions-prompt.js';
+
+/**
+ * Zod schema for dialogue extraction output
+ */
+const DialogueSchema = z.object({
+  quotes: z.array(
+    z.object({
+      human: z.string().describe('Exact verbatim quote from the human developer'),
+      assistant: z
+        .string()
+        .nullable()
+        .describe('Optional relevant assistant response for context'),
+    })
+  ),
+});
+
+/**
+ * Zod schema for technical decisions output
+ */
+const TechnicalDecisionsSchema = z.object({
+  decisions: z.array(
+    z.object({
+      title: z.string().describe('Brief title of the decision'),
+      status: z.enum(['Implemented', 'Discussed']).describe('Whether the decision resulted in code changes'),
+      files: z.array(z.string()).describe('Files affected by this decision'),
+      reasoning: z.array(z.string()).describe('Explicit reasoning points from the chat'),
+    })
+  ),
+});
 
 /**
  * Journal state definition using LangGraph Annotation API
@@ -64,6 +94,15 @@ export function getModel() {
  */
 export function resetModel() {
   model = null;
+}
+
+/**
+ * Get model with structured output for a given schema
+ * @param {z.ZodSchema} schema - Zod schema for output
+ * @returns {ChatAnthropic} Model configured for structured output
+ */
+function getStructuredModel(schema) {
+  return getModel().withStructuredOutput(schema);
 }
 
 /**
@@ -189,6 +228,123 @@ function escapeForJson(content) {
 }
 
 /**
+ * Verify dialogue quotes exist in actual user messages
+ * Filters out any quotes that don't appear in type:"user" messages
+ * @param {object} result - Structured output from AI with quotes array
+ * @param {object[]} messages - Original chat messages
+ * @returns {object} Verified result with invalid quotes removed
+ */
+function verifyDialogueQuotes(result, messages) {
+  if (!result.quotes || result.quotes.length === 0) {
+    return result;
+  }
+
+  // Get all user message content for verification
+  const userMessages = messages
+    .filter((m) => m.type === 'user')
+    .map((m) => (m.content || '').toLowerCase());
+
+  // Filter to quotes that actually appear in user messages
+  const verifiedQuotes = result.quotes.filter((quote) => {
+    // Remove [...] truncation markers and normalize
+    const quoteText = quote.human
+      .replace(/\[\.\.\.\]/g, '')
+      .replace(/\[…\]/g, '')
+      .trim()
+      .toLowerCase();
+
+    // Check if any substantial part of the quote exists in user messages
+    // Split into words and check if a significant portion matches
+    const words = quoteText.split(/\s+/).filter((w) => w.length > 3);
+    if (words.length === 0) return false;
+
+    // Quote must have at least 60% of its significant words in a user message
+    return userMessages.some((msg) => {
+      const matchingWords = words.filter((word) => msg.includes(word));
+      return matchingWords.length >= Math.ceil(words.length * 0.6);
+    });
+  });
+
+  return { quotes: verifiedQuotes };
+}
+
+/**
+ * Verify technical decisions have backing in chat messages
+ * Filters out decisions where reasoning doesn't appear in chat
+ * @param {object} result - Structured output from AI with decisions array
+ * @param {object[]} messages - Original chat messages
+ * @returns {object} Verified result with unverified decisions removed
+ */
+function verifyTechnicalDecisions(result, messages) {
+  if (!result.decisions || result.decisions.length === 0) {
+    return result;
+  }
+
+  // Combine all message content for searching
+  const allContent = messages.map((m) => (m.content || '').toLowerCase()).join(' ');
+
+  // Filter to decisions where reasoning appears in chat
+  const verifiedDecisions = result.decisions.filter((decision) => {
+    // Decision must have at least one reasoning point that appears in chat
+    return decision.reasoning.some((reason) => {
+      // Extract significant words from reasoning (4+ chars)
+      const words = reason
+        .toLowerCase()
+        .split(/\s+/)
+        .filter((w) => w.length > 4);
+
+      if (words.length === 0) return false;
+
+      // At least 50% of significant words should appear in chat
+      const matchingWords = words.filter((word) => allContent.includes(word));
+      return matchingWords.length >= Math.ceil(words.length * 0.5);
+    });
+  });
+
+  return { decisions: verifiedDecisions };
+}
+
+/**
+ * Format verified dialogue quotes to markdown
+ * @param {object} result - Verified dialogue result
+ * @returns {string} Formatted markdown
+ */
+function formatDialogueToMarkdown(result) {
+  if (!result.quotes || result.quotes.length === 0) {
+    return 'No significant dialogue found for this development session';
+  }
+
+  return result.quotes
+    .map((quote) => {
+      let formatted = `> **Human:** "${quote.human}"`;
+      if (quote.assistant) {
+        formatted += `\n> **Assistant:** "${quote.assistant}"`;
+      }
+      return formatted;
+    })
+    .join('\n\n');
+}
+
+/**
+ * Format verified technical decisions to markdown
+ * @param {object} result - Verified decisions result
+ * @returns {string} Formatted markdown
+ */
+function formatTechnicalDecisionsToMarkdown(result) {
+  if (!result.decisions || result.decisions.length === 0) {
+    return 'No significant technical decisions or problem solving documented for this development session';
+  }
+
+  return result.decisions
+    .map((decision) => {
+      const filesStr = decision.files.length > 0 ? ` - FILES: ${decision.files.join(', ')}` : '';
+      const reasoningStr = decision.reasoning.map((r) => `  - ${r}`).join('\n');
+      return `**DECISION: ${decision.title}** (${decision.status})${filesStr}\n${reasoningStr}`;
+    })
+    .join('\n\n');
+}
+
+/**
  * Format context data as user message content
  * @param {object} context - Context data
  * @param {object} options - Formatting options
@@ -255,24 +411,41 @@ ${sectionPrompt}`;
 /**
  * Technical decisions extraction node
  * Identifies architecture and implementation decisions
+ * Uses structured output with verification
  */
 async function technicalNode(state) {
   try {
     const { context } = state;
     const guidelines = getAllGuidelines();
 
+    // Modify prompt for structured output
+    const structuredPrompt = `${technicalDecisionsPrompt}
+
+Return your analysis as a JSON object with a "decisions" array. Each decision should have:
+- title: Brief title of the decision
+- status: "Implemented" or "Discussed"
+- files: Array of affected files (can be empty)
+- reasoning: Array of reasoning points explicitly from the chat`;
+
     const systemContent = `${guidelines}
 
-${technicalDecisionsPrompt}`;
+${structuredPrompt}`;
 
     const userContent = formatContextForUser(context);
 
-    const result = await getModel().invoke([
+    const structuredModel = getStructuredModel(TechnicalDecisionsSchema);
+    const result = await structuredModel.invoke([
       new SystemMessage(systemContent),
       new HumanMessage(userContent),
     ]);
 
-    return { technicalDecisions: result.content };
+    // Verify decisions have backing in chat
+    const verified = verifyTechnicalDecisions(result, context.chat.messages || []);
+
+    // Format to markdown
+    const formatted = formatTechnicalDecisionsToMarkdown(verified);
+
+    return { technicalDecisions: formatted };
   } catch (error) {
     return {
       technicalDecisions: '[Technical decisions extraction failed]',
@@ -285,6 +458,7 @@ ${technicalDecisionsPrompt}`;
  * Dialogue extraction node
  * Extracts key quotes from human/assistant conversation
  * Runs after summary to avoid redundancy
+ * Uses structured output with verification
  */
 async function dialogueNode(state) {
   try {
@@ -295,21 +469,35 @@ async function dialogueNode(state) {
     // Replace {maxQuotes} placeholder in prompt
     const sectionPrompt = dialoguePrompt.replace(/{maxQuotes}/g, String(maxQuotes));
 
+    // Modify prompt for structured output
+    const structuredPrompt = `${sectionPrompt}
+
+Return your analysis as a JSON object with a "quotes" array. Each quote should have:
+- human: The exact verbatim quote from the human developer
+- assistant: Optional relevant assistant response for context (or null)`;
+
     const systemContent = `${guidelines}
 
 The summary of this development session is:
 ${summary}
 
-${sectionPrompt}`;
+${structuredPrompt}`;
 
     const userContent = formatContextForUser(context, { includeSummary: false });
 
-    const result = await getModel().invoke([
+    const structuredModel = getStructuredModel(DialogueSchema);
+    const result = await structuredModel.invoke([
       new SystemMessage(systemContent),
       new HumanMessage(userContent),
     ]);
 
-    return { dialogue: result.content };
+    // Verify quotes exist in actual user messages
+    const verified = verifyDialogueQuotes(result, context.chat.messages || []);
+
+    // Format to markdown
+    const formatted = formatDialogueToMarkdown(verified);
+
+    return { dialogue: formatted };
   } catch (error) {
     return {
       dialogue: '[Dialogue extraction failed]',
@@ -383,4 +571,10 @@ export {
   buildGraph,
   hasFunctionalCode,
   hasSubstantialChat,
+  verifyDialogueQuotes,
+  verifyTechnicalDecisions,
+  formatDialogueToMarkdown,
+  formatTechnicalDecisionsToMarkdown,
+  DialogueSchema,
+  TechnicalDecisionsSchema,
 };
