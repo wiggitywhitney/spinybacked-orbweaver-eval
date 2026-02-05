@@ -38,6 +38,8 @@ Add testing infrastructure, Claude Code hooks, and project rules that catch prob
 - 80% coverage threshold as starting target
 
 ### Claude Code Hooks Architecture
+Hook architecture patterns informed by [everything-claude-code](https://github.com/affaan-m/everything-claude-code).
+
 Hooks are configured in `.claude/settings.json` with these event types:
 - `PostToolUse` on `Edit`: Run type checker and linter after file changes
 - `PreToolUse` on `Bash` with `git commit`: Run test suite before allowing commits
@@ -107,6 +109,16 @@ Hooks are configured in `.claude/settings.json` with these event types:
 | False positives in lint rules | Low | Start with minimal rule set, expand gradually |
 | Existing code fails type checks | Medium | Allow gradual strictness; fix issues as milestone 1 |
 | Coverage threshold too aggressive | Low | Start at 80%, adjust based on codebase reality |
+
+## References
+
+Patterns and examples from [everything-claude-code](https://github.com/affaan-m/everything-claude-code) that may be adapted:
+
+- [`hooks/hooks.json`](https://github.com/affaan-m/everything-claude-code/blob/main/hooks/hooks.json) — PostToolUse patterns for type checking and linting
+- [`skills/tdd-workflow/`](https://github.com/affaan-m/everything-claude-code/tree/main/skills/tdd-workflow) — TDD enforcement skill (future PRD)
+- [`agents/code-reviewer.md`](https://github.com/affaan-m/everything-claude-code/blob/main/agents/code-reviewer.md) — Code review agent (future PRD)
+- [`agents/tdd-guide.md`](https://github.com/affaan-m/everything-claude-code/blob/main/agents/tdd-guide.md) — TDD guide agent (future PRD)
+- [`agents/build-error-resolver.md`](https://github.com/affaan-m/everything-claude-code/blob/main/agents/build-error-resolver.md) — Build error resolution agent (future PRD)
 
 ## Progress Log
 
