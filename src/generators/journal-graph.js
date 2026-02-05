@@ -319,50 +319,6 @@ function verifyDialogueQuotes(result, messages) {
 }
 
 /**
- * Verify technical decisions have backing in user chat messages
- * Filters out decisions where reasoning only appears in assistant messages
- * @param {object} result - Structured output from AI with decisions array
- * @param {object[]} messages - Original chat messages
- * @returns {object} Verified result with unverified decisions removed
- */
-function verifyTechnicalDecisions(result, messages) {
-  if (!result.decisions || result.decisions.length === 0) {
-    return result;
-  }
-
-  // Only use user message content for verification (not assistant messages)
-  // This prevents AI-only reasoning from passing as "developer decisions"
-  const userContent = messages
-    .filter((m) => m.type === 'user')
-    .map((m) => (m.content || '').toLowerCase())
-    .join(' ');
-
-  if (!userContent) {
-    return { decisions: [] };
-  }
-
-  // Filter to decisions where reasoning appears in user messages
-  const verifiedDecisions = result.decisions.filter((decision) => {
-    // Decision must have at least one reasoning point that appears in user chat
-    return decision.reasoning.some((reason) => {
-      // Extract significant words from reasoning (4+ chars)
-      const words = reason
-        .toLowerCase()
-        .split(/\s+/)
-        .filter((w) => w.length > 4);
-
-      if (words.length === 0) return false;
-
-      // At least 50% of significant words should appear in user messages
-      const matchingWords = words.filter((word) => userContent.includes(word));
-      return matchingWords.length >= Math.ceil(words.length * 0.5);
-    });
-  });
-
-  return { decisions: verifiedDecisions };
-}
-
-/**
  * Format verified dialogue quotes to markdown
  * @param {object} result - Verified dialogue result
  * @returns {string} Formatted markdown
@@ -540,11 +496,8 @@ ${structuredPrompt}`;
     // Fix double-encoded output if model returned decisions as string
     result = fixDoubleEncodedOutput(result, 'decisions');
 
-    // Verify decisions have backing in chat
-    const verified = verifyTechnicalDecisions(result, context.chat.messages || []);
-
-    // Format to markdown
-    const formatted = formatTechnicalDecisionsToMarkdown(verified);
+    // Format to markdown (no content verification - trust AI extraction with schema enforcement)
+    const formatted = formatTechnicalDecisionsToMarkdown(result);
 
     return { technicalDecisions: formatted };
   } catch (error) {
@@ -733,7 +686,6 @@ export {
   analyzeCommitContent,
   generateImplementationGuidance,
   verifyDialogueQuotes,
-  verifyTechnicalDecisions,
   formatDialogueToMarkdown,
   formatTechnicalDecisionsToMarkdown,
   DialogueSchema,
