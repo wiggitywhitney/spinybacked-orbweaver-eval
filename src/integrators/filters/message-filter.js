@@ -23,7 +23,13 @@ function isTooShortMessage(content) {
  * Detect if a message is system noise (bash output, commands, system tags)
  *
  * These are automatically generated messages from Claude Code that contain
- * command output, not actual human dialogue.
+ * command output, not actual human dialogue. Includes:
+ * - XML-style tags: <bash-stdout>, <local-command-caveat>, <command-message>, etc.
+ * - Interrupt markers: [Request interrupted by user]
+ *
+ * We use a blanket filter for messages starting with '<' because genuine human
+ * dialogue rarely starts with angle brackets, while system-generated content
+ * (bash output, skill invocations, system caveats) consistently does.
  *
  * @param {string} content - Text content of the message
  * @returns {boolean} True if this is system noise
@@ -31,15 +37,11 @@ function isTooShortMessage(content) {
 function isSystemNoiseMessage(content) {
   if (!content) return false;
 
-  // System noise patterns - these are not genuine dialogue
-  const noisePatterns = [
-    /^<bash-stdout>/,
-    /^<bash-input>/,
-    /^<local-command-caveat>/,
-    /^\[Request interrupted/,
-  ];
+  const trimmed = content.trim();
 
-  return noisePatterns.some((pattern) => pattern.test(content));
+  // Filter any message starting with '<' (XML-style system tags)
+  // or '[Request interrupted' (user interrupt markers)
+  return trimmed.startsWith('<') || trimmed.startsWith('[Request interrupted');
 }
 
 /**
