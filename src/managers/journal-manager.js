@@ -181,7 +181,7 @@ export async function saveJournalEntry(sections, commit, reflections = [], baseP
   // Check for duplicate entry (same commit hash already in file)
   try {
     const existing = await readFile(entryPath, 'utf-8');
-    if (existing.includes(`Commit: ${commit.shortHash}`) || existing.includes(`"${(commit.message || '').split('\n')[0]}"`)) {
+    if (existing.includes(`Commit: ${commit.shortHash}`)) {
       // Already has an entry for this commit, skip
       return entryPath;
     }

@@ -250,7 +250,7 @@ function escapeForJson(content) {
  */
 function formatContextForSummary(context) {
   // Build session-grouped user-only messages
-  const sessions = context.chat.sessions;
+  const sessions = context.chat?.sessions;
   const userOnlySessions = [];
 
   if (sessions && sessions.size > 0) {
@@ -299,7 +299,7 @@ function formatContextForUser(context, options = {}) {
   const { includeSummary } = options;
 
   // Format sessions for AI consumption
-  const sessions = formatSessionsForAI(context.chat.sessions);
+  const sessions = formatSessionsForAI(context.chat?.sessions);
 
   let userContent = `## Commit Information
 **Hash**: ${context.commit.shortHash}
