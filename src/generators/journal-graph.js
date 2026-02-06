@@ -180,10 +180,39 @@ INSTRUCTION: Mark a decision as "Implemented" ONLY if it directly relates to cha
 }
 
 /**
- * Format chat messages for prompt inclusion
- * Uses JSON format for clear type identification
+ * Format chat sessions for AI consumption with session grouping
+ * Restores v1's session-grouped format to prevent cross-context dialogue bleed
+ * @param {Map} sessions - Map of sessionId to message arrays from context.chat.sessions
+ * @returns {Array} Formatted session objects for JSON serialization
+ */
+function formatSessionsForAI(sessions) {
+  if (!sessions || sessions.size === 0) {
+    return [];
+  }
+
+  let index = 0;
+  const result = [];
+  for (const [sessionId, messages] of sessions) {
+    index++;
+    const firstMsg = messages[0];
+    result.push({
+      session_id: `Session ${index}`,
+      session_start: firstMsg?.timestamp || null,
+      message_count: messages.length,
+      messages: messages.map((msg) => ({
+        type: msg.type,
+        content: msg.content,
+        timestamp: msg.timestamp,
+      })),
+    });
+  }
+  return result;
+}
+
+/**
+ * Format chat messages as flat list (legacy, used for formatChatMessages compatibility)
  * @param {object[]} messages - Filtered chat messages
- * @returns {string} Formatted messages
+ * @returns {string} Formatted messages in JSON-line format
  */
 function formatChatMessages(messages) {
   if (!messages || messages.length === 0) {
@@ -217,17 +246,34 @@ function escapeForJson(content) {
 
 /**
  * Format context for summary generation (filters out assistant messages)
- * V1 approach: Summary is about what THE DEVELOPER did, so we only need user messages
+ * Uses session-grouped format with self-documenting descriptions
  */
 function formatContextForSummary(context) {
-  const userOnlyMessages = (context.chat.messages || []).filter((m) => m.type === 'user');
+  // Build session-grouped user-only messages
+  const sessions = context.chat.sessions;
+  const userOnlySessions = [];
+
+  if (sessions && sessions.size > 0) {
+    let index = 0;
+    for (const [sessionId, messages] of sessions) {
+      const userMsgs = messages.filter((m) => m.type === 'user');
+      if (userMsgs.length > 0) {
+        index++;
+        userOnlySessions.push({
+          session_id: `Session ${index}`,
+          message_count: userMsgs.length,
+          messages: userMsgs.map((m) => ({ type: m.type, content: m.content })),
+        });
+      }
+    }
+  }
 
   return `Generate a summary for this development session:
 
-DATA SCHEMA:
-- commit: The git commit that was made (hash, author, message, diff)
-- chat_messages: Developer input during the session (type:"user" messages only)
-  Note: Assistant responses have been filtered out - focus on what THE DEVELOPER did
+AVAILABLE DATA:
+- Git commit data including hash, author, timestamp, message, and diff
+- Chat sessions grouped by session ID with developer messages only (assistant responses filtered out)
+  Focus on what THE DEVELOPER did, not what the AI said
 
 COMMIT DATA:
 ${JSON.stringify(
@@ -241,15 +287,19 @@ ${JSON.stringify(
   2
 )}
 
-DEVELOPER MESSAGES (type:"user" only):
-${JSON.stringify(userOnlyMessages.map((m) => ({ type: m.type, content: m.content })), null, 2)}`;
+DEVELOPER MESSAGES (grouped by session, type:"user" only):
+${JSON.stringify(userOnlySessions, null, 2)}`;
 }
 
 /**
  * Format context for dialogue/technical extraction (needs full chat)
+ * Uses session-grouped format with self-documenting descriptions
  */
 function formatContextForUser(context, options = {}) {
   const { includeSummary } = options;
+
+  // Format sessions for AI consumption
+  const sessions = formatSessionsForAI(context.chat.sessions);
 
   let userContent = `## Commit Information
 **Hash**: ${context.commit.shortHash}
@@ -262,8 +312,11 @@ ${context.commit.diff || 'No diff available'}
 \`\`\`
 
 ## Development Conversation
-DATA SCHEMA: type:"user" = developer input, type:"assistant" = AI responses
-${formatChatMessages(context.chat.messages)}`;
+AVAILABLE DATA: Chat sessions grouped by session ID with message counts
+- type:"user" = developer input (human quotes come from here)
+- type:"assistant" = AI responses (use only for context)
+
+${JSON.stringify(sessions, null, 2)}`;
 
   if (includeSummary) {
     userContent = `## Session Summary
@@ -441,6 +494,7 @@ export {
   summaryNode,
   technicalNode,
   dialogueNode,
+  formatSessionsForAI,
   formatChatMessages,
   formatContextForUser,
   formatContextForSummary,
