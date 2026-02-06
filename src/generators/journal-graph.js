@@ -357,7 +357,7 @@ function cleanDialogueOutput(raw) {
   }
 
   const result = cleaned.join('\n').trim();
-  if (!result) return raw; // Fallback to original if cleaning removed everything
+  if (!result) return 'No significant dialogue found for this development session';
   // Fix literal \n from JSON-escaped content that the model copied verbatim
   return result.replace(/\\n/g, '\n');
 }
