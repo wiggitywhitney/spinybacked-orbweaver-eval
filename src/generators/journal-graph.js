@@ -398,10 +398,11 @@ function cleanTechnicalOutput(raw) {
 const BANNED_WORD_REPLACEMENTS = [
   [/\bcomprehensive\b/gi, 'detailed'],
   [/\brobust\b/gi, 'solid'],
-  [/\bsignificant\b/gi, 'notable'],
+  [/\bsignificant\b/gi, 'important'],
   [/\bsystematic(ally)?\b/gi, (_, suffix) => suffix ? 'carefully' : 'structured'],
   [/\bmeticulous(ly)?\b/gi, (_, suffix) => suffix ? 'carefully' : 'careful'],
   [/\bmethodical(ly)?\b/gi, (_, suffix) => suffix ? 'carefully' : 'careful'],
+  [/\ba sophisticated\b/gi, 'an advanced'],
   [/\bsophisticated\b/gi, 'advanced'],
   [/\bleverag(e|ing)\b/gi, (_, suffix) => suffix === 'ing' ? 'using' : 'use'],
   [/\benhance[ds]?\b/gi, 'improved'],
