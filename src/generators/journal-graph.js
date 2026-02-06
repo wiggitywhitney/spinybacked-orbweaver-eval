@@ -13,41 +13,10 @@
 import { StateGraph, START, END, Annotation } from '@langchain/langgraph';
 import { ChatAnthropic } from '@langchain/anthropic';
 import { SystemMessage, HumanMessage } from '@langchain/core/messages';
-import { z } from 'zod';
 import { getAllGuidelines } from './prompts/guidelines/index.js';
 import { summaryPrompt } from './prompts/sections/summary-prompt.js';
 import { dialoguePrompt } from './prompts/sections/dialogue-prompt.js';
 import { technicalDecisionsPrompt } from './prompts/sections/technical-decisions-prompt.js';
-
-/**
- * Zod schema for dialogue extraction output
- */
-const DialogueSchema = z.object({
-  quotes: z.array(
-    z.object({
-      human: z.string().describe('Exact verbatim quote from the human developer'),
-      assistant: z
-        .string()
-        .optional()
-        .nullable()
-        .describe('Optional relevant assistant response for context'),
-    })
-  ),
-});
-
-/**
- * Zod schema for technical decisions output
- */
-const TechnicalDecisionsSchema = z.object({
-  decisions: z.array(
-    z.object({
-      title: z.string().describe('Brief title of the decision'),
-      status: z.enum(['Implemented', 'Discussed']).describe('Whether the decision resulted in code changes'),
-      files: z.array(z.string()).describe('Files affected by this decision'),
-      reasoning: z.array(z.string()).describe('Explicit reasoning points from the chat'),
-    })
-  ),
-});
 
 /**
  * Journal state definition using LangGraph Annotation API
@@ -111,39 +80,6 @@ export function getModel(temperature = 0) {
  */
 export function resetModel() {
   models.clear();
-}
-
-/**
- * Get model with structured output for a given schema and temperature
- * @param {z.ZodSchema} schema - Zod schema for output
- * @param {number} temperature - Temperature setting for the model
- * @returns {ChatAnthropic} Model configured for structured output
- */
-function getStructuredModel(schema, temperature = 0) {
-  return getModel(temperature).withStructuredOutput(schema);
-}
-
-/**
- * Fix double-encoded structured output
- * Sometimes the model returns arrays as JSON strings instead of actual arrays
- * This function detects and fixes that issue
- * @param {object} result - The structured output result
- * @param {string} arrayField - The field name that should be an array
- * @returns {object} Fixed result with properly parsed array
- */
-function fixDoubleEncodedOutput(result, arrayField) {
-  if (result && typeof result[arrayField] === 'string') {
-    try {
-      const parsed = JSON.parse(result[arrayField]);
-      if (Array.isArray(parsed)) {
-        return { ...result, [arrayField]: parsed };
-      }
-    } catch {
-      // If parsing fails, return empty array
-      return { ...result, [arrayField]: [] };
-    }
-  }
-  return result;
 }
 
 /**
@@ -280,108 +216,6 @@ function escapeForJson(content) {
 }
 
 /**
- * Normalize text for quote verification
- * Lowercases, collapses whitespace, converts ellipsis markers to standard form
- * @param {string} text - Text to normalize
- * @returns {string} Normalized text
- */
-function normalizeForVerification(text) {
-  return (text || '')
-    .toLowerCase()
-    .replace(/\[\.\.\.\]/g, '…')
-    .replace(/\[…\]/g, '…')
-    .replace(/\s+/g, ' ')
-    .trim();
-}
-
-/**
- * Verify dialogue quotes exist in actual user messages
- * Uses exact substring matching with ellipsis segment support
- * @param {object} result - Structured output from AI with quotes array
- * @param {object[]} messages - Original chat messages
- * @returns {object} Verified result with invalid quotes removed
- */
-function verifyDialogueQuotes(result, messages) {
-  if (!result.quotes || result.quotes.length === 0) {
-    return result;
-  }
-
-  // Get all user message content for verification (normalized)
-  const userMessages = messages
-    .filter((m) => m.type === 'user')
-    .map((m) => normalizeForVerification(m.content));
-
-  // Filter to quotes that actually appear in user messages
-  const verifiedQuotes = result.quotes.filter((quote) => {
-    const quoteText = normalizeForVerification(quote.human);
-    if (!quoteText) return false;
-
-    // Support truncated quotes by matching each segment in order
-    // Ellipsis markers (...) split the quote into segments that must appear in order
-    const segments = quoteText.split('…').filter(Boolean);
-    if (segments.length === 0) return false;
-
-    return userMessages.some((msg) => {
-      let searchIndex = 0;
-      for (const segment of segments) {
-        const foundIndex = msg.indexOf(segment, searchIndex);
-        if (foundIndex === -1) return false;
-        searchIndex = foundIndex + segment.length;
-      }
-      return true;
-    });
-  });
-
-  return { quotes: verifiedQuotes };
-}
-
-/**
- * Format verified dialogue quotes to markdown
- * @param {object} result - Verified dialogue result
- * @returns {string} Formatted markdown
- */
-function formatDialogueToMarkdown(result) {
-  if (!result.quotes || result.quotes.length === 0) {
-    return 'No significant dialogue found for this development session';
-  }
-
-  return result.quotes
-    .map((quote) => {
-      let formatted = `> **Human:** "${quote.human}"`;
-      if (quote.assistant) {
-        formatted += `\n> **Assistant:** "${quote.assistant}"`;
-      }
-      return formatted;
-    })
-    .join('\n\n');
-}
-
-/**
- * Format verified technical decisions to markdown
- * @param {object} result - Verified decisions result
- * @returns {string} Formatted markdown
- */
-function formatTechnicalDecisionsToMarkdown(result) {
-  if (!result.decisions || result.decisions.length === 0) {
-    return 'No significant technical decisions or problem solving documented for this development session';
-  }
-
-  return result.decisions
-    .map((decision) => {
-      const filesStr = decision.files.length > 0 ? ` - FILES: ${decision.files.join(', ')}` : '';
-      const reasoningStr = decision.reasoning.map((r) => `  - ${r}`).join('\n');
-      return `**DECISION: ${decision.title}** (${decision.status})${filesStr}\n${reasoningStr}`;
-    })
-    .join('\n\n');
-}
-
-/**
- * Format context data as user message content
- * @param {object} context - Context data
- * @param {object} options - Formatting options
- * @returns {string} Formatted user message
- */
-/**
  * Format context for summary generation (filters out assistant messages)
  * V1 approach: Summary is about what THE DEVELOPER did, so we only need user messages
  */
@@ -477,7 +311,7 @@ ${sectionPrompt}`;
 /**
  * Technical decisions extraction node
  * Identifies architecture and implementation decisions
- * Uses structured output with verification
+ * Returns free-form markdown (v1 approach - prompts enforce format)
  */
 async function technicalNode(state) {
   try {
@@ -488,35 +322,19 @@ async function technicalNode(state) {
     const diffAnalysis = analyzeCommitContent(context.commit.diff);
     const implementationGuidance = generateImplementationGuidance(diffAnalysis);
 
-    // Modify prompt for structured output
-    const structuredPrompt = `${technicalDecisionsPrompt}
-${implementationGuidance}
-
-Return your analysis as a JSON object with a "decisions" array. Each decision should have:
-- title: Brief title of the decision
-- status: "Implemented" or "Discussed"
-- files: Array of affected files (can be empty)
-- reasoning: Array of reasoning points explicitly from the chat`;
-
     const systemContent = `${guidelines}
 
-${structuredPrompt}`;
+${technicalDecisionsPrompt}
+${implementationGuidance}`;
 
     const userContent = formatContextForUser(context);
 
-    const structuredModel = getStructuredModel(TechnicalDecisionsSchema, NODE_TEMPERATURES.technical);
-    let result = await structuredModel.invoke([
+    const result = await getModel(NODE_TEMPERATURES.technical).invoke([
       new SystemMessage(systemContent),
       new HumanMessage(userContent),
     ]);
 
-    // Fix double-encoded output if model returned decisions as string
-    result = fixDoubleEncodedOutput(result, 'decisions');
-
-    // Format to markdown (no content verification - trust AI extraction with schema enforcement)
-    const formatted = formatTechnicalDecisionsToMarkdown(result);
-
-    return { technicalDecisions: formatted };
+    return { technicalDecisions: result.content.trim() };
   } catch (error) {
     return {
       technicalDecisions: '[Technical decisions extraction failed]',
@@ -526,57 +344,10 @@ ${structuredPrompt}`;
 }
 
 /**
- * Try to recover double-encoded structured output from a parsing error
- * LangChain's OutputParserException provides the raw output via llmOutput property
- * @param {Error} error - The parsing error (OutputParserException)
- * @param {string} arrayField - The field that should be an array
- * @returns {object|null} Recovered result or null if recovery failed
- */
-function tryRecoverFromParsingError(error, arrayField) {
-  // Use llmOutput property from OutputParserException (more reliable than regex)
-  let rawText = error.llmOutput;
-
-  // Fallback to regex extraction if llmOutput not available
-  if (!rawText) {
-    const textMatch = error.message?.match(/Text: "([\s\S]+?)"\. Error:/);
-    rawText = textMatch?.[1];
-  }
-
-  if (!rawText) return null;
-
-  try {
-    // Parse the outer JSON
-    const parsed = JSON.parse(rawText);
-
-    // If the array field is a string, parse it (double-encoded case)
-    if (typeof parsed[arrayField] === 'string') {
-      let arrayStr = parsed[arrayField];
-
-      // Clean up any XML-style tags the model may have appended (e.g., </invoke>)
-      arrayStr = arrayStr.replace(/<\/?\w+>/g, '').trim();
-
-      // Try to find valid JSON array boundaries
-      const startIdx = arrayStr.indexOf('[');
-      const endIdx = arrayStr.lastIndexOf(']');
-      if (startIdx !== -1 && endIdx !== -1 && endIdx > startIdx) {
-        arrayStr = arrayStr.substring(startIdx, endIdx + 1);
-      }
-
-      const recovered = JSON.parse(arrayStr);
-      parsed[arrayField] = Array.isArray(recovered) ? recovered : [];
-    }
-
-    return parsed;
-  } catch {
-    return null;
-  }
-}
-
-/**
  * Dialogue extraction node
  * Extracts key quotes from human/assistant conversation
  * Runs after summary to avoid redundancy
- * Uses structured output with verification
+ * Returns free-form markdown (v1 approach - prompts enforce format)
  */
 async function dialogueNode(state) {
   try {
@@ -587,46 +358,21 @@ async function dialogueNode(state) {
     // Replace {maxQuotes} placeholder in prompt
     const sectionPrompt = dialoguePrompt.replace(/{maxQuotes}/g, String(maxQuotes));
 
-    // Modify prompt for structured output
-    const structuredPrompt = `${sectionPrompt}
-
-Return your analysis as a JSON object with a "quotes" array. Each quote should have:
-- human: The exact verbatim quote from the human developer
-- assistant: Optional relevant assistant response for context (or null)`;
-
     const systemContent = `${guidelines}
 
 The summary of this development session is:
 ${summary}
 
-${structuredPrompt}`;
+${sectionPrompt}`;
 
     const userContent = formatContextForUser(context, { includeSummary: false });
 
-    let result;
-    try {
-      const structuredModel = getStructuredModel(DialogueSchema, NODE_TEMPERATURES.dialogue);
-      result = await structuredModel.invoke([
-        new SystemMessage(systemContent),
-        new HumanMessage(userContent),
-      ]);
-      // Fix double-encoded output if model returned quotes as string
-      result = fixDoubleEncodedOutput(result, 'quotes');
-    } catch (parseError) {
-      // Try to recover from double-encoded JSON parsing error
-      result = tryRecoverFromParsingError(parseError, 'quotes');
-      if (!result) {
-        throw parseError; // Re-throw if recovery failed
-      }
-    }
+    const result = await getModel(NODE_TEMPERATURES.dialogue).invoke([
+      new SystemMessage(systemContent),
+      new HumanMessage(userContent),
+    ]);
 
-    // Verify quotes exist in actual user messages
-    const verified = verifyDialogueQuotes(result, context.chat.messages || []);
-
-    // Format to markdown
-    const formatted = formatDialogueToMarkdown(verified);
-
-    return { dialogue: formatted };
+    return { dialogue: result.content.trim() };
   } catch (error) {
     return {
       dialogue: '[Dialogue extraction failed]',
@@ -702,10 +448,5 @@ export {
   hasFunctionalCode,
   analyzeCommitContent,
   generateImplementationGuidance,
-  verifyDialogueQuotes,
-  formatDialogueToMarkdown,
-  formatTechnicalDecisionsToMarkdown,
-  DialogueSchema,
-  TechnicalDecisionsSchema,
   NODE_TEMPERATURES,
 };
