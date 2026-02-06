@@ -365,10 +365,18 @@ ${sectionPrompt}`;
  * Technical decisions extraction node
  * Identifies architecture and implementation decisions
  * Returns free-form markdown (v1 approach - prompts enforce format)
+ * Early exit when no substantial user messages exist
  */
 async function technicalNode(state) {
   try {
     const { context } = state;
+
+    // Early exit: skip AI call when no substantial user messages (v1 pattern)
+    const substantialUserMessages = context.metadata?.filterStats?.substantialUserMessages ?? 0;
+    if (substantialUserMessages === 0) {
+      return { technicalDecisions: 'No significant technical decisions documented for this development session' };
+    }
+
     const guidelines = getAllGuidelines();
 
     // Analyze diff to generate dynamic implementation guidance
@@ -401,12 +409,22 @@ ${implementationGuidance}`;
  * Extracts key quotes from human/assistant conversation
  * Runs after summary to avoid redundancy
  * Returns free-form markdown (v1 approach - prompts enforce format)
+ * Early exit when no substantial user messages; dynamic maxQuotes
  */
 async function dialogueNode(state) {
   try {
     const { context, summary } = state;
+
+    // Early exit: skip AI call when no substantial user messages (v1 pattern)
+    const substantialUserMessages = context.metadata?.filterStats?.substantialUserMessages ?? 0;
+    if (substantialUserMessages === 0) {
+      return { dialogue: 'No significant dialogue found for this development session' };
+    }
+
     const guidelines = getAllGuidelines();
-    const maxQuotes = 4;
+
+    // Dynamic maxQuotes: 8% of substantial user messages + 1 (v1 formula)
+    const maxQuotes = Math.ceil(substantialUserMessages * 0.08) + 1;
 
     // Replace {maxQuotes} placeholder in prompt
     const sectionPrompt = dialoguePrompt.replace(/{maxQuotes}/g, String(maxQuotes));
