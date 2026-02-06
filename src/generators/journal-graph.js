@@ -70,40 +70,57 @@ export const JournalState = Annotation.Root({
 });
 
 /**
- * Lazy-initialized model instance
- * Uses Claude Haiku 4.5 for cost-effective generation
+ * Per-node temperature settings matching v1 behavior:
+ * - Summary (narrative): 0.7 for casual, natural tone
+ * - Dialogue (quote selection): 0.7 for natural selection
+ * - Technical decisions (factual): 0.1 for consistent extraction
  */
-let model;
+const NODE_TEMPERATURES = {
+  summary: 0.7,
+  dialogue: 0.7,
+  technical: 0.1,
+};
 
 /**
- * Get or create the Claude model instance
+ * Cache of model instances keyed by temperature
+ * Avoids recreating models for the same temperature
+ */
+const models = new Map();
+
+/**
+ * Get or create a Claude model instance for a given temperature
+ * @param {number} temperature - Temperature setting for the model
  * @returns {ChatAnthropic} Model instance
  */
-export function getModel() {
-  if (!model) {
-    model = new ChatAnthropic({
-      model: 'claude-3-5-haiku-latest',
-      maxTokens: 2048,
-      temperature: 0,
-    });
+export function getModel(temperature = 0) {
+  if (!models.has(temperature)) {
+    models.set(
+      temperature,
+      new ChatAnthropic({
+        model: 'claude-3-5-haiku-latest',
+        maxTokens: 2048,
+        temperature,
+      })
+    );
   }
-  return model;
+  return models.get(temperature);
 }
 
 /**
- * Reset model instance (for testing)
+ * Reset all model instances (for testing)
  */
 export function resetModel() {
-  model = null;
+  models.clear();
 }
 
 /**
- * Get model with structured output for a given schema
+ * Get model with structured output for a given schema and temperature
  * @param {z.ZodSchema} schema - Zod schema for output
+ * @param {number} temperature - Temperature setting for the model
  * @returns {ChatAnthropic} Model configured for structured output
  */
-function getStructuredModel(schema) {
-  return getModel().withStructuredOutput(schema);
+function getStructuredModel(schema, temperature = 0) {
+  return getModel(temperature).withStructuredOutput(schema);
 }
 
 /**
@@ -443,7 +460,7 @@ ${sectionPrompt}`;
 
     const userContent = formatContextForSummary(context);
 
-    const result = await getModel().invoke([
+    const result = await getModel(NODE_TEMPERATURES.summary).invoke([
       new SystemMessage(systemContent),
       new HumanMessage(userContent),
     ]);
@@ -487,7 +504,7 @@ ${structuredPrompt}`;
 
     const userContent = formatContextForUser(context);
 
-    const structuredModel = getStructuredModel(TechnicalDecisionsSchema);
+    const structuredModel = getStructuredModel(TechnicalDecisionsSchema, NODE_TEMPERATURES.technical);
     let result = await structuredModel.invoke([
       new SystemMessage(systemContent),
       new HumanMessage(userContent),
@@ -588,7 +605,7 @@ ${structuredPrompt}`;
 
     let result;
     try {
-      const structuredModel = getStructuredModel(DialogueSchema);
+      const structuredModel = getStructuredModel(DialogueSchema, NODE_TEMPERATURES.dialogue);
       result = await structuredModel.invoke([
         new SystemMessage(systemContent),
         new HumanMessage(userContent),
@@ -690,4 +707,5 @@ export {
   formatTechnicalDecisionsToMarkdown,
   DialogueSchema,
   TechnicalDecisionsSchema,
+  NODE_TEMPERATURES,
 };
