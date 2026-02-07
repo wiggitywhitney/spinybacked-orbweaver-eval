@@ -176,7 +176,7 @@ Before instrumentation can begin, user must run `telemetry-agent init`. This is 
    - OTLP endpoint configured
    - Test suite exists (warns if missing, continues anyway)
    - Verify localhost port availability for Weaver live-check (:4317 gRPC, :4320 HTTP). Note: if running in Docker, ensure the container can bind to these ports.
-   - **Implementation-time note:** If ports 4317/4320 are already in use (e.g., local OTel Collector, another Weaver instance), init should detect this and fail with a clear message. Consider whether to support configurable ports (Weaver may not support this — verify) or require the user to free the ports.
+   - **Implementation-time note:** If ports 4317/4320 are already in use (e.g., local OTel Collector, another Weaver instance), init should detect this and fail with a clear message directing the user to free the ports. Recovery strategies (process detection, reuse, force-clean flags) are implementation decisions. Consider whether to support configurable ports (Weaver may not support this — verify) or require the user to free the ports.
 
 2. **Validate Weaver schema**
    - Schema must already exist (PoC requirement)
@@ -872,36 +872,36 @@ The config file is created during `telemetry-agent init` and serves as the gate 
 # telemetry-agent.yaml (created by init, checked into repo)
 
 # Required
-schemaPath: ./telemetry/registry
-sdkInitFile: ./src/telemetry/setup.ts    # recorded during init
+schemaPath: ./telemetry/registry         # Path to Weaver registry directory
+sdkInitFile: ./src/telemetry/setup.ts    # OTel SDK initialization file (recorded during init)
 
 # Agent behavior
 autoApproveLibraries: true    # false = prompt before adding OTel libraries
-testCommand: "npm test"        # command to run test suite (supports any runner)
+testCommand: "npm test"        # Command to run test suite during validation (supports npm, vitest, jest, nx, etc.)
 
 # Limits and guardrails
-maxFilesPerRun: 50             # cost/time guardrail, user adjustable
-maxFixAttempts: 3              # bail out after N failed validation cycles per file
-maxTokensPerFile: 50000        # hard token budget per file (all attempts combined)
-schemaCheckpointInterval: 5    # run Weaver validation every N files
+maxFilesPerRun: 50             # Cost/time guardrail, user adjustable
+maxFixAttempts: 3              # Max validation retry attempts per file before reverting
+maxTokensPerFile: 50000        # Token budget ceiling per file (all fix attempts combined)
+schemaCheckpointInterval: 5    # Run schema validation checkpoint after every N files
 
 # Review
-reviewSensitivity: moderate    # strict | moderate | off
+reviewSensitivity: moderate    # PR annotation strictness: strict (flag tier 3+), moderate (outliers only), off (no warnings)
 
 # Execution mode
-dryRun: false                  # true = analyze only, no code changes or PR
+dryRun: false                  # true = run agents but revert all changes, output summary only (no branch, PR, or commits)
 
 # File filtering
-exclude:                        # glob patterns to skip
+exclude:                        # Glob patterns to skip
   - "**/*.test.ts"
   - "**/*.spec.ts"
-  - "src/generated/**"
+  - "src/generated/**"          # SDK init file is auto-excluded regardless of this list
 
 # Future (not implemented in PoC, reserved for post-PoC)
 # instrumentationMode: balanced  # thorough | balanced | minimal
 ```
 
-> **Implementation note (`testCommand`):** The test command runs with `OTEL_EXPORTER_OTLP_ENDPOINT` overridden to point at Weaver during validation. Verify that the test runner correctly inherits environment variables — `execSync` with env override behaves differently than `spawn` with env inheritance, and meta-runners like nx or turbo may spawn subprocesses that don't inherit the override. For PoC, `npm test` with `execSync` and explicit env is sufficient.
+> **Implementation note (`testCommand`):** The test command runs with `OTEL_EXPORTER_OTLP_ENDPOINT` overridden to point at Weaver during validation. Verify that the test runner correctly inherits environment variables — `execSync` with env override behaves differently than `spawn` with env inheritance, and meta-runners like nx or turbo may spawn subprocesses that don't inherit the override. For PoC, `npm test` with `execSync` and explicit env is sufficient. Consider validating env var inheritance during init (e.g., a smoke test that confirms the endpoint value propagates through the test runner) and failing with a clear error if it doesn't.
 
 ### What Goes Where
 
@@ -1158,7 +1158,7 @@ Four levers:
 
 **Interfaces:**
 - MCP server interface
-- CLI interface with JSON output mode and meaningful exit codes
+- CLI with JSON output mode and meaningful exit codes
 - GitHub Action with workflow_dispatch trigger
 
 **Instrumentation:**
