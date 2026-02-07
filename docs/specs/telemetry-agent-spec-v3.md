@@ -159,7 +159,7 @@ An `action.yml` that runs the CLI in a GitHub Actions runner. Setup steps: `acti
 
 **Note on Weaver MCP server:** Weaver v0.21.2 introduced `weaver registry mcp` — an MCP server providing search, get, and live-check tools directly. Since the PoC architecture already uses MCP (Claude Code → MCP server → Coordinator), the agent could interact with Weaver's native MCP server for schema operations instead of shelling out to CLI commands. Weaver v0.21.2 also added `weaver serve` (REST API + web UI) which could help during development/debugging.
 
-**Implementation-time decision:** Weaver CLI vs MCP server. The CLI approach (`weaver registry check`, `weaver registry resolve`) is simpler — just shell out and parse output. The MCP approach could provide tighter integration but adds architectural complexity (the Coordinator would need to maintain an MCP client connection to Weaver alongside its own MCP server for Claude Code). Start with CLI for PoC; consider MCP if schema operations become a bottleneck.
+**Implementation-time decision:** Weaver CLI vs MCP server. The CLI approach (`weaver registry check`, `weaver registry resolve`, `weaver registry diff`) is simpler — just shell out and parse output. The MCP approach could provide tighter integration but adds architectural complexity (the Coordinator would need to maintain an MCP client connection to Weaver alongside its own MCP server for Claude Code). Start with CLI for PoC; consider MCP if schema operations become a bottleneck.
 
 ---
 
@@ -299,7 +299,7 @@ Implementation: The Coordinator copies the file (and its corresponding schema st
 
 ### Periodic Schema Checkpoints
 
-To catch schema drift early instead of discovering it only at end-of-run, the Coordinator runs `weaver registry check` every `schemaCheckpointInterval` files (default: 5).
+To catch schema drift early instead of discovering it only at end-of-run, the Coordinator runs `weaver registry check` every `schemaCheckpointInterval` files (default: 5). Alongside validation, the Coordinator runs `weaver registry diff --baseline-registry <snapshot> -r ./telemetry/registry --diff-format json` to capture exactly what changed since the last checkpoint. This makes checkpoint output actionable — not just "valid/invalid" but "here's what was added."
 
 If a checkpoint fails, the Coordinator stops processing, reports which files were processed since the last successful checkpoint, and lets the user decide whether to fix and continue or abort. This bounds the blast radius of schema drift to at most N files of work.
 
@@ -522,7 +522,7 @@ The agent can extend the schema, but must follow existing patterns:
 
 3. **Add or create, but stay consistent** — Agent can add to existing groups or create new ones, but must observe and follow the conventions in the existing schema.
 
-4. **Coordinator enforces via drift detection** — The Coordinator sums `attributes_created` and `spans_added` across all results. Unreasonable totals (e.g., 30 new attributes for a single file) get flagged for human review.
+4. **Coordinator enforces via drift detection** — The Coordinator sums `attributes_created` and `spans_added` across all results. Unreasonable totals (e.g., 30 new attributes for a single file) get flagged for human review. Additionally, `weaver registry diff` (with `--diff-format json`) classifies each schema change as `added`, `renamed`, `updated`, `obsoleted`, or `removed`. The Coordinator can reject any change type other than `added` to enforce the "extend only" constraint programmatically.
 
 ---
 
@@ -851,6 +851,7 @@ The Coordinator renders results into the PR description as a human-readable summ
 
 - Per-file status, spans added, libraries discovered, schema extensions, and any failures with reasons
 - **Per-file span category breakdown table** — shows how many spans fall into each priority tier per file (always included regardless of `reviewSensitivity` setting)
+- **Schema changes summary** — generated via `weaver registry diff --diff-format markdown`, showing all attributes, spans, and other telemetry objects added to the registry during the run. Gives reviewers a clear picture of schema evolution without inspecting registry YAML files directly.
 - **Review sensitivity annotations** — warnings or flags based on the configured sensitivity level (see Review Sensitivity under What Gets Instrumented)
 - **Agent notes** — judgment call explanations from each file's result, surfaced inline with the per-file summary
 - **Token usage data** — pre-run estimate and actual token usage from `gen_ai.usage.*` attributes in agent self-instrumentation spans (see Cost Visibility under Configuration)
@@ -860,7 +861,7 @@ This builds trust with reviewers without polluting the git history with machine-
 
 ### Schema Hash Tracking
 
-Each agent can extend the schema, and extensions propagate via git commits. The `schemaHashBefore` and `schemaHashAfter` fields in each result let the Coordinator trace exactly which file's agent introduced a schema change. If Agent C's extension conflicts with Agent B's, the Coordinator can pinpoint the divergence by walking the hash sequence. Periodic schema checkpoints and end-of-run Weaver validation catch the resulting errors.
+Each agent can extend the schema, and extensions propagate via git commits. The `schemaHashBefore` and `schemaHashAfter` fields in each result let the Coordinator trace exactly which file's agent introduced a schema change. If Agent C's extension conflicts with Agent B's, the Coordinator can pinpoint the divergence by walking the hash sequence. Periodic schema checkpoints and end-of-run Weaver validation catch the resulting errors. When hashes differ, `weaver registry diff` shows the actual changes — not just "something changed" but "these attributes/spans were added." The Coordinator snapshots the registry directory at the start of the run and uses it as the `--baseline-registry` for diff operations.
 
 ---
 
@@ -922,7 +923,7 @@ Note: OTLP endpoint for production is configured in the user's OTel SDK setup, n
 
 ### Dry Run Mode
 
-When `dryRun: true`, the Coordinator runs the full analysis pipeline — file globbing, agent spawning, result collection — but treats every file as a revert: each agent runs normally (transforms the file, extends the schema, returns its result), then the Coordinator restores the file from its snapshot instead of committing. No branch is created, no npm install runs, no PR is created. The Coordinator outputs the collected results as a summary (same format as the PR description). This reuses the existing snapshot/revert mechanism — dry run is just "revert every file regardless of success."
+When `dryRun: true`, the Coordinator runs the full analysis pipeline — file globbing, agent spawning, result collection — but treats every file as a revert: each agent runs normally (transforms the file, extends the schema, returns its result), then the Coordinator restores the file from its snapshot instead of committing. No branch is created, no npm install runs, no PR is created. The Coordinator captures `weaver registry diff` output before reverting schema changes, so the dry run summary includes what schema extensions *would* have been made. The Coordinator then outputs the collected results as a summary (same format as the PR description). This reuses the existing snapshot/revert mechanism — dry run is just "revert every file regardless of success."
 
 This is useful during prompt tuning and calibration: you can run the agent against your codebase repeatedly without creating throwaway branches. The agents still make LLM API calls (and incur token costs), but no persistent filesystem or git state is modified.
 
