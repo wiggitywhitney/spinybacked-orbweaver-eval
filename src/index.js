@@ -264,7 +264,7 @@ async function main() {
 
   // Save journal entry
   debug('Saving journal entry...');
-  const savedPath = await saveJournalEntry(sections, context.commit, reflections);
+  const savedPath = await saveJournalEntry(sections, context.commit, reflections, '.', { debug });
 
   console.log(`
 ✅ Journal entry saved
