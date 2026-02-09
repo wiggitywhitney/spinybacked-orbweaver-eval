@@ -11,7 +11,7 @@
 |---------|------|---------|
 | v1 | 2026-02-05 | Initial draft |
 | v2 | 2026-02-06 | Incorporated consolidated technical review (Michael Rishi Forrester + Claude). Resolved Q5 (framework choice). Added research spikes, file revert protocol, Coordinator-managed SDK writes, dependency installation workflow, variable shadowing checks, periodic schema checkpoints, configurable limits, in-memory results, span density guardrails, and fix loop ceilings. |
-| v3 | 2026-02-07 | **Instrumentation model:** Replaced hardcoded span caps with priority-based hierarchy and review sensitivity. Restored rich LibraryRequirement objects. Added cost visibility. **Interfaces:** Moved CLI and GitHub Action to PoC scope. Added Coordinator programmatic API with progress callbacks. **Execution:** Added dry run mode, exclude patterns, config validation (Zod). **Result enrichment:** Added per-file agent notes, schema hash tracking, agent version tagging. **Spec hygiene:** Moved testCommand env note to Configuration. Added technical explanation for uncovered async patterns. |
+| v3 | 2026-02-07 | **Instrumentation model:** Replaced hardcoded span caps with priority-based hierarchy and review sensitivity. Restored rich LibraryRequirement objects. Added cost visibility. **Interfaces:** Moved CLI and GitHub Action to PoC scope. Added Coordinator programmatic API with progress callbacks. **Execution:** Added dry run mode, exclude patterns, config validation (Zod). **Result enrichment:** Added per-file agent notes, schema hash tracking, agent version tagging. **Spec hygiene:** Moved testCommand env note to Configuration. Added technical explanation for uncovered async patterns. Added RS2 (Weaver Integration Approach) and renumbered fix loop design to RS3; replaced "start with CLI" implementation-time decision with research spike. |
 
 ---
 
@@ -34,7 +34,7 @@ That verification loop is what makes this approach trustworthy enough to run aut
 
 ## Pre-Implementation Research Spikes
 
-Before implementation begins, two research spikes are required. These are timeboxed investigations whose output is documentation, not code. The implementing agent must complete these before writing any agent logic.
+Before implementation begins, three research spikes are required. These are timeboxed investigations whose output is documentation, not code. The implementing agent must complete these before writing any agent logic.
 
 ### RS1: Prompt Engineering for Code Transformation
 
@@ -49,7 +49,23 @@ Before implementation begins, two research spikes are required. These are timebo
 
 **Scope:** Focus on TypeScript instrumentation specifically. Evaluate against the patterns in this spec (wrapping functions with spans, adding imports, try/catch/finally blocks).
 
-### RS2: Validation/Fix Loop Design
+### RS2: Weaver Integration Approach
+
+**Goal:** Determine whether the agent should integrate with Weaver via CLI commands, the Weaver MCP server (`weaver registry mcp`), or a hybrid approach. This decision is upstream of RS3 (validation/fix loop design) because it determines what validation capabilities are available.
+
+**Deliverable:** A document covering:
+- Capability comparison: what each approach can and can't do (notably: the MCP server provides fuzzy search with relevance scoring that has no CLI equivalent, and ad-hoc `live_check` that accepts JSON samples per call rather than requiring an OTLP stream)
+- Architectural implications: the Coordinator would need to maintain an MCP client connection to Weaver alongside its own MCP server for Claude Code — evaluate whether this adds meaningful complexity or is straightforward
+- Performance characteristics: the MCP server resolves the registry once into memory with indexed data structures; the CLI re-loads and re-resolves on every call. Quantify the impact for a typical run (periodic checkpoints, per-file fix loops with up to 3 retries each, 50-file runs)
+- Whether the MCP server's ad-hoc `live_check` (per-call JSON sample validation) could enable per-file runtime validation instead of only end-of-run validation, and what that would change about the validation architecture
+- Whether fuzzy search improves the agent's ability to discover semconv attributes during the attribute priority chain (step 1: check OTel semantic conventions)
+- A concrete recommendation: CLI, MCP, or hybrid (e.g., MCP for search/lookup/live_check, CLI for `registry check` and `registry diff`)
+
+**Context:** Weaver v0.21.2 introduced `weaver registry mcp` — an MCP server that imports Weaver's internal Rust crates directly, loads and resolves the entire registry into memory once at startup, and serves 7 tools: `search` (fuzzy text search with relevance scoring), `get_attribute`, `get_metric`, `get_span`, `get_event`, `get_entity` (O(1) lookups from in-memory indexes), and `live_check` (validates telemetry samples against the registry through Weaver's full advisor pipeline). Weaver v0.21.2 also added `weaver serve` (REST API + web UI) which could help during development/debugging.
+
+**Scope:** Focus on PoC needs. The recommendation should consider what's simplest to implement now while not closing doors for future optimization.
+
+### RS3: Validation/Fix Loop Design
 
 **Goal:** Understand how existing AI coding tools handle the "generate → validate → fix → retry" cycle, and design the fix loop mechanics for this agent.
 
@@ -60,8 +76,9 @@ Before implementation begins, two research spikes are required. These are timebo
 - Recommended max retry counts and when to bail out
 - Whether the fix loop should be a single multi-turn conversation or separate API calls
 - Concrete fix loop design recommendation for this agent
+- How the Weaver integration approach (determined by RS2) affects fix loop design — e.g., if MCP enables per-file runtime validation, does that change the fix loop structure?
 
-**Implementation-time decision:** The fix loop can be modeled as either (a) a single multi-turn conversation where each retry adds the error to context, or (b) separate API calls where each retry starts fresh with just the file, schema, and error. Option (a) preserves what the agent tried; option (b) prevents context bloat. RS2 should evaluate which works better empirically.
+**Implementation-time decision:** The fix loop can be modeled as either (a) a single multi-turn conversation where each retry adds the error to context, or (b) separate API calls where each retry starts fresh with just the file, schema, and error. Option (a) preserves what the agent tried; option (b) prevents context bloat. RS3 should evaluate which works better empirically.
 
 **Scope:** Focus on the per-file validation chain (syntax → lint → Weaver). The end-of-run validation is separate and doesn't involve fix loops.
 
@@ -159,7 +176,7 @@ An `action.yml` that runs the CLI in a GitHub Actions runner. Setup steps: `acti
 
 **Note on Weaver MCP server:** Weaver v0.21.2 introduced `weaver registry mcp` — an MCP server providing search, get, and live-check tools directly. Since the PoC architecture already uses MCP (Claude Code → MCP server → Coordinator), the agent could interact with Weaver's native MCP server for schema operations instead of shelling out to CLI commands. Weaver v0.21.2 also added `weaver serve` (REST API + web UI) which could help during development/debugging.
 
-**Implementation-time decision:** Weaver CLI vs MCP server. The CLI approach (`weaver registry check`, `weaver registry resolve`, `weaver registry diff`) is simpler — just shell out and parse output. The MCP approach could provide tighter integration but adds architectural complexity (the Coordinator would need to maintain an MCP client connection to Weaver alongside its own MCP server for Claude Code). Start with CLI for PoC; consider MCP if schema operations become a bottleneck.
+**Weaver integration approach:** Determined by RS2 research spike. The CLI approach (`weaver registry check`, `weaver registry resolve`, `weaver registry diff`) shells out and parses output. The MCP server approach (`weaver registry mcp`) provides in-memory resolution, fuzzy search, and per-call live validation. See RS2 for the full evaluation — the choice affects validation architecture, attribute discovery, and performance characteristics.
 
 ---
 
@@ -1147,7 +1164,7 @@ Four levers:
 
 **Prerequisites and setup:**
 - Assumes target codebase already has OTel API and SDK installed, initialized, and a valid Weaver schema in place
-- Pre-implementation research spikes (RS1: prompt engineering, RS2: fix loop design)
+- Pre-implementation research spikes (RS1: prompt engineering, RS2: Weaver integration approach, RS3: fix loop design)
 - Mandatory init phase with prerequisite verification and SDK init file path recording
 - Config validation (Zod schema)
 
