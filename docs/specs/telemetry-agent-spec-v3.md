@@ -59,6 +59,7 @@ Before implementation begins, three research spikes are required. These are time
 - Performance characteristics: the MCP server resolves the registry once into memory with indexed data structures; the CLI re-loads and re-resolves on every call. Quantify the impact for a typical run (periodic checkpoints, per-file fix loops with up to 3 retries each, 50-file runs)
 - Whether the MCP server's ad-hoc `live_check` (per-call JSON sample validation) could enable per-file runtime validation instead of only end-of-run validation, and what that would change about the validation architecture
 - Whether fuzzy search improves the agent's ability to discover semconv attributes during the attribute priority chain (step 1: check OTel semantic conventions)
+- Whether `weaver registry diff --baseline-registry` accepts the output of `weaver registry resolve` as its baseline input, or requires a copy of the source registry directory. This affects the Coordinator's snapshot strategy for periodic checkpoints, dry run output, and PR summary generation — all three features depend on this command.
 - A concrete recommendation: CLI, MCP, or hybrid (e.g., MCP for search/lookup/live_check, CLI for `registry check` and `registry diff`)
 
 **Context:** Weaver v0.21.2 introduced `weaver registry mcp` — an MCP server that imports Weaver's internal Rust crates directly, loads and resolves the entire registry into memory once at startup, and serves 7 tools: `search` (fuzzy text search with relevance scoring), `get_attribute`, `get_metric`, `get_span`, `get_event`, `get_entity` (O(1) lookups from in-memory indexes), and `live_check` (validates telemetry samples against the registry through Weaver's full advisor pipeline). Weaver v0.21.2 also added `weaver serve` (REST API + web UI) which could help during development/debugging.
@@ -134,7 +135,7 @@ The Coordinator accepts an optional `callbacks` object for progress reporting:
 interface CoordinatorCallbacks {
   onFileStart?: (path: string, index: number, total: number) => void;
   onFileComplete?: (result: FileResult, index: number, total: number) => void;
-  onSchemaCheckpoint?: (filesProcessed: number, passed: boolean) => void;
+  onSchemaCheckpoint?: (filesProcessed: number, passed: boolean) => boolean | void;
   onValidationStart?: () => void;
   onValidationComplete?: (passed: boolean, complianceReport: string) => void;
   onRunComplete?: (results: FileResult[]) => void;
@@ -142,6 +143,37 @@ interface CoordinatorCallbacks {
 ```
 
 Each interface layer wires these to its own output mechanism: the CLI prints progress lines to stderr, the MCP server sends structured progress events, and the GitHub Action uses `core.info()` step annotations. The Coordinator itself never writes to stdout/stderr directly — all user-facing output flows through callbacks or the final result object. This keeps the Coordinator testable and interface-agnostic.
+
+### Coordinator Error Handling
+
+The Coordinator classifies errors into three categories based on whether subsequent work would be valid and useful. The PR summary is the single place where all warnings and degradations are reported.
+
+**Abort immediately** (unrecoverable — subsequent work would be invalid or wasted):
+
+| Error | Reason |
+|-------|--------|
+| Config validation failure | Nothing can run with bad config |
+| Can't create feature branch (git error) | No place to commit results |
+| Invalid or missing API key | Agent calls will all fail |
+| Weaver binary not found | No schema validation possible |
+| Schema validation fails during startup (before any files processed) | Starting schema is broken; agent extensions will compound the problem |
+
+**Degrade and continue** (isolated failure — the run can still produce useful output):
+
+| Error | Behavior |
+|-------|----------|
+| Individual npm package fails to install during bulk install | Skip it, warn in PR summary |
+| Weaver live-check port already in use at end-of-run | Skip live-check, warn in PR summary |
+| Git commit fails for a single file | Treat as file-level failure, revert file, continue |
+
+**Degrade and warn** (non-blocking — output is complete but a validation step was skipped):
+
+| Error | Behavior |
+|-------|----------|
+| Test suite not found | Skip end-of-run test validation, note in PR summary |
+| `weaver registry diff` fails | Omit diff from PR summary, note the omission |
+
+The principle: if the error means subsequent work will be invalid or wasted, abort. If the error is isolated and the run can still produce useful output, degrade and continue. If a non-essential validation or reporting step fails, warn and proceed.
 
 ### Interfaces
 
@@ -318,7 +350,11 @@ Implementation: The Coordinator copies the file (and its corresponding schema st
 
 To catch schema drift early instead of discovering it only at end-of-run, the Coordinator runs `weaver registry check` every `schemaCheckpointInterval` files (default: 5). Alongside validation, the Coordinator runs `weaver registry diff --baseline-registry <snapshot> -r ./telemetry/registry --diff-format json` to capture exactly what changed since the last checkpoint. This makes checkpoint output actionable — not just "valid/invalid" but "here's what was added."
 
-If a checkpoint fails, the Coordinator stops processing, reports which files were processed since the last successful checkpoint, and lets the user decide whether to fix and continue or abort. This bounds the blast radius of schema drift to at most N files of work.
+If a checkpoint fails, the Coordinator aborts the run by default. It reports which files were successfully processed before the failure and which files were processed since the last successful checkpoint (the blast radius). Interface layers can override this behavior by providing an `onSchemaCheckpoint` callback that returns `true` to continue processing despite the failure; returning `false` or `void` (or not providing the callback) aborts. This keeps the default safe for non-interactive contexts (CLI pipes, GitHub Actions, MCP server) while allowing interactive callers to offer a "fix and continue" option.
+
+### SDK Init File Parsing Scope
+
+The Coordinator supports SDK init files using the `NodeSDK` constructor pattern with an `instrumentations` array literal. It uses ts-morph to find the array, append new entries, and add corresponding import statements. If the SDK init file doesn't match a recognized pattern (e.g., instrumentations are constructed dynamically, spread from another file, or use `registerInstrumentations()`), the Coordinator writes a separate file (e.g., `telemetry-agent-instrumentations.ts`) exporting the new instrumentation instances, logs a warning with instructions for the user to integrate manually, and notes this in the PR summary. This keeps the Coordinator deterministic without requiring it to understand arbitrary SDK initialization patterns.
 
 ### Future: Parallel Processing
 
