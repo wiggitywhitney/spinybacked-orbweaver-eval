@@ -170,6 +170,143 @@ try {
   console.error('Empty directory test failed:', error.message);
 }
 
+// Test 7: Exact hash dedup (existing behavior)
+console.log('=== Test 7: Exact Hash Dedup ===');
+try {
+  await rm(TEST_DIR, { recursive: true, force: true });
+  await mkdir(TEST_DIR, { recursive: true });
+
+  const debugMessages = [];
+  const debugFn = (...args) => debugMessages.push(args.join(' '));
+
+  const commit7 = {
+    shortHash: 'aaa1111',
+    hash: 'aaa1111222233334444555566667777888899990000',
+    author: 'Whitney Lee',
+    timestamp: new Date('2026-02-07T08:01:13'),
+    message: 'feat: add new feature',
+  };
+
+  const sections7 = {
+    summary: 'Added a new feature.',
+    dialogue: '[No dialogue]',
+    technicalDecisions: '[No decisions]',
+  };
+
+  // First save
+  await saveJournalEntry(sections7, commit7, [], TEST_DIR, { debug: debugFn });
+
+  // Second save with same hash (re-run scenario)
+  await saveJournalEntry(sections7, commit7, [], TEST_DIR, { debug: debugFn });
+
+  const content7 = await readFile(
+    getJournalEntryPath(commit7.timestamp, TEST_DIR),
+    'utf-8'
+  );
+  const hashMatches = (content7.match(/Commit: aaa1111/g) || []).length;
+  console.log('Hash occurrences:', hashMatches, '(expected: 1)');
+  console.log('Debug logged:', debugMessages.filter(m => m.includes('exact hash')).length > 0 ? 'YES - hash match detected' : 'NO');
+  console.log('');
+} catch (error) {
+  console.error('Hash dedup test failed:', error.message);
+  console.error(error.stack);
+}
+
+// Test 8: Semantic dedup (cherry-pick/rebase scenario)
+console.log('=== Test 8: Semantic Dedup (Cherry-Pick/Rebase) ===');
+try {
+  await rm(TEST_DIR, { recursive: true, force: true });
+  await mkdir(TEST_DIR, { recursive: true });
+
+  const debugMessages = [];
+  const debugFn = (...args) => debugMessages.push(args.join(' '));
+
+  // Original commit
+  const originalCommit = {
+    shortHash: 'e749a96',
+    hash: 'e749a96aabbccdd1122334455667788990011aabb',
+    author: 'Whitney Lee',
+    timestamp: new Date('2026-02-07T08:01:13'),
+    message: 'feat: tighten telemetry agent spec v3',
+  };
+
+  const sections8 = {
+    summary: 'Tightened the telemetry agent spec.',
+    dialogue: '[No dialogue]',
+    technicalDecisions: '[No decisions]',
+  };
+
+  // Save original commit
+  await saveJournalEntry(sections8, originalCommit, [], TEST_DIR, { debug: debugFn });
+
+  // Cherry-picked commit: different hash, same timestamp and message
+  const cherryPickedCommit = {
+    shortHash: 'bb68ec4',
+    hash: 'bb68ec4aabbccdd1122334455667788990011ccdd',
+    author: 'Whitney Lee',
+    timestamp: new Date('2026-02-07T08:01:13'), // Same author timestamp
+    message: 'feat: tighten telemetry agent spec v3', // Same message
+  };
+
+  // This should be detected as a semantic duplicate
+  await saveJournalEntry(sections8, cherryPickedCommit, [], TEST_DIR, { debug: debugFn });
+
+  const content8 = await readFile(
+    getJournalEntryPath(originalCommit.timestamp, TEST_DIR),
+    'utf-8'
+  );
+  const entryCount8 = (content8.match(/### Summary/g) || []).length;
+  console.log('Entry count:', entryCount8, '(expected: 1 — cherry-pick should be deduped)');
+  console.log('Debug logged:', debugMessages.filter(m => m.includes('semantic match')).length > 0 ? 'YES - semantic match detected' : 'NO');
+  console.log('');
+} catch (error) {
+  console.error('Semantic dedup test failed:', error.message);
+  console.error(error.stack);
+}
+
+// Test 9: Same message, different timestamp (should NOT be suppressed)
+console.log('=== Test 9: Same Message, Different Timestamp (No False Positive) ===');
+try {
+  await rm(TEST_DIR, { recursive: true, force: true });
+  await mkdir(TEST_DIR, { recursive: true });
+
+  const commit9a = {
+    shortHash: 'ccc3333',
+    hash: 'ccc3333aabbccdd1122334455667788990011eeff',
+    author: 'Whitney Lee',
+    timestamp: new Date('2026-02-07T09:00:00'),
+    message: 'fix: update config',
+  };
+
+  const commit9b = {
+    shortHash: 'ddd4444',
+    hash: 'ddd4444aabbccdd1122334455667788990011eeff',
+    author: 'Whitney Lee',
+    timestamp: new Date('2026-02-07T09:15:00'), // Different timestamp
+    message: 'fix: update config', // Same message
+  };
+
+  const sections9 = {
+    summary: 'Updated config.',
+    dialogue: '[No dialogue]',
+    technicalDecisions: '[No decisions]',
+  };
+
+  await saveJournalEntry(sections9, commit9a, [], TEST_DIR);
+  await saveJournalEntry(sections9, commit9b, [], TEST_DIR);
+
+  const content9 = await readFile(
+    getJournalEntryPath(commit9a.timestamp, TEST_DIR),
+    'utf-8'
+  );
+  const entryCount9 = (content9.match(/### Summary/g) || []).length;
+  console.log('Entry count:', entryCount9, '(expected: 2 — different timestamps should both be kept)');
+  console.log('');
+} catch (error) {
+  console.error('False positive test failed:', error.message);
+  console.error(error.stack);
+}
+
 // Cleanup
 console.log('=== Cleanup ===');
 try {

@@ -170,19 +170,34 @@ export function formatJournalEntry(sections, commit, reflections = []) {
  * @param {Object} commit - Commit metadata with timestamp
  * @param {Array} reflections - Optional reflections to include
  * @param {string} basePath - Base path for journal (default: current directory)
+ * @param {Object} [options] - Optional settings
+ * @param {Function} [options.debug] - Debug logging function
  * @returns {Promise<string>} Path to saved file
  */
-export async function saveJournalEntry(sections, commit, reflections = [], basePath = '.') {
+export async function saveJournalEntry(sections, commit, reflections = [], basePath = '.', options = {}) {
+  const log = options.debug || (() => {});
   const entryPath = getJournalEntryPath(commit.timestamp, basePath);
 
   // Ensure directory exists
   await ensureDirectory(entryPath);
 
-  // Check for duplicate entry (same commit hash already in file)
+  // Check for duplicate entry
   try {
     const existing = await readFile(entryPath, 'utf-8');
+
+    // Path 1: Exact hash match (catches re-runs of the same commit)
     if (existing.includes(`Commit: ${commit.shortHash}`)) {
-      // Already has an entry for this commit, skip
+      log(`Skipping duplicate entry: exact hash match (${commit.shortHash})`);
+      return entryPath;
+    }
+
+    // Path 2: Semantic match (catches cherry-pick/rebase duplicates)
+    // Cherry-picks and rebases preserve author timestamp and commit message
+    // but produce a new commit hash. Match on both to avoid false positives.
+    const timeStr = formatTimestamp(commit.timestamp);
+    const commitMessage = (commit.message || '').split('\n')[0];
+    if (commitMessage && existing.includes(`## ${timeStr}`) && existing.includes(`**Message**: "${commitMessage}"`)) {
+      log(`Skipping duplicate entry: semantic match — same timestamp (${timeStr}) and message ("${commitMessage}"), likely cherry-pick/rebase of ${commit.shortHash}`);
       return entryPath;
     }
   } catch {

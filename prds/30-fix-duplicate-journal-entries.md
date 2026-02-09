@@ -45,16 +45,16 @@ Improve the dedup check to detect semantically identical commits by matching on 
 
 ## Success Criteria
 
-- [ ] Cherry-picked commits do not produce duplicate journal entries
-- [ ] Rebased commits do not produce duplicate journal entries
-- [ ] Exact-hash duplicates (existing behavior) are still caught
-- [ ] Legitimate commits with the same message but different timestamps are NOT suppressed
-- [ ] The dedup approach works for both commit-story-v2's own journal and journals in other repos (cluster-whisperer)
+- [x] Cherry-picked commits do not produce duplicate journal entries
+- [x] Rebased commits do not produce duplicate journal entries
+- [x] Exact-hash duplicates (existing behavior) are still caught
+- [x] Legitimate commits with the same message but different timestamps are NOT suppressed
+- [x] The dedup approach works for both commit-story-v2's own journal and journals in other repos (cluster-whisperer)
 
 ## Milestones
 
 ### Milestone 1: Improve Dedup Logic in Journal Manager
-**Status**: Not Started
+**Status**: Complete
 
 Replace the hash-only dedup check with a combined check that matches on:
 1. **Commit hash** (existing — catches exact re-runs)
@@ -65,14 +65,14 @@ The timestamp match should use the formatted display string already present in j
 **Done when**: A cherry-picked or rebased commit is detected as a duplicate and skipped. Existing exact-hash dedup still works.
 
 ### Milestone 2: Add Debug Logging for Skip Decisions
-**Status**: Not Started
+**Status**: Complete
 
 Add debug output (using existing `debug()` pattern) that logs when a duplicate is detected and why (hash match vs semantic match). This aids troubleshooting without affecting normal output.
 
 **Done when**: Running with debug enabled shows clear skip-reason messages for both dedup paths.
 
 ### Milestone 3: Validate Across Both Repos
-**Status**: Not Started
+**Status**: Complete
 
 Test the fix by running commit-story against both repos to confirm:
 - Normal commits generate entries as before
