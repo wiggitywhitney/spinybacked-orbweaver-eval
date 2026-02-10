@@ -30,7 +30,7 @@ Research is complete. See `docs/research/testing-infrastructure-research.md` for
 
 ## Success Criteria
 
-- [ ] Global deny list and permission allowlist configured in `~/.claude/settings.json`
+- [x] Global deny list and permission allowlist configured in `~/.claude/settings.json`
 - [ ] Shared claude config repo exists with testing infrastructure
 - [ ] Decision guide documents testing strategies for different project types
 - [ ] `/verify` skill works for Node.js/TypeScript projects
@@ -57,12 +57,12 @@ Key findings:
 ---
 
 ### Milestone 2: Global Safety Net (Layer 0)
-**Status**: Not Started
+**Status**: In Progress
 
 Configure `~/.claude/settings.json` with:
 
-- [ ] **Universal deny list** — Block reading sensitive files (`.env`, `*.pem`, `*.key`, `~/.ssh/**`, `~/.aws/**`, `**/credentials*`, `**/secrets/**`) and destructive commands (`sudo`, `rm -rf`, `curl * | bash`, `chmod 777`)
-- [ ] **Permission allowlist** — Curated list of commands Claude can run without prompting (git operations, npm scripts, test runners, gh CLI, etc.)
+- [x] **Universal deny list** — 27 deny rules blocking sensitive file reads (`.env`, `*.pem`, `*.key`, `~/.ssh/**`, `~/.aws/**`, `~/.docker/**`, `**/credentials*`, `**/secrets/**`, `**/.npmrc`, `id_rsa*`, `id_ed25519*`) and destructive commands (`sudo`, `rm -rf /`, `rm -rf ~*`, `chmod 777`, `> /dev/*`, pipe-to-shell)
+- [x] **Permission allowlist** — 33 allow rules (all git ops except push/merge/rebase, all npm except publish, `gh *`, `rm`, `node`, `ls`, `vals`, `weaver`, etc.) + 4 ask rules for shared-state/irreversible operations (`git push`, `git merge`, `git rebase`, `npm publish`). Hybrid autonomous profile — no profile-switching system built (YAGNI; project-level `.claude/settings.json` handles per-repo overrides if needed).
 - [ ] **Validate** — Confirm deny list blocks access to actual sensitive files, confirm allowlist lets normal development flow work
 
 **Done when**: `~/.claude/settings.json` is configured and validated. Claude Code sessions across all repos respect the deny list and permissions.
@@ -163,4 +163,5 @@ Each PRD should reference the shared config repo and the testing decision guide 
 | Date | Milestone | Notes |
 |------|-----------|-------|
 | 2026-02-10 | Milestone 1: Research | Complete. Researched 4 reference implementations, documented in testing-infrastructure-research.md. Strategy: layered approach (safety net → shared config → per-project application). |
+| 2026-02-10 | Milestone 2: Global Safety Net | In progress. Configured `~/.claude/settings.json` with 27 deny rules, 33 allow rules, 4 ask rules. Hybrid autonomous profile. Decided against profile-switching templates (YAGNI). Live validation pending next session. |
 | | | |
