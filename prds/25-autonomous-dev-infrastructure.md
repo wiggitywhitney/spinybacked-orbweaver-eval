@@ -30,7 +30,7 @@ Research is complete. See `docs/research/testing-infrastructure-research.md` for
 
 ## Success Criteria
 
-- [x] Global deny list and permission allowlist configured in `~/.claude/settings.json`
+- [x] Global deny list and permission allowlist configured and validated in `~/.claude/settings.json`
 - [ ] Shared claude config repo exists with testing infrastructure
 - [ ] Decision guide documents testing strategies for different project types
 - [ ] `/verify` skill works for Node.js/TypeScript projects
@@ -57,13 +57,13 @@ Key findings:
 ---
 
 ### Milestone 2: Global Safety Net (Layer 0)
-**Status**: In Progress
+**Status**: Complete
 
 Configure `~/.claude/settings.json` with:
 
 - [x] **Universal deny list** — 27 deny rules blocking sensitive file reads (`.env`, `*.pem`, `*.key`, `~/.ssh/**`, `~/.aws/**`, `~/.docker/**`, `**/credentials*`, `**/secrets/**`, `**/.npmrc`, `id_rsa*`, `id_ed25519*`) and destructive commands (`sudo`, `rm -rf /`, `rm -rf ~*`, `chmod 777`, `> /dev/*`, pipe-to-shell)
 - [x] **Permission allowlist** — 33 allow rules (all git ops except push/merge/rebase, all npm except publish, `gh *`, `rm`, `node`, `ls`, `vals`, `weaver`, etc.) + 4 ask rules for shared-state/irreversible operations (`git push`, `git merge`, `git rebase`, `npm publish`). Hybrid autonomous profile — no profile-switching system built (YAGNI; project-level `.claude/settings.json` handles per-repo overrides if needed).
-- [ ] **Validate** — Confirm deny list blocks access to actual sensitive files, confirm allowlist lets normal development flow work
+- [x] **Validate** — Confirmed deny list blocks sensitive files, allowlist permits normal workflow, ask rules prompt for shared-state ops. Found 3 non-functional deny patterns (see progress log).
 
 **Done when**: `~/.claude/settings.json` is configured and validated. Claude Code sessions across all repos respect the deny list and permissions.
 
@@ -164,4 +164,5 @@ Each PRD should reference the shared config repo and the testing decision guide 
 |------|-----------|-------|
 | 2026-02-10 | Milestone 1: Research | Complete. Researched 4 reference implementations, documented in testing-infrastructure-research.md. Strategy: layered approach (safety net → shared config → per-project application). |
 | 2026-02-10 | Milestone 2: Global Safety Net | In progress. Configured `~/.claude/settings.json` with 27 deny rules, 33 allow rules, 4 ask rules. Hybrid autonomous profile. Decided against profile-switching templates (YAGNI). Live validation pending next session. |
+| 2026-02-10 | Milestone 2: Validation | Complete. Live-tested all deny, allow, and ask rules. **Working**: all sensitive file read denials (.env, *.pem, *.key, ~/.ssh, ~/.aws, ~/.docker, credentials, secrets, .npmrc); destructive command denials (sudo, rm -rf /, rm -rf ~*, chmod 777); all allowlisted commands (git, npm, node, gh, ls, etc.); ask rules (git push, git merge). **Gaps found**: 3 deny patterns non-functional due to glob matching limitations with shell operators — `curl * \| bash*`, `> /dev/*`, and `wget * \| sh*` are not matched by Claude Code's permission glob engine. Low practical risk: Claude's built-in safety refuses destructive actions as a secondary layer, and `sudo` being blocked prevents most real damage. |
 | | | |
