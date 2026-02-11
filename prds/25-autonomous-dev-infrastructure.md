@@ -31,9 +31,9 @@ Research is complete. See `docs/research/testing-infrastructure-research.md` for
 ## Success Criteria
 
 - [x] Global deny list and permission allowlist configured and validated in `~/.claude/settings.json`
-- [ ] Shared claude config repo exists with testing infrastructure
+- [x] Shared claude config repo exists with testing infrastructure
 - [ ] Decision guide documents testing strategies for different project types
-- [ ] `/verify` skill works for Node.js/TypeScript projects
+- [x] `/verify` skill works for Node.js/TypeScript projects
 - [ ] CLAUDE.md template(s) include testing enforcement rules
 - [ ] Testing rules (Always/Never) are defined and loadable
 - [ ] "Apply testing framework" PRDs exist in all active repos (commit-story-v2, cluster-whisperer, telemetry agent)
@@ -62,7 +62,7 @@ Key findings:
 Configure `~/.claude/settings.json` with:
 
 - [x] **Universal deny list** — 27 deny rules blocking sensitive file reads (`.env`, `*.pem`, `*.key`, `~/.ssh/**`, `~/.aws/**`, `~/.docker/**`, `**/credentials*`, `**/secrets/**`, `**/.npmrc`, `id_rsa*`, `id_ed25519*`) and destructive commands (`sudo`, `rm -rf /`, `rm -rf ~*`, `chmod 777`, `> /dev/*`, pipe-to-shell)
-- [x] **Permission allowlist** — 33 allow rules (all git ops except push/merge/rebase, all npm except publish, `gh *`, `rm`, `node`, `ls`, `vals`, `weaver`, etc.) + 4 ask rules for shared-state/irreversible operations (`git push`, `git merge`, `git rebase`, `npm publish`). Hybrid autonomous profile — no profile-switching system built (YAGNI; project-level `.claude/settings.json` handles per-repo overrides if needed).
+- [x] **Permission allowlist** — 50 allow rules (all git ops including push, all npm except publish, `gh *`, `rm`, `node`, `ls`, `vals`, `weaver`, CodeRabbit MCP tools, `WebFetch`, `WebSearch`, etc.) + 5 ask rules for shared-state/irreversible operations (`git merge`, `git rebase`, `gh pr merge`, `npm publish`, Google Calendar delete). Hybrid autonomous profile — no profile-switching system built (YAGNI; project-level `.claude/settings.json` handles per-repo overrides if needed). `git push` moved from ask to allow — the PreToolUse commit hook serves as the pre-push safety net instead.
 - [x] **Validate** — Confirmed deny list blocks sensitive files, allowlist permits normal workflow, ask rules prompt for shared-state ops. Found 3 non-functional deny patterns (see progress log).
 
 **Done when**: `~/.claude/settings.json` is configured and validated. Claude Code sessions across all repos respect the deny list and permissions.
@@ -70,30 +70,18 @@ Configure `~/.claude/settings.json` with:
 ---
 
 ### Milestone 3: Shared Claude Config Repo (Layer 1)
-**Status**: Not Started
+**Status**: In Progress
 
-Create a new repo (name TBD — e.g., `whitney-claude-config` or `claude-dev-kit`) containing:
+Repo created at [wiggitywhitney/claude-config](https://github.com/wiggitywhitney/claude-config). Remaining work tracked in that repo's PRD #1.
 
-- [ ] **Testing decision guide** — Document that maps project types to testing strategies:
-  - LLM-calling code → what to test, how to handle non-determinism
-  - Agent frameworks (LangGraph) → workflow testing patterns
-  - K8s/infrastructure interaction → integration test approaches
-  - Script-orchestrated tools → input/output testing
-  - Pure utilities → standard unit testing
-- [ ] **`/verify` skill** — Shared slash command that runs a verification loop before PRs (build → type check → lint → tests → security scan). Inspired by Affaan's verification-loop and Michael's 8-step verify command. Should work for any Node.js/TypeScript project.
-- [ ] **CLAUDE.md template(s)** — Starter templates with testing rules baked in:
-  - "Write tests before marking any task complete"
-  - "Run all tests before creating a PR"
-  - "Never claim done with failing tests"
-  - Project-specific sections to fill in (test command, coverage thresholds, framework)
-- [ ] **Testing rules** — Always/Never patterns that can be loaded as Claude Code rules:
-  - Always: write tests for new functionality, run tests before committing, check for regressions
-  - Never: skip tests for "simple" changes, commit with failing tests, mock when real integration is feasible
-- [ ] **Permission profiles** — Reference settings.json configurations for different trust levels:
-  - Conservative (ask for everything except reads)
-  - Balanced (auto-approve edits, git status/diff, npm scripts; ask for commits/pushes)
-  - Autonomous (auto-approve most things; ask for pushes, destructive operations)
-- [ ] **README** — How to use this repo, how to apply it to a new project
+- [x] **`/verify` skill** — 5-phase verification loop (build → type check → lint → tests → security). Skill + deterministic scripts architecture. Three modes: quick, full, pre-pr. Tested in commit-story-v2.
+- [x] **PreToolUse hook on `git commit`** — Blocks commits that fail verification. Same scripts as the skill.
+- [x] **PostToolUse hook on `Write|Edit`** — Checks markdown files for bare code blocks. Replaces CLAUDE.md style rule with deterministic enforcement (zero context cost, 100% compliance).
+- [ ] **Testing decision guide** — Maps project types to testing strategies (Milestone 2 in claude-config PRD #1)
+- [ ] **Testing rules** — Always/Never patterns (Milestone 2 in claude-config PRD #1)
+- [ ] **CLAUDE.md template(s)** — Starter templates with testing rules (Milestone 3 in claude-config PRD #1)
+- [ ] **Permission profiles** — Reference settings.json for three trust levels (Milestone 3 in claude-config PRD #1)
+- [ ] **README** — How to use and apply the toolkit (Milestone 4 in claude-config PRD #1)
 
 **Done when**: Repo exists with all components, and the `/verify` skill has been tested in at least one real project.
 
@@ -129,7 +117,7 @@ Each PRD should reference the shared config repo and the testing decision guide 
 - **Project-specific test suites** — Writing actual tests for commit-story-v2, cluster-whisperer, or the telemetry agent. Those are separate PRDs (Milestone 4 deliverables).
 - **Specialized agents** (TDD guide, code reviewer, security reviewer) — Consider for future PRD based on need
 - **CI/CD pipeline setup** — Per-project concern, handled in apply-framework PRDs
-- **PostToolUse hooks** (auto-linting, auto-type-checking after edits) — Consider for future iteration of the shared config repo
+- **Comprehensive PostToolUse hooks** (auto-linting, auto-type-checking after edits) — One targeted PostToolUse hook (markdown codeblock checker) is in scope; a broader hooks framework is not
 - **Continuous learning / instinct systems** — Interesting (from Affaan and Michael's repos) but not needed now
 
 ## Dependencies
@@ -165,4 +153,8 @@ Each PRD should reference the shared config repo and the testing decision guide 
 | 2026-02-10 | Milestone 1: Research | Complete. Researched 4 reference implementations, documented in testing-infrastructure-research.md. Strategy: layered approach (safety net → shared config → per-project application). |
 | 2026-02-10 | Milestone 2: Global Safety Net | In progress. Configured `~/.claude/settings.json` with 27 deny rules, 33 allow rules, 4 ask rules. Hybrid autonomous profile. Decided against profile-switching templates (YAGNI). Live validation pending next session. |
 | 2026-02-10 | Milestone 2: Validation | Complete. Live-tested all deny, allow, and ask rules. **Working**: all sensitive file read denials (.env, *.pem, *.key, ~/.ssh, ~/.aws, ~/.docker, credentials, secrets, .npmrc); destructive command denials (sudo, rm -rf /, rm -rf ~*, chmod 777); all allowlisted commands (git, npm, node, gh, ls, etc.); ask rules (git push, git merge). **Gaps found**: 3 deny patterns non-functional due to glob matching limitations with shell operators — `curl * \| bash*`, `> /dev/*`, and `wget * \| sh*` are not matched by Claude Code's permission glob engine. Low practical risk: Claude's built-in safety refuses destructive actions as a secondary layer, and `sudo` being blocked prevents most real damage. |
+| 2026-02-11 | Milestone 2: Permission updates | Promoted PRD-workflow commands to global: `git pull`, CodeRabbit MCP tools (4), `WebFetch`, `WebSearch` to allow. Added `gh pr merge` to ask. Moved `git push` from ask to allow (PreToolUse commit hook serves as safety net). |
+| 2026-02-11 | Milestone 3: claude-config repo | Created [wiggitywhitney/claude-config](https://github.com/wiggitywhitney/claude-config). Bootstrapped with PRD skills, CLAUDE.md, CodeRabbit MCP, vals. PRD #1 created to track Layer 1 deliverables. |
+| 2026-02-11 | Milestone 3: /verify skill + hooks | Complete. `/verify` skill with 5-phase verification, 3 modes (quick/full/pre-pr), skill + deterministic scripts architecture. PreToolUse hook on `git commit` blocks unverified commits. PostToolUse hook on `Write\|Edit` checks markdown codeblocks (replaced CLAUDE.md style rule). Hooks installed globally in `~/.claude/settings.json`. Tested in commit-story-v2. |
+| 2026-02-11 | CLAUDE.md optimization | Removed code block style guidelines section — now enforced by PostToolUse hook. Reduces context window usage. |
 | | | |
