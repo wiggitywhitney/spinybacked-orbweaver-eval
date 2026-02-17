@@ -151,7 +151,7 @@ interface CoordinatorCallbacks {
 }
 ```
 
-The `onCostCeilingReady` callback fires after file globbing but before any agent processing begins. If the callback returns `false`, the Coordinator aborts the run. Returning `true` or `void` (or not providing the callback) proceeds normally. This gives interface layers the opportunity to surface cost information and request user confirmation before incurring token costs.
+The `onCostCeilingReady` callback fires after file globbing but before any agent processing begins, **only when `confirmEstimate` is `true`**. When `confirmEstimate` is `false`, the Coordinator still calculates the ceiling internally (for the PR summary) but does not invoke the callback. If the callback returns `false`, the Coordinator aborts the run. Returning `true` or `void` (or not providing the callback) proceeds normally.
 
 Each interface layer wires these to its own output mechanism: the CLI prints progress lines to stderr, the MCP server sends structured progress events, and the GitHub Action uses `core.info()` step annotations. The Coordinator itself never writes to stdout/stderr directly — all user-facing output flows through callbacks or the final result object. This keeps the Coordinator testable and interface-agnostic.
 
@@ -641,9 +641,9 @@ Common OTel JS instrumentation packages. Note: this allowlist should be reviewed
 | `http` / `https` | `@opentelemetry/instrumentation-http` |
 | `express` | `@opentelemetry/instrumentation-express` |
 | `pg` | `@opentelemetry/instrumentation-pg` |
-| `mysql` / `mysql2` | `@opentelemetry/instrumentation-mysql` / `mysql2` |
+| `mysql` / `mysql2` | `@opentelemetry/instrumentation-mysql` / `@opentelemetry/instrumentation-mysql2` |
 | `mongodb` | `@opentelemetry/instrumentation-mongodb` |
-| `redis` / `ioredis` | `@opentelemetry/instrumentation-redis` / `ioredis` |
+| `redis` / `ioredis` | `@opentelemetry/instrumentation-redis` / `@opentelemetry/instrumentation-ioredis` |
 | `grpc` / `@grpc/grpc-js` | `@opentelemetry/instrumentation-grpc` |
 | `koa` | `@opentelemetry/instrumentation-koa` |
 | `fastify` | `@fastify/otel` (note: `@opentelemetry/instrumentation-fastify` is deprecated as of auto-instrumentations-node v0.68.0, Feb 2026) |
