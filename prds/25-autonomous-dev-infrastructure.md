@@ -11,6 +11,7 @@ This PRD is **cross-project** — the testing practices, safety config, shared s
 A layered approach informed by research into four reference implementations (Viktor Farcic's dot-ai, Michael Forrester's claude-dotfiles and Brain Spec, Affaan Mustafa's everything-claude-code, and TACHES' get-shit-done):
 
 - **Layer 0**: Global safety net in `~/.claude/settings.json` — deny lists and permission allowlists that apply to all repos immediately
+- **Layer 0.5**: Tiered deterministic hooks — PreToolUse hooks on git commit (quick+lint), git push (full verification), and PR creation (pre-pr with expanded security). These are the primary enforcement mechanism, running scripts directly with no AI involvement
 - **Layer 1**: Shared claude config repo — reusable testing infrastructure (decision guide, `/verify` skill, CLAUDE.md templates, permission profiles, testing rules) that can be applied to any project
 - **Layer 2** (out of scope, per-project): Apply the framework to each active repo via separate PRDs
 
@@ -32,10 +33,11 @@ Research is complete. See `docs/research/testing-infrastructure-research.md` for
 
 - [x] Global deny list and permission allowlist configured and validated in `~/.claude/settings.json`
 - [x] Shared claude config repo exists with testing infrastructure
+- [x] Tiered deterministic hooks enforce verification at commit, push, and PR creation
 - [ ] Decision guide documents testing strategies for different project types
 - [x] `/verify` skill works for Node.js/TypeScript projects
-- [ ] CLAUDE.md template(s) include testing enforcement rules
-- [ ] Testing rules (Always/Never) are defined and loadable
+- [ ] CLAUDE.md template(s) provide project config and decision guide references (enforcement is via hooks, not CLAUDE.md rules)
+- [ ] Testing design guidance (what/how to test) integrated into the decision guide — enforceable rules are already in hooks
 - [ ] "Apply testing framework" PRDs exist in all active repos (commit-story-v2, cluster-whisperer, telemetry agent)
 
 ## Milestones
@@ -74,12 +76,11 @@ Configure `~/.claude/settings.json` with:
 
 Repo created at [wiggitywhitney/claude-config](https://github.com/wiggitywhitney/claude-config). Remaining work tracked in that repo's PRD #1.
 
-- [x] **`/verify` skill** — 5-phase verification loop (build → type check → lint → tests → security). Skill + deterministic scripts architecture. Three modes: quick, full, pre-pr. Tested in commit-story-v2.
-- [x] **PreToolUse hook on `git commit`** — Blocks commits that fail verification. Same scripts as the skill.
+- [x] **`/verify` skill** — 5-phase verification loop (build → type check → lint → security → tests). Skill + deterministic scripts architecture. Three modes: quick, full, pre-pr. Tested in commit-story-v2. The skill is for ad-hoc interactive use; hooks handle enforcement.
+- [x] **Tiered PreToolUse hooks** — Three deterministic hooks running scripts directly (no skill invocation): commit (quick+lint: build, type check, lint), push (full: build, type check, lint, security, tests), PR creation (pre-pr: full + expanded security). All purely deterministic — this is the primary enforcement mechanism.
 - [x] **PostToolUse hook on `Write|Edit`** — Checks markdown files for bare code blocks. Replaces CLAUDE.md style rule with deterministic enforcement (zero context cost, 100% compliance).
-- [ ] **Testing decision guide** — Maps project types to testing strategies (Milestone 2 in claude-config PRD #1)
-- [ ] **Testing rules** — Always/Never patterns (Milestone 2 in claude-config PRD #1)
-- [ ] **CLAUDE.md template(s)** — Starter templates with testing rules (Milestone 3 in claude-config PRD #1)
+- [ ] **Testing decision guide** — Maps project types to testing strategies, includes design guidance on what/how to test (Milestone 2 in claude-config PRD #1). This is the main remaining intellectual work — hooks enforce *that* tests pass, the guide helps decide *what* to test.
+- [ ] **CLAUDE.md template(s)** — Starter templates with project config, decision guide references, and non-enforceable guidance (Milestone 3 in claude-config PRD #1). Scoped down from original — enforcement is via hooks, not CLAUDE.md rules.
 - [ ] **Permission profiles** — Reference settings.json for three trust levels (Milestone 3 in claude-config PRD #1)
 - [ ] **README** — How to use and apply the toolkit (Milestone 4 in claude-config PRD #1)
 
@@ -105,8 +106,8 @@ Each PRD should reference the shared config repo and the testing decision guide 
 ### Milestone 5: Validation
 **Status**: Not Started
 
-- [ ] Run Claude Code with skip-permissions on a bounded task in commit-story-v2 with all Layer 0 guardrails active
-- [ ] Verify: deny list blocks sensitive file access, permissions allow normal workflow, `/verify` skill catches real issues
+- [ ] Run Claude Code with skip-permissions on a bounded task in commit-story-v2 with all guardrails active
+- [ ] Verify: deny list blocks sensitive file access, permissions allow normal workflow, tiered hooks catch real issues at commit/push/PR boundaries
 - [ ] Document any gaps or adjustments needed
 - [ ] Update shared config repo with lessons learned
 
@@ -157,4 +158,6 @@ Each PRD should reference the shared config repo and the testing decision guide 
 | 2026-02-11 | Milestone 3: claude-config repo | Created [wiggitywhitney/claude-config](https://github.com/wiggitywhitney/claude-config). Bootstrapped with PRD skills, CLAUDE.md, CodeRabbit MCP, vals. PRD #1 created to track Layer 1 deliverables. |
 | 2026-02-11 | Milestone 3: /verify skill + hooks | Complete. `/verify` skill with 5-phase verification, 3 modes (quick/full/pre-pr), skill + deterministic scripts architecture. PreToolUse hook on `git commit` blocks unverified commits. PostToolUse hook on `Write\|Edit` checks markdown codeblocks (replaced CLAUDE.md style rule). Hooks installed globally in `~/.claude/settings.json`. Tested in commit-story-v2. |
 | 2026-02-11 | CLAUDE.md optimization | Removed code block style guidelines section — now enforced by PostToolUse hook. Reduces context window usage. |
+| 2026-02-14 | Milestone 3: Tiered hooks | Evolved from single commit hook to three tiered PreToolUse hooks: commit (quick+lint), push (full), PR (pre-pr). All purely deterministic — scripts only, no skill invocation. Hooks are now the primary enforcement mechanism; `/verify` skill is ad-hoc only. See claude-config Decisions 10-12. |
+| 2026-02-17 | PRD revision | Updated Milestone 3, success criteria, and Milestone 5 to reflect hooks-first reality. Testing rules merged into decision guide scope (enforceable rules are in hooks). CLAUDE.md templates scoped down (enforcement via hooks, not rules). |
 | | | |
