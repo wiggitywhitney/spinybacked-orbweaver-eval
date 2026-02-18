@@ -75,11 +75,11 @@ Before implementation begins, three research spikes are required. These are time
 - What context to include in fix-loop prompts (full file? just the error? original + current?)
 - How to prevent the agent from oscillating between different broken states
 - Recommended max retry counts and when to bail out
-- Whether the fix loop should be a single multi-turn conversation or separate API calls
+- How to combine multi-turn conversations and fresh API calls within the fix loop (not either/or — evaluate when preserving context helps vs when resetting prevents oscillation)
 - Concrete fix loop design recommendation for this agent
 - Based on the fix loop design and the RS2 capability matrix, determine which Weaver integration points the validation loop needs — this produces the Weaver integration recommendation (CLI, MCP, or both) grounded in actual validation requirements
 
-**Implementation-time decision:** The fix loop can be modeled as either (a) a single multi-turn conversation where each retry adds the error to context, or (b) separate API calls where each retry starts fresh with just the file, schema, and error. Option (a) preserves what the agent tried; option (b) prevents context bloat. RS3 should evaluate which works better empirically.
+**Implementation-time decision:** The fix loop is not a binary choice between multi-turn conversations and separate API calls — it's a question of when to use each. Multi-turn preserves what the agent tried (valuable for iterating on a specific error), while fresh calls prevent context bloat and oscillation (valuable when the agent is stuck). RS3 should evaluate hybrid strategies: e.g., multi-turn within a validation stage, fresh calls between stages; or multi-turn for the first N retries, then reset to a fresh call if the agent is oscillating.
 
 **Scope:** Focus on the per-file validation chain (syntax → lint → Weaver). The end-of-run validation is separate and doesn't involve fix loops.
 
