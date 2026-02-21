@@ -1,7 +1,3 @@
-<!--
-Thank you for contributing! Please fill out this template to help us review your changes.
--->
-
 ## Description
 <!-- Provide a clear and concise description of your changes -->
 
@@ -72,6 +68,7 @@ See MIGRATION.md for upgrade guide.
 **Test commands run:**
 ```bash
 # Commands you ran locally to verify your changes
+# (Automated CI tests will run automatically on PR submission)
 ```
 
 **Test results:**
@@ -91,6 +88,9 @@ See MIGRATION.md for upgrade guide.
 - [ ] No secrets or credentials committed
 - [ ] Input validation implemented where needed
 - [ ] Security implications considered and documented
+- [ ] Dependencies scanned for vulnerabilities
+- [ ] Authentication/authorization logic reviewed
+- [ ] Error messages don't leak sensitive information
 
 ## Breaking Changes
 <!-- If this is a breaking change, describe the impact and provide migration guidance -->
@@ -108,6 +108,9 @@ See MIGRATION.md for upgrade guide.
 - [ ] I have performed a self-review of my code
 - [ ] I have commented my code, particularly in hard-to-understand areas
 - [ ] My changes generate no new warnings or errors
+- [ ] I have added tests that prove my fix is effective or my feature works
+- [ ] New and existing tests pass locally with my changes
+- [ ] Any dependent changes have been merged and published
 - [ ] PR title follows Conventional Commits format
 
 ## Additional Context

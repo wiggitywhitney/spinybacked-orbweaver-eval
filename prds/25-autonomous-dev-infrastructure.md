@@ -110,10 +110,46 @@ The shared testing framework (global CLAUDE.md rules, tiered hooks, decision gui
 ### Milestone 5: Validation
 **Status**: In Progress
 
-- [ ] Run Claude Code with skip-permissions on a bounded task in commit-story-v2 with all guardrails active
-- [ ] Verify: deny list blocks sensitive file access, permissions allow normal workflow, tiered hooks catch real issues at commit/push/PR boundaries
+- [x] Run Claude Code with skip-permissions on a bounded task in commit-story-v2 with all guardrails active
+- [x] Verify: deny list blocks sensitive file access, permissions allow normal workflow, tiered hooks catch real issues at commit/push/PR boundaries
 - [ ] Document any gaps or adjustments needed
 - [ ] Update shared config repo with lessons learned
+
+#### Validation Results (2026-02-21)
+
+**Deny list** (7 probes):
+| Probe | Expected | Actual |
+|-------|----------|--------|
+| `.env` | Blocked | Blocked |
+| `~/.ssh/id_rsa` | Blocked | Blocked |
+| `~/.aws/credentials` | Blocked | Blocked |
+| `~/.docker/config.json` | Blocked | Blocked |
+| `~/.npmrc` | Blocked | **NOT BLOCKED** |
+| `sudo` | Blocked | Blocked |
+| `rm -rf /` | Blocked | Blocked |
+| `chmod 777` | Blocked | Blocked |
+
+**Gap**: `Read(**/.npmrc)` does not match `~/.npmrc`. The `**/` glob matches subdirectories but not the home directory root. Fix: add `Read(.npmrc)` or `Read(~/.npmrc)` to the deny list.
+
+**Known gaps from Milestone 2** (unchanged): 3 deny patterns non-functional due to glob matching limitations with shell operators (`curl * | bash*`, `> /dev/*`, `wget * | sh*`). Low practical risk.
+
+**Permission allowlist** (4 probes): `git`, `node`, `npm`, `gh` all allowed without prompts. Normal workflow unimpeded.
+
+**Tiered hooks** (3 tiers):
+| Hook | Trigger | Result |
+|------|---------|--------|
+| Commit (quick+lint) | `git commit` | Passed — build, typecheck, lint |
+| Push (full) | `git push` | Passed — build, typecheck, lint, security, tests |
+| Test tier advisory | `git push` | Warning — missing unit/integration/e2e (correct, PRD #33 not started) |
+| PR (pre-pr) | `gh pr create` | Not yet tested — will fire when PRD closes |
+
+**Gap**: Tiered hooks repeat work across tiers. Push re-runs build+typecheck+lint (already passed at commit). PR re-runs everything. Each tier should be incremental:
+| Tier | Trigger | Should run |
+|------|---------|------------|
+| Commit | `git commit` | build, typecheck, lint |
+| Push | `git push` | security only |
+| PR | `gh pr create` | tests only |
+TDD handles test execution during development. Tests at PR are the formal gate before main. Running tests at every push is redundant and slow.
 
 **Done when**: Skip-permissions workflow has been validated in practice and any gaps have been addressed.
 
@@ -166,4 +202,6 @@ The shared testing framework (global CLAUDE.md rules, tiered hooks, decision gui
 | 2026-02-17 | PRD revision | Updated Milestone 3, success criteria, and Milestone 5 to reflect hooks-first reality. Testing rules merged into decision guide scope (enforceable rules are in hooks). CLAUDE.md templates scoped down (enforcement via hooks, not rules). |
 | 2026-02-18 | Milestone 3: Decision guide + testing rules complete | Synced with claude-config PRD #1. Milestone 2 (decision guide + testing rules) complete. Milestone 3 (CLAUDE.md templates + profiles) in progress — global CLAUDE.md audit done, per-repo audits and templates pending. New deliverables: commit message hook (Decision 17), dotfile overrides (Decision 16), per-language rules (Decision 13). Also marked PRD #33 as created in Milestone 4. |
 | 2026-02-21 | Milestone 3: Complete | claude-config PRD #1 is fully complete and archived. All deliverables done: CLAUDE.md templates (general + Node.js/TypeScript), per-language rules (TS, JS, Shell, Python, Go), permission profiles guide, commit message hook, dotfile overrides, test tier enforcement hooks, README with validated examples. PRD #8 (Go verification) also completed, extending hooks to Go projects. |
+| 2026-02-21 | Milestone 4: Complete | commit-story-v2 PRD #33 created. cluster-whisperer and telemetry agent PRDs deferred to their respective repos — testing framework is global, project-specific PRDs created when active development begins. |
+| 2026-02-21 | Milestone 5: Validation | Formal validation pass. Deny list: 7/8 probes blocked correctly. **Gap found**: `Read(**/.npmrc)` doesn't match `~/.npmrc` (glob `**/` doesn't match home root). npm auth token exposed. Fix needed: add `Read(.npmrc)` to deny list. Permission allowlist: all normal commands allowed. Tiered hooks: commit (quick+lint) and push (full) both fired and passed. Test tier advisory correctly warned about missing tests. |
 | | | |
