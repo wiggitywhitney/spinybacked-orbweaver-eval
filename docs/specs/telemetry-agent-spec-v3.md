@@ -1,8 +1,8 @@
 # Telemetry Agent Specification
 
-**Status:** Draft v3.1
+**Status:** Draft v3.2
 **Created:** 2026-02-05
-**Updated:** 2026-02-16
+**Updated:** 2026-02-21
 **Purpose:** AI agent that auto-instruments TypeScript code with OpenTelemetry based on a Weaver schema
 
 ## Revision History
@@ -13,6 +13,7 @@
 | v2 | 2026-02-06 | Incorporated consolidated technical review (Michael Rishi Forrester + Claude). Resolved Q5 (framework choice). Added research spikes, file revert protocol, Coordinator-managed SDK writes, dependency installation workflow, variable shadowing checks, periodic schema checkpoints, configurable limits, in-memory results, span density guardrails, and fix loop ceilings. |
 | v3 | 2026-02-07 | **Instrumentation model:** Replaced hardcoded span caps with priority-based hierarchy and review sensitivity. Restored rich LibraryRequirement objects. Added cost visibility. **Interfaces:** Moved CLI and GitHub Action to PoC scope. Added Coordinator programmatic API with progress callbacks. **Execution:** Added dry run mode, exclude patterns, config validation (Zod). **Result enrichment:** Added per-file agent notes, schema hash tracking, agent version tagging. **Spec hygiene:** Moved testCommand env note to Configuration. Added technical explanation for uncovered async patterns. Added RS2 (Weaver Integration Approach) and renumbered fix loop design to RS3; replaced "start with CLI" implementation-time decision with research spike. |
 | v3.1 | 2026-02-16 | **Cost visibility:** Redesigned pre-run cost from post-hoc PR-only to configurable pre-run confirmation step. Renamed from "estimate" to "ceiling" — without historical data, these are ceilings not estimates. Simplified `CostCeiling` to single `maxTokensCeiling` (tighter ceilings are future work). Added `onCostCeilingReady` callback, `confirmEstimate` config option (CLI only), CLI `--yes`/`-y` flag, exit code 3 (user abort), and dry run prompt guidance. **MCP:** Added `get-cost-ceiling` tool to handle confirmation at the tool boundary (MCP tools are request-response, can't pause mid-call). Token usage estimation and tighter ceilings added to Out of Scope (Future). Ceiling still appears in PR summary alongside actuals. **Correctness:** Added explicit schema re-resolution between files (agents must see prior agents' extensions). Clarified checkpoint failure behavior: stop processing but still create PR with partial results. Added dry run skips periodic checkpoints. **Precision:** Specified `maxTokensPerFile` enforcement mechanism (Coordinator sums API response metadata). Added schema hash canonicalization requirement. Added squash merge guidance for per-file commits. |
+| v3.2 | 2026-02-21 | **Dependency strategy:** Added `dependencyStrategy` config field (set during init). Services use `dependencies`; distributable packages use `peerDependencies`. `@opentelemetry/api` is always a peerDependency per OTel JS contrib GUIDELINES.md — multiple instances cause silent trace loss. Init phase now detects project type and records the strategy. Coordinator respects strategy during bulk install. |
 
 ---
 
@@ -101,7 +102,7 @@ The system has a **Coordinator** (deterministic script) that manages workflow an
   - Collect results from each agent (in-memory)
   - **Periodic schema checkpoints** (Weaver validation every N files)
   - **Aggregate library requirements** from all agents and perform single SDK init file write
-  - **Bulk dependency installation** (`npm install` for all discovered libraries)
+  - **Bulk dependency installation** (`npm install` for all discovered libraries, respecting `dependencyStrategy` for package.json placement)
   - Run end-of-run validation (Weaver live-check)
   - Assemble PR with summary (including per-file span category breakdown, review sensitivity annotations, agent notes, and token usage data)
 - **Why not AI:** These are mechanical tasks that don't need intelligence
@@ -242,7 +243,7 @@ Before instrumentation can begin, user must run `telemetry-agent init`. This is 
 
 1. **Verify prerequisites**
    - `package.json` exists → extracts project name for namespace
-   - `@opentelemetry/api` in dependencies (or offers to add it)
+   - `@opentelemetry/api` in `peerDependencies` (or offers to add it — always as peerDependency, never direct)
    - OTel SDK initialization exists somewhere → **records path in config** (e.g., `src/telemetry/setup.ts`)
    - OTLP endpoint configured
    - Test suite exists (warns if missing, continues anyway)
@@ -254,15 +255,24 @@ Before instrumentation can begin, user must run `telemetry-agent init`. This is 
    - Run `weaver registry check` to validate
    - If invalid or missing → fail with helpful error
 
-3. **Create config file**
-   - Writes `telemetry-agent.yaml` with schema path, SDK init file path, and settings
+3. **Detect project type** for dependency strategy
+   - Check `package.json` for signals: `bin` field (CLI tool), `main`/`exports` fields (library), `private: true` (service)
+   - Precedence when signals conflict: `private: true` → service; `bin` → distributable; `main`/`exports` → distributable. If no signals found, default to `dependencies` (service)
+   - Ask user to confirm: is this a **service** (deployed, not distributed) or **distributable** (npm package, CLI tool, library)?
+   - In non-interactive mode (`--yes` flag or CI environment), auto-select based on heuristic precedence without prompting
+   - Services use `dependencies` — OTel packages are runtime requirements
+   - Distributables use `peerDependencies` — consumers decide whether to install OTel
+   - Records choice as `dependencyStrategy` in config
+
+4. **Create config file**
+   - Writes `telemetry-agent.yaml` with schema path, SDK init file path, dependency strategy, and settings
    - Config file is the gate for instrumentation phase
 
 ### Prerequisites (verified during init)
 
 1. **`package.json`** — provides namespace
 2. **OTel SDK initialized** — user's responsibility, not agent's job. Init phase records the file path.
-3. **`@opentelemetry/api` in dependencies** — minimum SDK version: compatible with OTel JS SDK 2.0+ (the allowlist in this spec is sourced from `@opentelemetry/auto-instrumentations-node` v0.68.0's package list, but the agent does NOT use that mega-bundle — it installs individual instrumentation packages)
+3. **`@opentelemetry/api` as peerDependency** — must be a `peerDependency`, never a direct production dependency. Multiple instances in `node_modules` cause silent trace loss via no-op fallbacks (see opentelemetry-js-contrib GUIDELINES.md). Minimum version: compatible with OTel JS SDK 2.0+. The allowlist in this spec is sourced from `@opentelemetry/auto-instrumentations-node` v0.68.0's package list, but the agent does NOT use that mega-bundle — it installs individual instrumentation packages.
 4. **OTLP endpoint configured** — for production use (Datadog, Jaeger, etc.). During validation, agent temporarily overrides to point at Weaver.
 5. **Test suite exists** — for validation (agent warns if missing). The `testCommand` config accepts any runner (npm test, vitest, jest, nx test, etc.) — fine for PoC with npm, note for post-PoC that arbitrary runners should be well-supported.
 
@@ -279,7 +289,8 @@ Before instrumentation can begin, user must run `telemetry-agent init`. This is 
 │  3. Validate existing schema (weaver registry check)            │
 │     - Schema must exist (PoC requirement)                       │
 │     - If missing → fail with error                              │
-│  4. Create telemetry-agent.yaml config                          │
+│  4. Detect project type → set dependencyStrategy                │
+│  5. Create telemetry-agent.yaml config                          │
 └─────────────────────────────────────────────────────────────────┘
                               ↓
 ┌─────────────────────────────────────────────────────────────────┐
@@ -301,7 +312,8 @@ Before instrumentation can begin, user must run `telemetry-agent init`. This is 
 │     f. Every N files → periodic schema checkpoint               │
 │  5. After all files:                                            │
 │     a. Aggregate libraries_needed from all results              │
-│     b. npm install all discovered libraries (bulk)              │
+│     b. npm install discovered libraries per dependencyStrategy   │
+│        (@opentelemetry/api is always peerDependency regardless) │
 │     c. Write SDK init file once (register all libraries)        │
 │     d. Commit SDK + package.json changes                        │
 │  6. Run end-of-run validation (tests + Weaver live-check)       │
@@ -992,6 +1004,9 @@ sdkInitFile: ./src/telemetry/setup.ts    # OTel SDK initialization file (recorde
 autoApproveLibraries: true    # false = prompt before adding OTel libraries
 testCommand: "npm test"        # Command to run test suite during validation (supports npm, vitest, jest, nx, etc.)
 
+# Dependency strategy (set during init based on project type)
+dependencyStrategy: dependencies  # dependencies (services) | peerDependencies (distributable packages/CLIs/libraries)
+
 # Limits and guardrails
 maxFilesPerRun: 50             # Cost/time guardrail, user adjustable
 maxFixAttempts: 3              # Max validation retry attempts per file before reverting
@@ -1025,6 +1040,7 @@ exclude:                        # Glob patterns to skip
 | SDK init file path | Semconv version |
 | Test command | Attribute definitions |
 | Agent behavior settings | Span definitions |
+| Dependency strategy | |
 | Limits and guardrails | |
 | Review sensitivity | |
 | Execution mode (dry run) | |
@@ -1054,6 +1070,21 @@ The `instrumentationMode` setting is reserved for post-PoC. It would control how
 ### Config Validation
 
 The Coordinator validates the config at startup using a Zod schema (or equivalent runtime validator). Invalid or unknown fields produce clear error messages — e.g., `Unknown config field 'maxSpanPerFile' — did you mean 'maxFixAttempts'?`. This catches typos and stale config from earlier spec versions. The validation schema is the single source of truth for config shape; the YAML block above is documentation, not the implementation.
+
+### Dependency Strategy
+
+The `dependencyStrategy` config controls how the Coordinator adds OTel packages to `package.json`. This is set during `telemetry-agent init` based on the project type.
+
+**`@opentelemetry/api` is always a peerDependency** regardless of strategy. The OTel JS contrib GUIDELINES.md mandates this — multiple instances in `node_modules` cause silent trace loss via no-op fallbacks. The dependency strategy only affects **instrumentation packages** discovered and installed by the agent (e.g., `@opentelemetry/instrumentation-pg`, `@traceloop/instrumentation-anthropic`). The agent does not install or modify SDK packages — those are the user's responsibility (see Prerequisites).
+
+| Strategy | Project Type | Behavior |
+|----------|-------------|----------|
+| `dependencies` (default) | Services — backend APIs, workers, controllers deployed to servers/clusters | Instrumentation packages added to `dependencies`. They're runtime requirements and the package isn't distributed via npm. |
+| `peerDependencies` | Distributable packages — npm libraries, CLI tools, anything consumers `npm install` | Instrumentation packages added to `peerDependencies`. Consumers who want telemetry install the packages themselves; consumers who don't get no-op API calls with zero overhead. |
+
+When `dependencyStrategy: peerDependencies`, the Coordinator runs `npm install --save-peer` instead of `npm install --save`. The SDK init file is still written (it serves as a reference implementation), but the PR summary notes that consumers must install the peer dependencies for telemetry to be active. The Coordinator also adds `peerDependenciesMeta` with `optional: true` for each OTel peer dependency — this suppresses npm install warnings for consumers who don't want telemetry, aligning with the optional telemetry pattern.
+
+**Note:** The `optional: true` flag suppresses npm warnings but does not make the packages functionally optional. Consumers must install `@opentelemetry/api` because the instrumented code contains hard imports (e.g., `import { trace } from '@opentelemetry/api'`). The "optional" designation means consumers can choose *not to initialize the SDK*, resulting in no-op spans with zero overhead — but the API package itself must be present for imports to resolve.
 
 ### Cost Visibility
 
