@@ -310,8 +310,8 @@ Before instrumentation can begin, user must run `telemetry-agent init`. This is 
 │     f. Every N files → periodic schema checkpoint               │
 │  5. After all files:                                            │
 │     a. Aggregate libraries_needed from all results              │
-│     b. npm install discovered libraries (respects               │
-│        dependencyStrategy: dependencies or peerDependencies)    │
+│     b. npm install discovered libraries per dependencyStrategy   │
+│        (@opentelemetry/api is always peerDependency regardless) │
 │     c. Write SDK init file once (register all libraries)        │
 │     d. Commit SDK + package.json changes                        │
 │  6. Run end-of-run validation (tests + Weaver live-check)       │
@@ -1080,7 +1080,7 @@ The `dependencyStrategy` config controls how the Coordinator adds OTel packages 
 | `dependencies` (default) | Services — backend APIs, workers, controllers deployed to servers/clusters | Instrumentation packages added to `dependencies`. They're runtime requirements and the package isn't distributed via npm. |
 | `peerDependencies` | Distributable packages — npm libraries, CLI tools, anything consumers `npm install` | Instrumentation packages added to `peerDependencies`. Consumers who want telemetry install the packages themselves; consumers who don't get no-op API calls with zero overhead. |
 
-When `dependencyStrategy: peerDependencies`, the Coordinator runs `npm install --save-peer` instead of `npm install --save`. The SDK init file is still written (it serves as a reference implementation), but the PR summary notes that consumers must install the peer dependencies for telemetry to be active.
+When `dependencyStrategy: peerDependencies`, the Coordinator runs `npm install --save-peer` instead of `npm install --save`. The SDK init file is still written (it serves as a reference implementation), but the PR summary notes that consumers must install the peer dependencies for telemetry to be active. The Coordinator also adds `peerDependenciesMeta` with `optional: true` for each OTel peer dependency — this suppresses npm install warnings for consumers who don't want telemetry, aligning with the optional telemetry pattern.
 
 ### Cost Visibility
 
