@@ -257,7 +257,9 @@ Before instrumentation can begin, user must run `telemetry-agent init`. This is 
 
 3. **Detect project type** for dependency strategy
    - Check `package.json` for signals: `bin` field (CLI tool), `main`/`exports` fields (library), `private: true` (service)
+   - Precedence when signals conflict: `private: true` → service; `bin` → distributable; `main`/`exports` → distributable. If no signals found, default to `dependencies` (service)
    - Ask user to confirm: is this a **service** (deployed, not distributed) or **distributable** (npm package, CLI tool, library)?
+   - In non-interactive mode (`--yes` flag or CI environment), auto-select based on heuristic precedence without prompting
    - Services use `dependencies` — OTel packages are runtime requirements
    - Distributables use `peerDependencies` — consumers decide whether to install OTel
    - Records choice as `dependencyStrategy` in config
@@ -1073,7 +1075,7 @@ The Coordinator validates the config at startup using a Zod schema (or equivalen
 
 The `dependencyStrategy` config controls how the Coordinator adds OTel packages to `package.json`. This is set during `telemetry-agent init` based on the project type.
 
-**`@opentelemetry/api` is always a peerDependency** regardless of strategy. The OTel JS contrib GUIDELINES.md mandates this — multiple instances in `node_modules` cause silent trace loss via no-op fallbacks. The dependency strategy only affects instrumentation packages and SDK-related packages.
+**`@opentelemetry/api` is always a peerDependency** regardless of strategy. The OTel JS contrib GUIDELINES.md mandates this — multiple instances in `node_modules` cause silent trace loss via no-op fallbacks. The dependency strategy only affects **instrumentation packages** discovered and installed by the agent (e.g., `@opentelemetry/instrumentation-pg`, `@traceloop/instrumentation-anthropic`). The agent does not install or modify SDK packages — those are the user's responsibility (see Prerequisites).
 
 | Strategy | Project Type | Behavior |
 |----------|-------------|----------|
@@ -1081,6 +1083,8 @@ The `dependencyStrategy` config controls how the Coordinator adds OTel packages 
 | `peerDependencies` | Distributable packages — npm libraries, CLI tools, anything consumers `npm install` | Instrumentation packages added to `peerDependencies`. Consumers who want telemetry install the packages themselves; consumers who don't get no-op API calls with zero overhead. |
 
 When `dependencyStrategy: peerDependencies`, the Coordinator runs `npm install --save-peer` instead of `npm install --save`. The SDK init file is still written (it serves as a reference implementation), but the PR summary notes that consumers must install the peer dependencies for telemetry to be active. The Coordinator also adds `peerDependenciesMeta` with `optional: true` for each OTel peer dependency — this suppresses npm install warnings for consumers who don't want telemetry, aligning with the optional telemetry pattern.
+
+**Note:** The `optional: true` flag suppresses npm warnings but does not make the packages functionally optional. Consumers must install `@opentelemetry/api` because the instrumented code contains hard imports (e.g., `import { trace } from '@opentelemetry/api'`). The "optional" designation means consumers can choose *not to initialize the SDK*, resulting in no-op spans with zero overhead — but the API package itself must be present for imports to resolve.
 
 ### Cost Visibility
 
