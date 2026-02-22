@@ -25,24 +25,24 @@ Key decisions this PRD must make:
 
 ## Success Criteria
 
-- [ ] Test framework installed and configured (Vitest)
+- [x] Test framework installed and configured (Vitest)
 - [ ] Tests exist for non-LLM modules (collectors, context integration, journal manager, filtering)
 - [ ] LLM testing strategy decided and implemented (at minimum: contract tests or snapshot tests for AI generation)
-- [ ] `npm test` runs all tests and reports coverage
+- [x] `npm test` runs all tests and reports coverage
 - [ ] CI pipeline runs tests on every PR via GitHub Actions
-- [ ] Shared `/verify` skill from PRD #25 works in this repo
+- [x] Shared `/verify` skill from PRD #25 works in this repo
 - [ ] CodeRabbit + CI + tests all gate PRs before merge
 
 ## Milestones
 
 ### Milestone 1: Test Framework Setup
-**Status**: Not Started
+**Status**: Complete
 
-- [ ] Install Vitest as test framework
-- [ ] Configure for ES modules (this project uses ESM)
-- [ ] Add `npm test` and `npm run test:coverage` scripts
-- [ ] Wire up shared `/verify` skill from PRD #25's config repo
-- [ ] Write one smoke test to confirm the framework works
+- [x] Install Vitest as test framework
+- [x] Configure for ES modules (this project uses ESM)
+- [x] Add `npm test` and `npm run test:coverage` scripts
+- [x] Wire up shared `/verify` skill from PRD #25's config repo
+- [x] Write one smoke test to confirm the framework works
 
 **Done when**: `npm test` runs and passes with at least one test.
 
@@ -121,6 +121,10 @@ Note: This absorbs PRD #23 (CI/CD Pipeline) scope for this repo.
 | LLM test costs add up | Medium | Minimize real API calls. Use recorded responses for most tests, real calls only for smoke tests. |
 | Testing existing code reveals bugs | Low (actually positive) | Fix bugs as found. This is a feature, not a risk. |
 | ESM configuration issues with Vitest | Low | Vitest has good ESM support. Document any workarounds needed. |
+
+## Progress Log
+
+- **2026-02-21**: Milestone 1 complete — Vitest 4.0.18 installed with ESM config, coverage via @vitest/coverage-v8, smoke test on `isSafeGitRef` (10 tests passing), `/verify` skill globally available and auto-detecting project
 
 ## References
 

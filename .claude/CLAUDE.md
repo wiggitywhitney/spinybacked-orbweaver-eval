@@ -12,7 +12,7 @@ A complete rebuild of commit-story using modern tooling (LangGraph) with zero te
 When running PRD workflows, continue through the full cycle without stopping for confirmation:
 - `/prd-start` → automatically invoke `/prd-next`
 - After task completion → automatically invoke `/prd-update-progress`
-- After progress update → automatically invoke `/prd-next` for the next task
+- After progress update → run `/clear` to reset context, then invoke `/prd-next` for the next task
 - Continue until PRD is complete, then invoke `/prd-done`
 - After `/prd-done` → automatically invoke `/prd-start` for the next PRD in the dependency chain
 
