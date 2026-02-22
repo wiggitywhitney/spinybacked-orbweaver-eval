@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
-import { mkdtempSync, writeFileSync, mkdirSync, rmSync } from 'node:fs';
+import { mkdtempSync, writeFileSync, mkdirSync, rmSync, utimesSync } from 'node:fs';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 import {
@@ -274,15 +274,17 @@ describe('findJSONLFiles', () => {
     rmSync(tmpDir, { recursive: true, force: true });
   });
 
-  it('returns JSONL files sorted by modification time (newest first)', async () => {
+  it('returns JSONL files sorted by modification time (newest first)', () => {
     // Create files with different modification times
     const file1 = join(tmpDir, 'older.jsonl');
     const file2 = join(tmpDir, 'newer.jsonl');
     writeFileSync(file1, '{}', 'utf-8');
-
-    // Small delay to ensure different mtime
-    await new Promise((resolve) => setTimeout(resolve, 50));
     writeFileSync(file2, '{}', 'utf-8');
+
+    // Explicitly set different modification times (avoids timing-dependent delays)
+    const now = Date.now() / 1000;
+    utimesSync(file1, now - 10, now - 10);
+    utimesSync(file2, now, now);
 
     const result = findJSONLFiles(tmpDir);
     expect(result).toHaveLength(2);

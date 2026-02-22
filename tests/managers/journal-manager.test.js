@@ -351,9 +351,8 @@ describe('discoverReflections', () => {
     const end = new Date(2026, 1, 21, 23, 59, 59);
 
     const result = await discoverReflections(start, end, tmpDir);
-    if (result.length >= 2) {
-      expect(result[0].timestamp.getTime()).toBeLessThanOrEqual(result[1].timestamp.getTime());
-    }
+    expect(result.length).toBeGreaterThanOrEqual(2);
+    expect(result[0].timestamp.getTime()).toBeLessThanOrEqual(result[1].timestamp.getTime());
   });
 
   it('spans across month boundaries', async () => {
