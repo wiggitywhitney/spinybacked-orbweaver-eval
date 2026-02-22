@@ -38,7 +38,7 @@ Research is complete. See `docs/research/testing-infrastructure-research.md` for
 - [x] `/verify` skill works for Node.js/TypeScript projects
 - [x] Testing design guidance (what/how to test) integrated into the decision guide and testing rules — enforceable rules are in hooks
 - [x] CLAUDE.md template(s) provide project config and decision guide references (enforcement is via hooks, not CLAUDE.md rules)
-- [ ] "Apply testing framework" PRDs exist in all active repos (commit-story-v2, cluster-whisperer, telemetry agent)
+- [x] "Apply testing framework" PRDs exist in all active repos (commit-story-v2 PRD #33 created; cluster-whisperer and telemetry agent deferred to their repos — framework is global)
 
 ## Milestones
 
@@ -108,12 +108,12 @@ The shared testing framework (global CLAUDE.md rules, tiered hooks, decision gui
 ---
 
 ### Milestone 5: Validation
-**Status**: In Progress
+**Status**: Complete
 
 - [x] Run Claude Code with skip-permissions on a bounded task in commit-story-v2 with all guardrails active
 - [x] Verify: deny list blocks sensitive file access, permissions allow normal workflow, tiered hooks catch real issues at commit/push/PR boundaries
 - [x] Document any gaps or adjustments needed
-- [ ] Update shared config repo with lessons learned
+- [x] Update shared config repo with lessons learned (claude-config PRD #11: `.npmrc` deny fix, incremental hook tiers, docs-only early exit)
 
 #### Validation Results (2026-02-21)
 
@@ -205,4 +205,5 @@ TDD handles test execution during development. Tests at PR are the formal gate b
 | 2026-02-21 | Milestone 4: Complete | commit-story-v2 PRD #33 created. cluster-whisperer and telemetry agent PRDs deferred to their respective repos — testing framework is global, project-specific PRDs created when active development begins. |
 | 2026-02-21 | Milestone 5: Validation | Formal validation pass. Deny list: 7/8 probes blocked correctly. **Gap found**: `Read(**/.npmrc)` doesn't match `~/.npmrc` (glob `**/` doesn't match home root). npm auth token exposed. Fix needed: add `Read(.npmrc)` to deny list. Permission allowlist: all normal commands allowed. Tiered hooks: commit (quick+lint) and push (full) both fired and passed. Test tier advisory correctly warned about missing tests. |
 | 2026-02-21 | Milestone 5: Gaps documented | Gaps documented in PRD. claude-config PRD #11 created to fix: `.npmrc` deny list gap, incremental hook tiers (commit→build/typecheck/lint, push→security only, PR→tests only). New hooks already firing locally — push detected docs-only changes and skipped verification entirely. Waiting on claude-config PRD #11 merge to close out. |
+| 2026-02-21 | Milestone 5: Complete | claude-config PRD #11 completed and archived. All gaps resolved: `.npmrc` deny fix in settings.json, incremental hook tiers live, docs-only early exit working. All milestones complete. PRD closed. |
 | | | |
