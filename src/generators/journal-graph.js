@@ -608,7 +608,7 @@ export async function generateJournalSections(context) {
   };
 }
 
-// Export node functions for testing
+// Export node functions and helpers for testing
 export {
   summaryNode,
   technicalNode,
@@ -621,5 +621,9 @@ export {
   hasFunctionalCode,
   analyzeCommitContent,
   generateImplementationGuidance,
+  cleanDialogueOutput,
+  cleanTechnicalOutput,
+  cleanSummaryOutput,
+  escapeForJson,
   NODE_TEMPERATURES,
 };
