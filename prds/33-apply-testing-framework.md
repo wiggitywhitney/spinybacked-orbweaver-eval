@@ -93,12 +93,12 @@ Note: This absorbs PRD #23 (CI/CD Pipeline) scope for this repo.
 ---
 
 ### Milestone 5: Integration Validation
-**Status**: Not Started
+**Status**: Complete
 
-- [ ] Run the full commit-story pipeline (git hook → collectors → context → AI → journal) and verify tests catch real failures
-- [ ] Introduce a deliberate bug and confirm tests catch it
-- [ ] Run `/verify` skill and confirm it produces a useful report
-- [ ] Update project CLAUDE.md with testing rules specific to this repo
+- [x] Run the full commit-story pipeline (git hook → collectors → context → AI → journal) and verify tests catch real failures
+- [x] Introduce a deliberate bug and confirm tests catch it
+- [x] Run `/verify` skill and confirm it produces a useful report
+- [x] Update project CLAUDE.md with testing rules specific to this repo
 
 **Done when**: End-to-end confidence that the testing infrastructure catches real problems.
 
@@ -128,6 +128,7 @@ Note: This absorbs PRD #23 (CI/CD Pipeline) scope for this repo.
 - **2026-02-21**: Milestone 2 complete — 197 tests across 9 test files, all passing. Coverage for target modules: filters 97%/93%/100%/99% (stmt/branch/func/lines), git-collector 95%/78%/100%/95%, claude-collector 72%/81%/81%/70%, context-integrator 69%/48%/67%/69% (pure functions tested; orchestration deferred to M5), journal-manager 94%/84%/100%/94%, journal-paths 100%/100%/100%/100%. All deterministic logic exceeds 80% coverage target.
 - **2026-02-22**: Milestone 3 complete — Contract test strategy chosen: mock `@langchain/anthropic` via `vi.mock` class, unit test deterministic helpers directly. 123 new tests in 2 files (journal-graph.test.js: 105 tests covering deterministic helpers, node contract tests, graph structure; prompts.test.js: 18 tests covering prompt branching and guidelines). Coverage: journal-graph.js 99.4%/90%/100% (stmt/branch/func), all prompt modules 100%. Total suite: 320 tests, all passing. Documented LLM testing pattern in project CLAUDE.md.
 - **2026-02-22**: Milestone 4 complete — GitHub Actions CI workflow (`.github/workflows/ci.yml`) runs `npm run test:coverage` on Node 18/20/22 matrix for all PRs to main. Branch protection enabled: requires all 3 CI checks to pass (strict mode), PRs required. CodeRabbit runs alongside as GitHub App. npm cache for fast installs. Fixed pre-existing git-collector.test.js false-positive (anchored journal-entries regex to diff headers).
+- **2026-02-22**: Milestone 5 complete — Integration validation passed. Full suite: 320 tests, 83% stmt coverage. Deliberate bug injection in 3 modules (sensitive-filter, journal-graph, git-collector) all caught by tests (3, 5, 1 failures respectively). `/verify` skill runs successfully (security + tests). CLAUDE.md reviewed — no updates needed; existing testing docs sufficient. PRD #33 complete.
 
 ## References
 
