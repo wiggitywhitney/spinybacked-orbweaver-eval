@@ -40,6 +40,32 @@ This project will be distributed as an npm package. Keep production dependencies
 - **Node.js** with ES modules
 - **No telemetry** - this will be added by an instrumentation agent later
 
+## Testing Strategy
+
+- **Framework**: Vitest with ESM support, coverage via @vitest/coverage-v8
+- **Test location**: `tests/` directory mirrors `src/` structure
+- **Run tests**: `npm test` (all tests), `npm run test:coverage` (with coverage)
+
+### LLM Testing Pattern
+
+The AI generation pipeline (`src/generators/journal-graph.js`) uses contract tests — mock the LLM provider, test the orchestration:
+
+- **Deterministic helpers** (formatting, cleaning, analysis): unit test directly, no mocks
+- **LLM boundary** (graph nodes): mock `@langchain/anthropic` via `vi.mock`, verify message shapes sent to the model and post-processing of responses
+- **Early exits**: test that nodes skip LLM calls when context is insufficient
+- **Error handling**: test that nodes return fallback messages and accumulate errors
+- **No real API calls in tests**: too expensive and non-deterministic for CI
+
+Mock pattern for `ChatAnthropic`:
+```javascript
+const mockInvoke = vi.fn();
+vi.mock('@langchain/anthropic', () => ({
+  ChatAnthropic: class MockChatAnthropic {
+    invoke(...args) { return mockInvoke(...args); }
+  },
+}));
+```
+
 ## Secrets Management
 
 This project uses vals for secrets. See `.vals.yaml` for available secrets.

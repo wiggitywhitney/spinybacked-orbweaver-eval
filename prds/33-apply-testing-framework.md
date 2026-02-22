@@ -27,7 +27,7 @@ Key decisions this PRD must make:
 
 - [x] Test framework installed and configured (Vitest)
 - [x] Tests exist for non-LLM modules (collectors, context integration, journal manager, filtering)
-- [ ] LLM testing strategy decided and implemented (at minimum: contract tests or snapshot tests for AI generation)
+- [x] LLM testing strategy decided and implemented (at minimum: contract tests or snapshot tests for AI generation)
 - [x] `npm test` runs all tests and reports coverage
 - [ ] CI pipeline runs tests on every PR via GitHub Actions
 - [x] Shared `/verify` skill from PRD #25 works in this repo
@@ -64,14 +64,14 @@ Test the deterministic, non-LLM modules:
 ---
 
 ### Milestone 3: LLM Testing Strategy
-**Status**: Not Started
+**Status**: Complete
 
 Decide and implement a strategy for testing the AI generation pipeline:
 
-- [ ] **Research options** — Real API calls (expensive but accurate), recorded responses (snapshot/golden file tests), contract tests (verify input/output shapes), mock tests (verify orchestration logic)
-- [ ] **Decide approach** — Document the decision and rationale
-- [ ] **Implement** — Write tests using the chosen strategy
-- [ ] **Document** — Add to project CLAUDE.md so future development follows the same pattern
+- [x] **Research options** — Evaluated all four approaches; chose contract tests with mocked LLM provider as best balance of confidence vs cost
+- [x] **Decide approach** — Contract tests: mock `@langchain/anthropic` via `vi.mock` class, unit test deterministic helpers directly, verify message shapes and post-processing at LLM boundary
+- [x] **Implement** — 123 tests across 2 files: `journal-graph.test.js` (105 tests: deterministic helpers, node contract tests, graph structure), `prompts.test.js` (18 tests: prompt branching, guidelines). Coverage: journal-graph.js 99.4%/90%/100% (stmt/branch/func), prompts 100%
+- [x] **Document** — Added "Testing Strategy" and "LLM Testing Pattern" sections to `.claude/CLAUDE.md` with mock pattern example
 
 **Done when**: AI generation pipeline has tests that provide meaningful confidence without excessive cost.
 
@@ -126,6 +126,7 @@ Note: This absorbs PRD #23 (CI/CD Pipeline) scope for this repo.
 
 - **2026-02-21**: Milestone 1 complete — Vitest 4.0.18 installed with ESM config, coverage via @vitest/coverage-v8, smoke test on `isSafeGitRef` (10 tests passing), `/verify` skill globally available and auto-detecting project
 - **2026-02-21**: Milestone 2 complete — 197 tests across 9 test files, all passing. Coverage for target modules: filters 97%/93%/100%/99% (stmt/branch/func/lines), git-collector 95%/78%/100%/95%, claude-collector 72%/81%/81%/70%, context-integrator 69%/48%/67%/69% (pure functions tested; orchestration deferred to M5), journal-manager 94%/84%/100%/94%, journal-paths 100%/100%/100%/100%. All deterministic logic exceeds 80% coverage target.
+- **2026-02-22**: Milestone 3 complete — Contract test strategy chosen: mock `@langchain/anthropic` via `vi.mock` class, unit test deterministic helpers directly. 123 new tests in 2 files (journal-graph.test.js: 105 tests covering deterministic helpers, node contract tests, graph structure; prompts.test.js: 18 tests covering prompt branching and guidelines). Coverage: journal-graph.js 99.4%/90%/100% (stmt/branch/func), all prompt modules 100%. Total suite: 320 tests, all passing. Documented LLM testing pattern in project CLAUDE.md.
 
 ## References
 
