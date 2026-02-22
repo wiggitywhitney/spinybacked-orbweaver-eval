@@ -89,9 +89,10 @@ describe('getCommitData', () => {
   it('excludes journal entries from diff', async () => {
     const data = await getCommitData('HEAD');
 
-    // Diff should not contain journal/entries/ paths
+    // Diff file headers should not include journal/entries/ paths
+    // (anchor to line start so content *mentioning* journal paths doesn't false-positive)
     if (data.diff) {
-      expect(data.diff).not.toMatch(/diff --git a\/journal\/entries\//);
+      expect(data.diff).not.toMatch(/^diff --git a\/journal\/entries\//m);
     }
   });
 

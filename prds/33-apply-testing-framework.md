@@ -29,9 +29,9 @@ Key decisions this PRD must make:
 - [x] Tests exist for non-LLM modules (collectors, context integration, journal manager, filtering)
 - [x] LLM testing strategy decided and implemented (at minimum: contract tests or snapshot tests for AI generation)
 - [x] `npm test` runs all tests and reports coverage
-- [ ] CI pipeline runs tests on every PR via GitHub Actions
+- [x] CI pipeline runs tests on every PR via GitHub Actions
 - [x] Shared `/verify` skill from PRD #25 works in this repo
-- [ ] CodeRabbit + CI + tests all gate PRs before merge
+- [x] CodeRabbit + CI + tests all gate PRs before merge
 
 ## Milestones
 
@@ -78,13 +78,13 @@ Decide and implement a strategy for testing the AI generation pipeline:
 ---
 
 ### Milestone 4: CI Pipeline
-**Status**: Not Started
+**Status**: Complete
 
-- [ ] Create GitHub Actions workflow for PRs
-- [ ] Run: build, lint (if applicable), tests with coverage
-- [ ] Block merge on test failure
-- [ ] Keep workflow fast (target: under 5 minutes)
-- [ ] Integrate with existing CodeRabbit review workflow
+- [x] Create GitHub Actions workflow for PRs
+- [x] Run: build, lint (if applicable), tests with coverage
+- [x] Block merge on test failure
+- [x] Keep workflow fast (target: under 5 minutes)
+- [x] Integrate with existing CodeRabbit review workflow
 
 Note: This absorbs PRD #23 (CI/CD Pipeline) scope for this repo.
 
@@ -127,6 +127,7 @@ Note: This absorbs PRD #23 (CI/CD Pipeline) scope for this repo.
 - **2026-02-21**: Milestone 1 complete — Vitest 4.0.18 installed with ESM config, coverage via @vitest/coverage-v8, smoke test on `isSafeGitRef` (10 tests passing), `/verify` skill globally available and auto-detecting project
 - **2026-02-21**: Milestone 2 complete — 197 tests across 9 test files, all passing. Coverage for target modules: filters 97%/93%/100%/99% (stmt/branch/func/lines), git-collector 95%/78%/100%/95%, claude-collector 72%/81%/81%/70%, context-integrator 69%/48%/67%/69% (pure functions tested; orchestration deferred to M5), journal-manager 94%/84%/100%/94%, journal-paths 100%/100%/100%/100%. All deterministic logic exceeds 80% coverage target.
 - **2026-02-22**: Milestone 3 complete — Contract test strategy chosen: mock `@langchain/anthropic` via `vi.mock` class, unit test deterministic helpers directly. 123 new tests in 2 files (journal-graph.test.js: 105 tests covering deterministic helpers, node contract tests, graph structure; prompts.test.js: 18 tests covering prompt branching and guidelines). Coverage: journal-graph.js 99.4%/90%/100% (stmt/branch/func), all prompt modules 100%. Total suite: 320 tests, all passing. Documented LLM testing pattern in project CLAUDE.md.
+- **2026-02-22**: Milestone 4 complete — GitHub Actions CI workflow (`.github/workflows/ci.yml`) runs `npm run test:coverage` on Node 18/20/22 matrix for all PRs to main. Branch protection enabled: requires all 3 CI checks to pass (strict mode), PRs required. CodeRabbit runs alongside as GitHub App. npm cache for fast installs. Fixed pre-existing git-collector.test.js false-positive (anchored journal-entries regex to diff headers).
 
 ## References
 
