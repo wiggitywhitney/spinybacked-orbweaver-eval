@@ -37,7 +37,7 @@ journal/
     ├── daily/
     │   └── YYYY-MM-DD.md
     ├── weekly/
-    │   └── YYYY-Www.md     (ISO week number)
+    │   └── YYYY-Www.md     (ISO week-year + week number, e.g., 2026-W01)
     └── monthly/
         └── YYYY-MM.md
 ```
@@ -88,7 +88,7 @@ Provide a CLI command for generating summaries on demand — useful for historic
 
 **What's included**:
 - [ ] CLI subcommand: `npx commit-story summarize [date|date-range] [--force]`
-- [ ] Date range support: `npx commit-story summarize 2026-02-01..2026-02-15`
+- [ ] Date range support (inclusive endpoints, reversed ranges normalized to ascending): `npx commit-story summarize 2026-02-01..2026-02-15`
 - [ ] Single date: `npx commit-story summarize 2026-02-22`
 - [ ] `--force` flag to regenerate existing summaries
 - [ ] Progress indicator for multi-day backfill operations
@@ -102,7 +102,7 @@ Provide a CLI command for generating summaries on demand — useful for historic
 ### Milestone 4: Weekly Summaries
 **Status**: Not Started
 
-Weekly rollups that consolidate daily summaries into a higher-level narrative. Uses ISO week numbers for consistency.
+Weekly rollups that consolidate daily summaries into a higher-level narrative. Uses ISO week-year + week numbers for consistency (note: ISO week-year can differ from calendar year near boundaries, e.g., 2019-12-30 is in ISO week 2020-W01).
 
 **What's included**:
 - [ ] `src/generators/prompts/sections/weekly-summary-prompt.js` — prompt for weekly consolidation
