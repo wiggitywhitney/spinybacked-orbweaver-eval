@@ -1,8 +1,8 @@
 # Telemetry Agent Specification
 
-**Status:** Draft v3.2
+**Status:** Draft v3.3
 **Created:** 2026-02-05
-**Updated:** 2026-02-21
+**Updated:** 2026-02-23
 **Purpose:** AI agent that auto-instruments TypeScript code with OpenTelemetry based on a Weaver schema
 
 ## Revision History
@@ -14,6 +14,7 @@
 | v3 | 2026-02-07 | **Instrumentation model:** Replaced hardcoded span caps with priority-based hierarchy and review sensitivity. Restored rich LibraryRequirement objects. Added cost visibility. **Interfaces:** Moved CLI and GitHub Action to PoC scope. Added Coordinator programmatic API with progress callbacks. **Execution:** Added dry run mode, exclude patterns, config validation (Zod). **Result enrichment:** Added per-file agent notes, schema hash tracking, agent version tagging. **Spec hygiene:** Moved testCommand env note to Configuration. Added technical explanation for uncovered async patterns. Added RS2 (Weaver Integration Approach) and renumbered fix loop design to RS3; replaced "start with CLI" implementation-time decision with research spike. |
 | v3.1 | 2026-02-16 | **Cost visibility:** Redesigned pre-run cost from post-hoc PR-only to configurable pre-run confirmation step. Renamed from "estimate" to "ceiling" — without historical data, these are ceilings not estimates. Simplified `CostCeiling` cost metric to single `maxTokensCeiling` field (retains `fileCount` and `totalFileSizeBytes` for context; tighter ceilings are future work). Added `onCostCeilingReady` callback, `confirmEstimate` config option (CLI only), CLI `--yes`/`-y` flag, exit code 3 (user abort), and dry run prompt guidance. **MCP:** Added `get-cost-ceiling` tool to handle confirmation at the tool boundary (MCP tools are request-response, can't pause mid-call). Token usage estimation and tighter ceilings added to Out of Scope (Future). Ceiling still appears in PR summary alongside actuals. **Correctness:** Added explicit schema re-resolution between files (agents must see prior agents' extensions). Clarified checkpoint failure behavior: stop processing but still create PR with partial results. Added dry run skips periodic checkpoints. **Precision:** Specified `maxTokensPerFile` enforcement mechanism (Coordinator sums API response metadata). Added schema hash canonicalization requirement. Added squash merge guidance for per-file commits. |
 | v3.2 | 2026-02-21 | **Dependency strategy:** Added `dependencyStrategy` config field (set during init). Services use `dependencies`; distributable packages use `peerDependencies`. `@opentelemetry/api` is always a peerDependency per OTel JS contrib GUIDELINES.md — multiple instances cause silent trace loss. Init phase now detects project type and records the strategy. Coordinator respects strategy during bulk install. |
+| v3.3 | 2026-02-23 | **Prompt engineering:** Completed RS1 research spike; moved conclusions into spec. Agent outputs full file replacement (not diffs), justified on architectural simplicity and documented fragility of diff application logic. Added system prompt structure guidance (role → schema → rules → 3-5 examples → file → format spec) per Anthropic's Claude 4.x best practices. Added Claude 4.x prompt hygiene section (remove anti-laziness directives, use `effort` parameter, frame output completeness as format spec). Added elision detection as Coordinator pre-validation step. Added `largeFileThresholdLines` config. Added known failure modes table with mitigations. Removed RS1 from pre-implementation research spikes (two remain: RS2, RS3). |
 
 ---
 
@@ -36,20 +37,7 @@ That verification loop is what makes this approach trustworthy enough to run aut
 
 ## Pre-Implementation Research Spikes
 
-Before implementation begins, three research spikes are required. These are timeboxed investigations whose output is documentation, not code. The implementing agent must complete these before writing any agent logic.
-
-### RS1: Prompt Engineering for Code Transformation
-
-**Goal:** Understand what makes LLM prompts reliable for source code modification — not just generation, but transformation of existing code while preserving semantics.
-
-**Deliverable:** A document covering:
-- What prompt structures produce correct code transformations (examples, output format constraints, chain-of-thought vs. direct output)
-- Common failure modes when LLMs modify existing code (lost context, incomplete edits, hallucinated imports)
-- How to structure the "instrumented file" output so it's complete and unambiguous
-- Whether the agent should output a full file replacement or a diff/patch
-- Findings from any published research or practitioner experience on LLM-based code transformation
-
-**Scope:** Focus on TypeScript instrumentation specifically. Evaluate against the patterns in this spec (wrapping functions with spans, adding imports, try/catch/finally blocks).
+Before implementation begins, two research spikes are required. These are timeboxed investigations whose output is documentation, not code. The implementing agent must complete these before writing any agent logic. (RS1 — prompt engineering for code transformation — has been completed; its conclusions are embedded in the Agent Output Format, System Prompt Structure, and Elision Detection sections below.)
 
 ### RS2: Weaver Integration Capabilities
 
@@ -103,6 +91,7 @@ The system has a **Coordinator** (deterministic script) that manages workflow an
   - **Periodic schema checkpoints** (Weaver validation every N files)
   - **Aggregate library requirements** from all agents and perform single SDK init file write
   - **Bulk dependency installation** (`npm install` for all discovered libraries, respecting `dependencyStrategy` for package.json placement)
+  - **Elision detection** on agent output before validation (scan for placeholder patterns; flag output significantly shorter than input) — see Elision Detection section
   - Run end-of-run validation (Weaver live-check)
   - Assemble PR with summary (including per-file span category breakdown, review sensitivity annotations, agent notes, and token usage data)
 - **Why not AI:** These are mechanical tasks that don't need intelligence
@@ -365,6 +354,74 @@ Before instrumentation can begin, user must run `telemetry-agent init`. This is 
 ### Output
 - Single PR with all changes (code + schema updates + SDK init + package.json)
 - Validation results rendered in PR description
+
+### Agent Output Format
+
+The Instrumentation Agent outputs a **complete file replacement** — the entire instrumented TypeScript file, not a diff or patch.
+
+**Why full file replacement:**
+- **Architectural simplicity.** The Coordinator doesn't need diff-apply logic. The agent returns a complete file; the Coordinator writes it to disk. No fuzzy matching, no hunk location, no progressive fallback strategies. Fabian Hertwig's "Code Surgery" analysis (April 2025) documents the fragility of diff application across Codex, Aider, OpenHands, RooCode, and Cursor — every system implements elaborate recovery logic specifically because diffs break. Full file replacement eliminates this entire class of problems from the Coordinator.
+- **Single-file scope.** Each agent processes one file with full context. Token overhead of full file output (~200-1000 extra tokens for typical service files of 50-300 lines) is negligible relative to the system prompt + schema context that dominates each call.
+- **Elision is trivially detectable.** Full file output makes lazy elision (placeholder comments like `// ... rest of code`) easy to catch with simple string matching — see Elision Detection below.
+- **Acceptable trade-off for our use case.** Aider's benchmarks show diff-based formats achieve higher task success rates for general coding tasks with capable models. However, those benchmarks measure iterative, multi-turn conversational editing — a different use case than our single-pass, schema-constrained transformation with a validation loop. The simplicity and reliability of full file replacement outweigh the token efficiency of diffs for our architecture.
+
+**Note on Aider benchmarks:** Aider's edit format leaderboard shows diff formats outperforming the "whole" format on task success rate. Aider's docs describe "whole" as "the easiest for an LLM to use" (high format compliance) but not the highest-performing. We choose full file replacement for architectural reasons (no diff-apply logic needed), not because benchmarks show it's superior.
+
+**Large file handling:** Files exceeding `largeFileThresholdLines` (default: 500) trigger a warning in the agent's `notes` field. The Coordinator surfaces this in the PR summary. Large files are more prone to truncation and quality degradation — the `maxTokensPerFile` ceiling already accounts for full-file output, but files above this threshold warrant reviewer attention.
+
+### System Prompt Structure
+
+The Instrumentation Agent's system prompt follows a specific structure optimized for Claude's instruction-following behavior. Anthropic's Claude 4.x best practices documentation states these models "have been trained for more precise instruction following than previous generations" and "pay close attention to details and examples."
+
+**Prompt sections (in order):**
+1. **Role and constraints** — Defines the agent as a TypeScript instrumentation engineer implementing a Weaver schema contract. Includes explicit prohibitions as output format specifications (see Claude 4.x Prompt Hygiene below).
+2. **Schema contract** — The full resolved Weaver schema. This is the source of truth for span names, attributes, and semantic conventions.
+3. **Transformation rules** — Enumerated rules for the OTel instrumentation pattern: `tracer.startActiveSpan()` wrapping, try/catch/finally with `span.end()` in finally, `span.recordException()` + `setStatus()` on errors.
+4. **3-5 diverse examples** — Concrete TypeScript before/after pairs demonstrating the transformation pattern. Per Anthropic's multishot prompting guidance: "Include 3-5 diverse, relevant examples. More examples = better performance, especially for complex tasks." Examples should cover:
+   - A basic function instrumentation (happy path)
+   - An async function with existing try/catch
+   - A function that should be **skipped** (already instrumented)
+   - A function with variable names that would shadow `span`/`tracer`
+   - (Optional) A file where the agent records a library need instead of adding manual spans
+5. **Source file** — The complete file to instrument.
+6. **Output format specification** — "Return ONLY the complete instrumented TypeScript file. No markdown fences, no explanations, no partial output. Files containing placeholder comments (`// ...`, `// existing code`, `// rest of function`) will be rejected by validation."
+7. **Trace context** — Trace ID + parent span ID (operational metadata).
+
+**Claude 4.x Prompt Hygiene:**
+
+Anthropic's Claude 4.x best practices document several behaviors that directly affect the agent's system prompt design:
+
+- **Remove anti-laziness directives.** Instructions like "be thorough," "write COMPLETE code," or "do not be lazy" were workarounds for earlier models. On Claude 4.6, these "amplify the model's already-proactive behavior and can cause runaway thinking or write-then-rewrite loops." Instead, frame output completeness as a **format specification**: "Output format: complete TypeScript source file. Files containing placeholder comments will fail validation." This is a technical constraint, not a motivational nudge.
+- **Use the `effort` API parameter** as the primary control lever for thinking depth, rather than prompt-based workarounds. Specify which effort level to use in the agent config.
+- **Do not include chain-of-thought or thoroughness instructions** for the transformation itself. On Claude 4.6, these are unnecessary and can trigger runaway thinking or rewrite loops. The transformation rules are specific enough for direct output.
+- **Soften tool-use language** if MCP tools are exposed to the agent. Replace "You MUST use [tool]" with "Use [tool] when it would enhance your understanding." Claude 4.x models are more responsive to system prompts and may overtrigger on aggressive language.
+- **Guard against overengineering.** Claude 4.6 tends to create extra files and unnecessary abstractions. The system prompt should clearly state: "Your ONLY job is to add instrumentation. Do not refactor, rename, or restructure existing code."
+
+**What does benefit from reasoning:** The agent's *analysis* of which functions to instrument and which to skip benefits from internal reasoning. This should surface through the structured result fields (`notes`, `span_categories`) rather than chain-of-thought in the generated code.
+
+### Known Failure Modes
+
+Common failure modes for LLM-based code transformation, drawn from academic research and practitioner experience. The system prompt must include negative constraints for each, and the validation chain must catch them.
+
+| Failure Mode | Frequency | Mitigation |
+|---|---|---|
+| **Mis-typed API calls** — incorrect method signatures, wrong parameter types, non-existent API parameters | Most common (55% of knowledge-conflicting hallucinations per FORGE '26 study by Khati et al.) | Weaver static validation catches schema violations. Syntax checking catches type errors. System prompt specifies exact API patterns in transformation rules. |
+| **Hallucinated imports** — inventing packages or APIs that don't exist | Common (24% of hallucinations per FORGE '26) | Allowlist-first library discovery (already in spec). System prompt: imports must come from schema or allowlist. Post-transformation syntax check catches nonexistent imports. |
+| **Incomplete edits / truncation** — dropping functions, losing code at end of file | Common with large files | Full file output + Coordinator elision detection (see below). `largeFileThresholdLines` warning for files >500 lines. |
+| **Lost semantics** — subtly changing business logic while adding instrumentation | Moderate | System prompt (framed as format spec): "Your ONLY job is to add instrumentation. Do not refactor, rename, or restructure." Lint + test validation catches behavioral changes. |
+| **Lazy code / elision** — `// ... rest of the function` placeholder comments | Common (documented in Aider's laziness benchmarks; less frequent with Claude than GPT-4 Turbo) | System prompt: output format spec states placeholder comments fail validation. Coordinator elision detection scans for patterns before accepting output. |
+| **Incorrect span nesting / missing span.end()** — resource leaks | Moderate | Before/after examples demonstrate correct try/catch/finally pattern. Weaver static validation catches schema violations. |
+| **Variable shadowing** — introducing `span` where a local `span` already exists | Uncommon but insidious | ts-morph scope analysis (already in spec). System prompt reminds agent to check. |
+
+**Sources:** "Detecting and Correcting Hallucinations in LLM-Generated Code via Deterministic AST Analysis" (Khati et al., FORGE '26, arxiv 2601.19106) — note: the paper is authored by researchers at William & Mary, not Microsoft/GitHub. "Prompting LLMs for Code Editing: Struggles and Remedies" (Nam et al., Google, April 2025, arxiv 2504.20196) — identifies five categories of missing information that cause incorrect edits (specifics, operationalization plan, scope/localization, codebase context, output format). Aider laziness benchmarks (aider.chat) — 89-task refactoring benchmark measuring code elision.
+
+### Elision Detection
+
+Full file output introduces a specific risk: the model may output a "complete" file that's actually truncated or contains lazy placeholder comments. The Coordinator performs a pre-validation check before running the syntax/lint/Weaver chain:
+
+1. **Pattern scan** — Scan output for common elision patterns: `// ...`, `// existing code`, `// rest of`, `/* ... */`, `// TODO: original code`
+2. **Length comparison** — Compare output line count to input line count. If output is <80% of input lines and spans were supposedly added, flag for rejection.
+3. **Action** — If elision is detected, reject the output and retry (counts toward the file's `maxFixAttempts`). This is cheap (string matching, no AST needed) and catches the most common full-file output failure mode.
 
 ---
 
@@ -744,13 +801,15 @@ Validation stays in the Instrumentation Agent so it can fix what it breaks. The 
 
 ### Per-File Validation (with fix loops)
 
+**Pre-validation (Coordinator, no LLM):** Before running syntax/lint/Weaver validation, the Coordinator performs elision detection on the agent's output — scanning for placeholder patterns (`// ...`, `// existing code`, `// rest of`, `/* ... */`) and comparing output length to input length. If the output is <80% of input lines and spans were added, or if elision patterns are found, the Coordinator rejects the output and retries (counts toward the file's `maxFixAttempts`). This catches the most common full-file output failure mode without an LLM call. See Elision Detection section for details.
+
 Each check runs in a loop: validate → fix errors → retry until clean or max attempts reached.
 
 1. **Syntax** — TypeScript compiler / ts-morph (code must compile)
 2. **Lint** — Prettier/ESLint (code must be properly formatted)
 3. **Weaver registry check** — static schema validation
 
-Order matters: syntax first (must compile), then lint, then schema.
+Order matters: elision detection first (cheapest), then syntax (must compile), then lint, then schema.
 
 **Fix loop limits:** The agent retries up to `maxFixAttempts` (default: 3) per validation stage. If the agent cannot produce clean code within the limit, it returns a `"failed"` status and the Coordinator reverts the file. The `maxTokensPerFile` budget (default: 50,000) provides a hard ceiling on total token usage per file across all attempts. The Coordinator enforces this by summing `gen_ai.usage.input_tokens` and `gen_ai.usage.output_tokens` from each API call's response metadata during the fix loop. If cumulative usage exceeds the budget, the Coordinator stops retries and treats the file as failed, regardless of remaining `maxFixAttempts`.
 
@@ -926,7 +985,7 @@ The `notes` field lets the agent explain judgment calls — e.g., "skipped proce
 
 Schema hashes let the Coordinator trace exactly which agent introduced a schema change. If end-of-run Weaver validation fails, the Coordinator can identify the file whose schema modification caused the failure by comparing hashes across the result sequence. This is a cheap diagnostic — just a fast hash of the resolved schema JSON — not a full diff. The hash should be computed on canonicalized JSON (sorted keys, no whitespace) to avoid spurious differences from non-deterministic key ordering in Weaver's output.
 
-The `agentVersion` field tracks which version of the agent (or system prompt) produced each result. During prompt iteration — especially during the RS1 research spike — this lets you compare results across prompt versions and identify which changes improved or degraded output quality. Even a manually-bumped string (e.g., "v0.3-prompt-experiment") is useful. The Coordinator includes the agent version in the PR description.
+The `agentVersion` field tracks which version of the agent (or system prompt) produced each result. During prompt iteration — this lets you compare results across prompt versions and identify which changes improved or degraded output quality. Even a manually-bumped string (e.g., "v0.3-prompt-experiment") is useful. The Coordinator includes the agent version in the PR description.
 
 Success example:
 ```json
@@ -1011,6 +1070,7 @@ dependencyStrategy: dependencies  # dependencies (services) | peerDependencies (
 maxFilesPerRun: 50             # Cost/time guardrail, user adjustable
 maxFixAttempts: 3              # Max validation retry attempts per file before reverting
 maxTokensPerFile: 50000        # Token budget ceiling per file (all fix attempts combined)
+largeFileThresholdLines: 500   # Files above this trigger a warning in agent notes (prone to truncation)
 schemaCheckpointInterval: 5    # Run schema validation checkpoint after every N files
 
 # Review
@@ -1041,7 +1101,7 @@ exclude:                        # Glob patterns to skip
 | Test command | Attribute definitions |
 | Agent behavior settings | Span definitions |
 | Dependency strategy | |
-| Limits and guardrails | |
+| Limits and guardrails (including `largeFileThresholdLines`) | |
 | Review sensitivity | |
 | Execution mode (dry run) | |
 | Cost ceiling confirmation | |
@@ -1302,7 +1362,8 @@ Four levers:
 
 **Prerequisites and setup:**
 - Assumes target codebase already has OTel API and SDK installed, initialized, and a valid Weaver schema in place
-- Pre-implementation research spikes (RS1: prompt engineering, RS2: Weaver integration approach, RS3: fix loop design)
+- Prompt engineering conclusions embedded in spec (agent output format, system prompt structure, elision detection, known failure modes)
+- Pre-implementation research spikes (RS2: Weaver integration capabilities, RS3: fix loop design)
 - Mandatory init phase with prerequisite verification and SDK init file path recording
 - Config validation (Zod schema)
 
@@ -1397,3 +1458,12 @@ Relevant when the agent targets codebases that don't already have OTel installed
 - [OpenTelemetry Weaver](https://github.com/open-telemetry/weaver)
 - [ts-morph](https://ts-morph.com/)
 - [Anthropic TypeScript SDK](https://github.com/anthropics/anthropic-sdk-typescript)
+
+### RS1 Research Sources (verified February 2026)
+- [Anthropic Claude 4.x prompting best practices](https://docs.anthropic.com/en/docs/build-with-claude/prompt-engineering/claude-4-best-practices)
+- [Aider edit format leaderboard](https://aider.chat/docs/leaderboards/edit.html) and [laziness benchmarks](https://aider.chat/2023/12/21/unified-diffs.html)
+- ["Code Surgery: How AI Assistants Make Precise Edits" (Hertwig, April 2025)](https://fabianhertwig.com/blog/coding-assistants-file-edits/)
+- ["Prompting LLMs for Code Editing" (Nam et al., Google, April 2025)](https://arxiv.org/abs/2504.20196)
+- ["Detecting and Correcting Hallucinations in LLM-Generated Code" (Khati et al., FORGE '26)](https://arxiv.org/abs/2601.19106)
+- [Cursor speculative edits architecture](https://blog.sshh.io/p/how-cursor-ai-ide-works)
+- ["My LLM Coding Workflow going into 2026" (Osmani, January 2026)](https://addyosmani.com/blog/ai-coding-workflow/)
