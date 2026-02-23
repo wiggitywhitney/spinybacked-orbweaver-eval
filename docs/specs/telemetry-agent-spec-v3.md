@@ -1,8 +1,8 @@
 # Telemetry Agent Specification
 
-**Status:** Draft v3.2
+**Status:** Draft v3.5
 **Created:** 2026-02-05
-**Updated:** 2026-02-21
+**Updated:** 2026-02-23
 **Purpose:** AI agent that auto-instruments TypeScript code with OpenTelemetry based on a Weaver schema
 
 ## Revision History
@@ -14,6 +14,10 @@
 | v3 | 2026-02-07 | **Instrumentation model:** Replaced hardcoded span caps with priority-based hierarchy and review sensitivity. Restored rich LibraryRequirement objects. Added cost visibility. **Interfaces:** Moved CLI and GitHub Action to PoC scope. Added Coordinator programmatic API with progress callbacks. **Execution:** Added dry run mode, exclude patterns, config validation (Zod). **Result enrichment:** Added per-file agent notes, schema hash tracking, agent version tagging. **Spec hygiene:** Moved testCommand env note to Configuration. Added technical explanation for uncovered async patterns. Added RS2 (Weaver Integration Approach) and renumbered fix loop design to RS3; replaced "start with CLI" implementation-time decision with research spike. |
 | v3.1 | 2026-02-16 | **Cost visibility:** Redesigned pre-run cost from post-hoc PR-only to configurable pre-run confirmation step. Renamed from "estimate" to "ceiling" — without historical data, these are ceilings not estimates. Simplified `CostCeiling` cost metric to single `maxTokensCeiling` field (retains `fileCount` and `totalFileSizeBytes` for context; tighter ceilings are future work). Added `onCostCeilingReady` callback, `confirmEstimate` config option (CLI only), CLI `--yes`/`-y` flag, exit code 3 (user abort), and dry run prompt guidance. **MCP:** Added `get-cost-ceiling` tool to handle confirmation at the tool boundary (MCP tools are request-response, can't pause mid-call). Token usage estimation and tighter ceilings added to Out of Scope (Future). Ceiling still appears in PR summary alongside actuals. **Correctness:** Added explicit schema re-resolution between files (agents must see prior agents' extensions). Clarified checkpoint failure behavior: stop processing but still create PR with partial results. Added dry run skips periodic checkpoints. **Precision:** Specified `maxTokensPerFile` enforcement mechanism (Coordinator sums API response metadata). Added schema hash canonicalization requirement. Added squash merge guidance for per-file commits. |
 | v3.2 | 2026-02-21 | **Dependency strategy:** Added `dependencyStrategy` config field (set during init). Services use `dependencies`; distributable packages use `peerDependencies`. `@opentelemetry/api` is always a peerDependency per OTel JS contrib GUIDELINES.md — multiple instances cause silent trace loss. Init phase now detects project type and records the strategy. Coordinator respects strategy during bulk install. |
+| v3.3 | 2026-02-23 | **Prompt engineering:** Completed RS1 research spike; moved conclusions into spec. Agent outputs full file replacement (not diffs), justified on architectural simplicity and documented fragility of diff application logic. Added system prompt structure guidance (role → schema → rules → 3-5 examples → file → format spec) per Anthropic's Claude 4.x best practices. Added Claude 4.x prompt hygiene section (remove anti-laziness directives, use `effort` parameter, frame output completeness as format spec). Added elision detection as Coordinator pre-validation step. Added `largeFileThresholdLines` config. Added known failure modes table with mitigations. Removed RS1 from pre-implementation research spikes (two remain: RS2, RS3). |
+| v3.4 | 2026-02-23 | **Weaver integration:** Completed RS2 research spike; moved conclusions into spec. PoC uses Weaver CLI for all operations (`check`, `resolve`, `diff`, `live-check`). MCP server (v0.21.2, experimental) documented but deferred to post-PoC — schema-changes-between-files invalidates in-memory registry, and MCP lacks `check`/`diff`/`resolve` equivalents. Added Weaver Integration Approach section with CLI operations table, registry directory snapshot strategy for `--baseline-registry`, and post-PoC optimization path. Documented `weaver registry search` CLI deprecation (v0.20.0). Added diff output limitations (`updated` change type not yet implemented; `uncategorized` catch-all exists). Removed RS2 from pre-implementation research spikes (one remains: RS3). |
+| v3.4.1 | 2026-02-23 | **Weaver version pinning:** Added `weaverMinVersion` config field and init-time version check — the spec references version-dependent behavior (v0.20.0 search deprecation, v0.21.2 MCP server, diff limitations) without previously ensuring the correct version is present. Init now runs `weaver --version` and aborts if below minimum. **Diff network call note:** Documented that `weaver registry diff` may trigger network calls to fetch the semconv dependency referenced in the baseline's `registry_manifest.yaml`, since `cp -r` copies the manifest URL reference, not resolved data. |
+| v3.5 | 2026-02-23 | **Fix loop design:** Completed RS3 research spike; moved conclusions into spec. Replaced per-stage retry loops with single-pass validation chain per attempt. Introduced 3-attempt hybrid strategy: initial generation → multi-turn fix → fresh regeneration. Multi-turn preserves context for simple errors; fresh regeneration avoids oscillation for stuck agents (supported by Olausson et al. ICLR 2024 finding that diverse initial samples outperform deep repair). Added diff-based lint checking — only agent-introduced errors trigger fixes, following SWE-agent's approach. Added error-count monotonicity and duplicate error detection as early-exit heuristics. Derived `maxFixAttempts: 2` from research (Olausson et al. found 1 repair attempt is the cost-effective sweet spot; our external validation feedback justifies one extra; Aider's hardcoded 3 reflections is the upper bound from practice). Derived `maxTokensPerFile: 80000` from per-call token estimates (~37K worst-case for 3 attempts on a 500-line file, 2× headroom). Added `validation_attempts`, `validation_strategy_used`, and `error_progression` to FileResult. Confirmed MCP `live_check` deferral to post-PoC — would require synthetic sample construction from AST, not justified when CLI `check` + end-of-run `live-check` cover structural and semantic validation respectively. Removed RS3 from pre-implementation research spikes (none remain). |
 
 ---
 
@@ -36,53 +40,11 @@ That verification loop is what makes this approach trustworthy enough to run aut
 
 ## Pre-Implementation Research Spikes
 
-Before implementation begins, three research spikes are required. These are timeboxed investigations whose output is documentation, not code. The implementing agent must complete these before writing any agent logic.
+All three research spikes are complete. Their conclusions are embedded throughout the spec:
 
-### RS1: Prompt Engineering for Code Transformation
-
-**Goal:** Understand what makes LLM prompts reliable for source code modification — not just generation, but transformation of existing code while preserving semantics.
-
-**Deliverable:** A document covering:
-- What prompt structures produce correct code transformations (examples, output format constraints, chain-of-thought vs. direct output)
-- Common failure modes when LLMs modify existing code (lost context, incomplete edits, hallucinated imports)
-- How to structure the "instrumented file" output so it's complete and unambiguous
-- Whether the agent should output a full file replacement or a diff/patch
-- Findings from any published research or practitioner experience on LLM-based code transformation
-
-**Scope:** Focus on TypeScript instrumentation specifically. Evaluate against the patterns in this spec (wrapping functions with spans, adding imports, try/catch/finally blocks).
-
-### RS2: Weaver Integration Capabilities
-
-**Goal:** Map the capabilities, constraints, and integration characteristics of Weaver CLI and the Weaver MCP server. This spike produces a capability matrix that RS3 consumes when designing the validation loop — it does not make an integration recommendation. The integration decision belongs in RS3, where the actual validation needs are understood.
-
-**Deliverable:** A document covering:
-- Capability comparison: what each approach can and can't do (notably: the MCP server provides fuzzy search with relevance scoring that has no CLI equivalent, and ad-hoc `live_check` that accepts JSON samples per call rather than requiring an OTLP stream)
-- Architectural implications: the Coordinator would need to maintain an MCP client connection to Weaver alongside its own MCP server for Claude Code — evaluate whether this adds meaningful complexity or is straightforward
-- Performance characteristics: the MCP server resolves the registry once into memory with indexed data structures; the CLI re-loads and re-resolves on every call. Quantify the impact for a typical run (periodic checkpoints, per-file fix loops with up to 3 retries each, 50-file runs)
-- What the MCP server's ad-hoc `live_check` (per-call JSON sample validation) makes possible — document its capabilities so RS3 can evaluate whether per-file runtime validation changes the fix loop structure
-- Whether fuzzy search improves the agent's ability to discover semconv attributes during the attribute priority chain (step 1: check OTel semantic conventions)
-- Whether `weaver registry diff --baseline-registry` accepts the output of `weaver registry resolve` as its baseline input, or requires a copy of the source registry directory. This affects the Coordinator's snapshot strategy for periodic checkpoints, dry run output, and PR summary generation — all three features depend on this command.
-
-**Context:** Weaver v0.21.2 introduced `weaver registry mcp` — an MCP server that imports Weaver's internal Rust crates directly, loads and resolves the entire registry into memory once at startup, and serves 7 tools: `search` (fuzzy text search with relevance scoring), `get_attribute`, `get_metric`, `get_span`, `get_event`, `get_entity` (O(1) lookups from in-memory indexes), and `live_check` (validates telemetry samples against the registry through Weaver's full advisor pipeline). Weaver v0.21.2 also added `weaver serve` (REST API + web UI) which could help during development/debugging.
-
-**Scope:** Focus on PoC needs. Document what's available without bias toward any particular integration approach — the findings should stand on their own so RS3 can make an informed design decision.
-
-### RS3: Validation/Fix Loop Design
-
-**Goal:** Understand how existing AI coding tools handle the "generate → validate → fix → retry" cycle, design the fix loop mechanics for this agent, and determine the Weaver integration approach based on what the fix loop actually needs.
-
-**Deliverable:** A document covering:
-- How tools like Cursor, Aider, Claude Code, and similar handle iterative code correction
-- What context to include in fix-loop prompts (full file? just the error? original + current?)
-- How to prevent the agent from oscillating between different broken states
-- Recommended max retry counts and when to bail out
-- How to combine multi-turn conversations and fresh API calls within the fix loop (not either/or — evaluate when preserving context helps vs when resetting prevents oscillation)
-- Concrete fix loop design recommendation for this agent
-- Based on the fix loop design and the RS2 capability matrix, determine which Weaver integration points the validation loop needs — this produces the Weaver integration recommendation (CLI, MCP, or both) grounded in actual validation requirements
-
-**Implementation-time decision:** The fix loop is not a binary choice between multi-turn conversations and separate API calls — it's a question of when to use each. Multi-turn preserves what the agent tried (valuable for iterating on a specific error), while fresh calls prevent context bloat and oscillation (valuable when the agent is stuck). RS3 should evaluate hybrid strategies: e.g., multi-turn within a validation stage, fresh calls between stages; or multi-turn for the first N retries, then reset to a fresh call if the agent is oscillating.
-
-**Scope:** Focus on the per-file validation chain (syntax → lint → Weaver). The end-of-run validation is separate and doesn't involve fix loops.
+- **RS1 (Prompt Engineering):** Agent output format, system prompt structure, elision detection, known failure modes. See the Agent Output Format, System Prompt Structure, and Elision Detection sections.
+- **RS2 (Weaver Integration):** CLI for all PoC operations, MCP deferred to post-PoC. See the Weaver Integration Approach section.
+- **RS3 (Validation/Fix Loop Design):** Hybrid 3-attempt strategy (initial → multi-turn fix → fresh regeneration), single-pass validation chain, diff-based lint checking, oscillation detection. See the Per-File Validation section.
 
 ---
 
@@ -103,6 +65,7 @@ The system has a **Coordinator** (deterministic script) that manages workflow an
   - **Periodic schema checkpoints** (Weaver validation every N files)
   - **Aggregate library requirements** from all agents and perform single SDK init file write
   - **Bulk dependency installation** (`npm install` for all discovered libraries, respecting `dependencyStrategy` for package.json placement)
+  - **Elision detection** on agent output before validation (scan for placeholder patterns; flag output significantly shorter than input) — see Elision Detection section
   - Run end-of-run validation (Weaver live-check)
   - Assemble PR with summary (including per-file span category breakdown, review sensitivity annotations, agent notes, and token usage data)
 - **Why not AI:** These are mechanical tasks that don't need intelligence
@@ -167,7 +130,7 @@ The Coordinator classifies errors into three categories based on whether subsequ
 | Config validation failure | Nothing can run with bad config |
 | Can't create feature branch (git error) | No place to commit results |
 | Invalid or missing API key | Agent calls will all fail |
-| Weaver binary not found | No schema validation possible |
+| Weaver binary not found or below `weaverMinVersion` | No schema validation possible; version-dependent CLI behavior may differ |
 | Schema validation fails during startup (before any files processed) | Starting schema is broken; agent extensions will compound the problem |
 
 **Degrade and continue** (isolated failure — the run can still produce useful output):
@@ -219,9 +182,9 @@ An `action.yml` that runs the CLI in a GitHub Actions runner. Setup steps: `acti
 | Component | Technology | Rationale |
 |-----------|------------|-----------|
 | Coordinator | Plain TypeScript (Node.js) | Deterministic orchestration doesn't need a framework |
-| Instrumentation Agent | Direct Anthropic API via `@anthropic-ai/sdk` | Single provider, maximum control, simplest debugging |
+| Instrumentation Agent | Direct Anthropic API via `@anthropic-ai/sdk` (model configurable via `agentModel`, default: Sonnet 4.6) | Single provider, maximum control, simplest debugging |
 | AST manipulation | ts-morph | TypeScript-native, full type access, scope analysis |
-| Schema validation | Weaver CLI (with awareness of Weaver MCP server in v0.21.2) | Deterministic validation decoupled from MCP integration during PoC |
+| Schema validation | Weaver CLI (`check`, `resolve`, `diff`, `live-check`) | CLI for all PoC Weaver operations — see Weaver Integration Approach |
 | Code formatting | Prettier | Post-transformation formatting |
 | MCP interface | MCP TypeScript SDK | Thin wrapper over Coordinator |
 
@@ -229,9 +192,42 @@ An `action.yml` that runs the CLI in a GitHub Actions runner. Setup steps: `acti
 
 **Why not Vercel AI SDK:** Provider-agnostic abstraction adds a layer with no benefit when using a single provider (Claude). The direct Anthropic SDK gives the most transparent debugging experience.
 
-**Note on Weaver MCP server:** Weaver v0.21.2 introduced `weaver registry mcp` — an MCP server providing search, get, and live-check tools directly. Since the PoC architecture already uses MCP (Claude Code → MCP server → Coordinator), the agent could interact with Weaver's native MCP server for schema operations instead of shelling out to CLI commands. Weaver v0.21.2 also added `weaver serve` (REST API + web UI) which could help during development/debugging.
+**Note on Weaver MCP server:** Weaver v0.21.2 introduced `weaver registry mcp` (experimental) — an MCP server that resolves the registry into memory once and serves 7 tools: `search`, `get_attribute`, `get_metric`, `get_span`, `get_event`, `get_entity`, and `live_check`. Weaver v0.21.2 also added `weaver serve` (experimental REST API + web UI). Both are documented for post-PoC optimization — the PoC uses CLI only. See "Weaver Integration Approach" below for the full rationale.
 
-**Weaver integration approach:** Determined by the RS2 + RS3 research spikes. RS2 maps the capabilities of both the CLI (`weaver registry check`, `weaver registry resolve`, `weaver registry diff`) and the MCP server (`weaver registry mcp`, providing in-memory resolution, fuzzy search, and per-call live validation). RS3 then determines which integration points the validation loop needs, producing the final integration recommendation grounded in actual requirements.
+### Weaver Integration Approach
+
+**PoC decision: CLI only.** All Weaver operations use the CLI. The MCP server (v0.21.2, experimental) is documented for post-PoC optimization but not used in the PoC.
+
+**Why not the MCP server for PoC:**
+
+1. **Schema changes between files invalidate in-memory state.** The MCP server resolves the registry once at startup into in-memory indexed structures. Since agents extend the schema and their changes are committed after each file, the MCP server's in-memory state becomes stale after every file. The server would need to be restarted after each schema change, negating the in-memory benefit. The CLI's per-call resolution is actually the correct behavior for this use case — it always sees the latest filesystem state.
+
+2. **Missing critical operations.** The MCP server provides 7 tools (`search`, `get_attribute`, `get_metric`, `get_span`, `get_event`, `get_entity`, `live_check`) but does NOT expose `registry check` (static validation), `registry diff` (schema diffing), or `registry resolve` (full JSON resolution). These are required for periodic checkpoints, PR summaries, and agent context construction.
+
+3. **Experimental status.** Both `weaver registry mcp` and `weaver serve` are marked as experimental features in the v0.21.2 release. Building PoC infrastructure on experimental features creates upgrade risk.
+
+**CLI operations used in PoC:**
+
+| Operation | CLI Command | When Used |
+|-----------|------------|-----------|
+| Static schema validation | `weaver registry check -r <path>` | Periodic checkpoints, per-file fix loop |
+| Full schema resolution | `weaver registry resolve -r <path> -f json` | Before each file (agent context) |
+| Schema diffing | `weaver registry diff -r <current> --baseline-registry <snapshot-dir>` | Periodic checkpoints, dry run summary, PR summary |
+| Live telemetry validation | `weaver registry live-check -r <path>` | End-of-run validation (OTLP receiver) |
+
+**CLI `registry search` is deprecated** (v0.20.0) — "not compatible with V2 schema and will be removed in a future version." The agent discovers semconv attributes from the resolved schema JSON provided in its system prompt context, not via search commands.
+
+**Registry directory snapshot for diffing:** `weaver registry diff --baseline-registry` requires a registry directory as input — it does NOT accept resolved JSON from `weaver registry resolve`. The Coordinator copies the registry directory (`cp -r`) to a temporary location at the start of the run (before any agents execute). This directory copy serves as the baseline for all diff operations: periodic checkpoints, dry run summaries, and the final PR summary. **Note:** The snapshot contains `registry_manifest.yaml` with its semconv dependency URL (e.g., the GitHub zip reference). When Weaver resolves the baseline during diff, it may fetch this dependency over the network — the `cp -r` copies the URL reference, not cached resolved data. This means diff operations are not guaranteed to be fully offline. In CI environments with restricted network access, consider pre-resolving or caching the semconv dependency. If the upstream semconv changes between run-start and diff-time, the baseline could be non-deterministic; pinning the semconv version in `registry_manifest.yaml` (already the case) mitigates this.
+
+**Diff output limitations:** The diff classifies changes as `added`, `renamed`, `obsoleted`, `removed`, or `uncategorized` (a catch-all for complex or unclear changes). The `updated` change type is documented but **not yet implemented** in Weaver's diff engine — field-level comparison within top-level items is planned for future versions. The Coordinator's "reject any change type other than `added`" enforcement checks for `renamed`, `obsoleted`, `removed`, and `uncategorized`. Only top-level object presence/absence is tracked by the current diff.
+
+**Post-PoC optimization path:** The Weaver MCP server offers capabilities that could enhance future versions:
+
+- **Fuzzy search with relevance scoring** (`search` tool) — useful if the system prompt sends a subset of the resolved schema to save tokens. The agent could use MCP search to discover attributes not in its context window. Requires giving the agent MCP tool access (multi-turn tool-using conversation rather than one-shot API calls).
+- **Ad-hoc `live_check`** — validates JSON telemetry samples per call (input format: `{ "samples": [...] }` with attribute/span/metric objects) without starting an OTLP receiver. Could enable lightweight per-file schema validation by constructing synthetic samples from the agent's output. RS3 evaluated this and concluded it is **not justified for PoC**: it would require non-trivial static analysis (parsing instrumented TypeScript to extract what spans/attributes would be emitted), the per-file `weaver registry check` CLI already catches structural schema errors, and the end-of-run `live-check` (Weaver as OTLP receiver + test suite) catches semantic errors. The two-layer validation covers both ends without synthetic sample construction. Revisit post-PoC if ts-morph AST analysis of instrumented code makes synthetic sample construction feasible.
+- **O(1) signal lookups** (`get_attribute`, `get_span`, etc.) — direct lookups without parsing full resolved JSON. Most useful for building tool-augmented agent prompts.
+
+To use the MCP server, the Coordinator would maintain an `@modelcontextprotocol/sdk` client connection via `StdioClientTransport` (spawning `weaver registry mcp` as a child process). This is architecturally straightforward — approximately 10 lines of setup — and uses the same SDK the Coordinator already imports for its own MCP server interface. The Coordinator would simultaneously be an MCP server (for Claude Code) and an MCP client (for Weaver), which is a standard pattern supported natively by the SDK's separate `Server` and `Client` classes.
 
 ---
 
@@ -247,6 +243,7 @@ Before instrumentation can begin, user must run `telemetry-agent init`. This is 
    - OTel SDK initialization exists somewhere → **records path in config** (e.g., `src/telemetry/setup.ts`)
    - OTLP endpoint configured
    - Test suite exists (warns if missing, continues anyway)
+   - Verify Weaver binary version (`weaver --version`) meets `weaverMinVersion` (default: `0.21.2`). The spec depends on version-specific behavior: `registry search` deprecation (v0.20.0), MCP server and `weaver serve` (v0.21.2), diff output limitations. Running against an older Weaver version may produce silent failures or missing capabilities. If the version is below the minimum, init aborts with a clear message.
    - Verify localhost port availability for Weaver live-check (:4317 gRPC, :4320 HTTP). Note: if running in Docker, ensure the container can bind to these ports.
    - **Implementation-time note:** If ports 4317/4320 are already in use (e.g., local OTel Collector, another Weaver instance), init should detect this and fail with a clear message directing the user to free the ports. Recovery strategies (process detection, reuse, force-clean flags) are implementation decisions. Consider whether to support configurable ports (Weaver may not support this — verify) or require the user to free the ports.
 
@@ -332,7 +329,7 @@ Before instrumentation can begin, user must run `telemetry-agent init`. This is 
 │  6. Check for variable shadowing before inserting new variables │
 │  7. Add manual spans ONLY for business logic gaps               │
 │  8. Extend schema if needed (within guardrails)                 │
-│  9. Per-file validation (fix loops): syntax → lint → Weaver     │
+│  9. Per-file validation (fix loop): syntax → lint → Weaver      │
 │  10. Return result object to Coordinator                        │
 └─────────────────────────────────────────────────────────────────┘
 ```
@@ -359,12 +356,80 @@ Before instrumentation can begin, user must run `telemetry-agent init`. This is 
    - Check semconv first, then existing schema, then create new
    - Add manual span
 9. **Update Weaver schema** if new libraries/attributes/spans added
-10. **Per-file validation** — syntax → lint → Weaver static (fix loops, max attempts enforced)
+10. **Per-file validation** — syntax → lint → Weaver static (fix loop, max attempts enforced)
 11. **Return result** to Coordinator
 
 ### Output
 - Single PR with all changes (code + schema updates + SDK init + package.json)
 - Validation results rendered in PR description
+
+### Agent Output Format
+
+The Instrumentation Agent outputs a **complete file replacement** — the entire instrumented TypeScript file, not a diff or patch.
+
+**Why full file replacement:**
+- **Architectural simplicity.** The Coordinator doesn't need diff-apply logic. The agent returns a complete file; the Coordinator writes it to disk. No fuzzy matching, no hunk location, no progressive fallback strategies. Fabian Hertwig's "Code Surgery" analysis (April 2025) documents the fragility of diff application across Codex, Aider, OpenHands, RooCode, and Cursor — every system implements elaborate recovery logic specifically because diffs break. Full file replacement eliminates this entire class of problems from the Coordinator.
+- **Single-file scope.** Each agent processes one file with full context. Token overhead of full file output (~200-1000 extra tokens for typical service files of 50-300 lines) is negligible relative to the system prompt + schema context that dominates each call.
+- **Elision is trivially detectable.** Full file output makes lazy elision (placeholder comments like `// ... rest of code`) easy to catch with simple string matching — see Elision Detection below.
+- **Acceptable trade-off for our use case.** Aider's benchmarks show diff-based formats achieve higher task success rates for general coding tasks with capable models. However, those benchmarks measure iterative, multi-turn conversational editing — a different use case than our single-pass, schema-constrained transformation with a validation loop. The simplicity and reliability of full file replacement outweigh the token efficiency of diffs for our architecture.
+
+**Note on Aider benchmarks:** Aider's edit format leaderboard shows diff formats outperforming the "whole" format on task success rate. Aider's docs describe "whole" as "the easiest for an LLM to use" (high format compliance) but not the highest-performing. We choose full file replacement for architectural reasons (no diff-apply logic needed), not because benchmarks show it's superior.
+
+**Large file handling:** Files exceeding `largeFileThresholdLines` (default: 500) trigger a warning in the agent's `notes` field. The Coordinator surfaces this in the PR summary. Large files are more prone to truncation and quality degradation — the `maxTokensPerFile` ceiling already accounts for full-file output, but files above this threshold warrant reviewer attention.
+
+### System Prompt Structure
+
+The Instrumentation Agent's system prompt follows a specific structure optimized for Claude's instruction-following behavior. Anthropic's Claude 4.x best practices documentation states these models "have been trained for more precise instruction following than previous generations" and "pay close attention to details and examples."
+
+**Prompt sections (in order):**
+1. **Role and constraints** — Defines the agent as a TypeScript instrumentation engineer implementing a Weaver schema contract. Includes explicit prohibitions as output format specifications (see Claude 4.x Prompt Hygiene below).
+2. **Schema contract** — The full resolved Weaver schema. This is the source of truth for span names, attributes, and semantic conventions.
+3. **Transformation rules** — Enumerated rules for the OTel instrumentation pattern: `tracer.startActiveSpan()` wrapping, try/catch/finally with `span.end()` in finally, `span.recordException()` + `setStatus()` on errors.
+4. **3-5 diverse examples** — Concrete TypeScript before/after pairs demonstrating the transformation pattern. Per Anthropic's multishot prompting guidance: "Include 3-5 diverse, relevant examples. More examples = better performance, especially for complex tasks." Examples should cover:
+   - A basic function instrumentation (happy path)
+   - An async function with existing try/catch
+   - A function that should be **skipped** (already instrumented)
+   - A function with variable names that would shadow `span`/`tracer`
+   - (Optional) A file where the agent records a library need instead of adding manual spans
+5. **Source file** — The complete file to instrument.
+6. **Output format specification** — "Return ONLY the complete instrumented TypeScript file. No markdown fences, no explanations, no partial output. Files containing placeholder comments (`// ...`, `// existing code`, `// rest of function`) will be rejected by validation."
+7. **Trace context** — Trace ID + parent span ID (operational metadata).
+
+**Claude 4.x Prompt Hygiene:**
+
+Anthropic's Claude 4.x best practices document several behaviors that directly affect the agent's system prompt design:
+
+- **Remove anti-laziness directives.** Instructions like "be thorough," "write COMPLETE code," or "do not be lazy" were workarounds for earlier models. On Claude 4.6, these "amplify the model's already-proactive behavior and can cause runaway thinking or write-then-rewrite loops." Instead, frame output completeness as a **format specification**: "Output format: complete TypeScript source file. Files containing placeholder comments will fail validation." This is a technical constraint, not a motivational nudge.
+- **Use the `effort` API parameter** as the primary control lever for thinking depth, rather than prompt-based workarounds. The `agentEffort` config field (default: `medium`) controls this. For Claude 4.6 models, the Coordinator passes `thinking: {type: "adaptive"}` alongside the effort parameter; for pre-4.6 models, use `thinking: {type: "enabled", budget_tokens: N}` instead.
+- **Do not include chain-of-thought or thoroughness instructions** for the transformation itself. On Claude 4.6, these are unnecessary and can trigger runaway thinking or rewrite loops. The transformation rules are specific enough for direct output.
+- **Soften tool-use language** if MCP tools are exposed to the agent. Replace "You MUST use [tool]" with "Use [tool] when it would enhance your understanding." Claude 4.x models are more responsive to system prompts and may overtrigger on aggressive language.
+- **Guard against overengineering.** Claude 4.6 tends to create extra files and unnecessary abstractions. The system prompt should clearly state: "Your ONLY job is to add instrumentation. Do not refactor, rename, or restructure existing code."
+
+**What does benefit from reasoning:** The agent's *analysis* of which functions to instrument and which to skip benefits from internal reasoning. This should surface through the structured result fields (`notes`, `span_categories`) rather than chain-of-thought in the generated code.
+
+### Known Failure Modes
+
+Common failure modes for LLM-based code transformation, drawn from academic research and practitioner experience. The system prompt must include negative constraints for each, and the validation chain must catch them.
+
+| Failure Mode | Frequency | Mitigation |
+|---|---|---|
+| **Mis-typed API calls** — incorrect method signatures, wrong parameter types, non-existent API parameters | Most common (~55% of knowledge-conflicting hallucinations per Khati et al., FORGE '26) | Weaver static validation catches schema violations. Syntax checking catches type errors. System prompt specifies exact API patterns in transformation rules. |
+| **Hallucinated imports** — inventing packages or APIs that don't exist | Second most common (~24% per Khati et al., FORGE '26) | Allowlist-first library discovery (already in spec). System prompt: imports must come from schema or allowlist. Post-transformation syntax check catches nonexistent imports. |
+| **Incomplete edits / truncation** — dropping functions, losing code at end of file | Common with large files | Full file output + Coordinator elision detection (see below). `largeFileThresholdLines` warning for files >500 lines. |
+| **Lost semantics** — subtly changing business logic while adding instrumentation | Moderate | System prompt (framed as format spec): "Your ONLY job is to add instrumentation. Do not refactor, rename, or restructure." Lint + test validation catches behavioral changes. |
+| **Lazy code / elision** — `// ... rest of the function` placeholder comments | Common (documented in Aider's laziness benchmarks; less frequent with Claude than GPT-4 Turbo) | System prompt: output format spec states placeholder comments fail validation. Coordinator elision detection scans for patterns before accepting output. |
+| **Incorrect span nesting / missing span.end()** — resource leaks | Moderate | Before/after examples demonstrate correct try/catch/finally pattern. Weaver static validation catches schema violations. |
+| **Variable shadowing** — introducing `span` where a local `span` already exists | Uncommon but insidious | ts-morph scope analysis (already in spec). System prompt reminds agent to check. |
+
+**Sources:** "Detecting and Correcting Hallucinations in LLM-Generated Code via Deterministic AST Analysis" (Khati et al., William & Mary, FORGE '26, arxiv 2601.19106). "Prompting LLMs for Code Editing: Struggles and Remedies" (Nam et al., studying Google's internal Transform Code tool, April 2025, arxiv 2504.20196) — identifies five categories of missing information that cause incorrect edits (specifics, operationalization plan, scope/localization, codebase context, output format). Aider laziness benchmarks (aider.chat) — 89-task refactoring benchmark measuring code elision.
+
+### Elision Detection
+
+Full file output introduces a specific risk: the model may output a "complete" file that's actually truncated or contains lazy placeholder comments. The Coordinator performs a pre-validation check before running the syntax/lint/Weaver chain:
+
+1. **Pattern scan** — Scan output for common elision patterns: `// ...`, `// existing code`, `// rest of`, `/* ... */`, `// TODO: original code`
+2. **Length comparison** — Compare output line count to input line count. If output is <80% of input lines and spans were supposedly added, flag for rejection.
+3. **Action** — If elision is detected, reject the output and retry (counts toward the file's `maxFixAttempts`). This is cheap (string matching, no AST needed) and catches the most common full-file output failure mode.
 
 ---
 
@@ -387,7 +452,7 @@ Implementation: The Coordinator copies the file (and its corresponding schema st
 
 ### Periodic Schema Checkpoints
 
-To catch schema drift early instead of discovering it only at end-of-run, the Coordinator runs `weaver registry check` every `schemaCheckpointInterval` files (default: 5). Alongside validation, the Coordinator runs `weaver registry diff --baseline-registry <snapshot> -r ./telemetry/registry --diff-format json` to capture exactly what changed since the last checkpoint. This makes checkpoint output actionable — not just "valid/invalid" but "here's what was added."
+To catch schema drift early instead of discovering it only at end-of-run, the Coordinator runs `weaver registry check` every `schemaCheckpointInterval` files (default: 5). Alongside validation, the Coordinator runs `weaver registry diff --baseline-registry <snapshot-dir> -r ./telemetry/registry --diff-format json` to capture exactly what changed since the last checkpoint. The `<snapshot-dir>` is a directory copy of the registry made at the start of the run — `--baseline-registry` requires a registry directory, not resolved JSON (see Weaver Integration Approach). This makes checkpoint output actionable — not just "valid/invalid" but "here's what was added." Note: Weaver's diff currently tracks top-level object changes only (`added`, `renamed`, `obsoleted`, `removed`, `uncategorized`). The `updated` change type is not yet implemented, so field-level changes within existing objects are not detected by diff — they would be caught by `registry check` if they violate schema rules.
 
 If a checkpoint fails, the Coordinator stops processing new files by default. Files committed before the failing checkpoint are valid (they passed their own validations and all previous checkpoints), so the Coordinator still creates a PR with the partial results — the PR summary notes the checkpoint failure and identifies which files were processed since the last successful checkpoint (the blast radius). This is consistent with the fail-forward philosophy: don't waste work that already succeeded. Interface layers can override this behavior by providing an `onSchemaCheckpoint` callback that returns `true` to continue processing despite the failure; returning `false` or `void` (or not providing the callback) stops processing.
 
@@ -614,7 +679,7 @@ The agent can extend the schema, but must follow existing patterns:
 
 3. **Add or create, but stay consistent** — Agent can add to existing groups or create new ones, but must observe and follow the conventions in the existing schema.
 
-4. **Coordinator enforces via drift detection** — The Coordinator sums `attributes_created` and `spans_added` across all results. Unreasonable totals (e.g., 30 new attributes for a single file) get flagged for human review. Additionally, `weaver registry diff` (with `--diff-format json`) classifies each schema change as `added`, `renamed`, `updated`, `obsoleted`, or `removed`. The Coordinator can reject any change type other than `added` to enforce the "extend only" constraint programmatically.
+4. **Coordinator enforces via drift detection** — The Coordinator sums `attributes_created` and `spans_added` across all results. Unreasonable totals (e.g., 30 new attributes for a single file) get flagged for human review. Additionally, `weaver registry diff` (with `--diff-format json`) classifies each schema change as `added`, `renamed`, `obsoleted`, `removed`, or `uncategorized`. (The `updated` change type is documented but not yet implemented in Weaver's diff engine.) The Coordinator rejects any change type other than `added` to enforce the "extend only" constraint programmatically — in practice, this means checking for `renamed`, `obsoleted`, `removed`, and `uncategorized`.
 
 ---
 
@@ -742,17 +807,56 @@ Agent does NOT add manual spans for things libraries already handle.
 
 Validation stays in the Instrumentation Agent so it can fix what it breaks. The Coordinator enforces limits and handles failures.
 
-### Per-File Validation (with fix loops)
+### Per-File Validation (with fix loop)
 
-Each check runs in a loop: validate → fix errors → retry until clean or max attempts reached.
+**Pre-validation (Coordinator, no LLM):** Before running syntax/lint/Weaver validation, the Coordinator performs elision detection on the agent's output — scanning for placeholder patterns (`// ...`, `// existing code`, `// rest of`, `/* ... */`) and comparing output length to input length. If the output is <80% of input lines and spans were added, or if elision patterns are found, the Coordinator rejects the output and retries (counts toward the file's fix attempts). This catches the most common full-file output failure mode without an LLM call. See Elision Detection section for details.
+
+**Validation chain (single pass per attempt):** The following checks run as a single sequential pass after each agent attempt. If any stage fails, the remaining stages are skipped and the error from the *first failing stage* is fed back to the agent.
 
 1. **Syntax** — TypeScript compiler / ts-morph (code must compile)
-2. **Lint** — Prettier/ESLint (code must be properly formatted)
+2. **Lint** — Prettier/ESLint, diff-based (only agent-introduced errors — see below)
 3. **Weaver registry check** — static schema validation
 
-Order matters: syntax first (must compile), then lint, then schema.
+Order matters: elision detection first (cheapest, no LLM), then syntax (must compile before lint can run), then lint (code style), then schema (semantic correctness).
 
-**Fix loop limits:** The agent retries up to `maxFixAttempts` (default: 3) per validation stage. If the agent cannot produce clean code within the limit, it returns a `"failed"` status and the Coordinator reverts the file. The `maxTokensPerFile` budget (default: 50,000) provides a hard ceiling on total token usage per file across all attempts. The Coordinator enforces this by summing `gen_ai.usage.input_tokens` and `gen_ai.usage.output_tokens` from each API call's response metadata during the fix loop. If cumulative usage exceeds the budget, the Coordinator stops retries and treats the file as failed, regardless of remaining `maxFixAttempts`.
+**Diff-based lint checking:** The Coordinator captures lint output for the original file *before* the agent runs. After each attempt, it captures lint output for the modified file. Only *new* lint errors (not present in the original output) trigger a fix attempt. This prevents the agent from being forced to fix pre-existing code quality issues it didn't introduce — a problem SWE-agent encountered and solved with the same approach. (SWE-agent v0.6.1 changelog documents a bug where "existing linter errors in a file left SWE-agent unable to edit because of our lint-retry-loop." SWE-agent's fix compares pre-edit and post-edit lint output with line-number adjustment — for PoC, a simpler approach of comparing error codes and messages while ignoring line numbers is sufficient, since instrumentation adds lines that shift all subsequent line numbers. Line-number-aware diffing is a post-PoC refinement.)
+
+**Hybrid 3-attempt strategy:** The fix loop uses a hybrid of multi-turn conversation and fresh API calls, informed by the ICLR 2024 finding (Olausson et al., MIT/Microsoft Research) that diverse initial attempts outperform deep iterative repair, and by the practical observation from Aider, SWE-agent, and Cursor that models oscillate when repeatedly shown their own broken output.
+
+```text
+Attempt 1 (initial generation):
+  Fresh API call → agent produces instrumented file → run validation chain
+  If pass: done ✓
+
+Attempt 2 (multi-turn fix):
+  Same conversation → append error output as user message → agent produces corrected file → run validation chain
+  If pass: done ✓
+  If errors increased vs attempt 1: skip to attempt 3 (oscillation detected)
+
+Attempt 3 (fresh regeneration):
+  New API call with clean context → system prompt includes failure category hint
+  (e.g., "A previous attempt failed due to [syntax error in span creation].
+  Approach the instrumentation differently.")
+  → agent produces new instrumented file from scratch → run validation chain
+  If pass: done ✓
+  If fail: file status = "failed", revert to snapshot, move on
+```
+
+**Multi-turn fix prompt (attempt 2):** The error output is appended to the existing conversation as a user message: "The instrumented file has validation errors. Fix them and return the complete corrected file." followed by the specific error output (compiler errors, lint diff, or Weaver check results). The agent retains the full conversation context from attempt 1.
+
+**Fresh regeneration prompt (attempt 3):** A new API call with the same system prompt as attempt 1, plus an additional section: "IMPORTANT: A previous attempt to instrument this file failed. The failure was: [error category]. Avoid this failure mode." The user message contains the original (un-instrumented) file and schema context. The broken file from the previous attempt is deliberately excluded to prevent the agent from trying to patch it. **Tradeoff:** The failure category hint is intentionally high-level (e.g., "syntax error in span creation," not the full error trace). For some categories (wrong import, missing attribute), this is actionable enough to take a different approach. For others (complex type errors), the hint is vague and the agent is essentially starting fresh with minimal guidance. This is acceptable because attempt 3 is the last resort — the alternative of including the broken file has a known worse failure mode (the agent tries to patch rather than regenerate, causing oscillation). If the hint isn't enough, the file fails cleanly.
+
+**Early exit heuristics:**
+
+- **Error-count monotonicity:** If attempt N+1 fails at the *same validation stage* as attempt N but with more errors, the Coordinator skips directly to fresh regeneration (or bails out if already on fresh regeneration). This detects oscillation before the retry cap. If attempt N+1 fails at a *later* stage (e.g., attempt 1 failed at syntax, attempt 2 passes syntax but fails at lint), that's progress — the monotonicity check does not apply across stages.
+- **Duplicate error detection:** If the same error appears in two consecutive attempts that fail at the same stage, the agent is stuck. Comparison uses error code + file path as the key, ignoring line numbers — line numbers shift as the agent moves code around, but the same error code at the same file indicates the same conceptual problem. Skip to fresh regeneration or bail.
+- **Token budget exceeded:** The `maxTokensPerFile` budget (default: 80,000) spans all attempts for a given file. The Coordinator sums `gen_ai.usage.input_tokens` and `gen_ai.usage.output_tokens` from each API call's response metadata. If cumulative usage exceeds the budget, the Coordinator stops immediately — regardless of which attempt is in progress.
+
+**`maxTokensPerFile` derivation:** A single API call for a typical file (~200 lines) costs roughly 8-12K tokens (system prompt ~5K, file content ~1K, schema context ~2K, output ~2-4K). A large file at the `largeFileThresholdLines` boundary (~500 lines) costs roughly 12-16K per call. With 3 total attempts (initial + multi-turn fix + fresh regeneration), worst-case usage is: attempt 1 (~16K) + attempt 2 multi-turn (~5K incremental) + attempt 3 fresh (~16K) ≈ 37K for a large file. The default of 80K provides ~2× headroom over this worst case, accommodating files somewhat above the large-file threshold and variance in schema/prompt size. **Note on schema size variability:** The "~2K schema context" estimate assumes a small registry (e.g., commit-story's ~10-15 span definitions). A production project with 50+ span definitions could push schema context to 8-10K tokens per call, shifting the per-call cost upward. The 2× headroom is intended to absorb this variance, but projects with large schemas may need to increase `maxTokensPerFile` accordingly. Files that exhaust 80K tokens across 3 attempts are genuinely intractable and should fail. This is a PoC default — production tuning should adjust based on observed usage patterns and actual schema size.
+
+**`maxFixAttempts` (default: 2, configurable):** This controls the number of *fix* attempts after the initial generation — i.e., the total number of attempts is `1 + maxFixAttempts`. The last fix attempt is always a fresh regeneration; all preceding fix attempts are multi-turn. Specific values: `maxFixAttempts: 0` disables the fix loop entirely (one shot). `maxFixAttempts: 1` gives initial + one multi-turn fix (no fresh regeneration). `maxFixAttempts: 2` (default) gives initial + one multi-turn fix + one fresh regeneration. `maxFixAttempts: N` (for N > 2) gives initial + (N-1) multi-turn fixes + one fresh regeneration. The research strongly discourages values above 3 — Olausson et al. showed diminishing returns from deep repair, and Aider's hardcoded 3 is the practical upper bound.
+
+**Rationale for defaults:** Aider hardcodes `max_reflections = 3` (3 fix attempts after the initial generation, for 4 total). Olausson et al. (ICLR 2024) found that 1 repair attempt per initial sample is the cost-effective sweet spot — additional repair iterations showed diminishing returns and sometimes *reduced* pass rates below baseline. Our agent uses external validation (compiler errors, lint output, Weaver check results) rather than LLM self-repair, which provides higher-quality feedback than the paper's baseline. The paper showed that feedback quality is the key bottleneck: human *explanations* improved repair rates by 1.58×. Our feedback falls between the paper's self-repair condition and human explanations — we provide specific *detection* (exact error, exact line) but not *diagnosis* (why it's wrong or how to fix it). This is a bet that external detection is enough to justify 2 fix attempts rather than 1, but it's not a derived conclusion — the research only proves that feedback quality matters, not where our feedback falls on the spectrum. The fresh regeneration attempt is the key innovation over Aider's uniform multi-turn approach — it provides the "diverse initial sample" benefit identified by Olausson et al. within a single file's budget. Tang et al. (NeurIPS 2024) further confirmed that intelligent repair budget allocation consistently outperforms naive iteration, framing repair as an exploration-exploitation tradeoff.
 
 **Variable shadowing check:** Before inserting new variables (`span`, `tracer`, etc.), the agent uses ts-morph's scope analysis (TypeScript binder access) to check for existing variables with the same name in the target scope. If a collision is detected, the agent uses suffixed names (`otelSpan`, `otelTracer`) or reports the collision and skips instrumentation for that function. This check happens before the validation loop — it's a pre-condition, not something that gets "fixed" in a retry.
 
@@ -904,7 +1008,9 @@ interface FileResult {
   libraries_needed: LibraryRequirement[];  // Coordinator handles installation + SDK registration
   schema_extensions: string[];              // IDs of new schema entries
   attributes_created: number;
-  validation_retries: number;
+  validation_attempts: number;              // total attempts (1 = first try succeeded, 3 = all attempts used)
+  validation_strategy_used: "initial-generation" | "multi-turn-fix" | "fresh-regeneration";  // strategy of the last completed attempt (on success: which strategy resolved it; on failure: which strategy was last tried before giving up or hitting a budget/early-exit)
+  error_progression?: string[];             // e.g., ["3 syntax errors", "1 lint error", "0 errors"] — shows convergence or oscillation
   span_categories?: {                       // optional — not present on early failures
     external_calls: number;
     schema_defined: number;
@@ -915,7 +1021,7 @@ interface FileResult {
   schemaHashBefore?: string;                // hash of resolved schema before agent ran
   schemaHashAfter?: string;                 // hash of resolved schema after agent ran
   agentVersion?: string;                    // version of agent/prompt that produced this result
-  reason?: string;                          // human-readable summary, e.g. "syntax errors after 3 fix attempts"
+  reason?: string;                          // human-readable summary, e.g. "syntax errors after 3 attempts"
   last_error?: string;                      // raw error output for debugging, e.g. "Unexpected token at line 42"
 }
 ```
@@ -926,7 +1032,7 @@ The `notes` field lets the agent explain judgment calls — e.g., "skipped proce
 
 Schema hashes let the Coordinator trace exactly which agent introduced a schema change. If end-of-run Weaver validation fails, the Coordinator can identify the file whose schema modification caused the failure by comparing hashes across the result sequence. This is a cheap diagnostic — just a fast hash of the resolved schema JSON — not a full diff. The hash should be computed on canonicalized JSON (sorted keys, no whitespace) to avoid spurious differences from non-deterministic key ordering in Weaver's output.
 
-The `agentVersion` field tracks which version of the agent (or system prompt) produced each result. During prompt iteration — especially during the RS1 research spike — this lets you compare results across prompt versions and identify which changes improved or degraded output quality. Even a manually-bumped string (e.g., "v0.3-prompt-experiment") is useful. The Coordinator includes the agent version in the PR description.
+The `agentVersion` field tracks which version of the agent (or system prompt) produced each result. During prompt iteration — this lets you compare results across prompt versions and identify which changes improved or degraded output quality. Even a manually-bumped string (e.g., "v0.3-prompt-experiment") is useful. The Coordinator includes the agent version in the PR description.
 
 Success example:
 ```json
@@ -942,7 +1048,9 @@ Success example:
   ],
   "schema_extensions": ["span.commit_story.payment.process"],
   "attributes_created": 2,
-  "validation_retries": 1,
+  "validation_attempts": 2,
+  "validation_strategy_used": "multi-turn-fix",
+  "error_progression": ["1 lint error", "0 errors"],
   "span_categories": {
     "external_calls": 2,
     "schema_defined": 1,
@@ -963,8 +1071,10 @@ Failure example:
   "libraries_needed": [],
   "schema_extensions": [],
   "attributes_created": 0,
-  "validation_retries": 3,
-  "reason": "syntax errors after 3 fix attempts",
+  "validation_attempts": 3,
+  "validation_strategy_used": "fresh-regeneration",
+  "error_progression": ["2 syntax errors", "3 syntax errors", "1 syntax error"],
+  "reason": "syntax errors after 3 attempts",
   "last_error": "Unexpected token at line 42"
 }
 ```
@@ -1000,6 +1110,10 @@ The config file is created during `telemetry-agent init` and serves as the gate 
 schemaPath: ./telemetry/registry         # Path to Weaver registry directory
 sdkInitFile: ./src/telemetry/setup.ts    # OTel SDK initialization file (recorded during init)
 
+# Agent API configuration
+agentModel: claude-sonnet-4-6  # Model for Instrumentation Agent API calls (prompt hygiene guidance is written for 4.6 behavior)
+agentEffort: medium            # low | medium | high — controls thinking depth via effort API parameter (replaces prompt-based thoroughness cues; Sonnet 4.6 defaults to high which may cause higher latency)
+
 # Agent behavior
 autoApproveLibraries: true    # false = prompt before adding OTel libraries
 testCommand: "npm test"        # Command to run test suite during validation (supports npm, vitest, jest, nx, etc.)
@@ -1009,9 +1123,11 @@ dependencyStrategy: dependencies  # dependencies (services) | peerDependencies (
 
 # Limits and guardrails
 maxFilesPerRun: 50             # Cost/time guardrail, user adjustable
-maxFixAttempts: 3              # Max validation retry attempts per file before reverting
-maxTokensPerFile: 50000        # Token budget ceiling per file (all fix attempts combined)
+maxFixAttempts: 2              # Max fix attempts after initial generation (total attempts = 1 + maxFixAttempts) — see Per-File Validation for derivation
+maxTokensPerFile: 80000        # Token budget ceiling per file (all attempts combined) — see Per-File Validation for derivation
+largeFileThresholdLines: 500   # Files above this trigger a warning in agent notes (prone to truncation)
 schemaCheckpointInterval: 5    # Run schema validation checkpoint after every N files
+weaverMinVersion: "0.21.2"     # Minimum Weaver CLI version (init aborts if below; spec depends on v0.20.0+ and v0.21.2+ behavior)
 
 # Review
 reviewSensitivity: moderate    # PR annotation strictness: strict (flag tier 3+), moderate (outliers only), off (no warnings)
@@ -1030,6 +1146,8 @@ exclude:                        # Glob patterns to skip
 # instrumentationMode: balanced  # thorough | balanced | minimal
 ```
 
+> **Implementation note (`agentModel` and `agentEffort`):** The Claude 4.x prompt hygiene guidance in the System Prompt Structure section is written for Claude 4.6 model behavior (anti-laziness removal, adaptive thinking, effort parameter). If `agentModel` is set to a pre-4.6 model (e.g., `claude-sonnet-4-5-20250929`), the Coordinator should skip the prompt hygiene adjustments — earlier models may benefit from the thoroughness cues that 4.6 models don't need. The Coordinator passes `thinking: {type: "adaptive"}` with the `effort` parameter for 4.6 models. For older models, use `thinking: {type: "enabled", budget_tokens: N}` instead. The `agentEffort` default of `medium` balances output quality against latency and cost; `high` may be warranted for complex files but increases token usage.
+>
 > **Implementation note (`testCommand`):** The test command runs with `OTEL_EXPORTER_OTLP_ENDPOINT` overridden to point at Weaver during validation. Verify that the test runner correctly inherits environment variables — `execSync` with env override behaves differently than `spawn` with env inheritance, and meta-runners like nx or turbo may spawn subprocesses that don't inherit the override. For PoC, `npm test` with `execSync` and explicit env is sufficient. Consider validating env var inheritance during init (e.g., a smoke test that confirms the endpoint value propagates through the test runner) and failing with a clear error if it doesn't.
 
 ### What Goes Where
@@ -1039,9 +1157,10 @@ exclude:                        # Glob patterns to skip
 | Schema path | Namespace (authoritative) |
 | SDK init file path | Semconv version |
 | Test command | Attribute definitions |
-| Agent behavior settings | Span definitions |
+| Agent API config (`agentModel`, `agentEffort`) | Span definitions |
+| Agent behavior settings | |
 | Dependency strategy | |
-| Limits and guardrails | |
+| Limits and guardrails (including `largeFileThresholdLines`, `weaverMinVersion`) | |
 | Review sensitivity | |
 | Execution mode (dry run) | |
 | Cost ceiling confirmation | |
@@ -1090,7 +1209,7 @@ When `dependencyStrategy: peerDependencies`, the Coordinator runs `npm install -
 
 Cost visibility has two phases: a pre-run ceiling and post-run actuals. Both appear in the PR summary; the ceiling is additionally surfaced before the run begins when `confirmEstimate` is enabled.
 
-**Pre-run ceiling:** After file globbing (step 3b in the workflow), the Coordinator calculates a cost ceiling: `fileCount × maxTokensPerFile`. With `maxTokensPerFile: 50000` and the default 50-file limit, the worst-case ceiling is 2.5M tokens per run. Actual usage will be significantly lower — most files won't hit the per-file ceiling, and not all files will require fix loop retries. This is a ceiling, not an estimate: it's a simple, clearly-defined worst case. Tighter ceilings based on file sizes or historical data are future work (see Out of Scope).
+**Pre-run ceiling:** After file globbing (step 3b in the workflow), the Coordinator calculates a cost ceiling: `fileCount × maxTokensPerFile`. With `maxTokensPerFile: 80000` and the default 50-file limit, the worst-case ceiling is 4M tokens per run. Actual usage will be well below this — most files resolve on the first attempt (no fix loop), and typical files use ~10-15K tokens per attempt, not the ~37K worst case the ceiling is designed around. This is a ceiling, not an estimate: it's a simple, clearly-defined worst case. Tighter ceilings based on actual file sizes and historical data are future work (see Out of Scope).
 
 When `confirmEstimate: true`, the Coordinator fires the `onCostCeilingReady` callback, giving the interface layer an opportunity to surface the ceiling and request user confirmation before incurring token costs. If the user declines, the run aborts with no LLM calls made. When `confirmEstimate: false`, the ceiling is still calculated (it appears in the PR summary) but no confirmation is requested.
 
@@ -1302,7 +1421,9 @@ Four levers:
 
 **Prerequisites and setup:**
 - Assumes target codebase already has OTel API and SDK installed, initialized, and a valid Weaver schema in place
-- Pre-implementation research spikes (RS1: prompt engineering, RS2: Weaver integration approach, RS3: fix loop design)
+- Prompt engineering conclusions embedded in spec (agent output format, system prompt structure, elision detection, known failure modes)
+- Weaver integration conclusions embedded in spec (CLI for all PoC operations — see Weaver Integration Approach)
+- Fix loop design conclusions embedded in spec (hybrid 3-attempt strategy, diff-based lint, oscillation detection — see Per-File Validation)
 - Mandatory init phase with prerequisite verification and SDK init file path recording
 - Config validation (Zod schema)
 
@@ -1334,7 +1455,7 @@ Four levers:
 - File revert protocol (snapshot before agent, revert on failure)
 
 **Validation:**
-- Per-file validation with fix loops: syntax, lint, Weaver static (with max attempts and token budget)
+- Per-file validation with hybrid fix loop: single-pass chain (syntax, lint, Weaver static), 3-attempt strategy (initial → multi-turn fix → fresh regeneration), diff-based lint, oscillation detection, token budget ceiling
 - Periodic schema checkpoints
 - End-of-run validation: tests, Weaver live-check
 
@@ -1397,3 +1518,28 @@ Relevant when the agent targets codebases that don't already have OTel installed
 - [OpenTelemetry Weaver](https://github.com/open-telemetry/weaver)
 - [ts-morph](https://ts-morph.com/)
 - [Anthropic TypeScript SDK](https://github.com/anthropics/anthropic-sdk-typescript)
+
+### RS1 Research Sources (verified February 2026)
+- [Anthropic Claude 4.x prompting best practices](https://docs.anthropic.com/en/docs/build-with-claude/prompt-engineering/claude-4-best-practices)
+- [Aider edit format leaderboard](https://aider.chat/docs/leaderboards/edit.html) and [laziness benchmarks](https://aider.chat/2023/12/21/unified-diffs.html)
+- ["Code Surgery: How AI Assistants Make Precise Edits" (Hertwig, April 2025)](https://fabianhertwig.com/blog/coding-assistants-file-edits/)
+- ["Prompting LLMs for Code Editing" (Nam et al., Google, April 2025)](https://arxiv.org/abs/2504.20196)
+- ["Detecting and Correcting Hallucinations in LLM-Generated Code" (Khati et al., FORGE '26)](https://arxiv.org/abs/2601.19106)
+- [Cursor speculative edits architecture](https://blog.sshh.io/p/how-cursor-ai-ide-works)
+- ["My LLM Coding Workflow going into 2026" (Osmani, January 2026)](https://addyosmani.com/blog/ai-coding-workflow/)
+
+### RS2 Research Sources (verified February 2026)
+- [Weaver v0.21.2 release notes — MCP server, `weaver serve`](https://github.com/open-telemetry/weaver/releases/tag/v0.21.2)
+- [Weaver `docs/usage.md` — CLI command reference, `--baseline-registry`](https://github.com/open-telemetry/weaver/blob/main/docs/usage.md)
+- [Weaver `docs/schema-changes.md` — diff output format, `updated` not implemented](https://github.com/open-telemetry/weaver/blob/main/docs/schema-changes.md)
+- [Weaver v0.20.0 release notes — `registry search` deprecation](https://github.com/open-telemetry/weaver/releases/tag/v0.20.0)
+- [MCP TypeScript SDK — client API, `StdioClientTransport`](https://www.npmjs.com/package/@modelcontextprotocol/sdk)
+
+### RS3 Research Sources (verified February 2026)
+- ["Is Self-Repair a Silver Bullet for Code Generation?" (Olausson et al., MIT/Microsoft Research, ICLR 2024)](https://arxiv.org/abs/2306.09896) — 1 repair attempt is cost-effective sweet spot; diverse samples beat deep repair; external feedback dramatically improves repair rates
+- ["Code Repair with LLMs gives an Exploration-Exploitation Tradeoff" (Tang et al., NeurIPS 2024)](https://arxiv.org/abs/2405.17503) — confirms budget allocation matters; REx algorithm reduces API calls 1.5-5× via Thompson Sampling
+- [Aider `max_reflections = 3` — hardcoded reflection cap](https://github.com/Aider-AI/aider/issues/3450) — source code confirms hardcoded limit; not user-configurable as of Feb 2026
+- [Aider tree-sitter lint augmentation](https://aider.chat/2024/05/22/linting.html) — AST-augmented lint context gives LLM structural context instead of raw line numbers
+- [SWE-agent v0.6.1 changelog — diff-based lint checking](https://swe-agent.com/latest/installation/changelog/) — pre-edit vs post-edit lint comparison; only new errors trigger rejection
+- [SWE-EVO benchmark error taxonomy (December 2025)](https://arxiv.org/abs/2512.18470) — "Stuck in Loop" as recognized failure category validates oscillation detection need
+- [Claude Code hooks documentation — PostToolUse and Stop hooks](https://code.claude.com/docs/en/hooks)
