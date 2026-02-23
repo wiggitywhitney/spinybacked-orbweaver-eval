@@ -1,6 +1,6 @@
 # Telemetry Agent Specification
 
-**Status:** Draft v3.4
+**Status:** Draft v3.4.1
 **Created:** 2026-02-05
 **Updated:** 2026-02-23
 **Purpose:** AI agent that auto-instruments TypeScript code with OpenTelemetry based on a Weaver schema
@@ -16,6 +16,7 @@
 | v3.2 | 2026-02-21 | **Dependency strategy:** Added `dependencyStrategy` config field (set during init). Services use `dependencies`; distributable packages use `peerDependencies`. `@opentelemetry/api` is always a peerDependency per OTel JS contrib GUIDELINES.md — multiple instances cause silent trace loss. Init phase now detects project type and records the strategy. Coordinator respects strategy during bulk install. |
 | v3.3 | 2026-02-23 | **Prompt engineering:** Completed RS1 research spike; moved conclusions into spec. Agent outputs full file replacement (not diffs), justified on architectural simplicity and documented fragility of diff application logic. Added system prompt structure guidance (role → schema → rules → 3-5 examples → file → format spec) per Anthropic's Claude 4.x best practices. Added Claude 4.x prompt hygiene section (remove anti-laziness directives, use `effort` parameter, frame output completeness as format spec). Added elision detection as Coordinator pre-validation step. Added `largeFileThresholdLines` config. Added known failure modes table with mitigations. Removed RS1 from pre-implementation research spikes (two remain: RS2, RS3). |
 | v3.4 | 2026-02-23 | **Weaver integration:** Completed RS2 research spike; moved conclusions into spec. PoC uses Weaver CLI for all operations (`check`, `resolve`, `diff`, `live-check`). MCP server (v0.21.2, experimental) documented but deferred to post-PoC — schema-changes-between-files invalidates in-memory registry, and MCP lacks `check`/`diff`/`resolve` equivalents. Added Weaver Integration Approach section with CLI operations table, registry directory snapshot strategy for `--baseline-registry`, and post-PoC optimization path. Documented `weaver registry search` CLI deprecation (v0.20.0). Added diff output limitations (`updated` change type not yet implemented; `uncategorized` catch-all exists). Removed RS2 from pre-implementation research spikes (one remains: RS3). |
+| v3.4.1 | 2026-02-23 | **Weaver version pinning:** Added `weaverMinVersion` config field and init-time version check — the spec references version-dependent behavior (v0.20.0 search deprecation, v0.21.2 MCP server, diff limitations) without previously ensuring the correct version is present. Init now runs `weaver --version` and aborts if below minimum. **Diff network call note:** Documented that `weaver registry diff` may trigger network calls to fetch the semconv dependency referenced in the baseline's `registry_manifest.yaml`, since `cp -r` copies the manifest URL reference, not resolved data. |
 
 ---
 
@@ -141,7 +142,7 @@ The Coordinator classifies errors into three categories based on whether subsequ
 | Config validation failure | Nothing can run with bad config |
 | Can't create feature branch (git error) | No place to commit results |
 | Invalid or missing API key | Agent calls will all fail |
-| Weaver binary not found | No schema validation possible |
+| Weaver binary not found or below `weaverMinVersion` | No schema validation possible; version-dependent CLI behavior may differ |
 | Schema validation fails during startup (before any files processed) | Starting schema is broken; agent extensions will compound the problem |
 
 **Degrade and continue** (isolated failure — the run can still produce useful output):
@@ -228,7 +229,7 @@ An `action.yml` that runs the CLI in a GitHub Actions runner. Setup steps: `acti
 
 **CLI `registry search` is deprecated** (v0.20.0) — "not compatible with V2 schema and will be removed in a future version." The agent discovers semconv attributes from the resolved schema JSON provided in its system prompt context, not via search commands.
 
-**Registry directory snapshot for diffing:** `weaver registry diff --baseline-registry` requires a registry directory as input — it does NOT accept resolved JSON from `weaver registry resolve`. The Coordinator copies the registry directory (`cp -r`) to a temporary location at the start of the run (before any agents execute). This directory copy serves as the baseline for all diff operations: periodic checkpoints, dry run summaries, and the final PR summary.
+**Registry directory snapshot for diffing:** `weaver registry diff --baseline-registry` requires a registry directory as input — it does NOT accept resolved JSON from `weaver registry resolve`. The Coordinator copies the registry directory (`cp -r`) to a temporary location at the start of the run (before any agents execute). This directory copy serves as the baseline for all diff operations: periodic checkpoints, dry run summaries, and the final PR summary. **Note:** The snapshot contains `registry_manifest.yaml` with its semconv dependency URL (e.g., the GitHub zip reference). When Weaver resolves the baseline during diff, it may fetch this dependency over the network — the `cp -r` copies the URL reference, not cached resolved data. This means diff operations are not guaranteed to be fully offline. In CI environments with restricted network access, consider pre-resolving or caching the semconv dependency. If the upstream semconv changes between run-start and diff-time, the baseline could be non-deterministic; pinning the semconv version in `registry_manifest.yaml` (already the case) mitigates this.
 
 **Diff output limitations:** The diff classifies changes as `added`, `renamed`, `obsoleted`, `removed`, or `uncategorized` (a catch-all for complex or unclear changes). The `updated` change type is documented but **not yet implemented** in Weaver's diff engine — field-level comparison within top-level items is planned for future versions. The Coordinator's "reject any change type other than `added`" enforcement checks for `renamed`, `obsoleted`, `removed`, and `uncategorized`. Only top-level object presence/absence is tracked by the current diff.
 
@@ -254,6 +255,7 @@ Before instrumentation can begin, user must run `telemetry-agent init`. This is 
    - OTel SDK initialization exists somewhere → **records path in config** (e.g., `src/telemetry/setup.ts`)
    - OTLP endpoint configured
    - Test suite exists (warns if missing, continues anyway)
+   - Verify Weaver binary version (`weaver --version`) meets `weaverMinVersion` (default: `0.21.2`). The spec depends on version-specific behavior: `registry search` deprecation (v0.20.0), MCP server and `weaver serve` (v0.21.2), diff output limitations. Running against an older Weaver version may produce silent failures or missing capabilities. If the version is below the minimum, init aborts with a clear message.
    - Verify localhost port availability for Weaver live-check (:4317 gRPC, :4320 HTTP). Note: if running in Docker, ensure the container can bind to these ports.
    - **Implementation-time note:** If ports 4317/4320 are already in use (e.g., local OTel Collector, another Weaver instance), init should detect this and fail with a clear message directing the user to free the ports. Recovery strategies (process detection, reuse, force-clean flags) are implementation decisions. Consider whether to support configurable ports (Weaver may not support this — verify) or require the user to free the ports.
 
@@ -1094,6 +1096,7 @@ maxFixAttempts: 3              # Max validation retry attempts per file before r
 maxTokensPerFile: 50000        # Token budget ceiling per file (all fix attempts combined)
 largeFileThresholdLines: 500   # Files above this trigger a warning in agent notes (prone to truncation)
 schemaCheckpointInterval: 5    # Run schema validation checkpoint after every N files
+weaverMinVersion: "0.21.2"     # Minimum Weaver CLI version (init aborts if below; spec depends on v0.20.0+ and v0.21.2+ behavior)
 
 # Review
 reviewSensitivity: moderate    # PR annotation strictness: strict (flag tier 3+), moderate (outliers only), off (no warnings)
@@ -1126,7 +1129,7 @@ exclude:                        # Glob patterns to skip
 | Agent API config (`agentModel`, `agentEffort`) | Span definitions |
 | Agent behavior settings | |
 | Dependency strategy | |
-| Limits and guardrails (including `largeFileThresholdLines`) | |
+| Limits and guardrails (including `largeFileThresholdLines`, `weaverMinVersion`) | |
 | Review sensitivity | |
 | Execution mode (dry run) | |
 | Cost ceiling confirmation | |
