@@ -208,7 +208,7 @@ An `action.yml` that runs the CLI in a GitHub Actions runner. Setup steps: `acti
 | Component | Technology | Rationale |
 |-----------|------------|-----------|
 | Coordinator | Plain TypeScript (Node.js) | Deterministic orchestration doesn't need a framework |
-| Instrumentation Agent | Direct Anthropic API via `@anthropic-ai/sdk` | Single provider, maximum control, simplest debugging |
+| Instrumentation Agent | Direct Anthropic API via `@anthropic-ai/sdk` (model configurable via `agentModel`, default: Sonnet 4.6) | Single provider, maximum control, simplest debugging |
 | AST manipulation | ts-morph | TypeScript-native, full type access, scope analysis |
 | Schema validation | Weaver CLI (with awareness of Weaver MCP server in v0.21.2) | Deterministic validation decoupled from MCP integration during PoC |
 | Code formatting | Prettier | Post-transformation formatting |
@@ -392,7 +392,7 @@ The Instrumentation Agent's system prompt follows a specific structure optimized
 Anthropic's Claude 4.x best practices document several behaviors that directly affect the agent's system prompt design:
 
 - **Remove anti-laziness directives.** Instructions like "be thorough," "write COMPLETE code," or "do not be lazy" were workarounds for earlier models. On Claude 4.6, these "amplify the model's already-proactive behavior and can cause runaway thinking or write-then-rewrite loops." Instead, frame output completeness as a **format specification**: "Output format: complete TypeScript source file. Files containing placeholder comments will fail validation." This is a technical constraint, not a motivational nudge.
-- **Use the `effort` API parameter** as the primary control lever for thinking depth, rather than prompt-based workarounds. Specify which effort level to use in the agent config.
+- **Use the `effort` API parameter** as the primary control lever for thinking depth, rather than prompt-based workarounds. The `agentEffort` config field (default: `medium`) controls this. For Claude 4.6 models, the Coordinator passes `thinking: {type: "adaptive"}` alongside the effort parameter; for pre-4.6 models, use `thinking: {type: "enabled", budget_tokens: N}` instead.
 - **Do not include chain-of-thought or thoroughness instructions** for the transformation itself. On Claude 4.6, these are unnecessary and can trigger runaway thinking or rewrite loops. The transformation rules are specific enough for direct output.
 - **Soften tool-use language** if MCP tools are exposed to the agent. Replace "You MUST use [tool]" with "Use [tool] when it would enhance your understanding." Claude 4.x models are more responsive to system prompts and may overtrigger on aggressive language.
 - **Guard against overengineering.** Claude 4.6 tends to create extra files and unnecessary abstractions. The system prompt should clearly state: "Your ONLY job is to add instrumentation. Do not refactor, rename, or restructure existing code."
@@ -405,15 +405,15 @@ Common failure modes for LLM-based code transformation, drawn from academic rese
 
 | Failure Mode | Frequency | Mitigation |
 |---|---|---|
-| **Mis-typed API calls** — incorrect method signatures, wrong parameter types, non-existent API parameters | Most common (55% of knowledge-conflicting hallucinations per FORGE '26 study by Khati et al.) | Weaver static validation catches schema violations. Syntax checking catches type errors. System prompt specifies exact API patterns in transformation rules. |
-| **Hallucinated imports** — inventing packages or APIs that don't exist | Common (24% of hallucinations per FORGE '26) | Allowlist-first library discovery (already in spec). System prompt: imports must come from schema or allowlist. Post-transformation syntax check catches nonexistent imports. |
+| **Mis-typed API calls** — incorrect method signatures, wrong parameter types, non-existent API parameters | Most common (~55% of knowledge-conflicting hallucinations per Khati et al., FORGE '26) | Weaver static validation catches schema violations. Syntax checking catches type errors. System prompt specifies exact API patterns in transformation rules. |
+| **Hallucinated imports** — inventing packages or APIs that don't exist | Second most common (~24% per Khati et al., FORGE '26) | Allowlist-first library discovery (already in spec). System prompt: imports must come from schema or allowlist. Post-transformation syntax check catches nonexistent imports. |
 | **Incomplete edits / truncation** — dropping functions, losing code at end of file | Common with large files | Full file output + Coordinator elision detection (see below). `largeFileThresholdLines` warning for files >500 lines. |
 | **Lost semantics** — subtly changing business logic while adding instrumentation | Moderate | System prompt (framed as format spec): "Your ONLY job is to add instrumentation. Do not refactor, rename, or restructure." Lint + test validation catches behavioral changes. |
 | **Lazy code / elision** — `// ... rest of the function` placeholder comments | Common (documented in Aider's laziness benchmarks; less frequent with Claude than GPT-4 Turbo) | System prompt: output format spec states placeholder comments fail validation. Coordinator elision detection scans for patterns before accepting output. |
 | **Incorrect span nesting / missing span.end()** — resource leaks | Moderate | Before/after examples demonstrate correct try/catch/finally pattern. Weaver static validation catches schema violations. |
 | **Variable shadowing** — introducing `span` where a local `span` already exists | Uncommon but insidious | ts-morph scope analysis (already in spec). System prompt reminds agent to check. |
 
-**Sources:** "Detecting and Correcting Hallucinations in LLM-Generated Code via Deterministic AST Analysis" (Khati et al., FORGE '26, arxiv 2601.19106) — note: the paper is authored by researchers at William & Mary, not Microsoft/GitHub. "Prompting LLMs for Code Editing: Struggles and Remedies" (Nam et al., Google, April 2025, arxiv 2504.20196) — identifies five categories of missing information that cause incorrect edits (specifics, operationalization plan, scope/localization, codebase context, output format). Aider laziness benchmarks (aider.chat) — 89-task refactoring benchmark measuring code elision.
+**Sources:** "Detecting and Correcting Hallucinations in LLM-Generated Code via Deterministic AST Analysis" (Khati et al., William & Mary, FORGE '26, arxiv 2601.19106). "Prompting LLMs for Code Editing: Struggles and Remedies" (Nam et al., studying Google's internal Transform Code tool, April 2025, arxiv 2504.20196) — identifies five categories of missing information that cause incorrect edits (specifics, operationalization plan, scope/localization, codebase context, output format). Aider laziness benchmarks (aider.chat) — 89-task refactoring benchmark measuring code elision.
 
 ### Elision Detection
 
@@ -1059,6 +1059,10 @@ The config file is created during `telemetry-agent init` and serves as the gate 
 schemaPath: ./telemetry/registry         # Path to Weaver registry directory
 sdkInitFile: ./src/telemetry/setup.ts    # OTel SDK initialization file (recorded during init)
 
+# Agent API configuration
+agentModel: claude-sonnet-4-6  # Model for Instrumentation Agent API calls (prompt hygiene guidance is written for 4.6 behavior)
+agentEffort: medium            # low | medium | high — controls thinking depth via effort API parameter (replaces prompt-based thoroughness cues; Sonnet 4.6 defaults to high which may cause higher latency)
+
 # Agent behavior
 autoApproveLibraries: true    # false = prompt before adding OTel libraries
 testCommand: "npm test"        # Command to run test suite during validation (supports npm, vitest, jest, nx, etc.)
@@ -1090,6 +1094,8 @@ exclude:                        # Glob patterns to skip
 # instrumentationMode: balanced  # thorough | balanced | minimal
 ```
 
+> **Implementation note (`agentModel` and `agentEffort`):** The Claude 4.x prompt hygiene guidance in the System Prompt Structure section is written for Claude 4.6 model behavior (anti-laziness removal, adaptive thinking, effort parameter). If `agentModel` is set to a pre-4.6 model (e.g., `claude-sonnet-4-5-20250929`), the Coordinator should skip the prompt hygiene adjustments — earlier models may benefit from the thoroughness cues that 4.6 models don't need. The Coordinator passes `thinking: {type: "adaptive"}` with the `effort` parameter for 4.6 models. For older models, use `thinking: {type: "enabled", budget_tokens: N}` instead. The `agentEffort` default of `medium` balances output quality against latency and cost; `high` may be warranted for complex files but increases token usage.
+
 > **Implementation note (`testCommand`):** The test command runs with `OTEL_EXPORTER_OTLP_ENDPOINT` overridden to point at Weaver during validation. Verify that the test runner correctly inherits environment variables — `execSync` with env override behaves differently than `spawn` with env inheritance, and meta-runners like nx or turbo may spawn subprocesses that don't inherit the override. For PoC, `npm test` with `execSync` and explicit env is sufficient. Consider validating env var inheritance during init (e.g., a smoke test that confirms the endpoint value propagates through the test runner) and failing with a clear error if it doesn't.
 
 ### What Goes Where
@@ -1099,7 +1105,8 @@ exclude:                        # Glob patterns to skip
 | Schema path | Namespace (authoritative) |
 | SDK init file path | Semconv version |
 | Test command | Attribute definitions |
-| Agent behavior settings | Span definitions |
+| Agent API config (`agentModel`, `agentEffort`) | Span definitions |
+| Agent behavior settings | |
 | Dependency strategy | |
 | Limits and guardrails (including `largeFileThresholdLines`) | |
 | Review sensitivity | |
