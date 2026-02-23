@@ -1,6 +1,6 @@
 # Telemetry Agent Specification
 
-**Status:** Draft v3.4.1
+**Status:** Draft v3.5
 **Created:** 2026-02-05
 **Updated:** 2026-02-23
 **Purpose:** AI agent that auto-instruments TypeScript code with OpenTelemetry based on a Weaver schema
@@ -17,6 +17,7 @@
 | v3.3 | 2026-02-23 | **Prompt engineering:** Completed RS1 research spike; moved conclusions into spec. Agent outputs full file replacement (not diffs), justified on architectural simplicity and documented fragility of diff application logic. Added system prompt structure guidance (role → schema → rules → 3-5 examples → file → format spec) per Anthropic's Claude 4.x best practices. Added Claude 4.x prompt hygiene section (remove anti-laziness directives, use `effort` parameter, frame output completeness as format spec). Added elision detection as Coordinator pre-validation step. Added `largeFileThresholdLines` config. Added known failure modes table with mitigations. Removed RS1 from pre-implementation research spikes (two remain: RS2, RS3). |
 | v3.4 | 2026-02-23 | **Weaver integration:** Completed RS2 research spike; moved conclusions into spec. PoC uses Weaver CLI for all operations (`check`, `resolve`, `diff`, `live-check`). MCP server (v0.21.2, experimental) documented but deferred to post-PoC — schema-changes-between-files invalidates in-memory registry, and MCP lacks `check`/`diff`/`resolve` equivalents. Added Weaver Integration Approach section with CLI operations table, registry directory snapshot strategy for `--baseline-registry`, and post-PoC optimization path. Documented `weaver registry search` CLI deprecation (v0.20.0). Added diff output limitations (`updated` change type not yet implemented; `uncategorized` catch-all exists). Removed RS2 from pre-implementation research spikes (one remains: RS3). |
 | v3.4.1 | 2026-02-23 | **Weaver version pinning:** Added `weaverMinVersion` config field and init-time version check — the spec references version-dependent behavior (v0.20.0 search deprecation, v0.21.2 MCP server, diff limitations) without previously ensuring the correct version is present. Init now runs `weaver --version` and aborts if below minimum. **Diff network call note:** Documented that `weaver registry diff` may trigger network calls to fetch the semconv dependency referenced in the baseline's `registry_manifest.yaml`, since `cp -r` copies the manifest URL reference, not resolved data. |
+| v3.5 | 2026-02-23 | **Fix loop design:** Completed RS3 research spike; moved conclusions into spec. Replaced per-stage retry loops with single-pass validation chain per attempt. Introduced 3-attempt hybrid strategy: initial generation → multi-turn fix → fresh regeneration. Multi-turn preserves context for simple errors; fresh regeneration avoids oscillation for stuck agents (supported by Olausson et al. ICLR 2024 finding that diverse initial samples outperform deep repair). Added diff-based lint checking — only agent-introduced errors trigger fixes, following SWE-agent's approach. Added error-count monotonicity and duplicate error detection as early-exit heuristics. Derived `maxFixAttempts: 2` from research (Olausson et al. found 1 repair attempt is the cost-effective sweet spot; our external validation feedback justifies one extra; Aider's hardcoded 3 reflections is the upper bound from practice). Derived `maxTokensPerFile: 80000` from per-call token estimates (~37K worst-case for 3 attempts on a 500-line file, 2× headroom). Added `validation_attempts`, `validation_strategy_used`, and `error_progression` to FileResult. Confirmed MCP `live_check` deferral to post-PoC — would require synthetic sample construction from AST, not justified when CLI `check` + end-of-run `live-check` cover structural and semantic validation respectively. Removed RS3 from pre-implementation research spikes (none remain). |
 
 ---
 
@@ -39,24 +40,11 @@ That verification loop is what makes this approach trustworthy enough to run aut
 
 ## Pre-Implementation Research Spikes
 
-Before implementation begins, one research spike remains. These are timeboxed investigations whose output is documentation, not code. The implementing agent must complete this before writing any agent logic. (RS1 — prompt engineering — and RS2 — Weaver integration capabilities — have been completed; their conclusions are embedded throughout the spec. See the Agent Output Format, System Prompt Structure, and Elision Detection sections for RS1, and the Weaver Integration Approach section for RS2.)
+All three research spikes are complete. Their conclusions are embedded throughout the spec:
 
-### RS3: Validation/Fix Loop Design
-
-**Goal:** Understand how existing AI coding tools handle the "generate → validate → fix → retry" cycle, design the fix loop mechanics for this agent, and determine the Weaver integration approach based on what the fix loop actually needs.
-
-**Deliverable:** A document covering:
-- How tools like Cursor, Aider, Claude Code, and similar handle iterative code correction
-- What context to include in fix-loop prompts (full file? just the error? original + current?)
-- How to prevent the agent from oscillating between different broken states
-- Recommended max retry counts and when to bail out
-- How to combine multi-turn conversations and fresh API calls within the fix loop (not either/or — evaluate when preserving context helps vs when resetting prevents oscillation)
-- Concrete fix loop design recommendation for this agent
-- Based on the fix loop design and the Weaver integration findings (see Weaver Integration Approach section), evaluate whether MCP `live_check` (per-call JSON validation without OTLP server) adds value to the per-file fix loop, and whether this is worth the added complexity for PoC
-
-**Implementation-time decision:** The fix loop is not a binary choice between multi-turn conversations and separate API calls — it's a question of when to use each. Multi-turn preserves what the agent tried (valuable for iterating on a specific error), while fresh calls prevent context bloat and oscillation (valuable when the agent is stuck). RS3 should evaluate hybrid strategies: e.g., multi-turn within a validation stage, fresh calls between stages; or multi-turn for the first N retries, then reset to a fresh call if the agent is oscillating.
-
-**Scope:** Focus on the per-file validation chain (syntax → lint → Weaver). The end-of-run validation is separate and doesn't involve fix loops.
+- **RS1 (Prompt Engineering):** Agent output format, system prompt structure, elision detection, known failure modes. See the Agent Output Format, System Prompt Structure, and Elision Detection sections.
+- **RS2 (Weaver Integration):** CLI for all PoC operations, MCP deferred to post-PoC. See the Weaver Integration Approach section.
+- **RS3 (Validation/Fix Loop Design):** Hybrid 3-attempt strategy (initial → multi-turn fix → fresh regeneration), single-pass validation chain, diff-based lint checking, oscillation detection. See the Per-File Validation section.
 
 ---
 
@@ -236,7 +224,7 @@ An `action.yml` that runs the CLI in a GitHub Actions runner. Setup steps: `acti
 **Post-PoC optimization path:** The Weaver MCP server offers capabilities that could enhance future versions:
 
 - **Fuzzy search with relevance scoring** (`search` tool) — useful if the system prompt sends a subset of the resolved schema to save tokens. The agent could use MCP search to discover attributes not in its context window. Requires giving the agent MCP tool access (multi-turn tool-using conversation rather than one-shot API calls).
-- **Ad-hoc `live_check`** — validates JSON telemetry samples per call (input format: `{ "samples": [...] }` with attribute/span/metric objects) without starting an OTLP receiver. Could enable lightweight per-file schema validation by constructing synthetic samples from the agent's output. RS3 should evaluate whether this adds value to the fix loop.
+- **Ad-hoc `live_check`** — validates JSON telemetry samples per call (input format: `{ "samples": [...] }` with attribute/span/metric objects) without starting an OTLP receiver. Could enable lightweight per-file schema validation by constructing synthetic samples from the agent's output. RS3 evaluated this and concluded it is **not justified for PoC**: it would require non-trivial static analysis (parsing instrumented TypeScript to extract what spans/attributes would be emitted), the per-file `weaver registry check` CLI already catches structural schema errors, and the end-of-run `live-check` (Weaver as OTLP receiver + test suite) catches semantic errors. The two-layer validation covers both ends without synthetic sample construction. Revisit post-PoC if ts-morph AST analysis of instrumented code makes synthetic sample construction feasible.
 - **O(1) signal lookups** (`get_attribute`, `get_span`, etc.) — direct lookups without parsing full resolved JSON. Most useful for building tool-augmented agent prompts.
 
 To use the MCP server, the Coordinator would maintain an `@modelcontextprotocol/sdk` client connection via `StdioClientTransport` (spawning `weaver registry mcp` as a child process). This is architecturally straightforward — approximately 10 lines of setup — and uses the same SDK the Coordinator already imports for its own MCP server interface. The Coordinator would simultaneously be an MCP server (for Claude Code) and an MCP client (for Weaver), which is a standard pattern supported natively by the SDK's separate `Server` and `Client` classes.
@@ -341,7 +329,7 @@ Before instrumentation can begin, user must run `telemetry-agent init`. This is 
 │  6. Check for variable shadowing before inserting new variables │
 │  7. Add manual spans ONLY for business logic gaps               │
 │  8. Extend schema if needed (within guardrails)                 │
-│  9. Per-file validation (fix loops): syntax → lint → Weaver     │
+│  9. Per-file validation (fix loop): syntax → lint → Weaver      │
 │  10. Return result object to Coordinator                        │
 └─────────────────────────────────────────────────────────────────┘
 ```
@@ -368,7 +356,7 @@ Before instrumentation can begin, user must run `telemetry-agent init`. This is 
    - Check semconv first, then existing schema, then create new
    - Add manual span
 9. **Update Weaver schema** if new libraries/attributes/spans added
-10. **Per-file validation** — syntax → lint → Weaver static (fix loops, max attempts enforced)
+10. **Per-file validation** — syntax → lint → Weaver static (fix loop, max attempts enforced)
 11. **Return result** to Coordinator
 
 ### Output
@@ -819,19 +807,56 @@ Agent does NOT add manual spans for things libraries already handle.
 
 Validation stays in the Instrumentation Agent so it can fix what it breaks. The Coordinator enforces limits and handles failures.
 
-### Per-File Validation (with fix loops)
+### Per-File Validation (with fix loop)
 
-**Pre-validation (Coordinator, no LLM):** Before running syntax/lint/Weaver validation, the Coordinator performs elision detection on the agent's output — scanning for placeholder patterns (`// ...`, `// existing code`, `// rest of`, `/* ... */`) and comparing output length to input length. If the output is <80% of input lines and spans were added, or if elision patterns are found, the Coordinator rejects the output and retries (counts toward the file's `maxFixAttempts`). This catches the most common full-file output failure mode without an LLM call. See Elision Detection section for details.
+**Pre-validation (Coordinator, no LLM):** Before running syntax/lint/Weaver validation, the Coordinator performs elision detection on the agent's output — scanning for placeholder patterns (`// ...`, `// existing code`, `// rest of`, `/* ... */`) and comparing output length to input length. If the output is <80% of input lines and spans were added, or if elision patterns are found, the Coordinator rejects the output and retries (counts toward the file's fix attempts). This catches the most common full-file output failure mode without an LLM call. See Elision Detection section for details.
 
-Each check runs in a loop: validate → fix errors → retry until clean or max attempts reached.
+**Validation chain (single pass per attempt):** The following checks run as a single sequential pass after each agent attempt. If any stage fails, the remaining stages are skipped and the error from the *first failing stage* is fed back to the agent.
 
 1. **Syntax** — TypeScript compiler / ts-morph (code must compile)
-2. **Lint** — Prettier/ESLint (code must be properly formatted)
+2. **Lint** — Prettier/ESLint, diff-based (only agent-introduced errors — see below)
 3. **Weaver registry check** — static schema validation
 
-Order matters: elision detection first (cheapest), then syntax (must compile), then lint, then schema.
+Order matters: elision detection first (cheapest, no LLM), then syntax (must compile before lint can run), then lint (code style), then schema (semantic correctness).
 
-**Fix loop limits:** The agent retries up to `maxFixAttempts` (default: 3) per validation stage. If the agent cannot produce clean code within the limit, it returns a `"failed"` status and the Coordinator reverts the file. The `maxTokensPerFile` budget (default: 50,000) provides a hard ceiling on total token usage per file across all attempts. The Coordinator enforces this by summing `gen_ai.usage.input_tokens` and `gen_ai.usage.output_tokens` from each API call's response metadata during the fix loop. If cumulative usage exceeds the budget, the Coordinator stops retries and treats the file as failed, regardless of remaining `maxFixAttempts`.
+**Diff-based lint checking:** The Coordinator captures lint output for the original file *before* the agent runs. After each attempt, it captures lint output for the modified file. Only *new* lint errors (not present in the original output) trigger a fix attempt. This prevents the agent from being forced to fix pre-existing code quality issues it didn't introduce — a problem SWE-agent encountered and solved with the same approach. (SWE-agent v0.6.1 changelog documents a bug where "existing linter errors in a file left SWE-agent unable to edit because of our lint-retry-loop." The fix compares pre-edit and post-edit lint output with line-number adjustment to account for inserted/removed lines.)
+
+**Hybrid 3-attempt strategy:** The fix loop uses a hybrid of multi-turn conversation and fresh API calls, informed by the ICLR 2024 finding (Olausson et al., MIT/Microsoft Research) that diverse initial attempts outperform deep iterative repair, and by the practical observation from Aider, SWE-agent, and Cursor that models oscillate when repeatedly shown their own broken output.
+
+```text
+Attempt 1 (initial generation):
+  Fresh API call → agent produces instrumented file → run validation chain
+  If pass: done ✓
+
+Attempt 2 (multi-turn fix):
+  Same conversation → append error output as user message → agent produces corrected file → run validation chain
+  If pass: done ✓
+  If errors increased vs attempt 1: skip to attempt 3 (oscillation detected)
+
+Attempt 3 (fresh regeneration):
+  New API call with clean context → system prompt includes failure category hint
+  (e.g., "A previous attempt failed due to [syntax error in span creation].
+  Approach the instrumentation differently.")
+  → agent produces new instrumented file from scratch → run validation chain
+  If pass: done ✓
+  If fail: file status = "failed", revert to snapshot, move on
+```
+
+**Multi-turn fix prompt (attempt 2):** The error output is appended to the existing conversation as a user message: "The instrumented file has validation errors. Fix them and return the complete corrected file." followed by the specific error output (compiler errors, lint diff, or Weaver check results). The agent retains the full conversation context from attempt 1.
+
+**Fresh regeneration prompt (attempt 3):** A new API call with the same system prompt as attempt 1, plus an additional section: "IMPORTANT: A previous attempt to instrument this file failed. The failure was: [error category]. Avoid this failure mode." The user message contains the original (un-instrumented) file and schema context. The broken file from the previous attempt is deliberately excluded to prevent the agent from trying to patch it.
+
+**Early exit heuristics:**
+
+- **Error-count monotonicity:** If attempt N+1 has more validation errors than attempt N, the Coordinator skips directly to fresh regeneration (or bails out if already on fresh regeneration). This detects oscillation before the retry cap.
+- **Duplicate error detection:** If the same error message appears in two consecutive attempts, the agent is stuck. Skip to fresh regeneration or bail.
+- **Token budget exceeded:** The `maxTokensPerFile` budget (default: 80,000) spans all attempts for a given file. The Coordinator sums `gen_ai.usage.input_tokens` and `gen_ai.usage.output_tokens` from each API call's response metadata. If cumulative usage exceeds the budget, the Coordinator stops immediately — regardless of which attempt is in progress.
+
+**`maxTokensPerFile` derivation:** A single API call for a typical file (~200 lines) costs roughly 8-12K tokens (system prompt ~5K, file content ~1K, schema context ~2K, output ~2-4K). A large file at the `largeFileThresholdLines` boundary (~500 lines) costs roughly 12-16K per call. With 3 total attempts (initial + multi-turn fix + fresh regeneration), worst-case usage is: attempt 1 (~16K) + attempt 2 multi-turn (~5K incremental) + attempt 3 fresh (~16K) ≈ 37K for a large file. The default of 80K provides ~2× headroom over this worst case, accommodating files somewhat above the large-file threshold and variance in schema/prompt size. Files that exhaust 80K tokens across 3 attempts are genuinely intractable and should fail. This is a PoC default — production tuning may adjust based on observed usage patterns.
+
+**`maxFixAttempts` (default: 2, configurable):** This controls the number of *fix* attempts after the initial generation — i.e., the total number of attempts is `1 + maxFixAttempts`. The default of 2 yields 3 total attempts (initial + multi-turn fix + fresh regeneration). Setting `maxFixAttempts: 0` disables the fix loop entirely — one shot, take it or leave it. Setting `maxFixAttempts: 1` gives initial + one multi-turn fix (no fresh regeneration).
+
+**Rationale for defaults:** Aider hardcodes `max_reflections = 3` (3 fix attempts after the initial generation, for 4 total). Olausson et al. (ICLR 2024) found that 1 repair attempt per initial sample is the cost-effective sweet spot — additional repair iterations showed diminishing returns and sometimes *reduced* pass rates below baseline. Our agent benefits from higher-quality feedback than the paper's self-repair setup (we use external validation: compiler, linter, Weaver — which is structurally analogous to the "human feedback" condition that improved repair rates by 1.58× in the same study) so we allow 2 fix attempts rather than 1, but the research clearly warns against going higher. The fresh regeneration attempt is the key innovation over Aider's uniform multi-turn approach — it provides the "diverse initial sample" benefit identified by Olausson et al. within a single file's budget. Tang et al. (NeurIPS 2024) further confirmed that intelligent repair budget allocation consistently outperforms naive iteration, framing repair as an exploration-exploitation tradeoff.
 
 **Variable shadowing check:** Before inserting new variables (`span`, `tracer`, etc.), the agent uses ts-morph's scope analysis (TypeScript binder access) to check for existing variables with the same name in the target scope. If a collision is detected, the agent uses suffixed names (`otelSpan`, `otelTracer`) or reports the collision and skips instrumentation for that function. This check happens before the validation loop — it's a pre-condition, not something that gets "fixed" in a retry.
 
@@ -983,7 +1008,9 @@ interface FileResult {
   libraries_needed: LibraryRequirement[];  // Coordinator handles installation + SDK registration
   schema_extensions: string[];              // IDs of new schema entries
   attributes_created: number;
-  validation_retries: number;
+  validation_attempts: number;              // total attempts (1 = first try succeeded, 3 = all attempts used)
+  validation_strategy_used: "single-pass" | "multi-turn-fix" | "fresh-regeneration";  // which strategy resolved it (or last strategy tried on failure)
+  error_progression?: string[];             // e.g., ["3 syntax errors", "1 lint error", "0 errors"] — shows convergence or oscillation
   span_categories?: {                       // optional — not present on early failures
     external_calls: number;
     schema_defined: number;
@@ -994,7 +1021,7 @@ interface FileResult {
   schemaHashBefore?: string;                // hash of resolved schema before agent ran
   schemaHashAfter?: string;                 // hash of resolved schema after agent ran
   agentVersion?: string;                    // version of agent/prompt that produced this result
-  reason?: string;                          // human-readable summary, e.g. "syntax errors after 3 fix attempts"
+  reason?: string;                          // human-readable summary, e.g. "syntax errors after 3 attempts"
   last_error?: string;                      // raw error output for debugging, e.g. "Unexpected token at line 42"
 }
 ```
@@ -1021,7 +1048,9 @@ Success example:
   ],
   "schema_extensions": ["span.commit_story.payment.process"],
   "attributes_created": 2,
-  "validation_retries": 1,
+  "validation_attempts": 2,
+  "validation_strategy_used": "multi-turn-fix",
+  "error_progression": ["1 lint error", "0 errors"],
   "span_categories": {
     "external_calls": 2,
     "schema_defined": 1,
@@ -1042,8 +1071,10 @@ Failure example:
   "libraries_needed": [],
   "schema_extensions": [],
   "attributes_created": 0,
-  "validation_retries": 3,
-  "reason": "syntax errors after 3 fix attempts",
+  "validation_attempts": 3,
+  "validation_strategy_used": "fresh-regeneration",
+  "error_progression": ["2 syntax errors", "3 syntax errors", "1 syntax error"],
+  "reason": "syntax errors after 3 attempts",
   "last_error": "Unexpected token at line 42"
 }
 ```
@@ -1092,8 +1123,8 @@ dependencyStrategy: dependencies  # dependencies (services) | peerDependencies (
 
 # Limits and guardrails
 maxFilesPerRun: 50             # Cost/time guardrail, user adjustable
-maxFixAttempts: 3              # Max validation retry attempts per file before reverting
-maxTokensPerFile: 50000        # Token budget ceiling per file (all fix attempts combined)
+maxFixAttempts: 2              # Max fix attempts after initial generation (total attempts = 1 + maxFixAttempts) — see Per-File Validation for derivation
+maxTokensPerFile: 80000        # Token budget ceiling per file (all attempts combined) — see Per-File Validation for derivation
 largeFileThresholdLines: 500   # Files above this trigger a warning in agent notes (prone to truncation)
 schemaCheckpointInterval: 5    # Run schema validation checkpoint after every N files
 weaverMinVersion: "0.21.2"     # Minimum Weaver CLI version (init aborts if below; spec depends on v0.20.0+ and v0.21.2+ behavior)
@@ -1178,7 +1209,7 @@ When `dependencyStrategy: peerDependencies`, the Coordinator runs `npm install -
 
 Cost visibility has two phases: a pre-run ceiling and post-run actuals. Both appear in the PR summary; the ceiling is additionally surfaced before the run begins when `confirmEstimate` is enabled.
 
-**Pre-run ceiling:** After file globbing (step 3b in the workflow), the Coordinator calculates a cost ceiling: `fileCount × maxTokensPerFile`. With `maxTokensPerFile: 50000` and the default 50-file limit, the worst-case ceiling is 2.5M tokens per run. Actual usage will be significantly lower — most files won't hit the per-file ceiling, and not all files will require fix loop retries. This is a ceiling, not an estimate: it's a simple, clearly-defined worst case. Tighter ceilings based on file sizes or historical data are future work (see Out of Scope).
+**Pre-run ceiling:** After file globbing (step 3b in the workflow), the Coordinator calculates a cost ceiling: `fileCount × maxTokensPerFile`. With `maxTokensPerFile: 80000` and the default 50-file limit, the worst-case ceiling is 4M tokens per run. Actual usage will be well below this — most files resolve on the first attempt (no fix loop), and typical files use ~10-15K tokens per attempt, not the ~37K worst case the ceiling is designed around. This is a ceiling, not an estimate: it's a simple, clearly-defined worst case. Tighter ceilings based on actual file sizes and historical data are future work (see Out of Scope).
 
 When `confirmEstimate: true`, the Coordinator fires the `onCostCeilingReady` callback, giving the interface layer an opportunity to surface the ceiling and request user confirmation before incurring token costs. If the user declines, the run aborts with no LLM calls made. When `confirmEstimate: false`, the ceiling is still calculated (it appears in the PR summary) but no confirmation is requested.
 
@@ -1392,7 +1423,7 @@ Four levers:
 - Assumes target codebase already has OTel API and SDK installed, initialized, and a valid Weaver schema in place
 - Prompt engineering conclusions embedded in spec (agent output format, system prompt structure, elision detection, known failure modes)
 - Weaver integration conclusions embedded in spec (CLI for all PoC operations — see Weaver Integration Approach)
-- Pre-implementation research spike (RS3: fix loop design)
+- Fix loop design conclusions embedded in spec (hybrid 3-attempt strategy, diff-based lint, oscillation detection — see Per-File Validation)
 - Mandatory init phase with prerequisite verification and SDK init file path recording
 - Config validation (Zod schema)
 
@@ -1424,7 +1455,7 @@ Four levers:
 - File revert protocol (snapshot before agent, revert on failure)
 
 **Validation:**
-- Per-file validation with fix loops: syntax, lint, Weaver static (with max attempts and token budget)
+- Per-file validation with hybrid fix loop: single-pass chain (syntax, lint, Weaver static), 3-attempt strategy (initial → multi-turn fix → fresh regeneration), diff-based lint, oscillation detection, token budget ceiling
 - Periodic schema checkpoints
 - End-of-run validation: tests, Weaver live-check
 
@@ -1503,3 +1534,12 @@ Relevant when the agent targets codebases that don't already have OTel installed
 - [Weaver `docs/schema-changes.md` — diff output format, `updated` not implemented](https://github.com/open-telemetry/weaver/blob/main/docs/schema-changes.md)
 - [Weaver v0.20.0 release notes — `registry search` deprecation](https://github.com/open-telemetry/weaver/releases/tag/v0.20.0)
 - [MCP TypeScript SDK — client API, `StdioClientTransport`](https://www.npmjs.com/package/@modelcontextprotocol/sdk)
+
+### RS3 Research Sources (verified February 2026)
+- ["Is Self-Repair a Silver Bullet for Code Generation?" (Olausson et al., MIT/Microsoft Research, ICLR 2024)](https://arxiv.org/abs/2306.09896) — 1 repair attempt is cost-effective sweet spot; diverse samples beat deep repair; external feedback dramatically improves repair rates
+- ["Code Repair with LLMs gives an Exploration-Exploitation Tradeoff" (Tang et al., NeurIPS 2024)](https://arxiv.org/abs/2405.17503) — confirms budget allocation matters; REx algorithm reduces API calls 1.5-5× via Thompson Sampling
+- [Aider `max_reflections = 3` — hardcoded reflection cap](https://github.com/Aider-AI/aider/issues/3450) — source code confirms hardcoded limit; not user-configurable as of Feb 2026
+- [Aider tree-sitter lint augmentation](https://aider.chat/2024/05/22/linting.html) — AST-augmented lint context gives LLM structural context instead of raw line numbers
+- [SWE-agent v0.6.1 changelog — diff-based lint checking](https://swe-agent.com/latest/installation/changelog/) — pre-edit vs post-edit lint comparison; only new errors trigger rejection
+- [SWE-EVO benchmark error taxonomy (December 2025)](https://arxiv.org/abs/2512.18470) — "Stuck in Loop" as recognized failure category validates oscillation detection need
+- [Claude Code hooks documentation — PostToolUse and Stop hooks](https://code.claude.com/docs/en/hooks)
