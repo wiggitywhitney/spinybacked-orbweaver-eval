@@ -1009,7 +1009,7 @@ interface FileResult {
   schema_extensions: string[];              // IDs of new schema entries
   attributes_created: number;
   validation_attempts: number;              // total attempts (1 = first try succeeded, 3 = all attempts used)
-  validation_strategy_used: "single-pass" | "multi-turn-fix" | "fresh-regeneration";  // strategy of the last completed attempt (on success: which strategy resolved it; on failure: which strategy was last tried before giving up or hitting a budget/early-exit)
+  validation_strategy_used: "initial-generation" | "multi-turn-fix" | "fresh-regeneration";  // strategy of the last completed attempt (on success: which strategy resolved it; on failure: which strategy was last tried before giving up or hitting a budget/early-exit)
   error_progression?: string[];             // e.g., ["3 syntax errors", "1 lint error", "0 errors"] — shows convergence or oscillation
   span_categories?: {                       // optional — not present on early failures
     external_calls: number;
@@ -1147,7 +1147,7 @@ exclude:                        # Glob patterns to skip
 ```
 
 > **Implementation note (`agentModel` and `agentEffort`):** The Claude 4.x prompt hygiene guidance in the System Prompt Structure section is written for Claude 4.6 model behavior (anti-laziness removal, adaptive thinking, effort parameter). If `agentModel` is set to a pre-4.6 model (e.g., `claude-sonnet-4-5-20250929`), the Coordinator should skip the prompt hygiene adjustments — earlier models may benefit from the thoroughness cues that 4.6 models don't need. The Coordinator passes `thinking: {type: "adaptive"}` with the `effort` parameter for 4.6 models. For older models, use `thinking: {type: "enabled", budget_tokens: N}` instead. The `agentEffort` default of `medium` balances output quality against latency and cost; `high` may be warranted for complex files but increases token usage.
-
+>
 > **Implementation note (`testCommand`):** The test command runs with `OTEL_EXPORTER_OTLP_ENDPOINT` overridden to point at Weaver during validation. Verify that the test runner correctly inherits environment variables — `execSync` with env override behaves differently than `spawn` with env inheritance, and meta-runners like nx or turbo may spawn subprocesses that don't inherit the override. For PoC, `npm test` with `execSync` and explicit env is sufficient. Consider validating env var inheritance during init (e.g., a smoke test that confirms the endpoint value propagates through the test runner) and failing with a clear error if it doesn't.
 
 ### What Goes Where
