@@ -1,0 +1,126 @@
+/**
+ * format-results.ts - Formats vector search results for LLM consumption
+ *
+ * What this file does:
+ * Converts raw SearchResult arrays from the vector database into readable
+ * text that the LLM can understand and reason about. Both the semantic search
+ * and filter query tools use this same formatter.
+ *
+ * Why a shared formatter?
+ * Both vector tools return the same SearchResult type. Formatting once keeps
+ * the output consistent and avoids duplicating the presentation logic.
+ *
+ * Design choices:
+ * - Plain text, not JSON — LLMs read prose better than structured data
+ * - Score included with explanation — so the LLM understands relevance
+ * - Metadata on a separate line — easy to scan for kind, apiGroup, etc.
+ * - Numbered results — helps the LLM reference specific items
+ */
+
+import { trace, SpanStatusCode } from '@opentelemetry/api';
+import type { SearchResult } from "../../vectorstore";
+
+const tracer = trace.getTracer('commit-story.tools.format-results');
+
+/**
+ * Formats an array of search results into LLM-readable text.
+ *
+ * Example output:
+ *   Found 3 results in "capabilities" collection:
+ *
+ *   1. apps/v1/Deployment (distance: 0.15 — very similar)
+ *      Manages replicated application pods with rolling updates...
+ *      Metadata: kind=Deployment, apiGroup=apps, version=v1
+ *
+ *   2. acid.zalan.do/v1/postgresql (distance: 0.32 — similar)
+ *      ...
+ *
+ * @param results - Search results from VectorStore.search()
+ * @param collection - Which collection was searched (for the header)
+ * @returns Formatted string for the LLM to read
+ */
+export function formatSearchResults(
+  results: SearchResult[],
+  collection: string
+): string {
+  return tracer.startActiveSpan('format.search.results', (span) => {
+    try {
+      span.setAttribute('search.collection', collection);
+      span.setAttribute('search.results.count', results.length);
+
+      if (results.length === 0) {
+        return `No results found in "${collection}" collection.`;
+      }
+
+      const header = `Found ${results.length} result${results.length === 1 ? "" : "s"} in "${collection}" collection:\n`;
+
+      const formatted = results.map((result, index) => {
+        // Score of -1 means keyword/filter match (no vector comparison).
+        // Show "keyword match" instead of a meaningless distance number.
+        const scoreLabel =
+          result.score < 0
+            ? "keyword match"
+            : `distance: ${result.score.toFixed(2)} — ${describeSimilarity(result.score)}`;
+        const metadataLine = formatMetadata(result.metadata);
+
+        const lines = [
+          `${index + 1}. ${result.id} (${scoreLabel})`,
+          `   ${result.text}`,
+        ];
+
+        if (metadataLine) {
+          lines.push(`   Metadata: ${metadataLine}`);
+        }
+
+        return lines.join("\n");
+      });
+
+      return header + "\n" + formatted.join("\n\n");
+    } catch (error) {
+      span.recordException(error as Error);
+      span.setStatus({ code: SpanStatusCode.ERROR, message: (error as Error).message });
+      throw error;
+    } finally {
+      span.end();
+    }
+  });
+}
+
+/**
+ * Cosine distance thresholds for similarity labels.
+ * Tuning deferred to PRD #25 M3 when real data is available.
+ */
+const VERY_SIMILAR_THRESHOLD = 0.3;
+const SIMILAR_THRESHOLD = 0.6;
+const SOMEWHAT_RELATED_THRESHOLD = 1.0;
+
+/**
+ * Converts a cosine distance score into a human-readable similarity label.
+ *
+ * Cosine distance ranges:
+ * - 0.0 = identical vectors (perfect match)
+ * - 0.0–0.3 = very similar (strong semantic match)
+ * - 0.3–0.6 = similar (related content)
+ * - 0.6–1.0 = somewhat related (weak match)
+ * - 1.0–2.0 = dissimilar to opposite
+ */
+function describeSimilarity(score: number): string {
+  if (score < VERY_SIMILAR_THRESHOLD) return "very similar";
+  if (score < SIMILAR_THRESHOLD) return "similar";
+  if (score < SOMEWHAT_RELATED_THRESHOLD) return "somewhat related";
+  return "weak match";
+}
+
+/**
+ * Formats metadata key-value pairs into a readable string.
+ *
+ * Skips empty metadata. Joins pairs with commas.
+ * Example: "kind=Deployment, apiGroup=apps, version=v1"
+ */
+function formatMetadata(
+  metadata: Record<string, string | number | boolean>
+): string {
+  const entries = Object.entries(metadata);
+  if (entries.length === 0) return "";
+  return entries.map(([key, value]) => `${key}=${value}`).join(", ");
+}

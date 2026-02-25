@@ -1,0 +1,279 @@
+/**
+ * kubectl.ts - Executes kubectl commands as subprocesses
+ *
+ * How it works:
+ * 1. Takes an array of kubectl arguments (e.g., ["get", "pods", "-n", "default"])
+ * 2. Spawns kubectl as a child process
+ * 3. Returns the output as a string, or an error message if it fails
+ *
+ * Why spawnSync instead of execSync?
+ * Both are synchronous (block until complete), but they differ in how they
+ * handle arguments:
+ *
+ * - execSync(string): Passes the string to a shell (/bin/sh -c "...").
+ *   This means shell metacharacters like ; | ` $() are interpreted.
+ *   If args contained ["get", "pods; rm -rf /"], the shell would see TWO
+ *   commands: "kubectl get pods" AND "rm -rf /". This is shell injection.
+ *
+ * - spawnSync(cmd, args[]): Bypasses the shell entirely. Each array element
+ *   becomes a separate argument to the process. The string "pods; rm -rf /"
+ *   is passed as a single argument to kubectl, which safely fails with
+ *   "resource not found" instead of executing the injected command.
+ *
+ * Rule of thumb: Always use spawnSync with an args array when the arguments
+ * come from any external source (user input, API calls, AI agents).
+ *
+ * OpenTelemetry instrumentation:
+ * Each kubectl execution creates a span following OTel semantic conventions.
+ * We use process.* semconv attributes plus two pragmatic custom attributes
+ * (cluster_whisperer.k8s.namespace and cluster_whisperer.k8s.output_size_bytes) that have no semconv equivalent.
+ * See docs/opentelemetry-research.md Section 10 for the semconv gap analysis.
+ */
+
+import { spawnSync } from "child_process";
+import { SpanKind, SpanStatusCode } from "@opentelemetry/api";
+import { getTracer } from "../tracing";
+
+/**
+ * Flags that may contain sensitive values (tokens, passwords, keys).
+ * These are redacted from span attributes to prevent leaking secrets to telemetry.
+ */
+const SENSITIVE_FLAGS = new Set([
+  "--token",
+  "--password",
+  "--client-key",
+  "--client-certificate",
+  "--kubeconfig",
+]);
+
+/**
+ * Redact sensitive kubectl arguments before adding to span attributes.
+ *
+ * Some kubectl flags can contain secrets (--token, --password, etc.) that
+ * should not be exported to telemetry backends. This function replaces
+ * the values of known sensitive flags with "[REDACTED]".
+ *
+ * @param args - kubectl arguments array
+ * @returns New array with sensitive values redacted
+ */
+function redactSensitiveArgs(args: string[]): string[] {
+  const redacted: string[] = [];
+
+  for (let i = 0; i < args.length; i++) {
+    const arg = args[i];
+
+    // Check for --flag=value format
+    for (const flag of SENSITIVE_FLAGS) {
+      if (arg.startsWith(`${flag}=`)) {
+        redacted.push(`${flag}=[REDACTED]`);
+        continue;
+      }
+    }
+
+    // Check for --flag value format (two separate args)
+    if (SENSITIVE_FLAGS.has(arg) && i + 1 < args.length) {
+      redacted.push(arg);
+      redacted.push("[REDACTED]");
+      i++; // Skip the next arg (the value)
+      continue;
+    }
+
+    // Not sensitive, keep as-is
+    redacted.push(arg);
+  }
+
+  return redacted;
+}
+
+/**
+ * Result from executing a kubectl command.
+ *
+ * Why a structured result instead of just a string?
+ * MCP tool responses include an `isError` flag to signal failures to clients.
+ * Previously we detected errors by checking if output started with "Error",
+ * but this caused false positives when legitimate output (like application logs)
+ * contained error messages. By returning the error state explicitly based on
+ * kubectl's exit code, we avoid content-based detection entirely.
+ */
+export interface KubectlResult {
+  output: string;
+  isError: boolean;
+}
+
+/**
+ * Metadata extracted from kubectl args for tracing attributes.
+ * We parse this from the args array to create meaningful span names
+ * and attributes without changing the executeKubectl API.
+ */
+interface KubectlMetadata {
+  operation: string; // get, describe, logs
+  resource: string; // pods, deployments, etc.
+  namespace: string | undefined; // from -n flag
+}
+
+/**
+ * Extracts operation metadata from kubectl args for tracing.
+ *
+ * Kubectl commands follow predictable patterns:
+ * - kubectl get pods -n default     → operation=get, resource=pods
+ * - kubectl describe pod nginx      → operation=describe, resource=pod
+ * - kubectl logs nginx -n default   → operation=logs, resource=nginx (pod name)
+ *
+ * @param args - kubectl arguments (without "kubectl" itself)
+ * @returns Metadata for span naming and attributes
+ */
+function extractKubectlMetadata(args: string[]): KubectlMetadata {
+  // Operation is always the first argument
+  const operation = args[0] || "unknown";
+
+  // Resource is typically the second argument
+  // For logs, this is the pod name; for get/describe, it's the resource type
+  const resource = args[1] || "unknown";
+
+  // Find namespace from -n or --namespace flag
+  let namespaceIndex = args.indexOf("-n");
+  if (namespaceIndex === -1) {
+    namespaceIndex = args.indexOf("--namespace");
+  }
+  const namespace =
+    namespaceIndex !== -1 && args[namespaceIndex + 1]
+      ? args[namespaceIndex + 1]
+      : undefined;
+
+  return { operation, resource, namespace };
+}
+
+/**
+ * Executes a kubectl command and returns a structured result.
+ *
+ * Creates an OpenTelemetry span for the kubectl subprocess execution with:
+ * - Span name: "kubectl {operation} {resource}" (e.g., "kubectl get pods")
+ * - Span kind: CLIENT (outbound subprocess call)
+ * - Attributes: OTel semconv process.* attributes plus cluster_whisperer.k8s.namespace and cluster_whisperer.k8s.output_size_bytes
+ *
+ * The span is automatically parented under the active MCP tool span (if any),
+ * creating the hierarchy: execute_tool kubectl_get → kubectl get pods
+ *
+ * @param args - Array of arguments to pass to kubectl (e.g., ["get", "pods"])
+ * @returns Object with output string and isError flag based on exit code
+ *
+ * Example:
+ *   executeKubectl(["get", "pods", "-n", "default"])
+ *   // Returns: { output: "NAME  READY  STATUS...", isError: false }
+ *
+ *   executeKubectl(["get", "nonexistent"])
+ *   // Returns: { output: "Error executing...", isError: true }
+ */
+export function executeKubectl(args: string[]): KubectlResult {
+  const tracer = getTracer();
+  const metadata = extractKubectlMetadata(args);
+
+  // Build the full command for display purposes (logging only, not execution)
+  const command = `kubectl ${args.join(" ")}`;
+
+  // Span name follows Viktor's pattern: "kubectl {operation} {resource}"
+  // SpanKind.CLIENT = outbound call (we're calling kubectl subprocess)
+  return tracer.startActiveSpan(
+    `kubectl ${metadata.operation} ${metadata.resource}`,
+    { kind: SpanKind.CLIENT },
+    (span) => {
+      // Set pre-execution attributes
+      // OTel semconv process.* attributes
+      // Redact sensitive flags (--token, --password, etc.) before adding to span
+      span.setAttribute("process.executable.name", "kubectl");
+      span.setAttribute("process.command_args", [
+        "kubectl",
+        ...redactSensitiveArgs(args),
+      ]);
+
+      // Pragmatic custom attributes (no semconv equivalent, namespaced to project)
+      // cluster_whisperer.k8s.namespace is useful for filtering queries by namespace
+      if (metadata.namespace) {
+        span.setAttribute("cluster_whisperer.k8s.namespace", metadata.namespace);
+      }
+
+      try {
+        // spawnSync bypasses the shell - each array element is a separate argument.
+        // This prevents shell injection even if args contain malicious characters.
+        const result = spawnSync("kubectl", args, {
+          encoding: "utf-8", // Return strings instead of Buffers
+          timeout: 30000, // 30 second timeout to avoid hanging
+        });
+
+        // Handle spawn errors (e.g., kubectl not found)
+        if (result.error) {
+          span.setAttribute("process.exit.code", -1);
+          span.setAttribute("error.type", result.error.name);
+          span.recordException(result.error);
+          span.setStatus({
+            code: SpanStatusCode.ERROR,
+            message: result.error.message,
+          });
+
+          return {
+            output: `Error executing "${command}": ${result.error.message}`,
+            isError: true,
+          };
+        }
+
+        // Set exit code (semconv attribute)
+        span.setAttribute("process.exit.code", result.status ?? -1);
+
+        // Handle non-zero exit codes (e.g., resource not found, permission denied)
+        if (result.status !== 0) {
+          const errorMessage = result.stderr || "Unknown error";
+          span.setAttribute("error.type", "KubectlError");
+          span.setStatus({
+            code: SpanStatusCode.ERROR,
+            message: errorMessage,
+          });
+
+          return {
+            output: `Error executing "${command}": ${errorMessage}`,
+            isError: true,
+          };
+        }
+
+        // Success case
+        // cluster_whisperer.k8s.output_size_bytes is a pragmatic custom attribute (no semconv equivalent)
+        // Useful for debugging when kubectl returns unexpectedly large output
+        span.setAttribute(
+          "cluster_whisperer.k8s.output_size_bytes",
+          Buffer.byteLength(result.stdout, "utf-8")
+        );
+        span.setStatus({ code: SpanStatusCode.OK });
+
+        return {
+          output: result.stdout,
+          isError: false,
+        };
+      } catch (error) {
+        // Unexpected error during execution
+        span.setAttribute("process.exit.code", -1);
+
+        if (error instanceof Error) {
+          span.setAttribute("error.type", error.name);
+          span.recordException(error);
+          span.setStatus({
+            code: SpanStatusCode.ERROR,
+            message: error.message,
+          });
+        } else {
+          span.setAttribute("error.type", "UnknownError");
+          span.recordException(new Error(String(error)));
+          span.setStatus({
+            code: SpanStatusCode.ERROR,
+            message: String(error),
+          });
+        }
+
+        return {
+          output: `Error executing "${command}": ${error instanceof Error ? error.message : String(error)}`,
+          isError: true,
+        };
+      } finally {
+        span.end();
+      }
+    }
+  );
+}

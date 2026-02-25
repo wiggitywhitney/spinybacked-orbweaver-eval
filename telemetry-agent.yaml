@@ -1,0 +1,4 @@
+# telemetry-agent.yaml — manually created for evaluation run-1
+# (telemetry-agent init has no wired handler)
+schemaPath: ./telemetry/registry
+sdkInitFile: ./src/telemetry/setup.ts
