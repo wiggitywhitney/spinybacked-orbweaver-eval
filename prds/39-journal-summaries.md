@@ -134,16 +134,16 @@ Monthly rollups that consolidate weekly summaries into a retrospective view.
 ---
 
 ### Milestone 6: Documentation and Integration
-**Status**: Not Started
+**Status**: Complete
 
 User-facing documentation and polish for the summary feature.
 
 **What's included**:
-- [ ] Update README with summary commands and configuration
-- [ ] Update `--help` output with summary subcommand
-- [ ] Document environment variables (`COMMIT_STORY_AUTO_SUMMARIZE`, `COMMIT_STORY_TIMEZONE`)
-- [ ] Document file structure for summaries directory
-- [ ] Verify MCP tools (reflections, context) work correctly alongside summary generation
+- [x] Update README with summary commands and configuration
+- [x] Update `--help` output with summary subcommand
+- [x] Document environment variables (`COMMIT_STORY_AUTO_SUMMARIZE`, `COMMIT_STORY_TIMEZONE`)
+- [x] Document file structure for summaries directory
+- [x] Verify MCP tools (reflections, context) work correctly alongside summary generation
 
 **Done when**: A new user can discover, configure, and use summary generation from the README alone
 
@@ -180,6 +180,13 @@ User-facing documentation and polish for the summary feature.
 ## Progress Log
 
 ### 2026-03-04
+- Completed Milestone 6: Documentation and Integration
+- Updated README with comprehensive Summaries section: auto-generation, manual CLI commands, configuration table, file structure
+- Verified `--help` output already documents summarize subcommand (added in Milestone 3)
+- Documented `COMMIT_STORY_AUTO_SUMMARIZE` and `COMMIT_STORY_TIMEZONE` env vars in configuration table
+- Documented `journal/summaries/` directory tree with daily/weekly/monthly structure
+- Verified MCP tools (reflections → `journal/reflections/`, context → `journal/context/`) are fully independent from summary pipeline
+- All 535 tests passing, all 6 milestones complete
 - Real-world validation of all three cadences against live journal entries:
   - Daily: generated summaries for Feb 22 (8 entries), Feb 23 (11 entries), Feb 24 (3 entries) — coherent standup-style narratives
   - Weekly: generated W09 summary from 2 daily summaries — proper cross-day synthesis with highlights and patterns
