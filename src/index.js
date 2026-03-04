@@ -25,7 +25,7 @@ import { generateJournalSections } from './generators/journal-graph.js';
 import { saveJournalEntry, discoverReflections } from './managers/journal-manager.js';
 import { isJournalEntriesOnlyCommit, isMergeCommit, shouldSkipMergeCommit, isSafeGitRef } from './utils/commit-analyzer.js';
 import { triggerAutoSummaries } from './managers/auto-summarize.js';
-import { parseSummarizeArgs, runSummarize, showSummarizeHelp } from './commands/summarize.js';
+import { parseSummarizeArgs, runSummarize, runWeeklySummarize, showSummarizeHelp } from './commands/summarize.js';
 
 /** Exit codes */
 const EXIT_SUCCESS = 0;
@@ -218,6 +218,55 @@ async function handleSummarize(args) {
     process.exit(EXIT_ERROR);
   }
 
+  // Weekly mode
+  if (parsed.weekly) {
+    const total = parsed.weeks.length;
+    console.log(`\n📊 Generating weekly summaries for ${total} week${total > 1 ? 's' : ''}...`);
+    if (parsed.force) {
+      console.log('   --force: regenerating existing summaries');
+    }
+
+    let completed = 0;
+    const result = await runWeeklySummarize({
+      weeks: parsed.weeks,
+      force: parsed.force,
+      basePath: '.',
+      onProgress: (msg) => {
+        completed++;
+        console.log(`   [${completed}/${total}] ${msg}`);
+      },
+    });
+
+    console.log('');
+    if (result.generated.length > 0) {
+      console.log(`✅ Generated: ${result.generated.length} weekly summary(ies)`);
+    }
+    if (result.noSummaries.length > 0) {
+      console.log(`⏭️  No daily summaries: ${result.noSummaries.length} week(s)`);
+    }
+    if (result.alreadyExists.length > 0) {
+      console.log(`⏭️  Already exist: ${result.alreadyExists.length} week(s)`);
+    }
+    if (result.failed.length > 0) {
+      console.log(`❌ Failed: ${result.failed.length} week(s)`);
+      for (const weekStr of result.failed) {
+        console.log(`   - ${weekStr}`);
+      }
+    }
+    if (result.errors.length > 0) {
+      console.log('');
+      console.log('⚠️  Errors:');
+      for (const err of result.errors) {
+        console.log(`   - ${err}`);
+      }
+    }
+    console.log('');
+
+    process.exit(result.failed.length > 0 ? EXIT_ERROR : EXIT_SUCCESS);
+    return;
+  }
+
+  // Daily mode
   const total = parsed.dates.length;
   console.log(`\n📊 Generating daily summaries for ${total} date${total > 1 ? 's' : ''}...`);
   if (parsed.force) {
@@ -382,16 +431,21 @@ async function main() {
     }
   }
 
-  // Auto-generate daily summaries for unsummarized past days
+  // Auto-generate daily and weekly summaries for unsummarized past days/weeks
   if (config.autoSummarize) {
-    debug('Checking for unsummarized days...');
+    debug('Checking for unsummarized days and weeks...');
     try {
       const summaryResult = await triggerAutoSummaries('.', {
         onProgress: (msg) => debug(msg),
       });
 
       if (summaryResult.generated.length > 0) {
-        console.log(`📊 Generated ${summaryResult.generated.length} daily summary(ies)`);
+        const dailyCount = summaryResult.generated.filter(p => p.includes('daily')).length;
+        const weeklyCount = summaryResult.generated.filter(p => p.includes('weekly')).length;
+        const parts = [];
+        if (dailyCount > 0) parts.push(`${dailyCount} daily`);
+        if (weeklyCount > 0) parts.push(`${weeklyCount} weekly`);
+        console.log(`📊 Generated ${parts.join(' + ')} summary(ies)`);
         for (const path of summaryResult.generated) {
           debug(`   ${path}`);
         }

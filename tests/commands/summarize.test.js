@@ -1,5 +1,5 @@
-// ABOUTME: Tests for summarize CLI command — date parsing, range expansion, and backfill orchestration
-// ABOUTME: Verifies argument parsing, progress output, validation, and --force flag behavior
+// ABOUTME: Tests for summarize CLI command — date/week parsing, range expansion, and backfill orchestration
+// ABOUTME: Verifies argument parsing, progress output, validation, --force and --weekly flag behavior
 
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { mkdtempSync, rmSync, mkdirSync, writeFileSync, existsSync } from 'node:fs';
@@ -8,14 +8,18 @@ import { tmpdir } from 'node:os';
 
 // Mock the summary graph (LLM calls)
 const mockGenerateDailySummary = vi.fn();
+const mockGenerateWeeklySummary = vi.fn();
 vi.mock('../../src/generators/summary-graph.js', () => ({
   generateDailySummary: (...args) => mockGenerateDailySummary(...args),
+  generateWeeklySummary: (...args) => mockGenerateWeeklySummary(...args),
 }));
 
 import {
   parseSummarizeArgs,
   expandDateRange,
+  isValidWeekString,
   runSummarize,
+  runWeeklySummarize,
 } from '../../src/commands/summarize.js';
 
 // ---------------------------------------------------------------------------
@@ -57,8 +61,10 @@ describe('parseSummarizeArgs', () => {
     const result = parseSummarizeArgs(['2026-02-22']);
     expect(result).toEqual({
       dates: ['2026-02-22'],
+      weeks: [],
       force: false,
       help: false,
+      weekly: false,
       error: null,
     });
   });
@@ -126,6 +132,31 @@ describe('parseSummarizeArgs', () => {
   it('handles single-day range', () => {
     const result = parseSummarizeArgs(['2026-02-15..2026-02-15']);
     expect(result.dates).toEqual(['2026-02-15']);
+  });
+
+  it('parses --weekly with week string', () => {
+    const result = parseSummarizeArgs(['--weekly', '2026-W08']);
+    expect(result.weekly).toBe(true);
+    expect(result.weeks).toEqual(['2026-W08']);
+    expect(result.dates).toEqual([]);
+    expect(result.error).toBeNull();
+  });
+
+  it('returns error for --weekly with invalid week format', () => {
+    const result = parseSummarizeArgs(['--weekly', '2026-03']);
+    expect(result.error).toMatch(/invalid week/i);
+  });
+
+  it('returns error for --weekly with no week argument', () => {
+    const result = parseSummarizeArgs(['--weekly']);
+    expect(result.error).toMatch(/missing week/i);
+  });
+
+  it('parses --weekly with --force', () => {
+    const result = parseSummarizeArgs(['--weekly', '2026-W08', '--force']);
+    expect(result.weekly).toBe(true);
+    expect(result.force).toBe(true);
+    expect(result.weeks).toEqual(['2026-W08']);
   });
 });
 
@@ -310,5 +341,130 @@ describe('runSummarize', () => {
     expect(result.generated).toEqual(['2026-02-01']);
     expect(result.noEntries).toContain('2026-02-02');
     expect(result.alreadyExists).toContain('2026-02-03');
+  });
+});
+
+// ---------------------------------------------------------------------------
+// isValidWeekString
+// ---------------------------------------------------------------------------
+
+describe('isValidWeekString', () => {
+  it('accepts valid ISO week strings', () => {
+    expect(isValidWeekString('2026-W01')).toBe(true);
+    expect(isValidWeekString('2026-W08')).toBe(true);
+    expect(isValidWeekString('2026-W52')).toBe(true);
+    expect(isValidWeekString('2026-W53')).toBe(true);
+  });
+
+  it('rejects invalid formats', () => {
+    expect(isValidWeekString('2026-03')).toBe(false);
+    expect(isValidWeekString('2026-W0')).toBe(false);
+    expect(isValidWeekString('W08')).toBe(false);
+    expect(isValidWeekString('not-a-week')).toBe(false);
+  });
+
+  it('rejects week 0 and week 54+', () => {
+    expect(isValidWeekString('2026-W00')).toBe(false);
+    expect(isValidWeekString('2026-W54')).toBe(false);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// runWeeklySummarize (integration with real filesystem, mocked LLM)
+// ---------------------------------------------------------------------------
+
+describe('runWeeklySummarize', () => {
+  beforeEach(() => {
+    setupTmpDir();
+    mockGenerateWeeklySummary.mockReset();
+    mockGenerateWeeklySummary.mockResolvedValue({
+      weekInReview: 'The week was productive.',
+      highlights: '- Shipped feature A',
+      patterns: '- Consistent refactoring',
+      errors: [],
+    });
+  });
+
+  afterEach(() => {
+    teardownTmpDir();
+  });
+
+  it('generates weekly summary when daily summaries exist', async () => {
+    // 2026-W10: March 2-8
+    writeSummary('2026-03-02');
+    writeSummary('2026-03-03');
+
+    const result = await runWeeklySummarize({
+      weeks: ['2026-W10'],
+      force: false,
+      basePath: tmpDir,
+    });
+
+    expect(result.generated).toEqual(['2026-W10']);
+    expect(result.noSummaries).toEqual([]);
+    expect(result.failed).toEqual([]);
+
+    const weeklyPath = join(tmpDir, 'journal', 'summaries', 'weekly', '2026-W10.md');
+    expect(existsSync(weeklyPath)).toBe(true);
+  });
+
+  it('reports no-summaries when no daily summaries exist for the week', async () => {
+    const result = await runWeeklySummarize({
+      weeks: ['2026-W10'],
+      force: false,
+      basePath: tmpDir,
+    });
+
+    expect(result.generated).toEqual([]);
+    expect(result.noSummaries).toContain('2026-W10');
+    expect(mockGenerateWeeklySummary).not.toHaveBeenCalled();
+  });
+
+  it('reports already-exists when weekly summary exists', async () => {
+    writeSummary('2026-03-02');
+    const weeklyDir = join(tmpDir, 'journal', 'summaries', 'weekly');
+    mkdirSync(weeklyDir, { recursive: true });
+    writeFileSync(join(weeklyDir, '2026-W10.md'), 'existing', 'utf-8');
+
+    const result = await runWeeklySummarize({
+      weeks: ['2026-W10'],
+      force: false,
+      basePath: tmpDir,
+    });
+
+    expect(result.generated).toEqual([]);
+    expect(result.alreadyExists).toContain('2026-W10');
+    expect(mockGenerateWeeklySummary).not.toHaveBeenCalled();
+  });
+
+  it('regenerates with --force', async () => {
+    writeSummary('2026-03-02');
+    const weeklyDir = join(tmpDir, 'journal', 'summaries', 'weekly');
+    mkdirSync(weeklyDir, { recursive: true });
+    writeFileSync(join(weeklyDir, '2026-W10.md'), 'existing', 'utf-8');
+
+    const result = await runWeeklySummarize({
+      weeks: ['2026-W10'],
+      force: true,
+      basePath: tmpDir,
+    });
+
+    expect(result.generated).toEqual(['2026-W10']);
+    expect(mockGenerateWeeklySummary).toHaveBeenCalled();
+  });
+
+  it('calls onProgress callback', async () => {
+    writeSummary('2026-03-02');
+
+    const logs = [];
+    await runWeeklySummarize({
+      weeks: ['2026-W10'],
+      force: false,
+      basePath: tmpDir,
+      onProgress: (msg) => logs.push(msg),
+    });
+
+    expect(logs).toHaveLength(1);
+    expect(logs[0]).toContain('2026-W10');
   });
 });

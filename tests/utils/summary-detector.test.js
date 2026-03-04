@@ -1,4 +1,4 @@
-// ABOUTME: Tests for summary-detector.js — gap detection for unsummarized journal days
+// ABOUTME: Tests for summary-detector.js — gap detection for unsummarized journal days and weeks
 // ABOUTME: Uses temp directories with fixture entries and summaries to test detection logic
 
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
@@ -8,7 +8,9 @@ import { tmpdir } from 'node:os';
 
 import {
   findUnsummarizedDays,
+  findUnsummarizedWeeks,
   getDaysWithEntries,
+  getDaysWithDailySummaries,
 } from '../../src/utils/summary-detector.js';
 
 // ---------------------------------------------------------------------------
@@ -39,6 +41,12 @@ function writeSummary(dateStr, content = '# Summary\n\nSome summary') {
   const dir = join(tmpDir, 'journal', 'summaries', 'daily');
   mkdirSync(dir, { recursive: true });
   writeFileSync(join(dir, `${dateStr}.md`), content, 'utf-8');
+}
+
+function writeWeeklySummary(weekStr, content = '# Weekly Summary\n\nSome weekly summary') {
+  const dir = join(tmpDir, 'journal', 'summaries', 'weekly');
+  mkdirSync(dir, { recursive: true });
+  writeFileSync(join(dir, `${weekStr}.md`), content, 'utf-8');
 }
 
 // ---------------------------------------------------------------------------
@@ -173,5 +181,93 @@ describe('findUnsummarizedDays', () => {
     const result = await findUnsummarizedDays(tmpDir);
     // Should only return days that HAVE entries, not fill gaps
     expect(result).toEqual(['2026-02-16', '2026-02-17', '2026-02-19']);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// getDaysWithDailySummaries
+// ---------------------------------------------------------------------------
+
+describe('getDaysWithDailySummaries', () => {
+  beforeEach(setupTmpDir);
+  afterEach(teardownTmpDir);
+
+  it('returns empty array when no summaries directory exists', async () => {
+    const result = await getDaysWithDailySummaries(tmpDir);
+    expect(result).toEqual([]);
+  });
+
+  it('returns sorted dates from daily summaries directory', async () => {
+    writeSummary('2026-02-22');
+    writeSummary('2026-02-20');
+    writeSummary('2026-02-21');
+
+    const result = await getDaysWithDailySummaries(tmpDir);
+    expect(result).toEqual(['2026-02-20', '2026-02-21', '2026-02-22']);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// findUnsummarizedWeeks
+// ---------------------------------------------------------------------------
+
+describe('findUnsummarizedWeeks', () => {
+  beforeEach(setupTmpDir);
+  afterEach(teardownTmpDir);
+
+  it('returns empty array when no daily summaries exist', async () => {
+    const result = await findUnsummarizedWeeks(tmpDir);
+    expect(result).toEqual([]);
+  });
+
+  it('returns week strings for weeks with daily summaries but no weekly summary', async () => {
+    // 2026-02-16 is a Monday in week 2026-W08
+    writeSummary('2026-02-16');
+    writeSummary('2026-02-17');
+    // 2026-02-23 is a Monday in week 2026-W09
+    writeSummary('2026-02-23');
+
+    const result = await findUnsummarizedWeeks(tmpDir);
+    expect(result).toContain('2026-W08');
+    expect(result).toContain('2026-W09');
+  });
+
+  it('excludes weeks that already have weekly summaries', async () => {
+    writeSummary('2026-02-16'); // W08
+    writeSummary('2026-02-23'); // W09
+    writeWeeklySummary('2026-W08');
+
+    const result = await findUnsummarizedWeeks(tmpDir);
+    expect(result).not.toContain('2026-W08');
+    expect(result).toContain('2026-W09');
+  });
+
+  it('excludes the current week', async () => {
+    // Write a daily summary for today's week — should be excluded
+    const today = new Date();
+    const todayStr = today.toISOString().slice(0, 10);
+    writeSummary(todayStr);
+
+    // Also write one for a past week to verify it IS included
+    writeSummary('2026-01-05'); // W02
+
+    const result = await findUnsummarizedWeeks(tmpDir);
+    // The current week should not appear
+    const { getISOWeekString } = await import('../../src/utils/journal-paths.js');
+    const currentWeek = getISOWeekString(today);
+    expect(result).not.toContain(currentWeek);
+    expect(result).toContain('2026-W02');
+  });
+
+  it('returns sorted results', async () => {
+    writeSummary('2026-02-23'); // W09
+    writeSummary('2026-02-16'); // W08
+    writeSummary('2026-01-05'); // W02
+
+    const result = await findUnsummarizedWeeks(tmpDir);
+    // Should be ascending
+    for (let i = 1; i < result.length; i++) {
+      expect(result[i] > result[i - 1]).toBe(true);
+    }
   });
 });

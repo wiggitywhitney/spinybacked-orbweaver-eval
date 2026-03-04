@@ -1,10 +1,12 @@
-// ABOUTME: LangGraph StateGraph for daily summary generation (separate from per-commit journal-graph)
-// ABOUTME: Consolidates a day's journal entries into Narrative, Key Decisions, and Open Threads sections
+// ABOUTME: LangGraph StateGraphs for summary generation (daily and weekly, separate from per-commit journal-graph)
+// ABOUTME: Daily: consolidates journal entries into Narrative, Key Decisions, Open Threads
+// ABOUTME: Weekly: consolidates daily summaries into Week in Review, Highlights, Patterns
 
 import { StateGraph, START, END, Annotation } from '@langchain/langgraph';
 import { ChatAnthropic } from '@langchain/anthropic';
 import { SystemMessage, HumanMessage } from '@langchain/core/messages';
 import { dailySummaryPrompt } from './prompts/sections/daily-summary-prompt.js';
+import { weeklySummaryPrompt } from './prompts/sections/weekly-summary-prompt.js';
 
 /**
  * Summary state definition using LangGraph Annotation API.
@@ -241,6 +243,196 @@ export async function generateDailySummary(entries, date) {
     narrative: result.narrative || '',
     keyDecisions: result.keyDecisions || '',
     openThreads: result.openThreads || '',
+    errors: result.errors || [],
+    generatedAt: new Date(),
+  };
+}
+
+// ---------------------------------------------------------------------------
+// Weekly summary generation
+// ---------------------------------------------------------------------------
+
+/**
+ * Weekly summary state definition.
+ * Input: dailySummaries (array of rendered daily summary markdown) and weekLabel.
+ * Output: parsed sections from the LLM response.
+ */
+export const WeeklySummaryState = Annotation.Root({
+  // Input
+  dailySummaries: Annotation(),
+  weekLabel: Annotation(),
+
+  // Outputs (populated by node)
+  weekInReview: Annotation(),
+  highlights: Annotation(),
+  patterns: Annotation(),
+
+  // Metadata
+  errors: Annotation({
+    reducer: (left, right) => [...(left || []), ...(right || [])],
+    default: () => [],
+  }),
+});
+
+/**
+ * Format daily summaries for LLM consumption.
+ * Labels each by date and provides context about the week.
+ * @param {Array<{ date: string, content: string }>} dailySummaries - Daily summaries with dates
+ * @returns {string} Formatted summaries for the human message
+ */
+export function formatDailySummariesForWeekly(dailySummaries) {
+  if (!dailySummaries || dailySummaries.length === 0) {
+    return 'No daily summaries found for this week.';
+  }
+
+  const count = dailySummaries.length;
+  const header = count === 1
+    ? `The following is 1 daily summary from this week:`
+    : `The following are ${count} daily summaries from this week:`;
+
+  const formatted = dailySummaries.map((summary, i) =>
+    `--- Day ${i + 1} of ${count}: ${summary.date} ---\n\n${summary.content}`
+  ).join('\n\n');
+
+  return `${header}\n\n${formatted}`;
+}
+
+/**
+ * Parse the LLM's response into the three weekly summary sections.
+ * Extracts content between ## Week in Review, ## Highlights, ## Patterns headers.
+ * @param {string} raw - Raw LLM output
+ * @returns {{ weekInReview: string, highlights: string, patterns: string }}
+ */
+function parseWeeklySummarySections(raw) {
+  const sections = { weekInReview: '', highlights: '', patterns: '' };
+  if (!raw) return sections;
+
+  const sectionPattern = /^## (Week in Review|Highlights|Patterns)\s*$/gm;
+  const matches = [...raw.matchAll(sectionPattern)];
+
+  for (let i = 0; i < matches.length; i++) {
+    const name = matches[i][1];
+    const startIdx = matches[i].index + matches[i][0].length;
+    const endIdx = i + 1 < matches.length ? matches[i + 1].index : raw.length;
+    const content = raw.slice(startIdx, endIdx).trim();
+
+    if (name === 'Week in Review') sections.weekInReview = content;
+    else if (name === 'Highlights') sections.highlights = content;
+    else if (name === 'Patterns') sections.patterns = content;
+  }
+
+  // If no sections were parsed, put everything in weekInReview
+  if (!sections.weekInReview && !sections.highlights && !sections.patterns) {
+    sections.weekInReview = raw.trim();
+  }
+
+  return sections;
+}
+
+/**
+ * Post-processing: clean weekly summary output.
+ * Strips preamble and replaces banned formal words.
+ */
+export function cleanWeeklySummaryOutput(raw) {
+  if (!raw) return raw;
+
+  let result = raw;
+
+  // Replace banned words (same list as daily)
+  for (const [pattern, replacement] of BANNED_WORD_REPLACEMENTS) {
+    result = result.replace(pattern, replacement);
+  }
+
+  // Strip preamble before ## Week in Review
+  const reviewIdx = result.indexOf('## Week in Review');
+  if (reviewIdx > 0) {
+    result = result.slice(reviewIdx);
+  }
+
+  return result.trim() || raw;
+}
+
+/**
+ * Weekly summary generation node.
+ * Reads daily summaries and produces a consolidated weekly summary.
+ */
+export async function weeklySummaryNode(state) {
+  const { dailySummaries, weekLabel } = state;
+
+  // Early exit: no daily summaries to consolidate
+  if (!dailySummaries || dailySummaries.length === 0) {
+    return {
+      weekInReview: 'No daily summaries found for this week.',
+      highlights: '',
+      patterns: '',
+      errors: [],
+    };
+  }
+
+  try {
+    const prompt = weeklySummaryPrompt(dailySummaries.length);
+    const formattedSummaries = formatDailySummariesForWeekly(dailySummaries);
+
+    const result = await getModel(0.7).invoke([
+      new SystemMessage(prompt),
+      new HumanMessage(formattedSummaries),
+    ]);
+
+    const cleaned = cleanWeeklySummaryOutput(result.content);
+    const sections = parseWeeklySummarySections(cleaned);
+
+    return {
+      weekInReview: sections.weekInReview,
+      highlights: sections.highlights,
+      patterns: sections.patterns,
+      errors: [],
+    };
+  } catch (error) {
+    return {
+      weekInReview: '[Weekly summary generation failed]',
+      highlights: '',
+      patterns: '',
+      errors: [`Weekly summary generation failed: ${error.message}`],
+    };
+  }
+}
+
+/**
+ * Build and compile the weekly summary graph.
+ * Simple single-node pipeline: START → generate_weekly_summary → END
+ */
+function buildWeeklyGraph() {
+  const graph = new StateGraph(WeeklySummaryState)
+    .addNode('generate_weekly_summary', weeklySummaryNode)
+    .addEdge(START, 'generate_weekly_summary')
+    .addEdge('generate_weekly_summary', END);
+
+  return graph.compile();
+}
+
+let compiledWeeklyGraph;
+
+function getWeeklyGraph() {
+  if (!compiledWeeklyGraph) {
+    compiledWeeklyGraph = buildWeeklyGraph();
+  }
+  return compiledWeeklyGraph;
+}
+
+/**
+ * Generate a weekly summary from daily summaries.
+ * @param {Array<{ date: string, content: string }>} dailySummaries - Daily summaries with dates
+ * @param {string} weekLabel - ISO week string (e.g., "2026-W09") for context
+ * @returns {Promise<{ weekInReview: string, highlights: string, patterns: string, errors: string[], generatedAt: Date }>}
+ */
+export async function generateWeeklySummary(dailySummaries, weekLabel) {
+  const graph = getWeeklyGraph();
+  const result = await graph.invoke({ dailySummaries, weekLabel });
+
+  return {
+    weekInReview: result.weekInReview || '',
+    highlights: result.highlights || '',
+    patterns: result.patterns || '',
     errors: result.errors || [],
     generatedAt: new Date(),
   };

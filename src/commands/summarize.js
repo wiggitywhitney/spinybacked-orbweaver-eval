@@ -1,7 +1,7 @@
-// ABOUTME: CLI handler for the "summarize" subcommand — backfill daily summaries on demand
-// ABOUTME: Parses date/range args, orchestrates generation with progress output and --force flag
+// ABOUTME: CLI handler for the "summarize" subcommand — backfill daily and weekly summaries on demand
+// ABOUTME: Parses date/range/week args, orchestrates generation with progress output and --force flag
 
-import { generateAndSaveDailySummary } from '../managers/summary-manager.js';
+import { generateAndSaveDailySummary, generateAndSaveWeeklySummary } from '../managers/summary-manager.js';
 import { readDayEntries } from '../managers/summary-manager.js';
 import { getSummaryPath } from '../utils/journal-paths.js';
 import { access } from 'node:fs/promises';
@@ -20,6 +20,17 @@ function isValidDate(str) {
     date.getMonth() === month - 1 &&
     date.getDate() === day
   );
+}
+
+/**
+ * Validate an ISO week string (YYYY-Www).
+ * @param {string} str - Week string to validate
+ * @returns {boolean} True if valid format
+ */
+export function isValidWeekString(str) {
+  if (!/^\d{4}-W\d{2}$/.test(str)) return false;
+  const week = parseInt(str.slice(6));
+  return week >= 1 && week <= 53;
 }
 
 /**
@@ -50,11 +61,12 @@ export function expandDateRange(startStr, endStr) {
 /**
  * Parse arguments for the summarize subcommand.
  * @param {string[]} args - Arguments after "summarize"
- * @returns {{ dates: string[], force: boolean, help: boolean, error: string|null }}
+ * @returns {{ dates: string[], weeks: string[], force: boolean, help: boolean, weekly: boolean, error: string|null }}
  */
 export function parseSummarizeArgs(args) {
   let force = false;
   let help = false;
+  let weekly = false;
   let dateArg = null;
 
   for (const arg of args) {
@@ -62,42 +74,56 @@ export function parseSummarizeArgs(args) {
       force = true;
     } else if (arg === '--help' || arg === '-h') {
       help = true;
+    } else if (arg === '--weekly') {
+      weekly = true;
     } else if (!arg.startsWith('-')) {
       dateArg = arg;
     }
   }
 
   if (help) {
-    return { dates: [], force, help: true, error: null };
+    return { dates: [], weeks: [], force, help: true, weekly, error: null };
   }
 
   if (!dateArg) {
-    return { dates: [], force, help: false, error: 'Missing date argument. Usage: commit-story summarize <date|date-range> [--force]' };
+    const usage = weekly
+      ? 'Missing week argument. Usage: commit-story summarize --weekly <YYYY-Www> [--force]'
+      : 'Missing date argument. Usage: commit-story summarize <date|date-range> [--force]';
+    return { dates: [], weeks: [], force, help: false, weekly, error: usage };
   }
 
+  // Weekly mode: expect ISO week string(s)
+  if (weekly) {
+    if (!isValidWeekString(dateArg)) {
+      return { dates: [], weeks: [], force, help: false, weekly, error: `Invalid week format: ${dateArg}. Expected YYYY-Www (e.g., 2026-W08)` };
+    }
+    return { dates: [], weeks: [dateArg], force, help: false, weekly, error: null };
+  }
+
+  // Daily mode: date or date range
   // Check for range (date..date)
   if (dateArg.includes('..')) {
     const parts = dateArg.split('..');
     if (parts.length !== 2) {
-      return { dates: [], force, help: false, error: `Invalid date range: ${dateArg}` };
+      return { dates: [], weeks: [], force, help: false, weekly, error: `Invalid date range: ${dateArg}` };
     }
     const [a, b] = parts;
     if (!isValidDate(a) || !isValidDate(b)) {
-      return { dates: [], force, help: false, error: `Invalid date in range: ${dateArg}` };
+      return { dates: [], weeks: [], force, help: false, weekly, error: `Invalid date in range: ${dateArg}` };
     }
     // Normalize reversed ranges to ascending
     const start = a <= b ? a : b;
     const end = a <= b ? b : a;
     const dates = expandDateRange(start, end);
-    return { dates, force, help: false, error: null };
+    return { dates, weeks: [], force, help: false, weekly, error: null };
   }
 
   // Single date
   if (!isValidDate(dateArg)) {
-    return { dates: [], force, help: false, error: `Invalid date format: ${dateArg}. Expected YYYY-MM-DD` };
+    return { dates: [], weeks: [], force, help: false, weekly, error: `Invalid date format: ${dateArg}. Expected YYYY-MM-DD` };
   }
 
-  return { dates: [dateArg], force, help: false, error: null };
+  return { dates: [dateArg], weeks: [], force, help: false, weekly, error: null };
 }
 
 /**
@@ -176,23 +202,81 @@ export async function runSummarize(options) {
 }
 
 /**
+ * Run the weekly summarize command — generate weekly summaries for the given weeks.
+ * @param {{ weeks: string[], force: boolean, basePath?: string, onProgress?: (msg: string) => void }} options
+ * @returns {Promise<{ generated: string[], noSummaries: string[], alreadyExists: string[], failed: string[], errors: string[] }>}
+ */
+export async function runWeeklySummarize(options) {
+  const { weeks, force, basePath = '.', onProgress } = options;
+
+  const result = {
+    generated: [],
+    noSummaries: [],
+    alreadyExists: [],
+    failed: [],
+    errors: [],
+  };
+
+  for (const weekStr of weeks) {
+    try {
+      const genResult = await generateAndSaveWeeklySummary(weekStr, basePath, { force });
+
+      if (genResult.saved) {
+        result.generated.push(weekStr);
+        if (onProgress) {
+          onProgress(`Generated weekly summary for ${weekStr} (${genResult.dayCount} daily summaries)`);
+        }
+        if (genResult.errors && genResult.errors.length > 0) {
+          for (const err of genResult.errors) {
+            result.errors.push(`${weekStr}: ${err}`);
+          }
+        }
+      } else if (genResult.reason && genResult.reason.includes('no daily summaries')) {
+        result.noSummaries.push(weekStr);
+        if (onProgress) {
+          onProgress(`Skipped ${weekStr}: no daily summaries`);
+        }
+      } else if (genResult.reason && genResult.reason.includes('already exists')) {
+        result.alreadyExists.push(weekStr);
+        if (onProgress) {
+          onProgress(`Skipped ${weekStr}: weekly summary already exists`);
+        }
+      } else {
+        result.noSummaries.push(weekStr);
+      }
+    } catch (err) {
+      result.failed.push(weekStr);
+      result.errors.push(`${weekStr}: ${err.message}`);
+      if (onProgress) {
+        onProgress(`Failed ${weekStr}: ${err.message}`);
+      }
+    }
+  }
+
+  return result;
+}
+
+/**
  * Show help text for the summarize subcommand.
  */
 export function showSummarizeHelp() {
   console.log(`
 Commit Story — Summarize
 
-Generate daily summaries for journal entries.
+Generate daily or weekly summaries for journal entries.
 
 Usage:
   npx commit-story summarize <date> [--force]
   npx commit-story summarize <start>..<end> [--force]
+  npx commit-story summarize --weekly <YYYY-Www> [--force]
 
 Arguments:
   date         Single date (YYYY-MM-DD)
   start..end   Date range (inclusive, YYYY-MM-DD..YYYY-MM-DD)
+  YYYY-Www     ISO week (e.g., 2026-W08)
 
 Options:
+  --weekly     Generate a weekly summary instead of daily
   --force      Regenerate existing summaries
   --help, -h   Show this help message
 
@@ -200,5 +284,7 @@ Examples:
   npx commit-story summarize 2026-02-22
   npx commit-story summarize 2026-02-01..2026-02-20
   npx commit-story summarize 2026-02-22 --force
+  npx commit-story summarize --weekly 2026-W08
+  npx commit-story summarize --weekly 2026-W08 --force
 `);
 }

@@ -100,17 +100,17 @@ Provide a CLI command for generating summaries on demand — useful for historic
 ---
 
 ### Milestone 4: Weekly Summaries
-**Status**: Not Started
+**Status**: Complete
 
 Weekly rollups that consolidate daily summaries into a higher-level narrative. Uses ISO week-year + week numbers for consistency (note: ISO week-year can differ from calendar year near boundaries, e.g., 2019-12-30 is in ISO week 2020-W01).
 
 **What's included**:
-- [ ] `src/generators/prompts/sections/weekly-summary-prompt.js` — prompt for weekly consolidation
-- [ ] Extend `summary-manager.js` to support weekly cadence
-- [ ] Proposed sections: **Week in Review** (narrative arc of the week's work), **Highlights** (most significant accomplishments), **Patterns** (recurring themes, persistent blockers, emerging directions)
-- [ ] Auto-trigger: generate weekly summary on first commit after a week boundary
-- [ ] Manual: `npx commit-story summarize --weekly 2026-W08`
-- [ ] Tests for weekly generation and cadence detection
+- [x] `src/generators/prompts/sections/weekly-summary-prompt.js` — prompt for weekly consolidation
+- [x] Extend `summary-manager.js` to support weekly cadence
+- [x] Proposed sections: **Week in Review** (narrative arc of the week's work), **Highlights** (most significant accomplishments), **Patterns** (recurring themes, persistent blockers, emerging directions)
+- [x] Auto-trigger: generate weekly summary on first commit after a week boundary
+- [x] Manual: `npx commit-story summarize --weekly 2026-W08`
+- [x] Tests for weekly generation and cadence detection
 
 **Done when**: Weekly summaries generate from daily summaries and read as a coherent weekly development narrative
 
@@ -180,6 +180,15 @@ User-facing documentation and polish for the summary feature.
 ## Progress Log
 
 ### 2026-03-04
+- Completed Milestone 4: Weekly Summaries
+- Created `weekly-summary-prompt.js` with 5-step process (authored via /write-prompt review)
+- Extended `summary-graph.js` with WeeklySummaryState, weeklySummaryNode, generateWeeklySummary
+- Extended `summary-manager.js` with getWeekBoundaries, readWeekDailySummaries, formatWeeklySummary, saveWeeklySummary, generateAndSaveWeeklySummary
+- Extended `summary-detector.js` with findUnsummarizedWeeks, getDaysWithDailySummaries
+- Extended `auto-summarize.js` with triggerAutoWeeklySummaries; triggerAutoSummaries now chains daily → weekly
+- Extended `summarize.js` CLI with --weekly flag, isValidWeekString, runWeeklySummarize
+- Updated `index.js` handleSummarize for weekly mode; auto-summarize output shows daily + weekly counts
+- 63 new tests across 5 test files, all 473 tests passing
 - Completed Milestone 3: Manual Backfill CLI
 - Created `src/commands/summarize.js` — date parsing, range expansion, backfill orchestration
 - Added subcommand routing to `src/index.js` — detects `summarize` as first arg, routes to handler

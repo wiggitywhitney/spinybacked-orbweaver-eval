@@ -1,12 +1,15 @@
-// ABOUTME: Orchestrates daily summary generation — reads entries, calls summary graph, writes output
+// ABOUTME: Orchestrates daily and weekly summary generation — reads source content, calls graph, writes output
 // ABOUTME: Handles duplicate detection via file existence (DD-003) and force-regeneration
 
-import { readFile, writeFile, access } from 'node:fs/promises';
-import { generateDailySummary } from '../generators/summary-graph.js';
+import { readFile, writeFile, access, readdir } from 'node:fs/promises';
+import { join } from 'node:path';
+import { generateDailySummary, generateWeeklySummary } from '../generators/summary-graph.js';
 import {
   getJournalEntryPath,
   getSummaryPath,
+  getSummariesDirectory,
   getDateString,
+  getISOWeekString,
   ensureDirectory,
 } from '../utils/journal-paths.js';
 
@@ -139,6 +142,177 @@ export async function generateAndSaveDailySummary(date, basePath = '.', options 
     saved: true,
     path,
     entryCount: entries.length,
+    errors: result.errors || [],
+  };
+}
+
+// ---------------------------------------------------------------------------
+// Weekly summary pipeline
+// ---------------------------------------------------------------------------
+
+/**
+ * Get the Monday and Sunday dates for an ISO week.
+ * @param {string} weekStr - ISO week string like "2026-W09"
+ * @returns {{ monday: Date, sunday: Date }} Start and end dates of the week
+ */
+export function getWeekBoundaries(weekStr) {
+  const match = weekStr.match(/^(\d{4})-W(\d{2})$/);
+  if (!match) {
+    throw new Error(`Invalid ISO week string: "${weekStr}". Expected format: YYYY-Www`);
+  }
+
+  const [, yearStr, weekStr2] = match;
+  const year = parseInt(yearStr);
+  const week = parseInt(weekStr2);
+
+  // ISO week 1 contains the first Thursday of the year.
+  // Find Jan 4 (always in week 1), then back up to Monday of that week.
+  const jan4 = new Date(year, 0, 4);
+  const jan4Day = jan4.getDay() || 7; // Convert Sunday from 0 to 7
+  const week1Monday = new Date(jan4);
+  week1Monday.setDate(jan4.getDate() - (jan4Day - 1));
+
+  // Target week's Monday
+  const monday = new Date(week1Monday);
+  monday.setDate(week1Monday.getDate() + (week - 1) * 7);
+
+  // Sunday = Monday + 6 days
+  const sunday = new Date(monday);
+  sunday.setDate(monday.getDate() + 6);
+
+  return { monday, sunday };
+}
+
+/**
+ * Read all daily summaries for a given ISO week.
+ * Scans the daily summaries directory for files within the week's date range.
+ * @param {string} weekStr - ISO week string like "2026-W09"
+ * @param {string} basePath - Base path for journal (default: current directory)
+ * @returns {Promise<Array<{ date: string, content: string }>>} Daily summaries sorted by date
+ */
+export async function readWeekDailySummaries(weekStr, basePath = '.') {
+  const { monday, sunday } = getWeekBoundaries(weekStr);
+  const dailyDir = getSummariesDirectory('daily', basePath);
+
+  const summaries = [];
+
+  // Check each day in the week
+  const current = new Date(monday);
+  while (current <= sunday) {
+    const dateStr = getDateString(current);
+    const dailyPath = getSummaryPath('daily', current, basePath);
+
+    try {
+      const content = await readFile(dailyPath, 'utf-8');
+      if (content && content.trim()) {
+        summaries.push({ date: dateStr, content: content.trim() });
+      }
+    } catch {
+      // No daily summary for this day — skip
+    }
+
+    current.setDate(current.getDate() + 1);
+  }
+
+  return summaries;
+}
+
+/**
+ * Format weekly summary sections into markdown output.
+ * @param {{ weekInReview: string, highlights: string, patterns: string }} sections - Summary sections
+ * @param {string} weekStr - ISO week string for the header
+ * @returns {string} Formatted markdown summary
+ */
+export function formatWeeklySummary(sections, weekStr) {
+  const lines = [];
+
+  lines.push(`# Weekly Summary — ${weekStr}`);
+  lines.push('');
+  lines.push('## Week in Review');
+  lines.push('');
+  lines.push(sections.weekInReview || '[No weekly narrative generated]');
+  lines.push('');
+  lines.push('## Highlights');
+  lines.push('');
+  lines.push(sections.highlights || 'No standout highlights this week.');
+  lines.push('');
+  lines.push('## Patterns');
+  lines.push('');
+  lines.push(sections.patterns || 'No notable patterns this week.');
+  lines.push('');
+
+  return lines.join('\n');
+}
+
+/**
+ * Save a weekly summary to the summaries directory.
+ * Checks for existing file to prevent duplicates (DD-003).
+ * @param {string} content - Formatted markdown summary
+ * @param {string} weekStr - ISO week string
+ * @param {string} basePath - Base path for journal (default: current directory)
+ * @param {{ force?: boolean }} options - Options
+ * @returns {Promise<string|null>} Path to saved file, or null if skipped
+ */
+export async function saveWeeklySummary(content, weekStr, basePath = '.', options = {}) {
+  // Use any date in the week to compute the path (Monday)
+  const { monday } = getWeekBoundaries(weekStr);
+  const summaryPath = getSummaryPath('weekly', monday, basePath);
+
+  // Check for existing summary (DD-003)
+  if (!options.force) {
+    try {
+      await access(summaryPath);
+      return null;
+    } catch {
+      // Doesn't exist, proceed
+    }
+  }
+
+  await ensureDirectory(summaryPath);
+  await writeFile(summaryPath, content, 'utf-8');
+
+  return summaryPath;
+}
+
+/**
+ * Full pipeline: read daily summaries for a week, generate weekly summary, save to file.
+ * @param {string} weekStr - ISO week string like "2026-W09"
+ * @param {string} basePath - Base path for journal (default: current directory)
+ * @param {{ force?: boolean }} options - Options
+ * @returns {Promise<{ saved: boolean, path?: string, reason?: string, dayCount?: number, errors?: string[] }>}
+ */
+export async function generateAndSaveWeeklySummary(weekStr, basePath = '.', options = {}) {
+  // Check for existing summary first
+  if (!options.force) {
+    const { monday } = getWeekBoundaries(weekStr);
+    const summaryPath = getSummaryPath('weekly', monday, basePath);
+    try {
+      await access(summaryPath);
+      return { saved: false, reason: `Weekly summary already exists for ${weekStr}` };
+    } catch {
+      // Doesn't exist, proceed
+    }
+  }
+
+  // Read daily summaries for the week
+  const dailySummaries = await readWeekDailySummaries(weekStr, basePath);
+  if (dailySummaries.length === 0) {
+    return { saved: false, reason: `Skipped ${weekStr}: no daily summaries found` };
+  }
+
+  // Generate weekly summary via LangGraph
+  const result = await generateWeeklySummary(dailySummaries, weekStr);
+
+  // Format the output
+  const formatted = formatWeeklySummary(result, weekStr);
+
+  // Save to file
+  const path = await saveWeeklySummary(formatted, weekStr, basePath, options);
+
+  return {
+    saved: true,
+    path,
+    dayCount: dailySummaries.length,
     errors: result.errors || [],
   };
 }

@@ -1,8 +1,9 @@
-// ABOUTME: Detects journal days that have entries but no daily summary
+// ABOUTME: Detects journal days/weeks that have content but no summary
 // ABOUTME: Scans entries and summaries directories to find gaps for auto-trigger
 
 import { readdir } from 'node:fs/promises';
 import { join } from 'node:path';
+import { getISOWeekString } from './journal-paths.js';
 
 /**
  * Get all dates that have journal entry files.
@@ -93,4 +94,94 @@ export async function findUnsummarizedDays(basePath = '.', options = {}) {
     if (summarizedDays.has(dateStr)) return false;
     return true;
   });
+}
+
+/**
+ * Get all ISO week strings that have weekly summary files.
+ * @param {string} basePath - Base path for journal (default: current directory)
+ * @returns {Promise<Set<string>>} Set of week strings (YYYY-Www)
+ */
+async function getSummarizedWeeks(basePath = '.') {
+  const summariesDir = join(basePath, 'journal', 'summaries', 'weekly');
+  const weekPattern = /^\d{4}-W\d{2}\.md$/;
+
+  let files;
+  try {
+    files = await readdir(summariesDir);
+  } catch {
+    return new Set();
+  }
+
+  const weeks = new Set();
+  for (const file of files) {
+    if (weekPattern.test(file)) {
+      weeks.add(file.replace('.md', ''));
+    }
+  }
+  return weeks;
+}
+
+/**
+ * Get all dates that have daily summary files (as date strings).
+ * @param {string} basePath - Base path for journal (default: current directory)
+ * @returns {Promise<string[]>} Sorted array of date strings (YYYY-MM-DD)
+ */
+export async function getDaysWithDailySummaries(basePath = '.') {
+  const summariesDir = join(basePath, 'journal', 'summaries', 'daily');
+  const datePattern = /^\d{4}-\d{2}-\d{2}\.md$/;
+
+  let files;
+  try {
+    files = await readdir(summariesDir);
+  } catch {
+    return [];
+  }
+
+  const dates = [];
+  for (const file of files) {
+    if (datePattern.test(file)) {
+      dates.push(file.replace('.md', ''));
+    }
+  }
+  dates.sort();
+  return dates;
+}
+
+/**
+ * Find ISO weeks that have daily summaries but no weekly summary.
+ * Excludes the current week (not yet complete).
+ * Groups daily summary dates into ISO weeks, then checks for existing weekly summaries.
+ * @param {string} basePath - Base path for journal (default: current directory)
+ * @returns {Promise<string[]>} Sorted array of unsummarized ISO week strings
+ */
+export async function findUnsummarizedWeeks(basePath = '.') {
+  const dailySummaryDates = await getDaysWithDailySummaries(basePath);
+  if (dailySummaryDates.length === 0) return [];
+
+  // Group daily summary dates into ISO weeks
+  const weeksWithSummaries = new Set();
+  for (const dateStr of dailySummaryDates) {
+    const [year, month, day] = dateStr.split('-').map(Number);
+    const date = new Date(year, month - 1, day);
+    const weekStr = getISOWeekString(date);
+    weeksWithSummaries.add(weekStr);
+  }
+
+  // Get current week to exclude it
+  const currentWeek = getISOWeekString(new Date());
+
+  // Check which weeks already have weekly summaries
+  const summarizedWeeks = await getSummarizedWeeks(basePath);
+
+  const unsummarized = [];
+  for (const weekStr of weeksWithSummaries) {
+    // Exclude current week — not yet complete
+    if (weekStr >= currentWeek) continue;
+    // Exclude already summarized
+    if (summarizedWeeks.has(weekStr)) continue;
+    unsummarized.push(weekStr);
+  }
+
+  unsummarized.sort();
+  return unsummarized;
 }
