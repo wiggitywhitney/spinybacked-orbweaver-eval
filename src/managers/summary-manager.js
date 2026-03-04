@@ -196,7 +196,6 @@ export function getWeekBoundaries(weekStr) {
  */
 export async function readWeekDailySummaries(weekStr, basePath = '.') {
   const { monday, sunday } = getWeekBoundaries(weekStr);
-  const dailyDir = getSummariesDirectory('daily', basePath);
 
   const summaries = [];
 
