@@ -79,7 +79,8 @@ export function parseSummarizeArgs(args) {
   let help = false;
   let weekly = false;
   let monthly = false;
-  let dateArg = null;
+  const positionalArgs = [];
+  const unknownFlags = [];
 
   for (const arg of args) {
     if (arg === '--force') {
@@ -91,9 +92,22 @@ export function parseSummarizeArgs(args) {
     } else if (arg === '--monthly') {
       monthly = true;
     } else if (!arg.startsWith('-')) {
-      dateArg = arg;
+      positionalArgs.push(arg);
+    } else {
+      unknownFlags.push(arg);
     }
   }
+
+  if (weekly && monthly) {
+    return { dates: [], weeks: [], months: [], force, help: false, weekly, monthly, error: 'Use either --weekly or --monthly, not both.' };
+  }
+  if (unknownFlags.length > 0) {
+    return { dates: [], weeks: [], months: [], force, help: false, weekly, monthly, error: `Unknown option(s): ${unknownFlags.join(', ')}` };
+  }
+  if (positionalArgs.length > 1) {
+    return { dates: [], weeks: [], months: [], force, help: false, weekly, monthly, error: `Too many arguments: ${positionalArgs.join(' ')}` };
+  }
+  const dateArg = positionalArgs[0] || null;
 
   if (help) {
     return { dates: [], weeks: [], months: [], force, help: true, weekly, monthly, error: null };

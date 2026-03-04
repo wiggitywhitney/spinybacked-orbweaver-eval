@@ -64,7 +64,11 @@ function parseArgs() {
     subcommand = firstNonFlag;
     // Everything after the subcommand name goes to the subcommand handler
     const subIdx = args.indexOf(firstNonFlag);
-    subcommandArgs.push(...args.slice(subIdx + 1));
+    subcommandArgs.push(
+      ...args
+        .slice(subIdx + 1)
+        .filter(arg => arg !== '--debug' && arg !== '-d')
+    );
     // Still check for global --debug flag
     for (const arg of args) {
       if (arg === '--debug' || arg === '-d') {

@@ -6,6 +6,48 @@ import { join } from 'node:path';
 import { getISOWeekString, getYearMonth } from './journal-paths.js';
 
 /**
+ * Get the current date string in the configured timezone.
+ * Uses COMMIT_STORY_TIMEZONE if set, otherwise system local time.
+ * @returns {string} Date string in YYYY-MM-DD format
+ */
+function getTodayString() {
+  const tz = process.env.COMMIT_STORY_TIMEZONE || null;
+  if (tz) {
+    const fmt = new Intl.DateTimeFormat('en-CA', {
+      timeZone: tz,
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+    });
+    return fmt.format(new Date());
+  }
+  const now = new Date();
+  const y = now.getFullYear();
+  const m = String(now.getMonth() + 1).padStart(2, '0');
+  const d = String(now.getDate()).padStart(2, '0');
+  return `${y}-${m}-${d}`;
+}
+
+/**
+ * Get a Date object representing "now" in the configured timezone.
+ * @returns {Date} Date object for current time in configured timezone
+ */
+function getNowDate() {
+  const tz = process.env.COMMIT_STORY_TIMEZONE || null;
+  if (tz) {
+    const fmt = new Intl.DateTimeFormat('en-CA', {
+      timeZone: tz,
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+    });
+    const [year, month, day] = fmt.format(new Date()).split('-').map(Number);
+    return new Date(year, month - 1, day);
+  }
+  return new Date();
+}
+
+/**
  * Get all dates that have journal entry files.
  * Scans all YYYY-MM subdirectories under journal/entries/ for YYYY-MM-DD.md files.
  * @param {string} basePath - Base path for journal (default: current directory)
@@ -83,7 +125,7 @@ export async function findUnsummarizedDays(basePath = '.', options = {}) {
   if (entryDays.length === 0) return [];
 
   const summarizedDays = await getSummarizedDays(basePath);
-  const today = new Date().toISOString().slice(0, 10);
+  const today = getTodayString();
 
   return entryDays.filter(dateStr => {
     // Exclude today — not yet complete
@@ -167,8 +209,8 @@ export async function findUnsummarizedWeeks(basePath = '.') {
     weeksWithSummaries.add(weekStr);
   }
 
-  // Get current week to exclude it
-  const currentWeek = getISOWeekString(new Date());
+  // Get current week to exclude it (timezone-aware)
+  const currentWeek = getISOWeekString(getNowDate());
 
   // Check which weeks already have weekly summaries
   const summarizedWeeks = await getSummarizedWeeks(basePath);
@@ -271,8 +313,8 @@ export async function findUnsummarizedMonths(basePath = '.') {
     monthsWithWeeklies.add(monthStr);
   }
 
-  // Get current month to exclude it
-  const currentMonth = getYearMonth(new Date());
+  // Get current month to exclude it (timezone-aware)
+  const currentMonth = getYearMonth(getNowDate());
 
   // Check which months already have monthly summaries
   const summarizedMonths = await getSummarizedMonths(basePath);

@@ -108,7 +108,9 @@ describe('readWeekDailySummaries', () => {
   });
 
   afterEach(async () => {
-    await rm(tmpDir, { recursive: true, force: true });
+    if (tmpDir) {
+      await rm(tmpDir, { recursive: true, force: true });
+    }
   });
 
   it('reads all daily summaries for a week', async () => {
@@ -194,7 +196,9 @@ describe('saveWeeklySummary', () => {
   });
 
   afterEach(async () => {
-    await rm(tmpDir, { recursive: true, force: true });
+    if (tmpDir) {
+      await rm(tmpDir, { recursive: true, force: true });
+    }
   });
 
   it('saves weekly summary to correct path', async () => {
@@ -246,7 +250,9 @@ describe('generateAndSaveWeeklySummary', () => {
   });
 
   afterEach(async () => {
-    await rm(tmpDir, { recursive: true, force: true });
+    if (tmpDir) {
+      await rm(tmpDir, { recursive: true, force: true });
+    }
   });
 
   it('generates and saves weekly summary from daily summaries', async () => {

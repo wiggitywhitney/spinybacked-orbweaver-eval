@@ -4,6 +4,10 @@
 import { findUnsummarizedDays, findUnsummarizedWeeks, findUnsummarizedMonths } from '../utils/summary-detector.js';
 import { generateAndSaveDailySummary, generateAndSaveWeeklySummary, generateAndSaveMonthlySummary } from './summary-manager.js';
 
+function getErrorMessage(err) {
+  return err instanceof Error ? err.message : String(err);
+}
+
 /**
  * Trigger automatic daily summary generation for all unsummarized past days.
  * Generates summaries sequentially to avoid overwhelming the LLM API.
@@ -52,11 +56,20 @@ export async function triggerAutoSummaries(basePath = '.', options = {}) {
       }
     } catch (err) {
       result.failed.push(dateStr);
-      result.errors.push(`${dateStr}: ${err.message}`);
+      result.errors.push(`${dateStr}: ${getErrorMessage(err)}`);
       if (onProgress) {
-        onProgress(`Failed to generate summary for ${dateStr}: ${err.message}`);
+        onProgress(`Failed to generate summary for ${dateStr}: ${getErrorMessage(err)}`);
       }
     }
+  }
+
+  // Skip higher-cadence rollups if daily generation had failures —
+  // prevents locking in incomplete weekly/monthly via duplicate detection
+  if (result.failed.length > 0) {
+    if (onProgress) {
+      onProgress('Skipped weekly/monthly auto-summaries because daily generation had failures');
+    }
+    return result;
   }
 
   // After daily summaries are generated, check for unsummarized weeks
@@ -113,9 +126,9 @@ export async function triggerAutoWeeklySummaries(basePath = '.', options = {}) {
       }
     } catch (err) {
       result.failed.push(weekStr);
-      result.errors.push(`${weekStr}: ${err.message}`);
+      result.errors.push(`${weekStr}: ${getErrorMessage(err)}`);
       if (onProgress) {
-        onProgress(`Failed to generate weekly summary for ${weekStr}: ${err.message}`);
+        onProgress(`Failed to generate weekly summary for ${weekStr}: ${getErrorMessage(err)}`);
       }
     }
   }
@@ -163,9 +176,9 @@ export async function triggerAutoMonthlySummaries(basePath = '.', options = {}) 
       }
     } catch (err) {
       result.failed.push(monthStr);
-      result.errors.push(`${monthStr}: ${err.message}`);
+      result.errors.push(`${monthStr}: ${getErrorMessage(err)}`);
       if (onProgress) {
-        onProgress(`Failed to generate monthly summary for ${monthStr}: ${err.message}`);
+        onProgress(`Failed to generate monthly summary for ${monthStr}: ${getErrorMessage(err)}`);
       }
     }
   }

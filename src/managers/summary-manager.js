@@ -138,6 +138,10 @@ export async function generateAndSaveDailySummary(date, basePath = '.', options 
   // Save to file
   const path = await saveDailySummary(formatted, date, basePath, options);
 
+  if (!path) {
+    return { saved: false, reason: `Summary already exists for ${dateStr}` };
+  }
+
   return {
     saved: true,
     path,
@@ -308,6 +312,10 @@ export async function generateAndSaveWeeklySummary(weekStr, basePath = '.', opti
 
   // Save to file
   const path = await saveWeeklySummary(formatted, weekStr, basePath, options);
+
+  if (!path) {
+    return { saved: false, reason: `Weekly summary already exists for ${weekStr}` };
+  }
 
   return {
     saved: true,
@@ -488,6 +496,10 @@ export async function generateAndSaveMonthlySummary(monthStr, basePath = '.', op
 
   // Save to file
   const path = await saveMonthlySummary(formatted, monthStr, basePath, options);
+
+  if (!path) {
+    return { saved: false, reason: `Monthly summary already exists for ${monthStr}` };
+  }
 
   return {
     saved: true,
