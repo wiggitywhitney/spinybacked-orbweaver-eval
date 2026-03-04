@@ -342,6 +342,7 @@ export async function runMonthlySummarize(options) {
  * Show help text for the summarize subcommand.
  */
 export function showSummarizeHelp() {
+  // eslint-disable-next-line no-console
   console.log(`
 Commit Story — Summarize
 
