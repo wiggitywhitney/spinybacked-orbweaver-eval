@@ -70,6 +70,77 @@ the AI from echoing its own responses or including unnecessary process talk.
 - **Author**: Whitney Lee
 ```
 
+## Summaries
+
+Commit Story can consolidate your per-commit journal entries into daily, weekly, and monthly summaries — the level most useful for standups, retrospectives, and personal reflection.
+
+### How It Works
+
+- **Daily summaries** read all journal entries for a given day and produce a standup-style narrative with sections for what was accomplished, key decisions, and open threads.
+- **Weekly summaries** consolidate daily summaries into a week-in-review with highlights and recurring patterns.
+- **Monthly summaries** consolidate weekly summaries into a retrospective with accomplishments, growth, and a look ahead.
+
+### Automatic Generation
+
+Summaries generate automatically on each commit:
+
+1. On the first commit of a new day, daily summaries are generated for all unsummarized previous days
+2. On the first commit after a week boundary, a weekly summary is generated
+3. On the first commit of a new month, a monthly summary is generated
+
+To disable automatic summaries:
+
+```bash
+export COMMIT_STORY_AUTO_SUMMARIZE=false
+```
+
+### Manual Generation
+
+Generate summaries on demand with the `summarize` subcommand:
+
+```bash
+# Daily summaries
+npx commit-story summarize 2026-02-22                     # Single day
+npx commit-story summarize 2026-02-01..2026-02-20         # Date range
+npx commit-story summarize 2026-02-22 --force             # Regenerate existing
+
+# Weekly summaries
+npx commit-story summarize --weekly 2026-W08              # Single week
+npx commit-story summarize --weekly 2026-W08 --force      # Regenerate existing
+
+# Monthly summaries
+npx commit-story summarize --monthly 2026-02              # Single month
+npx commit-story summarize --monthly 2026-02 --force      # Regenerate existing
+```
+
+### Configuration
+
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `COMMIT_STORY_AUTO_SUMMARIZE` | Set to `false` to disable automatic summary generation | `true` (enabled) |
+| `COMMIT_STORY_TIMEZONE` | IANA timezone for day/week/month boundaries (e.g., `America/Chicago`) | System local time |
+| `ANTHROPIC_API_KEY` | Required for all AI generation | — |
+
+### Summary File Structure
+
+Summaries are stored alongside your journal entries:
+
+```text
+journal/
+├── entries/              # Per-commit entries (existing)
+│   └── YYYY-MM/
+│       └── YYYY-MM-DD.md
+└── summaries/            # Consolidated summaries
+    ├── daily/
+    │   └── YYYY-MM-DD.md
+    ├── weekly/
+    │   └── YYYY-Www.md   # ISO week (e.g., 2026-W08)
+    └── monthly/
+        └── YYYY-MM.md
+```
+
+Duplicate detection uses file existence — if a summary file already exists, it is skipped unless `--force` is passed.
+
 ## v2 Architecture
 
 This is a complete rebuild of [commit-story v1](https://github.com/wiggitywhitney/commit-story) with modern tooling:
@@ -104,6 +175,7 @@ See [`docs/telemetry/`](docs/telemetry/) for the generated attribute documentati
 - Claude Code chat history collection and filtering
 - AI-powered journal generation (summary, dialogue, technical decisions)
 - Journal file management (`journal/entries/YYYY-MM/YYYY-MM-DD.md`)
+- Daily, weekly, and monthly summary generation (automatic and manual)
 - MCP server for real-time context capture
 - OpenTelemetry Weaver telemetry schema
 
