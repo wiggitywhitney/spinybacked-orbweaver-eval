@@ -180,6 +180,11 @@ User-facing documentation and polish for the summary feature.
 ## Progress Log
 
 ### 2026-03-04
+- Real-world validation of all three cadences against live journal entries:
+  - Daily: generated summaries for Feb 22 (8 entries), Feb 23 (11 entries), Feb 24 (3 entries) — coherent standup-style narratives
+  - Weekly: generated W09 summary from 2 daily summaries — proper cross-day synthesis with highlights and patterns
+  - Monthly: generated Feb 2026 summary from 1 weekly summary — accomplishments, growth, and looking-ahead sections
+  - Error resilience confirmed: API overload (529) handled gracefully, `--force` regeneration succeeded
 - Completed Milestone 5: Monthly Summaries
 - Created `monthly-summary-prompt.js` with 6-step process and 4 sections (Month in Review, Accomplishments, Growth, Looking Ahead)
 - Extended `summary-graph.js` with MonthlySummaryState, monthlySummaryNode, generateMonthlySummary, formatWeeklySummariesForMonthly, cleanMonthlySummaryOutput
