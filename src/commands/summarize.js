@@ -342,8 +342,7 @@ export async function runMonthlySummarize(options) {
  * Show help text for the summarize subcommand.
  */
 export function showSummarizeHelp() {
-  // eslint-disable-next-line no-console
-  console.log(`
+  const helpText = `
 Commit Story — Summarize
 
 Generate daily, weekly, or monthly summaries for journal entries.
@@ -374,5 +373,6 @@ Examples:
   npx commit-story summarize --weekly 2026-W08 --force
   npx commit-story summarize --monthly 2026-02
   npx commit-story summarize --monthly 2026-02 --force
-`);
+`;
+  console.log(helpText); // eslint-disable-line no-console
 }
