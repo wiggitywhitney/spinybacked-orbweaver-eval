@@ -65,17 +65,17 @@ Implement the core daily summary pipeline — read all journal entries for a giv
 ---
 
 ### Milestone 2: Gap Detection and Auto-Trigger
-**Status**: Not Started
+**Status**: Complete
 
 Make daily summaries automatic — detect the first commit of a new day and generate summaries for all unsummarized previous days.
 
 **What's included**:
-- [ ] `src/utils/summary-detector.js` — identify which days have entries but no summary
-- [ ] Integration into `src/index.js` — after saving a journal entry, check if summaries are needed for previous days
-- [ ] Smart gap handling: skip days with no entries (weekends, vacations), detect irregular patterns
-- [ ] Duplicate prevention: check for existing summary files before generating
-- [ ] Configuration: environment variable to enable/disable auto-summaries (`COMMIT_STORY_AUTO_SUMMARIZE=true`)
-- [ ] Tests for gap detection logic and auto-trigger integration
+- [x] `src/utils/summary-detector.js` — identify which days have entries but no summary
+- [x] Integration into `src/index.js` — after saving a journal entry, check if summaries are needed for previous days
+- [x] Smart gap handling: skip days with no entries (weekends, vacations), detect irregular patterns
+- [x] Duplicate prevention: check for existing summary files before generating
+- [x] Configuration: environment variable to enable/disable auto-summaries (`COMMIT_STORY_AUTO_SUMMARIZE=true`)
+- [x] Tests for gap detection logic and auto-trigger integration
 
 **Done when**: Making the first commit on Monday automatically generates daily summaries for any unsummarized days from the previous week that had journal entries
 
@@ -180,6 +180,12 @@ User-facing documentation and polish for the summary feature.
 ## Progress Log
 
 ### 2026-03-04
+- Completed Milestone 2: Gap Detection and Auto-Trigger
+- Created `summary-detector.js` — `findUnsummarizedDays()` and `getDaysWithEntries()` scan filesystem for gaps
+- Created `auto-summarize.js` — orchestrates sequential summary generation with error resilience and progress callbacks
+- Added `COMMIT_STORY_AUTO_SUMMARIZE` and `COMMIT_STORY_TIMEZONE` to config.js
+- Integrated auto-trigger into index.js — runs after journal entry save when enabled
+- 21 new tests (13 detector + 8 auto-summarize), all 388 tests passing
 - Completed Milestone 1: Daily Summary Generation
 - Added `getSummaryPath`, `getSummariesDirectory`, `getISOWeekString` to journal-paths.js
 - Created `daily-summary-prompt.js` with 5-step architecture (authored via /write-prompt)

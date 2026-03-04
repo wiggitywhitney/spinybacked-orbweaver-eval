@@ -66,7 +66,7 @@ export function getModel(temperature = 0) {
     models.set(
       temperature,
       new ChatAnthropic({
-        model: 'claude-3-5-haiku-latest',
+        model: 'claude-haiku-4-5-20251001',
         maxTokens: 2048,
         temperature,
       })

@@ -1,4 +1,6 @@
 #!/usr/bin/env node
+// ABOUTME: Main entry point for commit-story — generates journal entries from git commits
+// ABOUTME: Orchestrates context gathering, LLM generation, saving, and auto-summary triggers
 /**
  * Commit Story - Automated Engineering Journal
  *
@@ -16,11 +18,13 @@
  */
 
 import './utils/config.js'; // Load environment variables first
+import { config } from './utils/config.js';
 import { execFileSync } from 'node:child_process';
 import { gatherContextForCommit } from './integrators/context-integrator.js';
 import { generateJournalSections } from './generators/journal-graph.js';
 import { saveJournalEntry, discoverReflections } from './managers/journal-manager.js';
 import { isJournalEntriesOnlyCommit, isMergeCommit, shouldSkipMergeCommit, isSafeGitRef } from './utils/commit-analyzer.js';
+import { triggerAutoSummaries } from './managers/auto-summarize.js';
 
 /** Exit codes */
 const EXIT_SUCCESS = 0;
@@ -276,6 +280,34 @@ async function main() {
     console.log('⚠️  Some sections had generation issues:');
     for (const err of sections.errors) {
       console.log(`   - ${err}`);
+    }
+  }
+
+  // Auto-generate daily summaries for unsummarized past days
+  if (config.autoSummarize) {
+    debug('Checking for unsummarized days...');
+    try {
+      const summaryResult = await triggerAutoSummaries('.', {
+        onProgress: (msg) => debug(msg),
+      });
+
+      if (summaryResult.generated.length > 0) {
+        console.log(`📊 Generated ${summaryResult.generated.length} daily summary(ies)`);
+        for (const path of summaryResult.generated) {
+          debug(`   ${path}`);
+        }
+      }
+
+      if (summaryResult.failed.length > 0) {
+        console.log(`⚠️  Failed to generate ${summaryResult.failed.length} summary(ies)`);
+        for (const dateStr of summaryResult.failed) {
+          console.log(`   - ${dateStr}`);
+        }
+      }
+    } catch (err) {
+      // Auto-summarize failures should not block the main flow
+      console.log(`⚠️  Auto-summarize error: ${err.message}`);
+      debug(err.stack);
     }
   }
 
