@@ -86,14 +86,22 @@ v2 serves as a laboratory for exploring how AI automation reshapes telemetry pra
 
 ## Telemetry Schema
 
-The `telemetry/registry/` directory contains an OpenTelemetry Weaver schema defining semantic conventions for commit-story. **No telemetry is implemented yet** — the schema exists so an AI agent can read it and instrument the codebase.
+The `semconv/` directory contains an OpenTelemetry Weaver schema defining semantic conventions for commit-story. **No telemetry is implemented yet** — the schema exists so an AI agent can read it and instrument the codebase.
 
 The schema:
 
-- Imports official OTel semantic conventions (GenAI, VCS, RPC)
+- Imports official OTel semantic conventions v1.37.0 (GenAI, VCS, RPC)
 - Defines custom `commit_story.*` attributes for domain-specific telemetry
 
 See [`docs/telemetry/`](docs/telemetry/) for the generated attribute documentation.
+
+### Agent Configuration
+
+The [SpinybackedOrbWeaver](https://github.com/wiggitywhitney/spinybacked-orbweaver) telemetry agent reads `orb.yaml` in the project root to locate the schema and SDK init file:
+
+- **`semconv/`** — Weaver registry (attributes, manifest, OTel semconv dependency)
+- **`src/instrumentation.js`** — OTel SDK init file with an empty `instrumentations` array for the agent to populate
+- **`orb.yaml`** — Agent config pointing to the above paths (`schemaPath: semconv`, `sdkInitFile: src/instrumentation.js`)
 
 ## Project Status
 

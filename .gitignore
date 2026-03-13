@@ -36,4 +36,4 @@ journal/context/
 .vals.yaml
 
 # Weaver generated output
-telemetry/registry/resolved.json
+semconv/resolved.json
