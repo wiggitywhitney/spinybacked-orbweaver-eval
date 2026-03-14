@@ -13,3 +13,5 @@ Entry format: `- (YYYY-MM-DD) Description of feature-level change (PRD #X, miles
 - (2026-03-13) Added "Draft PRD #4" milestone to create self-improving evaluation chain (PRD #3)
 - (2026-03-13) Completed evaluation run-3: 17/21 files succeeded, 4 failed. Documented 11 orb issues with acceptance criteria tied to practice files (PRD #3, evaluation run-3)
 - (2026-03-13) Increased maxTokensPerFile to 150000 in orb.yaml — rescued commit-analyzer.js from token budget failure (PRD #3, evaluation run-3)
+- (2026-03-13) Completed per-file evaluation: full 31-rule rubric on all 21 files — 4/4 gates pass, 19/26 quality (73%). Discovered stale orb build invalidates run-3 as a test of fixes #61/#64/#65 (PRD #3, per-file evaluation)
+- (2026-03-13) Consolidated orb issues doc from 13 to 11 issues — folded token budget disable into #1, sensitive-filter.js into #2 (PRD #3, per-file evaluation)

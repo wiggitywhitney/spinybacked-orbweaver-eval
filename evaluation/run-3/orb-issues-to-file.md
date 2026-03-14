@@ -18,9 +18,10 @@ The pre-flight cost ceiling is just `fileCount × maxTokensPerFile` (global wors
 
 **User impact:** "Don't spend the maximum budget and show me nothing. That's terrible."
 
-**Proposed fixes (pick one or both):**
+**Proposed fixes (pick one or more):**
 - **Pre-flight estimation**: Estimate per-file token cost from file size/line count and skip files predicted to exceed budget before making API calls. Validate estimation accuracy against the two commit-story-v2-eval files: commit-analyzer.js (~88K actual) and journal-graph.js (~94K actual at default budget).
 - **Remove budget as a hard failure**: If already past the budget after an attempt, show the result anyway (maybe with a warning) rather than discarding paid-for work
+- **Allow disabling the budget** (from Issue #10): Accept `maxTokensPerFile: 0` or `maxTokensPerFile: unlimited` in orb.yaml to disable the budget check entirely. For evaluation runs or when a user is willing to pay, they should be able to opt out.
 
 **Code locations:**
 - Budget check: `src/fix-loop/instrument-with-retry.ts` line 330-336
@@ -58,6 +59,8 @@ if (response.parsed_output == null) {
   // Include diagnostics in error message
 }
 ```
+
+**Acceptance criterion (from Issue #11):** `orb instrument src/integrators/filters/sensitive-filter.js` must succeed. This 236-line file with 12 regex patterns fails with null parsed_output on every attempt across two independent runs. Leading theory: complex regex patterns with backslashes and escaped brackets cause JSON parsing failures when the LLM reproduces file content inside a JSON string field. Diagnostics from this fix should confirm or refute this theory.
 
 **Code locations:**
 - Null check: `src/agent/instrument-file.ts` lines 190-196
@@ -206,34 +209,15 @@ Success = at least some functions in each file get instrumented, even if others 
 
 ---
 
-## Issue 10: Add Option to Disable Max Token Budget
+## ~~Issue 10~~ (Folded into Issue 1)
 
-**Problem:** There's no way to say "I don't care about cost, just try to instrument the file." The `maxTokensPerFile` setting has no "unlimited" option. For evaluation runs or when a user is willing to pay, they should be able to opt out of the budget entirely.
-
-**Proposed fix:** Accept `maxTokensPerFile: 0` or `maxTokensPerFile: unlimited` in orb.yaml to disable the budget check.
-
----
-
-## Issue 11: Fix null parsed_output so sensitive-filter.js succeeds
+## Issue 11: ~~Fix null parsed_output so sensitive-filter.js succeeds~~ (Folded into Issue 2)
 
 **Acceptance criterion:** `orb instrument src/integrators/filters/sensitive-filter.js` succeeds.
 
 **Context:** This 236-line file with straightforward pure functions fails with null parsed_output on every attempt across two independent runs (run-3 main + supplemental). It's a simple file — 12 regex patterns, 4 exported functions, no complex control flow. It should be easy to instrument.
 
-**Depends on:** Issue #2 (null parsed_output diagnostics). Start by adding diagnostics to confirm the root cause before choosing a fix.
-
-**Leading theory:** The file contains complex regex patterns with backslashes, `[\s\S]*?`, escaped brackets, and multi-line PEM key detection patterns. When the LLM reproduces file content inside a JSON string field (structured output), these characters likely cause JSON parsing failures. The Zod schema rejects the malformed JSON → null parsed_output.
-
-**Evidence supporting regex theory:**
-- File has 12 regex patterns with heavy escaping
-- LLM must reproduce these exactly inside a JSON string value
-- Other files of similar size and complexity succeed — the difference is regex density
-- Null parsed_output = Zod validation failed = likely malformed JSON, not refusal or truncation
-
-**Possible fixes (choose after diagnostics confirm root cause):**
-- **Diff-based output format**: Instead of "return the entire file as a JSON string," have the LLM return only the changes (additions/modifications). Avoids needing to reproduce regex patterns verbatim in JSON.
-- **Post-process JSON repair**: Fix common LLM JSON escaping errors (unescaped backslashes, broken unicode sequences) before Zod validation.
-- **Separate content block**: Return instrumented code outside the JSON structure (e.g., in a text content block) so it doesn't need JSON escaping.
+**Depends on:** Issue #2 (null parsed_output diagnostics). Start by adding diagnostics to confirm the root cause before choosing a fix. This issue has been folded into Issue #2 as an acceptance criterion — see Issue #2 for the combined scope.
 
 ---
 
@@ -256,6 +240,22 @@ The instrumented code is on a local branch but the PR artifact — which is valu
 - Consider also validating the GitHub token can create PRs (not just push) via the GitHub API
 
 **Code location:** `src/coordinator/coordinate.ts` or `src/interfaces/instrument-handler.ts` (startup sequence)
+
+---
+
+## Issue 13: Save PR Summary to a Local File as Backup
+
+**Acceptance criterion:** After instrumentation completes, the PR summary (title, body, per-file table, agent notes) is written to a local file (e.g., `orb-pr-summary.md` in the project root or a configurable path) regardless of whether the push/PR creation succeeds.
+
+**Problem:** In run-3, the push failed and the PR summary was lost entirely. The PR summary contains valuable evaluation artifacts — per-file status table, span counts, agent notes explaining decisions. When push fails, all of that information is gone. The user has to reconstruct it from the log.
+
+**Proposed fix:**
+- Always write the PR summary to a local file before attempting push
+- Include it in verbose output as well
+- If push succeeds and PR is created, the local file is a nice-to-have backup
+- If push fails, the local file preserves the PR content for manual review or manual PR creation
+
+**Code location:** `src/deliverables/pr-summary.ts` (where the summary is rendered)
 
 ---
 
