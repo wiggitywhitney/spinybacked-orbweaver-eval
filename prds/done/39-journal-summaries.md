@@ -45,7 +45,7 @@ journal/
 ## Milestones
 
 ### Milestone 1: Daily Summary Generation
-**Status**: Not Started
+**Status**: Complete
 
 Implement the core daily summary pipeline — read all journal entries for a given date, generate a consolidated narrative via LangGraph, and write to `journal/summaries/daily/`.
 
@@ -54,96 +54,96 @@ Implement the core daily summary pipeline — read all journal entries for a giv
 - Proposed sections: **Narrative** (what was accomplished and why), **Key Decisions** (consolidated technical decisions from the day), **Open Threads** (things left unfinished or questions raised)
 
 **What's included**:
-- [ ] `src/utils/journal-paths.js` — add `getSummaryPath(cadence, date)` and `getSummariesDirectory(cadence)`
-- [ ] `src/generators/summary-graph.js` — new LangGraph StateGraph for summary generation (separate from per-commit journal-graph)
-- [ ] `src/generators/prompts/sections/daily-summary-prompt.js` — prompt template for daily consolidation
-- [ ] `src/managers/summary-manager.js` — orchestrates reading entries, calling the graph, writing output
-- [ ] Tests for all new components
+- [x] `src/utils/journal-paths.js` — add `getSummaryPath(cadence, date)` and `getSummariesDirectory(cadence)`
+- [x] `src/generators/summary-graph.js` — new LangGraph StateGraph for summary generation (separate from per-commit journal-graph)
+- [x] `src/generators/prompts/sections/daily-summary-prompt.js` — prompt template for daily consolidation
+- [x] `src/managers/summary-manager.js` — orchestrates reading entries, calling the graph, writing output
+- [x] Tests for all new components
 
 **Done when**: `npx commit-story summarize 2026-02-22` reads that day's journal entries and produces a coherent daily summary in `journal/summaries/daily/2026-02-22.md`
 
 ---
 
 ### Milestone 2: Gap Detection and Auto-Trigger
-**Status**: Not Started
+**Status**: Complete
 
 Make daily summaries automatic — detect the first commit of a new day and generate summaries for all unsummarized previous days.
 
 **What's included**:
-- [ ] `src/utils/summary-detector.js` — identify which days have entries but no summary
-- [ ] Integration into `src/index.js` — after saving a journal entry, check if summaries are needed for previous days
-- [ ] Smart gap handling: skip days with no entries (weekends, vacations), detect irregular patterns
-- [ ] Duplicate prevention: check for existing summary files before generating
-- [ ] Configuration: environment variable to enable/disable auto-summaries (`COMMIT_STORY_AUTO_SUMMARIZE=true`)
-- [ ] Tests for gap detection logic and auto-trigger integration
+- [x] `src/utils/summary-detector.js` — identify which days have entries but no summary
+- [x] Integration into `src/index.js` — after saving a journal entry, check if summaries are needed for previous days
+- [x] Smart gap handling: skip days with no entries (weekends, vacations), detect irregular patterns
+- [x] Duplicate prevention: check for existing summary files before generating
+- [x] Configuration: auto-summaries enabled by default; set `COMMIT_STORY_AUTO_SUMMARIZE=false` to disable
+- [x] Tests for gap detection logic and auto-trigger integration
 
 **Done when**: Making the first commit on Monday automatically generates daily summaries for any unsummarized days from the previous week that had journal entries
 
 ---
 
 ### Milestone 3: Manual Backfill CLI
-**Status**: Not Started
+**Status**: Complete
 
 Provide a CLI command for generating summaries on demand — useful for historical backfill, regeneration, and testing.
 
 **What's included**:
-- [ ] CLI subcommand: `npx commit-story summarize [date|date-range] [--force]`
-- [ ] Date range support (inclusive endpoints, reversed ranges normalized to ascending): `npx commit-story summarize 2026-02-01..2026-02-15`
-- [ ] Single date: `npx commit-story summarize 2026-02-22`
-- [ ] `--force` flag to regenerate existing summaries
-- [ ] Progress indicator for multi-day backfill operations
-- [ ] Validation: skip dates with no entries, warn on dates with existing summaries
-- [ ] Tests for CLI argument parsing and backfill orchestration
+- [x] CLI subcommand: `npx commit-story summarize [date|date-range] [--force]`
+- [x] Date range support (inclusive endpoints, reversed ranges normalized to ascending): `npx commit-story summarize 2026-02-01..2026-02-15`
+- [x] Single date: `npx commit-story summarize 2026-02-22`
+- [x] `--force` flag to regenerate existing summaries
+- [x] Progress indicator for multi-day backfill operations
+- [x] Validation: skip dates with no entries, warn on dates with existing summaries
+- [x] Tests for CLI argument parsing and backfill orchestration
 
 **Done when**: `npx commit-story summarize 2026-02-01..2026-02-20` generates daily summaries for all days in that range that have entries, with a progress indicator
 
 ---
 
 ### Milestone 4: Weekly Summaries
-**Status**: Not Started
+**Status**: Complete
 
 Weekly rollups that consolidate daily summaries into a higher-level narrative. Uses ISO week-year + week numbers for consistency (note: ISO week-year can differ from calendar year near boundaries, e.g., 2019-12-30 is in ISO week 2020-W01).
 
 **What's included**:
-- [ ] `src/generators/prompts/sections/weekly-summary-prompt.js` — prompt for weekly consolidation
-- [ ] Extend `summary-manager.js` to support weekly cadence
-- [ ] Proposed sections: **Week in Review** (narrative arc of the week's work), **Highlights** (most significant accomplishments), **Patterns** (recurring themes, persistent blockers, emerging directions)
-- [ ] Auto-trigger: generate weekly summary on first commit after a week boundary
-- [ ] Manual: `npx commit-story summarize --weekly 2026-W08`
-- [ ] Tests for weekly generation and cadence detection
+- [x] `src/generators/prompts/sections/weekly-summary-prompt.js` — prompt for weekly consolidation
+- [x] Extend `summary-manager.js` to support weekly cadence
+- [x] Proposed sections: **Week in Review** (narrative arc of the week's work), **Highlights** (most significant accomplishments), **Patterns** (recurring themes, persistent blockers, emerging directions)
+- [x] Auto-trigger: generate weekly summary on first commit after a week boundary
+- [x] Manual: `npx commit-story summarize --weekly 2026-W08`
+- [x] Tests for weekly generation and cadence detection
 
 **Done when**: Weekly summaries generate from daily summaries and read as a coherent weekly development narrative
 
 ---
 
 ### Milestone 5: Monthly Summaries
-**Status**: Not Started
+**Status**: Complete
 
 Monthly rollups that consolidate weekly summaries into a retrospective view.
 
 **What's included**:
-- [ ] `src/generators/prompts/sections/monthly-summary-prompt.js` — prompt for monthly consolidation
-- [ ] Extend `summary-manager.js` to support monthly cadence
-- [ ] Proposed sections: **Month in Review** (narrative arc), **Accomplishments** (shipped features, resolved issues), **Growth** (skills learned, patterns discovered), **Looking Ahead** (open threads, upcoming work)
-- [ ] Auto-trigger: generate monthly summary on first commit of a new month
-- [ ] Manual: `npx commit-story summarize --monthly 2026-02`
-- [ ] Tests for monthly generation
+- [x] `src/generators/prompts/sections/monthly-summary-prompt.js` — prompt for monthly consolidation
+- [x] Extend `summary-manager.js` to support monthly cadence
+- [x] Proposed sections: **Month in Review** (narrative arc), **Accomplishments** (shipped features, resolved issues), **Growth** (skills learned, patterns discovered), **Looking Ahead** (open threads, upcoming work)
+- [x] Auto-trigger: generate monthly summary on first commit of a new month
+- [x] Manual: `npx commit-story summarize --monthly 2026-02`
+- [x] Tests for monthly generation
 
 **Done when**: Monthly summaries generate from weekly summaries and provide a useful retrospective of the month's development work
 
 ---
 
 ### Milestone 6: Documentation and Integration
-**Status**: Not Started
+**Status**: Complete
 
 User-facing documentation and polish for the summary feature.
 
 **What's included**:
-- [ ] Update README with summary commands and configuration
-- [ ] Update `--help` output with summary subcommand
-- [ ] Document environment variables (`COMMIT_STORY_AUTO_SUMMARIZE`, `COMMIT_STORY_TIMEZONE`)
-- [ ] Document file structure for summaries directory
-- [ ] Verify MCP tools (reflections, context) work correctly alongside summary generation
+- [x] Update README with summary commands and configuration
+- [x] Update `--help` output with summary subcommand
+- [x] Document environment variables (`COMMIT_STORY_AUTO_SUMMARIZE`, `COMMIT_STORY_TIMEZONE`)
+- [x] Document file structure for summaries directory
+- [x] Verify MCP tools (reflections, context) work correctly alongside summary generation
 
 **Done when**: A new user can discover, configure, and use summary generation from the README alone
 
@@ -178,6 +178,56 @@ User-facing documentation and polish for the summary feature.
 3. **Reflections in summaries**: Should daily summaries incorporate reflections and context captures from that day, or only the journal entries?
 
 ## Progress Log
+
+### 2026-03-04
+- Completed Milestone 6: Documentation and Integration
+- Updated README with comprehensive Summaries section: auto-generation, manual CLI commands, configuration table, file structure
+- Verified `--help` output already documents summarize subcommand (added in Milestone 3)
+- Documented `COMMIT_STORY_AUTO_SUMMARIZE` and `COMMIT_STORY_TIMEZONE` env vars in configuration table
+- Documented `journal/summaries/` directory tree with daily/weekly/monthly structure
+- Verified MCP tools (reflections → `journal/reflections/`, context → `journal/context/`) are fully independent from summary pipeline
+- All 535 tests passing, all 6 milestones complete
+- Real-world validation of all three cadences against live journal entries:
+  - Daily: generated summaries for Feb 22 (8 entries), Feb 23 (11 entries), Feb 24 (3 entries) — coherent standup-style narratives
+  - Weekly: generated W09 summary from 2 daily summaries — proper cross-day synthesis with highlights and patterns
+  - Monthly: generated Feb 2026 summary from 1 weekly summary — accomplishments, growth, and looking-ahead sections
+  - Error resilience confirmed: API overload (529) handled gracefully, `--force` regeneration succeeded
+- Completed Milestone 5: Monthly Summaries
+- Created `monthly-summary-prompt.js` with 6-step process and 4 sections (Month in Review, Accomplishments, Growth, Looking Ahead)
+- Extended `summary-graph.js` with MonthlySummaryState, monthlySummaryNode, generateMonthlySummary, formatWeeklySummariesForMonthly, cleanMonthlySummaryOutput
+- Extended `summary-manager.js` with getMonthBoundaries, readMonthWeeklySummaries, formatMonthlySummary, saveMonthlySummary, generateAndSaveMonthlySummary
+- Extended `summary-detector.js` with findUnsummarizedMonths
+- Extended `auto-summarize.js` with triggerAutoMonthlySummaries; triggerAutoSummaries now chains daily → weekly → monthly
+- Extended `summarize.js` CLI with --monthly flag, isValidMonthString, runMonthlySummarize
+- Updated `index.js` handleSummarize for monthly mode; auto-summarize output shows daily + weekly + monthly counts
+- 62 new tests across 7 test files, all 535 tests passing
+- Completed Milestone 4: Weekly Summaries
+- Created `weekly-summary-prompt.js` with 5-step process (authored via /write-prompt review)
+- Extended `summary-graph.js` with WeeklySummaryState, weeklySummaryNode, generateWeeklySummary
+- Extended `summary-manager.js` with getWeekBoundaries, readWeekDailySummaries, formatWeeklySummary, saveWeeklySummary, generateAndSaveWeeklySummary
+- Extended `summary-detector.js` with findUnsummarizedWeeks, getDaysWithDailySummaries
+- Extended `auto-summarize.js` with triggerAutoWeeklySummaries; triggerAutoSummaries now chains daily → weekly
+- Extended `summarize.js` CLI with --weekly flag, isValidWeekString, runWeeklySummarize
+- Updated `index.js` handleSummarize for weekly mode; auto-summarize output shows daily + weekly counts
+- 63 new tests across 5 test files, all 473 tests passing
+- Completed Milestone 3: Manual Backfill CLI
+- Created `src/commands/summarize.js` — date parsing, range expansion, backfill orchestration
+- Added subcommand routing to `src/index.js` — detects `summarize` as first arg, routes to handler
+- Progress indicator with `[N/total]` format for multi-day operations
+- Updated `--help` output with summarize subcommand documentation
+- 22 new tests (10 arg parsing + 4 range expansion + 8 integration), all 410 tests passing
+- Completed Milestone 2: Gap Detection and Auto-Trigger
+- Created `summary-detector.js` — `findUnsummarizedDays()` and `getDaysWithEntries()` scan filesystem for gaps
+- Created `auto-summarize.js` — orchestrates sequential summary generation with error resilience and progress callbacks
+- Added `COMMIT_STORY_AUTO_SUMMARIZE` and `COMMIT_STORY_TIMEZONE` to config.js
+- Integrated auto-trigger into index.js — runs after journal entry save when enabled
+- 21 new tests (13 detector + 8 auto-summarize), all 388 tests passing
+- Completed Milestone 1: Daily Summary Generation
+- Added `getSummaryPath`, `getSummariesDirectory`, `getISOWeekString` to journal-paths.js
+- Created `daily-summary-prompt.js` with 5-step architecture (authored via /write-prompt)
+- Created `summary-graph.js` — separate LangGraph StateGraph per DD-001
+- Created `summary-manager.js` — orchestrates read entries → generate → save with duplicate detection (DD-003)
+- 55 new tests across 4 test files, all 367 tests passing
 
 ### 2026-02-23
 - Created PRD from v1 PRD-5 design adapted for v2 architecture

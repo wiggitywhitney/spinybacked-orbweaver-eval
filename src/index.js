@@ -1,4 +1,6 @@
 #!/usr/bin/env node
+// ABOUTME: Main entry point for commit-story — generates journal entries from git commits
+// ABOUTME: Orchestrates context gathering, LLM generation, saving, and auto-summary triggers
 /**
  * Commit Story - Automated Engineering Journal
  *
@@ -16,11 +18,14 @@
  */
 
 import './utils/config.js'; // Load environment variables first
+import { config } from './utils/config.js';
 import { execFileSync } from 'node:child_process';
 import { gatherContextForCommit } from './integrators/context-integrator.js';
 import { generateJournalSections } from './generators/journal-graph.js';
 import { saveJournalEntry, discoverReflections } from './managers/journal-manager.js';
 import { isJournalEntriesOnlyCommit, isMergeCommit, shouldSkipMergeCommit, isSafeGitRef } from './utils/commit-analyzer.js';
+import { triggerAutoSummaries } from './managers/auto-summarize.js';
+import { parseSummarizeArgs, runSummarize, runWeeklySummarize, runMonthlySummarize, showSummarizeHelp } from './commands/summarize.js';
 
 /** Exit codes */
 const EXIT_SUCCESS = 0;
@@ -42,13 +47,36 @@ function debug(...args) {
 
 /**
  * Parse command line arguments
- * @returns {{ commitRef: string, debug: boolean, help: boolean }}
+ * @returns {{ subcommand: string|null, commitRef: string, debug: boolean, help: boolean, subcommandArgs: string[] }}
  */
 function parseArgs() {
   const args = process.argv.slice(2);
 
   let commitRef = 'HEAD';
   let showHelp = false;
+  let subcommand = null;
+  const subcommandArgs = [];
+
+  // Check if first non-flag argument is a known subcommand
+  const knownSubcommands = ['summarize'];
+  const firstNonFlag = args.find(a => !a.startsWith('-'));
+  if (firstNonFlag && knownSubcommands.includes(firstNonFlag)) {
+    subcommand = firstNonFlag;
+    // Everything after the subcommand name goes to the subcommand handler
+    const subIdx = args.indexOf(firstNonFlag);
+    subcommandArgs.push(
+      ...args
+        .slice(subIdx + 1)
+        .filter(arg => arg !== '--debug' && arg !== '-d')
+    );
+    // Still check for global --debug flag
+    for (const arg of args) {
+      if (arg === '--debug' || arg === '-d') {
+        DEBUG = true;
+      }
+    }
+    return { subcommand, commitRef, debug: DEBUG, help: false, subcommandArgs };
+  }
 
   for (const arg of args) {
     if (arg === '--debug' || arg === '-d') {
@@ -60,7 +88,7 @@ function parseArgs() {
     }
   }
 
-  return { commitRef, debug: DEBUG, help: showHelp };
+  return { subcommand, commitRef, debug: DEBUG, help: showHelp, subcommandArgs };
 }
 
 /**
@@ -72,7 +100,11 @@ Commit Story - Automated Engineering Journal
 
 Usage:
   npx commit-story [commitRef] [options]
-  node src/index.js [commitRef] [options]
+  npx commit-story summarize <date|range> [--force]
+
+Commands:
+  summarize    Generate daily, weekly, or monthly summaries
+               Use --help for subcommand details
 
 Arguments:
   commitRef    Git commit reference (default: HEAD)
@@ -83,10 +115,11 @@ Options:
   --help, -h   Show this help message
 
 Examples:
-  npx commit-story              # Generate for latest commit
-  npx commit-story HEAD~1       # Generate for previous commit
-  npx commit-story abc1234      # Generate for specific commit
-  npx commit-story --debug      # Verbose output
+  npx commit-story                              # Generate for latest commit
+  npx commit-story HEAD~1                       # Generate for previous commit
+  npx commit-story summarize 2026-02-22         # Summarize a day
+  npx commit-story summarize 2026-02-01..2026-02-20  # Summarize a range
+  npx commit-story --debug                      # Verbose output
 
 Exit codes:
   0  Success (journal entry generated)
@@ -168,15 +201,186 @@ function getPreviousCommitTime(commitRef) {
 }
 
 /**
+ * Handle the "summarize" subcommand.
+ * @param {string[]} args - Arguments after "summarize"
+ */
+async function handleSummarize(args) {
+  const parsed = parseSummarizeArgs(args);
+
+  if (parsed.help) {
+    showSummarizeHelp();
+    process.exit(EXIT_SUCCESS);
+  }
+
+  if (parsed.error) {
+    console.error(`\n❌ ${parsed.error}\n`);
+    process.exit(EXIT_ERROR);
+  }
+
+  // Validate environment (need API key for generation)
+  if (!validateEnvironment()) {
+    process.exit(EXIT_ERROR);
+  }
+
+  // Weekly mode
+  if (parsed.weekly) {
+    const total = parsed.weeks.length;
+    console.log(`\n📊 Generating weekly summaries for ${total} week${total > 1 ? 's' : ''}...`);
+    if (parsed.force) {
+      console.log('   --force: regenerating existing summaries');
+    }
+
+    let completed = 0;
+    const result = await runWeeklySummarize({
+      weeks: parsed.weeks,
+      force: parsed.force,
+      basePath: '.',
+      onProgress: (msg) => {
+        completed++;
+        console.log(`   [${completed}/${total}] ${msg}`);
+      },
+    });
+
+    console.log('');
+    if (result.generated.length > 0) {
+      console.log(`✅ Generated: ${result.generated.length} weekly summary(ies)`);
+    }
+    if (result.noSummaries.length > 0) {
+      console.log(`⏭️  No daily summaries: ${result.noSummaries.length} week(s)`);
+    }
+    if (result.alreadyExists.length > 0) {
+      console.log(`⏭️  Already exist: ${result.alreadyExists.length} week(s)`);
+    }
+    if (result.failed.length > 0) {
+      console.log(`❌ Failed: ${result.failed.length} week(s)`);
+      for (const weekStr of result.failed) {
+        console.log(`   - ${weekStr}`);
+      }
+    }
+    if (result.errors.length > 0) {
+      console.log('');
+      console.log('⚠️  Errors:');
+      for (const err of result.errors) {
+        console.log(`   - ${err}`);
+      }
+    }
+    console.log('');
+
+    process.exit(result.failed.length > 0 ? EXIT_ERROR : EXIT_SUCCESS);
+    return;
+  }
+
+  // Monthly mode
+  if (parsed.monthly) {
+    const total = parsed.months.length;
+    console.log(`\n📊 Generating monthly summaries for ${total} month${total > 1 ? 's' : ''}...`);
+    if (parsed.force) {
+      console.log('   --force: regenerating existing summaries');
+    }
+
+    let completed = 0;
+    const result = await runMonthlySummarize({
+      months: parsed.months,
+      force: parsed.force,
+      basePath: '.',
+      onProgress: (msg) => {
+        completed++;
+        console.log(`   [${completed}/${total}] ${msg}`);
+      },
+    });
+
+    console.log('');
+    if (result.generated.length > 0) {
+      console.log(`✅ Generated: ${result.generated.length} monthly summary(ies)`);
+    }
+    if (result.noSummaries.length > 0) {
+      console.log(`⏭️  No weekly summaries: ${result.noSummaries.length} month(s)`);
+    }
+    if (result.alreadyExists.length > 0) {
+      console.log(`⏭️  Already exist: ${result.alreadyExists.length} month(s)`);
+    }
+    if (result.failed.length > 0) {
+      console.log(`❌ Failed: ${result.failed.length} month(s)`);
+      for (const monthStr of result.failed) {
+        console.log(`   - ${monthStr}`);
+      }
+    }
+    if (result.errors.length > 0) {
+      console.log('');
+      console.log('⚠️  Errors:');
+      for (const err of result.errors) {
+        console.log(`   - ${err}`);
+      }
+    }
+    console.log('');
+
+    process.exit(result.failed.length > 0 ? EXIT_ERROR : EXIT_SUCCESS);
+    return;
+  }
+
+  // Daily mode
+  const total = parsed.dates.length;
+  console.log(`\n📊 Generating daily summaries for ${total} date${total > 1 ? 's' : ''}...`);
+  if (parsed.force) {
+    console.log('   --force: regenerating existing summaries');
+  }
+
+  let completed = 0;
+  const result = await runSummarize({
+    dates: parsed.dates,
+    force: parsed.force,
+    basePath: '.',
+    onProgress: (msg) => {
+      completed++;
+      console.log(`   [${completed}/${total}] ${msg}`);
+    },
+  });
+
+  // Print summary
+  console.log('');
+  if (result.generated.length > 0) {
+    console.log(`✅ Generated: ${result.generated.length} summary(ies)`);
+  }
+  if (result.noEntries.length > 0) {
+    console.log(`⏭️  No entries: ${result.noEntries.length} date(s)`);
+  }
+  if (result.alreadyExists.length > 0) {
+    console.log(`⏭️  Already exist: ${result.alreadyExists.length} date(s)`);
+  }
+  if (result.failed.length > 0) {
+    console.log(`❌ Failed: ${result.failed.length} date(s)`);
+    for (const dateStr of result.failed) {
+      console.log(`   - ${dateStr}`);
+    }
+  }
+  if (result.errors.length > 0) {
+    console.log('');
+    console.log('⚠️  Errors:');
+    for (const err of result.errors) {
+      console.log(`   - ${err}`);
+    }
+  }
+  console.log('');
+
+  process.exit(result.failed.length > 0 ? EXIT_ERROR : EXIT_SUCCESS);
+}
+
+/**
  * Main entry point
  */
 async function main() {
-  const { commitRef, help } = parseArgs();
+  const { subcommand, commitRef, help, subcommandArgs } = parseArgs();
 
   // Show help if requested
   if (help) {
     showHelp();
     process.exit(EXIT_SUCCESS);
+  }
+
+  // Route to subcommand handlers
+  if (subcommand === 'summarize') {
+    await handleSummarize(subcommandArgs);
+    return;
   }
 
   debug('Starting commit-story');
@@ -276,6 +480,41 @@ async function main() {
     console.log('⚠️  Some sections had generation issues:');
     for (const err of sections.errors) {
       console.log(`   - ${err}`);
+    }
+  }
+
+  // Auto-generate daily and weekly summaries for unsummarized past days/weeks
+  if (config.autoSummarize) {
+    debug('Checking for unsummarized days and weeks...');
+    try {
+      const summaryResult = await triggerAutoSummaries('.', {
+        onProgress: (msg) => debug(msg),
+      });
+
+      if (summaryResult.generated.length > 0) {
+        const dailyCount = summaryResult.generated.filter(p => p.includes('daily')).length;
+        const weeklyCount = summaryResult.generated.filter(p => p.includes('weekly')).length;
+        const monthlyCount = summaryResult.generated.filter(p => p.includes('monthly')).length;
+        const parts = [];
+        if (dailyCount > 0) parts.push(`${dailyCount} daily`);
+        if (weeklyCount > 0) parts.push(`${weeklyCount} weekly`);
+        if (monthlyCount > 0) parts.push(`${monthlyCount} monthly`);
+        console.log(`📊 Generated ${parts.join(' + ')} summary(ies)`);
+        for (const path of summaryResult.generated) {
+          debug(`   ${path}`);
+        }
+      }
+
+      if (summaryResult.failed.length > 0) {
+        console.log(`⚠️  Failed to generate ${summaryResult.failed.length} summary(ies)`);
+        for (const dateStr of summaryResult.failed) {
+          console.log(`   - ${dateStr}`);
+        }
+      }
+    } catch (err) {
+      // Auto-summarize failures should not block the main flow
+      console.log(`⚠️  Auto-summarize error: ${err.message}`);
+      debug(err.stack);
     }
   }
 
