@@ -75,6 +75,29 @@ Observations from evaluating the PR summary as a reviewer-facing deliverable.
 - **Token usage section needs interpretation guidance.** The $5.84 vs $67.86 ceiling looks like efficiency but indicates broken schema evolution. A healthy cost ratio range or a "cost anomaly" flag would help reviewers and operators spot issues without OTel/orbweaver expertise.
 - **Warnings section is O(n²) and unusable.** Each file's warning repeats the full cumulative extension list. By file 29, this is 40+ IDs per line × 16 lines. A deduplicated summary or per-file delta format would make this section useful.
 
+## Schema Coverage Split — Scoring Methodology for Run-5
+
+The Weaver schema was designed before the summary subsystem existed. ~9 files have no pre-defined span names or attributes in the registry. This changes how SCH rules should be scored.
+
+### Schema-covered vs schema-uncovered files
+
+| Category | Files | SCH-002 expectation |
+|----------|-------|---------------------|
+| Schema-covered | ~20 files (collectors, journal-graph, integrators, journal-manager, MCP tools, commit-analyzer, journal-paths, config, index, prompt files) | Must use registry attributes — ad-hoc is a real failure |
+| Schema-uncovered | ~9 files (summary-graph, summary-manager, summary-detector, auto-summarize, summarize command, daily/weekly/monthly-summary-prompt) | Must invent reasonable attributes following `commit_story.*` namespace conventions |
+
+### Scoring implications
+
+- **SCH-002 (ad-hoc attributes):** For schema-uncovered files, evaluate quality of inventions (namespace adherence, semantic validity, naming convention consistency) rather than registry presence. For schema-covered files, apply normally.
+- **SCH-001 (span naming consistency):** More interesting signal for new files — do invented span names follow the established `commit_story.*` pattern? Run-4 showed deviation (`summary.daily.generate` instead of `commit_story.summary.daily_generate`).
+- **Schema evolution becomes higher-stakes.** For uncovered files, evolution is the *only* mechanism for cross-file coherence. When file 14 invents a span name, file 21 should see it and build on it.
+
+### Design decision: do NOT pre-register summary attributes
+
+Keeping the schema gap preserves a valuable test case — the agent's ability to extend a schema coherently under ambiguity. Pre-registering would test "can the agent follow instructions" (easier) rather than "can the agent extend schema coherently" (harder, more valuable for evaluating orbweaver's architecture).
+
+Run-5 rubric scoring should explicitly track schema-covered vs schema-uncovered as a dimension in scoring output.
+
 ## Carry-Forward Items
 
 Unresolved issues, open questions, and items deferred to run-5.
