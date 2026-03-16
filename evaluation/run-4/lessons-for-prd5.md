@@ -37,7 +37,8 @@ Better ways to score, new agent patterns, tooling improvements.
 
 - **Token usage breakdown is a diagnostic tool.** The cache read/write ratio revealed the schema evolution bug before we even looked at the code. When cache reads are 4x input tokens across a 29-file run, it means the prompt isn't changing — which is wrong if schema evolution is supposed to make it change. Consider adding a "schema evolution health check" to the evaluation: compare schemaHashBefore and schemaHashAfter from the run output.
 - **Anomalous cost should be a red flag.** $5.84 vs $67.86 ceiling looked like great efficiency, but it was actually a symptom of broken schema evolution. When actual cost is dramatically below ceiling, investigate why before celebrating. Add a "cost sanity check" to the evaluation: if actual < 15% of ceiling, verify the prompt is actually changing between files.
-- **Separate orbweaver issues from process lessons immediately.** Run-4 discovered both types of findings simultaneously. Having `orb-issues-to-file.md` and `lessons-for-prd5.md` as parallel documents from the start keeps them from getting mixed.
+- **Separate orbweaver findings from process lessons immediately.** Run-4 discovered both types simultaneously. Having the findings document and `lessons-for-prd5.md` as parallel documents from the start keeps them from getting mixed.
+- **Per-file evaluation methodology is stricter than single-pass.** Run-4's multi-agent per-file evaluation flagged COV-002, COV-004, CDQ-002, and CDQ-006 as failures where run-3's single-pass evaluation passed them. The per-file agents are more thorough but this creates cross-run comparability issues. Run-5 should use the same per-file methodology for consistency. Provide methodology-adjusted scores alongside strict scores when comparing to earlier runs.
 
 ## Rubric-Codebase Mapping Corrections
 
@@ -107,10 +108,54 @@ Keeping the schema gap preserves a valuable test case — the agent's ability to
 
 Run-5 rubric scoring should explicitly track schema-covered vs schema-uncovered as a dimension in scoring output.
 
+## Findings Document Process
+
+Changes to the orbweaver findings workflow for run-5.
+
+### Vocabulary: "findings" not "issues"
+
+Run-4 initially called everything an "issue" in `orb-issues-to-file.md`. This conflated small GitHub issues with PRD-sized architectural work. Starting in run-4 (mid-stream, retroactively applied), the document uses **"findings"** as the umbrella term:
+
+- **PRD** — needs design decisions, multiple milestones, or architectural changes. Create a PRD in spinybacked-orbweaver.
+- **Issue** — focused fix with clear acceptance criteria. Create a GitHub issue.
+
+Each finding gets a `recommended_action: PRD | Issue` tag. Run-5 should use this vocabulary from the start.
+
+The run-4 findings document is `evaluation/run-4/orb-findings.md` (renamed from `orb-issues-to-file.md`). The old filename is kept as a historical artifact but is superseded.
+
+### Cross-repo evidence references
+
+Each finding must include an **Evidence** section with file paths relative to the `commit-story-v2-eval` repo root. The implementing AI in spinybacked-orbweaver should clone the eval repo and read the referenced files for full context.
+
+Example format:
+```markdown
+**Evidence (commit-story-v2-eval repo):**
+- `evaluation/run-4/per-file-evaluation.json` → `per_file["src/commands/summarize.js"].rules.NDS-005`
+- `evaluation/run-4/rubric-scores.md` → Dimension 1: NDS-005 section
+```
+
+Without these breadcrumbs, the implementing AI has no way to find the detailed evaluation evidence that motivates the finding.
+
+### Filename convention
+
+Run-4 used `orb-` prefix filenames (`orb-issues-to-file.md`, `orb-output.log`). The CLI was renamed from `orb` to `orbweaver` (spinybacked-orbweaver #123). Run-5 should use `orbweaver-` prefix for new filenames. Existing historical filenames in run-1 through run-4 are preserved as-is.
+
+## Rubric Scoring Observations
+
+Observations from the rubric scoring aggregation milestone.
+
+- **CDQ-002 criterion shifted between run-3 and run-4.** Run-3 CDQ-002 checked whether `trace.getTracer()` was called with a string argument (pattern check → PASS). Run-4 checks whether the library name is correct (semantic check → FAIL for 'unknown_service'). The underlying bug existed in run-3 but wasn't captured by CDQ-002. Run-5 should use the run-4 (stricter) criterion consistently.
+- **CDQ-006 "cheap computation" exemption question.** `toISOString()` is a very cheap operation. Run-3 passed CDQ-006; run-4 fails it. Consider adding a rubric clarification: "trivial type conversions (toISOString, String(), Number()) do not require isRecording() guards." This would make CDQ-006 consistent across runs.
+- **Rule-level pass/fail penalizes more files.** Run-4 has 16 instrumented files vs run-3's 11. With rule-level pass/fail scoring (any file fails = rule fails), more files means more surface area for failures. This is mathematically correct but can be misleading in cross-run comparisons. Consider adding per-file instance counts alongside rule-level scores to provide nuance.
+- **85% target unreachable without fixing 3 specific bugs.** Under the most favorable scoring variant (methodology-adjusted + split = 73%), fixing CDQ-002 (unknown_service), NDS-005 (expected-condition catches), and COV-001 (index.js root span) — all tracked as orbweaver findings — would reach 22/26 = 85%.
+
 ## Carry-Forward Items
 
 Unresolved issues, open questions, and items deferred to run-5.
 
-- **Orbweaver issue #1 (schema evolution)** must be fixed and verified before run-5 starts. This is a blocking prerequisite — without it, the evaluation is testing a fundamentally broken workflow.
-- **Orbweaver issues #2-4 (test/validation gaps)** should be fixed before run-5 to avoid repeating the 32-failure pattern.
+- **Orbweaver finding #1 (schema evolution)** must be fixed and verified before run-5 starts. This is a blocking prerequisite — without it, the evaluation is testing a fundamentally broken workflow. **Recommended action: PRD.**
+- **Orbweaver finding #2 (validation pipeline)** should be fixed before run-5 to avoid repeating the 32-failure pattern. **Recommended action: PRD.**
+- **Orbweaver findings #3, #9, #13 (agent code generation bugs)** — expected-condition catches, unknown_service tracer name, index.js root span — are the three fixes needed to reach 85%. **Recommended action: Issues.**
 - **Run-5 pre-run verification** should include a schema evolution smoke test: instrument one file, verify extensions written, resolve schema, confirm extensions visible.
+- **Run-5 findings document** should be named `orbweaver-findings.md` (not `orb-findings.md`) and use the findings vocabulary from the start.
+- **PRD #5 must have an explicit "evaluation process improvements" milestone.** Run-4 discovered significant methodology changes (per-file agents, schema coverage split, findings vocabulary, cross-repo evidence) that are as important as orbweaver software fixes. In run-4 these emerged organically and had to be worked through manually mid-evaluation. PRD #5 should treat evaluation methodology as a first-class deliverable with its own milestone — not something that gets folded into other milestones or discovered ad-hoc. This includes: rubric rule clarifications (CDQ-006 exemption, CDQ-002 criterion), scoring methodology standardization (methodology-adjusted vs strict), and cross-run comparability guidance.

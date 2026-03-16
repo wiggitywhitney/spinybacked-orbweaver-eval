@@ -1,0 +1,529 @@
+{
+  "meta": {
+    "run": 4,
+    "date": "2026-03-16",
+    "orbweaver_version": "0.1.0",
+    "orbweaver_branch": "orbweaver/instrument-1773627869602",
+    "rubric_version": "32 rules (5 gates + 27 quality)",
+    "files_processed": 29,
+    "files_instrumented_on_branch": 16,
+    "files_zero_span": 10,
+    "files_failed": 3,
+    "total_spans_on_branch": 48,
+    "unique_span_names": 37,
+    "source_artifact": "per-file-evaluation.json"
+  },
+  "gates": {
+    "total_pass": 4,
+    "total_fail": 1,
+    "results": {
+      "NDS-001": {
+        "result": "pass",
+        "evidence": "All files pass node --check. Tracer ReferenceError in summary-graph.js/sensitive-filter.js is a runtime error, not syntax."
+      },
+      "NDS-002": {
+        "result": "fail",
+        "evidence": "32 test failures (ReferenceError: tracer is not defined). Caused by summary-graph.js (21 failures) and sensitive-filter.js (11 failures). Function-level fallback added tracer.startActiveSpan() without tracer import.",
+        "note": "The failing code was never committed to the branch — the branch contains only passing instrumentation. The test failures occurred in the working directory during the run. The deliverable (branch) would pass NDS-002; the run process does not."
+      },
+      "NDS-003": {
+        "result": "pass",
+        "evidence": "All 16 instrumented files on the branch have instrumentation-only changes. No non-instrumentation lines modified.",
+        "note": "Per-file quality evaluation flags NDS-003 for summarize.js and summary-manager.js (catch block semantic changes), but these are instrumentation additions that change behavior — better classified as NDS-005 failures. The gate (only instrumentation lines changed) passes."
+      },
+      "API-001": {
+        "result": "pass",
+        "evidence": "All 16 source files import only from @opentelemetry/api. No SDK, exporter, or instrumentation package imports."
+      },
+      "NDS-006": {
+        "result": "pass",
+        "evidence": "All agent-added imports use ESM syntax (import...from). No require() or module.exports. Project is ESM (type: module)."
+      }
+    },
+    "verdict": "NDS-002 FAIL blocks a clean gate pass. However, the branch itself is clean — quality scoring proceeds because the deliverable contains only passing instrumentation."
+  },
+  "quality_rules": {
+    "NDS-004": {
+      "result": "pass",
+      "files_pass": 16,
+      "files_fail": 0,
+      "evidence": "All 16 instrumented files preserve all exported function signatures. startActiveSpan callbacks wrap function bodies without modifying parameter lists, return types, or export declarations."
+    },
+    "NDS-005": {
+      "result": "fail",
+      "files_pass": 13,
+      "files_fail": 3,
+      "failing_files": [
+        "src/commands/summarize.js",
+        "src/managers/summary-manager.js",
+        "src/utils/summary-detector.js"
+      ],
+      "evidence": "3 files have expected-condition catch blocks (ENOENT file/directory not found) changed to record exceptions and set ERROR status. OTel setStatus is a one-way latch — spans are permanently ERROR even when the function succeeds. This is a semantic behavioral change to error handling.",
+      "failure_class": "expected-condition catch block — distinct from traditional NDS-005 (agent broke error handling). See orb issue #10."
+    },
+    "COV-001": {
+      "result": "fail",
+      "files_pass": 15,
+      "files_fail": 1,
+      "failing_files": ["src/index.js"],
+      "evidence": "index.js main() (CLI entry point, root span) has NO span. Only summarize and journal-generate code paths within main are spanned. Without a root span, the trace has no top-level operation.",
+      "note": "In run-3, index.js had a commit_story.generate_journal_entry span covering main(). Run-4 has spans on code paths within main but not on main() itself — a genuine regression."
+    },
+    "COV-002": {
+      "result": "fail",
+      "files_pass": 8,
+      "files_fail": 2,
+      "files_na": 6,
+      "failing_files": ["src/collectors/claude-collector.js", "src/index.js"],
+      "evidence": "claude-collector: findJSONLFiles (readdirSync) and parseJSONLFile (readFileSync) lack individual spans. index.js: 3 git validation calls (isGitRepository, isValidCommitRef, getPreviousCommitTime) lack spans.",
+      "methodology_note": "Run-3 accepted parent span coverage for internal helpers (COV-002 PASS). Run-4 per-file agents applied stricter per-operation evaluation. This is a methodology difference, not necessarily a regression."
+    },
+    "COV-003": {
+      "result": "pass",
+      "files_pass": 16,
+      "files_fail": 0,
+      "evidence": "All 48 spans across 16 files have recordException + setStatus(ERROR) in catch blocks. Standard error recording pattern followed consistently."
+    },
+    "COV-004": {
+      "result": "fail",
+      "files_pass": 10,
+      "files_fail": 3,
+      "files_na": 3,
+      "failing_files": ["src/collectors/claude-collector.js", "src/collectors/git-collector.js", "src/index.js"],
+      "evidence": "claude-collector: findJSONLFiles/parseJSONLFile are I/O operations without spans. git-collector: getCommitMetadata/getCommitDiff/getMergeInfo are async without individual spans (parent covers them). index.js: main() is async without a span.",
+      "methodology_note": "Run-3 accepted parent span coverage (COV-004 PASS). Run-4 evaluates individual operations more strictly."
+    },
+    "COV-005": {
+      "result": "fail",
+      "files_pass": 11,
+      "files_fail": 2,
+      "files_na": 3,
+      "failing_files": ["src/managers/auto-summarize.js", "src/utils/summary-detector.js"],
+      "evidence": "auto-summarize (4 ad-hoc attrs) and summary-detector (3 ad-hoc attrs) use attributes not in the Weaver registry. These are schema-uncovered summary subsystem files where no registry definitions exist.",
+      "schema_coverage_note": "Both failing files are schema-uncovered. The ad-hoc attributes follow commit_story.* namespace and are semantically valid. Under schema coverage split methodology, this would be evaluated differently (see schema_coverage_split section)."
+    },
+    "COV-006": {
+      "result": "pass",
+      "files_pass": 1,
+      "files_na": 15,
+      "evidence": "journal-graph.js: manual spans on LangGraph graph nodes are justified — @traceloop/instrumentation-langchain covers ChatAnthropic.invoke() but NOT LangGraph node execution, state transitions, or graph orchestration."
+    },
+    "RST-001": {
+      "result": "fail",
+      "files_pass": 15,
+      "files_fail": 1,
+      "failing_files": ["src/integrators/filters/token-filter.js"],
+      "evidence": "truncateDiff() and truncateMessages() are exported but are pure synchronous data transformation functions with no I/O. They should not have their own spans — they are called from applyTokenBudget (which has a span). Adding spans to pure functions is over-instrumentation."
+    },
+    "RST-002": {
+      "result": "pass",
+      "files_pass": 16,
+      "files_fail": 0,
+      "evidence": "No spans on trivial accessors or property getters across all files."
+    },
+    "RST-003": {
+      "result": "pass",
+      "files_pass": 16,
+      "files_fail": 0,
+      "evidence": "No duplicate spans on thin wrappers."
+    },
+    "RST-004": {
+      "result": "pass",
+      "files_pass": 14,
+      "files_borderline": 2,
+      "files_fail": 0,
+      "evidence": "All spanned unexported functions have I/O exemption. 2 borderline cases in MCP tools (saveContext, saveReflection — unexported but do I/O, exemption applies)."
+    },
+    "RST-005": {
+      "result": "N/A",
+      "evidence": "No pre-existing instrumentation. First instrumentation run on this codebase."
+    },
+    "API-002": {
+      "result": "pass",
+      "evidence": "@opentelemetry/api is in peerDependencies (^1.9.0). commit-story-v2 is a library — peerDependencies is correct. The agent preserved the existing declaration.",
+      "run3_comparison": "IMPROVEMENT from run-3 FAIL (agent marked @opentelemetry/api as optional)."
+    },
+    "API-003": {
+      "result": "pass",
+      "evidence": "No vendor-specific SDK packages. @traceloop/instrumentation-langchain and @traceloop/instrumentation-mcp added as optional peerDependencies — community auto-instrumentation, not vendor SDKs.",
+      "run3_comparison": "IMPROVEMENT from run-3 FAIL (stale build included @traceloop/node-server-sdk mega-bundle)."
+    },
+    "API-004": {
+      "result": "pass",
+      "evidence": "No @opentelemetry/sdk-* or instrumentation-* imports in source files. All OTel imports resolve to @opentelemetry/api only."
+    },
+    "SCH-001": {
+      "result": "fail",
+      "files_pass": 11,
+      "files_fail": 4,
+      "files_borderline": 1,
+      "failing_files": [
+        "src/integrators/context-integrator.js",
+        "src/managers/summary-manager.js",
+        "src/mcp/server.js",
+        "src/mcp/tools/context-capture-tool.js"
+      ],
+      "evidence": "8 of 37 span names (22%) deviate from the commit_story.* convention: context.gather_for_commit, summary.daily/weekly/monthly.generate, mcp.server.start, context.capture.save, mcp.tool.journal_capture_context, mcp.tool.journal_add_reflection. The remaining 29/37 (78%) use commit_story.* consistently.",
+      "deviating_names": {
+        "context.*": ["context.gather_for_commit", "context.capture.save"],
+        "summary.*": ["summary.daily.generate", "summary.weekly.generate", "summary.monthly.generate"],
+        "mcp.*": ["mcp.server.start", "mcp.tool.journal_capture_context", "mcp.tool.journal_add_reflection"]
+      },
+      "note": "Deviation correlates with file processing order — later files deviate more. Schema evolution (when fixed) would propagate naming conventions across files."
+    },
+    "SCH-002": {
+      "result": "fail",
+      "files_pass": 13,
+      "files_fail": 3,
+      "failing_files": [
+        "src/commands/summarize.js",
+        "src/managers/auto-summarize.js",
+        "src/utils/summary-detector.js"
+      ],
+      "evidence": "11 ad-hoc attribute keys not in registry across 3 files. All follow commit_story.* namespace convention and represent legitimate domain concepts.",
+      "ad_hoc_attributes": [
+        "commit_story.summarize.input_count",
+        "commit_story.summarize.force",
+        "commit_story.summarize.generated_count",
+        "commit_story.summarize.failed_count",
+        "commit_story.journal.unsummarized_count",
+        "commit_story.journal.generated_count",
+        "commit_story.journal.skipped_count",
+        "commit_story.journal.failed_count",
+        "commit_story.journal.days_found",
+        "commit_story.journal.unsummarized_weeks_count",
+        "commit_story.journal.unsummarized_months_count"
+      ],
+      "note": "All 11 ad-hoc attributes are semantically valid, follow namespace conventions, and would be reasonable registry additions. Schema evolution mechanism (broken in run-4) would have registered these automatically."
+    },
+    "SCH-003": {
+      "result": "pass",
+      "files_pass": 15,
+      "files_na": 1,
+      "evidence": "All attribute values conform to registry type constraints. Enum values valid, integers for counts, ISO strings for timestamps, booleans for flags."
+    },
+    "SCH-004": {
+      "result": "pass",
+      "files_pass": 15,
+      "files_na": 1,
+      "evidence": "No redundant or duplicate attributes. Ad-hoc attributes capture genuinely new domain concepts not covered by existing registry entries."
+    },
+    "CDQ-001": {
+      "result": "pass",
+      "files_pass": 16,
+      "files_fail": 0,
+      "evidence": "All 48 spans use startActiveSpan callback pattern with finally { span.end() }. No span leaks possible."
+    },
+    "CDQ-002": {
+      "result": "fail",
+      "files_pass": 0,
+      "files_fail": 16,
+      "evidence": "All 16 files use trace.getTracer('unknown_service'). The library name should be 'commit-story' (from package.json#name). This is a systemic agent configuration bug — one root cause, 16 affected files.",
+      "note": "Run-3 CDQ-002 evaluated only whether trace.getTracer() was called correctly (pattern check) and PASSED. Run-4 evaluates whether the library name is correct (semantic check). This is a stricter criterion applied to CDQ-002 in run-4. The underlying bug (wrong tracer name) existed in run-3 but was captured by CDQ-008 (inconsistent naming) instead."
+    },
+    "CDQ-003": {
+      "result": "fail",
+      "files_pass": 15,
+      "files_fail": 1,
+      "failing_files": ["src/commands/summarize.js"],
+      "evidence": "summarize.js uses recordException + setStatus(ERROR) on a non-error control flow path — file-not-found is the expected condition for generating a new summary. Misuse of the error recording pattern.",
+      "run3_comparison": "Run-3 CDQ-003 failed for commit-analyzer.js (missing recordException). That file passes in run-4. New failure in summarize.js is a different issue (misuse vs absence)."
+    },
+    "CDQ-005": {
+      "result": "pass",
+      "files_pass": 16,
+      "files_fail": 0,
+      "evidence": "All spans use startActiveSpan callback pattern which automatically maintains async context. No manual context.with() needed."
+    },
+    "CDQ-006": {
+      "result": "fail",
+      "files_pass": 14,
+      "files_fail": 2,
+      "failing_files": ["src/collectors/claude-collector.js", "src/collectors/git-collector.js"],
+      "evidence": "toISOString() calls without span.isRecording() guard in 3 sites across 2 files.",
+      "methodology_note": "Run-3 CDQ-006 PASSED because toISOString() was deemed lightweight. Run-4 per-file agents applied the rubric strictly — any attribute computation without isRecording() guard is a CDQ-006 violation. Whether toISOString() requires a guard is debatable — it's a very cheap operation."
+    },
+    "CDQ-007": {
+      "result": "pass",
+      "files_pass": 16,
+      "files_fail": 0,
+      "evidence": "No unbounded or PII attributes. commit_story.commit.author is in registry with PII annotation (accepted per decision log 2026-03-15). All attribute values are bounded.",
+      "run3_comparison": "IMPROVEMENT from run-3 FAIL (CDQ-007 flagged commit_story.commit.author as PII). Run-4 passes because PII annotation was added to registry — this is a schema/rubric change, not an agent improvement."
+    },
+    "CDQ-008": {
+      "result": "pass",
+      "evidence": "All 16 files use trace.getTracer('unknown_service'). Single naming convention — consistent. The name is wrong (should be 'commit-story'), but CDQ-008 evaluates consistency, not correctness.",
+      "run3_comparison": "IMPROVEMENT from run-3 FAIL (two naming conventions: commit_story and commit-story). Fresh build resolved the stale-build inconsistency."
+    }
+  },
+  "dimensions": {
+    "NDS": {
+      "rules": ["NDS-004", "NDS-005"],
+      "pass": 1,
+      "fail": 1,
+      "na": 0,
+      "score": "1/2 (50%)",
+      "run3_score": "2/2 (100%)",
+      "change": "regression",
+      "note": "NDS-005 regression: 3 files have expected-condition catch blocks changed to record exceptions. New failure class not seen in run-3."
+    },
+    "COV": {
+      "rules": ["COV-001", "COV-002", "COV-003", "COV-004", "COV-005", "COV-006"],
+      "pass": 2,
+      "fail": 4,
+      "na": 0,
+      "score": "2/6 (33%)",
+      "run3_score": "6/6 (100%)",
+      "change": "regression",
+      "note": "Major apparent regression, but largely driven by: (1) stricter per-file agent evaluation vs run-3 single-pass (COV-002, COV-004), (2) new summary subsystem files with no registry coverage (COV-005), (3) genuine regression on index.js root span (COV-001). See methodology_adjusted for context.",
+      "methodology_adjusted": {
+        "COV-002": "Would PASS under run-3 methodology (parent span coverage accepted)",
+        "COV-004": "Would PASS under run-3 methodology (parent span coverage accepted)",
+        "adjusted_score": "4/6 (67%) — still lower than run-3 due to genuine COV-001 and COV-005 failures"
+      }
+    },
+    "RST": {
+      "rules": ["RST-001", "RST-002", "RST-003", "RST-004", "RST-005"],
+      "pass": 3,
+      "fail": 1,
+      "na": 1,
+      "score": "3/4 (75%)",
+      "score_excluding_na": "3/4",
+      "run3_score": "4/4 (100%)",
+      "change": "regression",
+      "note": "RST-001 regression: token-filter.js has spans on pure synchronous functions."
+    },
+    "API": {
+      "rules": ["API-002", "API-003", "API-004"],
+      "pass": 3,
+      "fail": 0,
+      "na": 0,
+      "score": "3/3 (100%)",
+      "run3_score": "1/3 (33%)",
+      "change": "improvement",
+      "note": "API-002 fixed (agent no longer marks @opentelemetry/api optional). API-003 fixed (fresh build eliminated mega-bundle). API-004 remains passing. The largest single-dimension improvement in run-4."
+    },
+    "SCH": {
+      "rules": ["SCH-001", "SCH-002", "SCH-003", "SCH-004"],
+      "pass": 2,
+      "fail": 2,
+      "na": 0,
+      "score": "2/4 (50%)",
+      "run3_score": "2/4 (50%)",
+      "change": "unchanged",
+      "note": "Same score but different failure profiles. Run-3: 4+ naming patterns (stale build) and 2 ad-hoc attrs. Run-4: naming deviation on 8/37 spans (schema-uncovered files) and 11 ad-hoc attrs (all in schema-uncovered files). Schema coverage split reinterprets these failures."
+    },
+    "CDQ": {
+      "rules": ["CDQ-001", "CDQ-002", "CDQ-003", "CDQ-005", "CDQ-006", "CDQ-007", "CDQ-008"],
+      "pass": 4,
+      "fail": 3,
+      "na": 0,
+      "score": "4/7 (57%)",
+      "run3_score": "4/7 (57%)",
+      "change": "unchanged",
+      "note": "Same score, completely different failure set. Run-3 failures: CDQ-003 (missing recordException), CDQ-007 (PII), CDQ-008 (inconsistent naming). Run-4 failures: CDQ-002 (wrong tracer name), CDQ-003 (misuse of error recording), CDQ-006 (missing isRecording guard). Run-3 failures resolved (fresh build, schema change); new failures appeared."
+    }
+  },
+  "overall_score": {
+    "strict": {
+      "gates_pass": 4,
+      "gates_fail": 1,
+      "gates_total": 5,
+      "quality_pass": 15,
+      "quality_fail": 11,
+      "quality_na": 1,
+      "quality_scored": 26,
+      "quality_percentage": "15/26 (58%)"
+    },
+    "methodology_adjusted": {
+      "note": "Adjusts COV-002 and COV-004 to PASS (run-3 methodology accepted parent span coverage) and CDQ-002 to PASS (run-3 methodology checked pattern, not name correctness).",
+      "quality_pass": 18,
+      "quality_fail": 8,
+      "quality_scored": 26,
+      "quality_percentage": "18/26 (69%)"
+    },
+    "schema_coverage_split": {
+      "note": "Applies split scoring to SCH-002 (schema-uncovered files evaluated on invention quality rather than registry match). SCH-002 passes under split methodology.",
+      "quality_pass": 16,
+      "quality_fail": 10,
+      "quality_scored": 26,
+      "quality_percentage": "16/26 (62%)"
+    },
+    "methodology_adjusted_plus_split": {
+      "note": "Combines methodology adjustment (COV-002, COV-004, CDQ-002) and schema coverage split (SCH-002). Most favorable interpretation.",
+      "quality_pass": 19,
+      "quality_fail": 7,
+      "quality_scored": 26,
+      "quality_percentage": "19/26 (73%)"
+    },
+    "run3_score": "19/26 (73%)"
+  },
+  "failure_classification": [
+    {
+      "rule": "NDS-002",
+      "type": "gate",
+      "category": "new_regression",
+      "evidence": "32 test failures from missing tracer imports in function-level fallback. Never committed to branch — branch is clean.",
+      "orbweaver_issue": "#2, #3"
+    },
+    {
+      "rule": "NDS-005",
+      "type": "quality",
+      "category": "genuine_new_finding",
+      "evidence": "3 files: expected-condition catch blocks (ENOENT) changed to record exceptions + ERROR status. New failure class: agent doesn't distinguish error handling from expected-condition control flow.",
+      "orbweaver_issue": "#10"
+    },
+    {
+      "rule": "COV-001",
+      "type": "quality",
+      "category": "genuine_regression",
+      "evidence": "index.js missing root span on main(). Run-3 had a root span. This is a genuine reduction in coverage for the CLI entry point."
+    },
+    {
+      "rule": "COV-002",
+      "type": "quality",
+      "category": "methodology_change",
+      "evidence": "Run-3 accepted parent span coverage; run-4 per-file agents evaluate individual operations. Not a genuine regression."
+    },
+    {
+      "rule": "COV-004",
+      "type": "quality",
+      "category": "methodology_change",
+      "evidence": "Same as COV-002 — stricter evaluation of individual async operations."
+    },
+    {
+      "rule": "COV-005",
+      "type": "quality",
+      "category": "new_territory",
+      "evidence": "Ad-hoc attributes in schema-uncovered summary files. The agent invented valid attributes in a domain with no registry guidance. Partially addressed by schema coverage split."
+    },
+    {
+      "rule": "RST-001",
+      "type": "quality",
+      "category": "genuine_new_finding",
+      "evidence": "token-filter.js: spans on pure synchronous functions (truncateDiff, truncateMessages). Over-instrumentation."
+    },
+    {
+      "rule": "SCH-001",
+      "type": "quality",
+      "category": "schema_evolution_dependency",
+      "evidence": "8/37 span names deviate from commit_story.* convention. Deviating names are in files processed later in the run. Schema evolution (broken) would propagate naming conventions.",
+      "orbweaver_issue": "#1 (schema evolution), #12 (naming inconsistency)"
+    },
+    {
+      "rule": "SCH-002",
+      "type": "quality",
+      "category": "schema_evolution_dependency",
+      "evidence": "11 ad-hoc attributes in 3 schema-uncovered files. All follow namespace conventions. Schema evolution would have registered these. Schema coverage split reinterprets this.",
+      "orbweaver_issue": "#1 (schema evolution)"
+    },
+    {
+      "rule": "CDQ-002",
+      "type": "quality",
+      "category": "genuine_new_finding",
+      "evidence": "All 16 files: trace.getTracer('unknown_service') instead of 'commit-story'. Systemic agent bug — one root cause.",
+      "orbweaver_issue": "#11",
+      "note": "Run-3 CDQ-002 used a pattern-only check (PASS). Run-4 checks name correctness (FAIL). The bug existed in run-3 but wasn't captured by CDQ-002."
+    },
+    {
+      "rule": "CDQ-003",
+      "type": "quality",
+      "category": "genuine_new_finding",
+      "evidence": "summarize.js: recordException + ERROR status on expected control flow (file-not-found). Misuse of error recording pattern.",
+      "orbweaver_issue": "#10"
+    },
+    {
+      "rule": "CDQ-006",
+      "type": "quality",
+      "category": "methodology_change",
+      "evidence": "toISOString() without isRecording() guard. Run-3 deemed this lightweight (PASS). Run-4 applies strict rubric interpretation (FAIL). Debatable whether toISOString() requires a guard."
+    }
+  ],
+  "schema_coverage_split": {
+    "methodology": "Score SCH-001 and SCH-002 separately for schema-covered files (~10 instrumented, where registry defines expected attributes) vs schema-uncovered files (~6 instrumented, summary subsystem files where agent must invent attributes).",
+    "covered_files": [
+      "src/collectors/claude-collector.js",
+      "src/collectors/git-collector.js",
+      "src/generators/journal-graph.js",
+      "src/index.js",
+      "src/integrators/context-integrator.js",
+      "src/integrators/filters/message-filter.js",
+      "src/integrators/filters/token-filter.js",
+      "src/utils/commit-analyzer.js",
+      "src/utils/journal-paths.js",
+      "src/mcp/tools/reflection-tool.js"
+    ],
+    "uncovered_files": [
+      "src/commands/summarize.js",
+      "src/managers/auto-summarize.js",
+      "src/managers/summary-manager.js",
+      "src/mcp/server.js",
+      "src/mcp/tools/context-capture-tool.js",
+      "src/utils/summary-detector.js"
+    ],
+    "SCH-001": {
+      "strict_result": "fail",
+      "strict_evidence": "8/37 span names deviate from commit_story.* (22% deviation)",
+      "covered_result": "fail",
+      "covered_evidence": "context-integrator.js uses 'context.gather_for_commit' instead of 'commit_story.context.gather_for_commit'. 1 of 10 covered files deviates (10%). This is a genuine naming failure — the registry defines commit_story.* convention.",
+      "uncovered_result": "fail",
+      "uncovered_evidence": "summary-manager uses summary.* prefix (should be commit_story.summary.*). MCP files use mcp.* and context.* prefixes. 4 of 6 uncovered files deviate. However, some deviation is expected without schema evolution to propagate conventions.",
+      "split_interpretation": "SCH-001 fails under both strict and split scoring. The covered file failure (context-integrator) is a genuine bug. The uncovered file failures are partially explained by broken schema evolution but indicate the agent doesn't default to commit_story.* even without guidance."
+    },
+    "SCH-002": {
+      "strict_result": "fail",
+      "strict_evidence": "11 ad-hoc attribute keys not in registry across 3 files",
+      "covered_result": "pass",
+      "covered_evidence": "All 10 schema-covered files use only registry-defined attributes. 0 ad-hoc attributes in covered files.",
+      "uncovered_result": "pass",
+      "uncovered_evidence": "All 11 ad-hoc attributes follow commit_story.* namespace, represent legitimate domain concepts, use appropriate types, and would be reasonable registry additions. Invention quality is high.",
+      "split_interpretation": "SCH-002 PASSES under split methodology. Schema-covered files are fully compliant. Schema-uncovered files show good attribute invention quality. The strict failure is entirely attributable to the schema gap (by design — see decision log 2026-03-16).",
+      "ad_hoc_quality_assessment": {
+        "namespace_adherence": "11/11 (100%) follow commit_story.*",
+        "semantic_validity": "11/11 (100%) represent real domain concepts",
+        "naming_convention": "10/11 (91%) use consistent snake_case — commit_story.summarize.force (boolean) could arguably be commit_story.summarize.is_forced for consistency",
+        "type_appropriateness": "11/11 (100%) use correct types (integers for counts, boolean for flag)"
+      }
+    }
+  },
+  "run_comparison": {
+    "run3_to_run4_improvements": [
+      {"rule": "API-002", "from": "fail", "to": "pass", "reason": "Agent no longer marks @opentelemetry/api as optional"},
+      {"rule": "API-003", "from": "fail", "to": "pass", "reason": "Fresh build eliminated @traceloop/node-server-sdk mega-bundle"},
+      {"rule": "CDQ-007", "from": "fail", "to": "pass", "reason": "PII annotation added to registry (schema change, not agent improvement)"},
+      {"rule": "CDQ-008", "from": "fail", "to": "pass", "reason": "Fresh build resolved inconsistent tracer naming"}
+    ],
+    "run3_to_run4_regressions": [
+      {"rule": "NDS-005", "from": "pass", "to": "fail", "reason": "Expected-condition catch blocks changed in 3 new summary files"},
+      {"rule": "COV-001", "from": "pass", "to": "fail", "reason": "index.js root span missing (genuine regression)"},
+      {"rule": "RST-001", "from": "pass", "to": "fail", "reason": "token-filter.js over-instrumentation (genuine regression)"},
+      {"rule": "CDQ-002", "from": "pass", "to": "fail", "reason": "Stricter criterion — run-3 checked pattern only; run-4 checks name correctness"}
+    ],
+    "run3_to_run4_methodology_changes": [
+      {"rule": "COV-002", "from": "pass", "to": "fail", "reason": "Stricter per-file evaluation (parent span coverage no longer sufficient)"},
+      {"rule": "COV-004", "from": "pass", "to": "fail", "reason": "Same methodology change as COV-002"},
+      {"rule": "COV-005", "from": "pass", "to": "fail", "reason": "New summary files with ad-hoc attributes (new territory)"},
+      {"rule": "CDQ-006", "from": "pass", "to": "fail", "reason": "toISOString() now requires isRecording() guard (stricter interpretation)"}
+    ],
+    "run3_to_run4_unchanged_failures": [
+      {"rule": "SCH-001", "status": "fail", "note": "Different failure profile: run-3 had 4+ naming patterns (stale build); run-4 has 8/37 deviations (schema evolution)"},
+      {"rule": "SCH-002", "status": "fail", "note": "Different failure profile: run-3 had 2 ad-hoc attrs; run-4 has 11 (all in new files)"},
+      {"rule": "CDQ-003", "status": "fail", "note": "Different files: run-3 commit-analyzer (missing recordException); run-4 summarize.js (misuse on expected condition)"}
+    ],
+    "file_rescue_assessment": {
+      "goal": "Rescue at least 2 of 4 persistently failing files",
+      "result": "2 rescued — goal met",
+      "details": [
+        {"file": "journal-graph.js", "run2": "fail (token budget)", "run3": "fail (oscillation)", "run4": "success (4 spans)", "rescued": true},
+        {"file": "context-integrator.js", "run2": "fail (NDS-003)", "run3": "fail (NDS-003)", "run4": "success (1 span)", "rescued": true},
+        {"file": "sensitive-filter.js", "run2": "fail (null output)", "run3": "fail (null output)", "run4": "fail (missing tracer import, not committed)", "rescued": false},
+        {"file": "journal-manager.js", "run2": "fail (NDS-003)", "run3": "fail (NDS-003)", "run4": "fail (0 spans, NDS-003 blocked)", "rescued": false}
+      ]
+    },
+    "coverage_assessment": {
+      "run3": {"instrumented": 11, "skipped": 6, "failed": 4, "total": 21},
+      "run4": {"instrumented": 16, "skipped": 10, "failed": 3, "total": 29},
+      "note": "Run-4 processed 8 more files than run-3. The increase from 11 to 16 instrumented files includes 2 rescued files and 3 new summary subsystem files."
+    }
+  }
+}

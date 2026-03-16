@@ -11,7 +11,7 @@
 
 Run-3 scored 73% quality (19/26 rules pass, 4/4 gates pass) but was compromised by a stale orbweaver build — fixes #61 (mega-bundle), #64 (tracer naming), and #65 (span naming) existed in source but were never compiled to `dist/`. Three of seven quality rule failures (API-003, SCH-001, CDQ-008) are expected repeats from the stale build. Run-3 also discovered a new regression (API-002: agent marked `@opentelemetry/api` optional), two genuine new findings (SCH-002: ad-hoc attributes, CDQ-003: missing recordException), and one schema design issue (CDQ-007: PII in `commit_story.commit.author`).
 
-The same 4 files have failed across both run-2 and run-3: journal-graph.js (oscillation/token budget), sensitive-filter.js (null parsed output), context-integrator.js (NDS-003 blocks refactor), and journal-manager.js (NDS-003 x5). Run-3 produced 11 orbweaver issues documented in `evaluation/run-3/orb-issues-to-file.md`.
+The same 4 files have failed across both run-2 and run-3: journal-graph.js (oscillation/token budget), sensitive-filter.js (null parsed output), context-integrator.js (NDS-003 blocks refactor), and journal-manager.js (NDS-003 x5). Run-3 produced 11 orbweaver issues documented in `evaluation/run-3/orb-findings.md`.
 
 ### Primary Goal
 
@@ -52,7 +52,7 @@ Verify that orbweaver fixes resolve all 7 quality rule failures from run-3, push
 
 ### Orbweaver Issues Filed from Run-3
 
-11 issues documented in `evaluation/run-3/orb-issues-to-file.md`:
+11 issues documented in `evaluation/run-3/orb-findings.md`:
 
 | Issue | Summary | Priority |
 |-------|---------|----------|
@@ -97,7 +97,7 @@ Three-phase approach:
 - **Evaluation rubric**: `spinybacked-orbweaver/research/evaluation-rubric.md` (31 rules)
 - **Rubric-codebase mapping**: `spinybacked-orbweaver/research/rubric-codebase-mapping.md`
 - **Run-3 orbweaver branches**: `orb/instrument-1773434669510` (main), `orb/instrument-1773438620295` (supplemental)
-- **Orbweaver issues**: `evaluation/run-3/orb-issues-to-file.md` (11 issues)
+- **Orbweaver issues**: `evaluation/run-3/orb-findings.md` (11 issues)
 - **Lessons for PRD #4**: `evaluation/run-3/lessons-for-prd4.md`
 
 ---
@@ -174,7 +174,7 @@ Three-phase approach:
   6. Emit per-file evaluation results as a canonical JSON artifact (`evaluation/run-4/per-file-evaluation.json`) — render the markdown report from it to prevent drift between evaluation docs
   7. Document in `evaluation/run-4/per-file-evaluation.md` (generated from the JSON artifact)
   8. Append any rubric scoring ambiguities or methodology observations to `evaluation/run-4/lessons-for-prd5.md`
-  9. Append any new orbweaver software bugs discovered during evaluation to `evaluation/run-4/orb-issues-to-file.md`
+  9. Append any new orbweaver software bugs discovered during evaluation to `evaluation/run-4/orb-findings.md`
 
 - [x] **PR artifact evaluation** — Evaluate the PR as a first-class deliverable:
   1. If PR exists: evaluate description quality, per-file table, span counts, agent decision notes
@@ -182,16 +182,16 @@ Three-phase approach:
   3. If PR was lost: document why and assess whether orbweaver issue #12 (credential validation) and #13 (local summary) were fixed
   4. Document in `evaluation/run-4/pr-evaluation.md`
   5. Append any PR quality observations to `evaluation/run-4/lessons-for-prd5.md`
-  6. Append any new orbweaver software bugs to `evaluation/run-4/orb-issues-to-file.md`
+  6. Append any new orbweaver software bugs to `evaluation/run-4/orb-findings.md`
 
-- [ ] **Rubric scoring** — Synthesize per-file findings into dimension-level scores:
+- [x] **Rubric scoring** — Synthesize per-file findings into dimension-level scores:
   1. Aggregate per-file agent findings from `evaluation/run-4/per-file-evaluation.json`
   2. Score each dimension (NDS, COV, RST, API, SCH, CDQ) with per-rule evidence
   3. Classify each failure: stale build repeat / new regression / genuine new finding / schema design issue
   4. **Schema coverage split scoring** (decision log 2026-03-16): Score SCH-001 and SCH-002 separately for schema-covered files (~20, where registry defines expected attributes) vs schema-uncovered files (~9 summary subsystem files, where agent must invent attributes). For uncovered files, evaluate invention quality (namespace adherence, semantic validity) rather than registry match. Report both strict score (all files against registry) and split score (covered strict + uncovered inventions). See `lessons-for-prd5.md` "Schema Coverage Split" section for full methodology.
   5. Emit as `evaluation/run-4/rubric-scores.json` (machine-readable) and render `evaluation/run-4/rubric-scores.md` from it (run-3-compatible format)
   6. Append any new rubric gaps or scoring ambiguities to `evaluation/run-4/lessons-for-prd5.md`
-  7. Append any new orbweaver software bugs to `evaluation/run-4/orb-issues-to-file.md`
+  7. Append any new orbweaver software bugs to `evaluation/run-4/orb-findings.md`
 
 - [ ] **Baseline comparison and synthesis** — Compare run-4 vs run-3 vs run-2:
   1. Dimension-level trend analysis (4-run where applicable)
@@ -211,9 +211,9 @@ Three-phase approach:
   6. Generate from the canonical JSON artifacts (`per-file-evaluation.json`, `rubric-scores.json`) to prevent drift between evaluation docs
   7. Document in `evaluation/run-4/actionable-fix-output.md`
   8. Final review of `evaluation/run-4/lessons-for-prd5.md` — ensure all forward-looking items are captured
-  9. Final review of `evaluation/run-4/orb-issues-to-file.md` — ensure all orbweaver bugs are captured with acceptance criteria
+  9. Final review of `evaluation/run-4/orb-findings.md` — ensure all orbweaver bugs are captured with acceptance criteria
 
-- [ ] **Draft PRD #5 for next evaluation run** — Create a PRD for evaluation run-5 following the structure of this PRD. Primary inputs: `evaluation/run-4/lessons-for-prd5.md` (process improvements, rubric gaps, evaluation methodology changes) and `evaluation/run-4/orb-issues-to-file.md` (orbweaver software bugs to verify as fixed). Also incorporate run-4 scores as baselines, carry forward unresolved bugs/spec gaps/rubric gaps, and encode process lessons. **Key methodology to encode**: schema coverage split scoring (do NOT pre-register summary attributes — keep the gap as a test of agent schema extension capability; see decision log 2026-03-16). The goal is a self-improving evaluation chain where each run's PRD encodes the lessons of previous runs.
+- [ ] **Draft PRD #5 for next evaluation run** — Create a PRD for evaluation run-5 following the structure of this PRD. Primary inputs: `evaluation/run-4/lessons-for-prd5.md` (process improvements, rubric gaps, evaluation methodology changes) and `evaluation/run-4/orb-findings.md` (orbweaver software bugs to verify as fixed). Also incorporate run-4 scores as baselines, carry forward unresolved bugs/spec gaps/rubric gaps, and encode process lessons. **Key methodology to encode**: schema coverage split scoring (do NOT pre-register summary attributes — keep the gap as a test of agent schema extension capability; see decision log 2026-03-16). The goal is a self-improving evaluation chain where each run's PRD encodes the lessons of previous runs.
 
 ---
 
@@ -301,7 +301,7 @@ Encoded in the milestones but listed explicitly for reference:
   - `rubric-scores.md`: Dimension-level scoring with per-rule evidence
   - `baseline-comparison.md`: Run-3 vs run-2 vs run-1
   - `actionable-fix-output.md`: Fix instructions for orbweaver maintainer
-  - `orb-issues-to-file.md`: 11 issues with acceptance criteria
+  - `orb-findings.md`: 11 issues with acceptance criteria
   - `lessons-for-prd4.md`: Forward-looking improvements (primary input for this PRD)
 - **evaluation/run-2/**: Full run-2 documentation
 - **spinybacked-orbweaver issues #61-#69**: Run-2 findings
@@ -323,13 +323,15 @@ Encoded in the milestones but listed explicitly for reference:
 | 2026-03-13 | Research OpenLLMetry before scoring COV-006 | The agent has auto-instrumentation support for LangChain but run-3 couldn't test it (journal-graph.js failed). Research needed to set expectations for run-4 |
 | 2026-03-13 | Create `lessons-for-prd5.md` at start of evaluation and append throughout | Run-3 created `lessons-for-prd4.md` mid-evaluation (decision log entry 2026-03-13). PRD #4 formalizes this as a milestone that runs in parallel with all evaluation milestones, ensuring lessons are captured while context is fresh |
 | 2026-03-13 | Use canonical JSON artifacts as source of truth for all evaluation docs | Run-3 had drift risk between per-file-evaluation.md, rubric-scores.md, and actionable-fix-output.md since all were authored independently. PRD #4 emits per-file-evaluation.json and rubric-scores.json first, then renders markdown from them. CodeRabbit review of PR #6 flagged this pattern |
-| 2026-03-15 | Rename all "orb" references to "orbweaver" in PRD and evaluation docs | CLI was renamed from `orb` to `orbweaver` in spinybacked-orbweaver #123. Config file already renamed to `orbweaver.yaml`. PRD and evaluation docs updated for consistency. Historical filenames (`orb-output.log`, `orb-issues-to-file.md`) and branch names (`orb/instrument-*`) preserved as-is |
+| 2026-03-15 | Rename all "orb" references to "orbweaver" in PRD and evaluation docs | CLI was renamed from `orb` to `orbweaver` in spinybacked-orbweaver #123. Config file already renamed to `orbweaver.yaml`. PRD and evaluation docs updated for consistency. Historical filenames (`orb-output.log`, `orb-findings.md`) and branch names (`orb/instrument-*`) preserved as-is |
 | 2026-03-15 | Accept `commit_story.commit.author` as PII with annotation | Git author names are public metadata on every commit; author attribution is core to journal purpose. Added `note` to registry attribute rather than hashing or removing. CDQ-007 evaluators can see PII was consciously accepted |
 | 2026-03-15 | Add `commit_story.git.subcommand` and `commit_story.commit.parent_count` to Weaver registry | Both were ad-hoc attributes the agent invented in run-3 (SCH-002). They're legitimate domain attributes. Orbweaver #102 and #147 fixed agent-side handling; registry pre-registration removes a known failure point. Filed commit-story-v2#49 for upstream sync |
 | 2026-03-15 | Manual spans justified for LangGraph orchestration despite OpenLLMetry availability | `@traceloop/instrumentation-langchain` JS package covers LangChain chat model calls but NOT LangGraph node execution, state transitions, or graph compilation. Python package is more mature. Manual spans on graph nodes are the correct pattern for commit-story-v2 |
-| 2026-03-16 | Track orbweaver issues and evaluation process lessons in separate documents | Run-4 discovered both categories simultaneously. `orb-issues-to-file.md` feeds GitHub issues on spinybacked-orbweaver; `lessons-for-prd5.md` feeds PRD #5. The distinction prevents mixing software bugs with process improvements |
+| 2026-03-16 | Track orbweaver issues and evaluation process lessons in separate documents | Run-4 discovered both categories simultaneously. `orb-findings.md` feeds GitHub issues on spinybacked-orbweaver; `lessons-for-prd5.md` feeds PRD #5. The distinction prevents mixing software bugs with process improvements |
 | 2026-03-16 | Schema evolution broken — format mismatch between agent output and parser | Agent outputs schemaExtensions as string IDs per prompt spec; parseExtension() expects YAML objects with id field. All extensions rejected as "(unparseable)". Schema never evolved across 29 files. Critical orbweaver bug — filed as run-4 orb issue #1 |
-| 2026-03-16 | Every evaluation milestone must update both output documents | Failure deep-dives revealed the two output streams (`orb-issues-to-file.md` for orbweaver bugs, `lessons-for-prd5.md` for process improvements) were only referenced in some milestones. Added explicit update steps to all remaining milestones to prevent findings from being lost |
+| 2026-03-16 | Every evaluation milestone must update both output documents | Failure deep-dives revealed the two output streams (`orb-findings.md` for orbweaver bugs, `lessons-for-prd5.md` for process improvements) were only referenced in some milestones. Added explicit update steps to all remaining milestones to prevent findings from being lost |
 | 2026-03-16 | Split SCH-002 scoring by schema coverage — do not pre-register summary attributes | The Weaver schema was designed before the summary subsystem (~9 files) existed. For schema-uncovered files, ad-hoc attributes are *expected* — the agent must invent them. Evaluate whether inventions follow namespace conventions and are semantically reasonable, not whether they match a non-existent registry. Keeping the schema gap preserves a test of the agent's judgment under ambiguity and tests the schema evolution mechanism. Pre-registering would test "follow instructions" (easier) instead of "extend schema coherently" (harder, more valuable). Run-5 should maintain this gap. |
 | 2026-03-16 | Evaluate branch state (the deliverable), not PR summary self-reported status | Per-file evaluation discovered that summary-graph.js ("partial, 6 spans"), sensitive-filter.js ("partial, 2 spans"), and journal-manager.js ("partial, 0 spans") have NO changes on the orbweaver branch — their instrumentation was never committed. The PR summary's per-file status table reports work that exists only in the agent's memory or working directory. Future evaluations must diff `main..orbweaver-branch` for ground truth, not trust the agent's self-report. This also means NDS-002's 32 test failures came from working-directory changes that were never delivered. |
 | 2026-03-16 | Expected-condition catch blocks are a distinct NDS-005/CDQ-003 failure class | Per-file agent evaluation found 3 files (summarize.js, summary-manager.js, summary-detector.js) where the agent changed silent `catch {}` blocks — used for expected control flow like ENOENT file-not-found — to record exceptions and set ERROR status. OTel's setStatus is a one-way latch; once ERROR, spans can't revert to OK. This pollutes telemetry with false errors. Filed as orb issue #10. This failure class is distinct from "agent broke error handling" (NDS-005 traditional) — the control flow is preserved, but the observability semantics are wrong. Run-5 rubric may need a dedicated rule or sub-classification. |
+| 2026-03-16 | Rename orbweaver findings document from "issues" to "findings" with PRD/issue classification | "Issue" conflated small GitHub issues with PRD-sized architectural work. "Findings" is neutral evaluation vocabulary. Each finding is classified as `PRD` (needs design decisions, milestones) or `Issue` (focused fix). Document renamed from `orb-issues-to-file.md` to `orb-findings.md`. Each finding includes cross-repo evidence references so the implementing AI in spinybacked-orbweaver can navigate directly to supporting documentation in this eval repo. |
+| 2026-03-16 | PRD #5 must have explicit evaluation process improvements milestone | Run-4 discovered significant methodology changes (per-file agents, schema coverage split, findings vocabulary, cross-repo evidence) that were as important as orbweaver software findings. These emerged organically and had to be worked through manually. PRD #5 should treat evaluation methodology as a first-class deliverable with its own milestone. |
