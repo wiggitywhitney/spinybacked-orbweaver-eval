@@ -5,12 +5,15 @@
  * Writes to journal/reflections/YYYY-MM/YYYY-MM-DD.md
  */
 
+import { trace, SpanStatusCode } from '@opentelemetry/api';
 import { z } from 'zod';
 import { mkdir, appendFile } from 'node:fs/promises';
 import { dirname, join } from 'node:path';
 
 /** Separator bar for entries */
 const SEPARATOR = '═══════════════════════════════════════';
+
+const tracer = trace.getTracer('unknown_service');
 
 /**
  * Get the reflections file path for a date
@@ -63,17 +66,28 @@ ${SEPARATOR}
  * @returns {Promise<string>} - The path where the reflection was saved
  */
 async function saveReflection(text) {
-  const now = new Date();
-  const filePath = getReflectionsPath(now);
+  return tracer.startActiveSpan('commit_story.journal.save_reflection', async (span) => {
+    try {
+      const now = new Date();
+      const filePath = getReflectionsPath(now);
 
-  // Ensure directory exists
-  await mkdir(dirname(filePath), { recursive: true });
+      // Ensure directory exists
+      await mkdir(dirname(filePath), { recursive: true });
 
-  // Format and append the entry
-  const entry = formatReflectionEntry(text, now);
-  await appendFile(filePath, entry, 'utf-8');
+      // Format and append the entry
+      const entry = formatReflectionEntry(text, now);
+      await appendFile(filePath, entry, 'utf-8');
 
-  return filePath;
+      span.setAttribute('commit_story.journal.file_path', filePath);
+      return filePath;
+    } catch (error) {
+      span.recordException(error);
+      span.setStatus({ code: SpanStatusCode.ERROR });
+      throw error;
+    } finally {
+      span.end();
+    }
+  });
 }
 
 /**
@@ -88,26 +102,33 @@ export function registerReflectionTool(server) {
       text: z.string().describe('The reflection text, verbatim from the user'),
     },
     async ({ text }) => {
-      try {
-        const savedPath = await saveReflection(text);
-        return {
-          content: [
-            {
-              type: 'text',
-              text: `Reflection saved to ${savedPath}`,
-            },
-          ],
-        };
-      } catch (error) {
-        return {
-          content: [
-            {
-              type: 'text',
-              text: `Error saving reflection: ${error.message}`,
-            },
-          ],
-        };
-      }
+      return tracer.startActiveSpan('mcp.tool.journal_add_reflection', async (span) => {
+        try {
+          const savedPath = await saveReflection(text);
+          span.setAttribute('commit_story.journal.file_path', savedPath);
+          return {
+            content: [
+              {
+                type: 'text',
+                text: `Reflection saved to ${savedPath}`,
+              },
+            ],
+          };
+        } catch (error) {
+          span.recordException(error);
+          span.setStatus({ code: SpanStatusCode.ERROR });
+          return {
+            content: [
+              {
+                type: 'text',
+                text: `Error saving reflection: ${error.message}`,
+              },
+            ],
+          };
+        } finally {
+          span.end();
+        }
+      });
     }
   );
 }
