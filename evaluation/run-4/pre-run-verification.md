@@ -8,9 +8,9 @@
 
 ---
 
-## Run-3 Orbweaver Issues — All 11 Resolved
+## Run-3 Orbweaver Issues — 10 of 11 Resolved
 
-Every run-3 issue has a corresponding GitHub fix, all closed with merged PRs:
+Of the 11 run-3 issues documented in `orb-issues-to-file.md`, 10 have corresponding GitHub fixes (all closed with merged PRs). Issue #5 was not filed. Issues #10 and #11 were folded into #1 and #2 respectively during consolidation.
 
 | Run-3 Issue | Description | GitHub Issue(s) | Status |
 |---|---|---|---|
@@ -18,11 +18,13 @@ Every run-3 issue has a corresponding GitHub fix, all closed with merged PRs:
 | #2 | Null parsed output has no diagnostics | #103 | CLOSED |
 | #3 | Zero-span files give no reason | #111 | CLOSED |
 | #4 | NDS-003 blocks safe refactors | #100 | CLOSED |
-| #5 | Accept multiple path arguments | Not filed | — |
+| #5 | Accept multiple path arguments | Not filed | OPEN (low priority) |
 | #6 | Oscillation error missing rule info | #103 | CLOSED |
 | #7 | Test suite integration | #120, #121 | CLOSED |
 | #8 | Unify oscillation/repeated-failure messages | #103 | CLOSED |
 | #9 | Function-level instrumentation | #106 | CLOSED |
+| ~~#10~~ | ~~Folded into #1~~ | — | — |
+| ~~#11~~ | ~~Folded into #2~~ | — | — |
 | #12 | Validate GitHub token at startup | #104, #137 | CLOSED |
 | #13 | Save PR summary locally | #104 | CLOSED |
 
