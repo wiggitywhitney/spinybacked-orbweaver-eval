@@ -92,6 +92,15 @@ The Weaver schema was designed before the summary subsystem existed. ~9 files ha
 - **SCH-001 (span naming consistency):** More interesting signal for new files — do invented span names follow the established `commit_story.*` pattern? Run-4 showed deviation (`summary.daily.generate` instead of `commit_story.summary.daily_generate`).
 - **Schema evolution becomes higher-stakes.** For uncovered files, evolution is the *only* mechanism for cross-file coherence. When file 14 invents a span name, file 21 should see it and build on it.
 
+### Impact on run-4 interpretation
+
+This reframing changes how we should read run-4 results:
+
+- **SCH-002 (11 ad-hoc attributes) is less of a failure than initially scored.** Most ad-hoc attributes come from summary files where invention was required. `commit_story.journal.unsummarized_count`, `commit_story.summarize.generated_count`, etc. follow the namespace, describe real domain concepts, and are reasonable registry candidates. SCH-002 should pass for schema-uncovered files that invented well.
+- **SCH-001 (8/37 span names deviating) has a sharper diagnosis.** The deviating names (`summary.daily.generate`, `mcp.server.start`, `context.gather_for_commit`) are specifically from schema-uncovered files. The agent had no naming template to follow. Schema evolution is the mechanism that would propagate the `commit_story.*` convention to these files — but evolution was broken.
+- **The run-4 quality score is slightly better than initially calculated.** Rubric scoring milestone should apply the split methodology and note the adjusted interpretation alongside the strict interpretation.
+- **Run-5's key test becomes schema evolution for uncovered files.** With evolution fixed, will the agent pick up `commit_story.*` naming from early files and apply it consistently to later summary files? Run-4 couldn't test this at all.
+
 ### Design decision: do NOT pre-register summary attributes
 
 Keeping the schema gap preserves a valuable test case — the agent's ability to extend a schema coherently under ambiguity. Pre-registering would test "can the agent follow instructions" (easier) rather than "can the agent extend schema coherently" (harder, more valuable for evaluating orbweaver's architecture).
