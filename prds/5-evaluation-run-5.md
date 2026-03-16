@@ -134,7 +134,7 @@ Four-phase approach:
 
 ## Milestones
 
-- [ ] **Evaluation process improvements** — Standardize methodology changes discovered in run-4 as formal updates before evaluation begins:
+- [x] **Evaluation process improvements** — Standardize methodology changes discovered in run-4 as formal updates before evaluation begins:
   1. **Rubric clarification: CDQ-002** — Standardize on semantic check (tracer name correctness), not pattern-only check (whether getTracer was called). Document that the bug existed in run-3 but wasn't captured.
   2. **Rubric clarification: CDQ-006** — Add "cheap computation" exemption: trivial type conversions (toISOString, String(), Number()) do not require isRecording() guards. This makes CDQ-006 consistent across runs.
   3. **Rubric sub-classification: NDS-005** — Document expected-condition catch blocks as a distinct failure class. The rule covers both "agent broke error handling" (traditional) and "agent recorded expected conditions as errors" (new in run-4). Consider adding NDS-005a/NDS-005b sub-classifications or a dedicated rule.
@@ -159,7 +159,7 @@ Four-phase approach:
   9. Record which run-4 findings are verified fixed vs still open — this determines the expected score ceiling.
   10. Append any pre-run observations to `evaluation/run-5/lessons-for-prd6.md`
 
-- [ ] **Collect lessons for PRD #6** — Create BOTH output documents at the START and append throughout all subsequent milestones:
+- [x] **Collect lessons for PRD #6** — Create BOTH output documents at the START and append throughout all subsequent milestones:
   1. Create `evaluation/run-5/orbweaver-findings.md` (note: `orbweaver-` prefix, not `orb-`). Use findings vocabulary (PRD vs Issue classification) from the start.
   2. Create `evaluation/run-5/lessons-for-prd6.md`. Sections: Rubric Gaps, Process Improvements, Evaluation Methodology, Rubric-Codebase Mapping Corrections, Schema Decisions, Carry-Forward Items.
   3. Both documents are updated throughout all subsequent milestones. Every milestone has explicit "append to findings/lessons" steps.

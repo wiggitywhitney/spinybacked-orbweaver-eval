@@ -38,6 +38,10 @@ Entry format: `- (YYYY-MM-DD) Description of feature-level change (PRD #X, miles
 - (2026-03-16) Documented evaluation branch lifecycle: eval branches are never merged — PRs for CodeRabbit review only. PRDs for future runs must be created on main via separate branches (PRD #4, lessons)
 - (2026-03-16) Completed PRD #4: all 11 milestones done. PRD #5 drafted on separate branch (PR #9) since eval branches never merge (PRD #4, draft PRD #5)
 
+- (2026-03-16) Standardized evaluation methodology for run-5: CDQ-002 semantic check, CDQ-006 cheap computation exemption, NDS-005a/005b sub-classifications, per-file canonical scoring, schema coverage split, instance counts, systemic bug classification, branch state verification, cost anomaly diagnostics (PRD #5, evaluation process improvements)
+- (2026-03-16) Created run-5 skeleton documents: orbweaver-findings.md and lessons-for-prd6.md with structured sections (PRD #5, collect lessons)
+- (2026-03-16) Applied rubric clarifications to spinybacked-orbweaver evaluation-rubric.md and rubric-codebase-mapping.md via PR #172 (PRD #5, evaluation process improvements)
+
 ### Changed
 - (2026-03-16) Fixed span count discrepancy: total_spans_on_branch corrected from 48 to 38 in per-file-evaluation.json and rubric-scores.json (48 included working-directory-only changes from partial files not committed to branch). Updated baseline-comparison.md table to match canonical per-file-evaluation.json (PRD #4, CodeRabbit finding fix)
 - (2026-03-15) Renamed all "orb" references to "orbweaver" in PRD #4 and evaluation docs to match CLI rename (spinybacked-orbweaver #123)
