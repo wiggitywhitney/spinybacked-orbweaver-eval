@@ -159,6 +159,30 @@ Observations from the baseline comparison milestone that affect run-5 methodolog
 - **Cost anomaly as a diagnostic.** Run-4's cost at 8.6% of ceiling was a symptom of broken schema evolution. Run-5 should add a "cost sanity check": if actual < 15% of ceiling, investigate whether the prompt is actually changing between files.
 - **PR delivery has never succeeded for this codebase.** Run-3: auth failure. Run-4: test failure. Run-5 should verify PR creation capability end-to-end in pre-run (push a test branch, delete it).
 
+## Cross-Repo Handoff Process
+
+Run-4 established a new pattern for communicating evaluation findings to the orbweaver repo.
+
+### Recommendation document, not direct issues
+
+Previous runs (implicitly) assumed findings would be filed directly as GitHub issues. Run-4 introduced a formal handoff: the eval repo produces a **recommendation document** (`handoff-to-orbweaver.md`) with all findings, evidence links, and priority recommendations. The target repo AI reads it, verifies claims against the current orbweaver codebase, right-sizes each finding (PRD vs issue), and files what's actually valid.
+
+**Why this is better than direct issue filing:**
+- The orbweaver AI knows its own codebase — it can verify whether root cause analysis is correct, check if code has changed since the eval, and assess fix complexity accurately
+- It prevents stale or wrong issues — findings may reference code that's already been refactored
+- It lets the implementing AI right-size work — what looks like a PRD from outside may be a simple fix from inside (or vice versa)
+- It creates a natural review checkpoint between "eval found X" and "we're committing to fix X"
+
+**Run-5 should encode this as the standard handoff process:**
+1. Evaluation produces `handoff-to-orbweaver.md` (or `handoff-to-<target>.md`) as a formal milestone
+2. The document uses local filesystem paths (both repos on the same machine) so the receiving AI can read evidence files directly
+3. The receiving AI produces a triage report: which findings are confirmed, which are stale, what the actual fix classification is
+4. Only after triage does issue/PRD creation happen
+
+### Evidence accessibility
+
+Both repos are on the same local machine (`/Users/whitney.lee/Documents/Repositories/`). The handoff document uses absolute local paths to evidence files. No cloning or GitHub API access needed. If this changes (different machines, CI environments), the handoff doc should use GitHub URLs instead.
+
 ## Carry-Forward Items
 
 Unresolved issues, open questions, and items deferred to run-5.

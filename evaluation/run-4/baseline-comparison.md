@@ -28,7 +28,7 @@ Run-4 processed 29 files (up from 21) with a fresh orbweaver build, resolving al
 | **Files correctly skipped** | 7 | 6 | 10 | +4 |
 | **Files failed/partial** | 4 | 4 | 3 (partial) | -1 (0 full failures) |
 | **Persistently failing files rescued** | — | — | 2/4 | New metric |
-| **Total spans on branch** | ~21 | 18 | 48 | +30 |
+| **Total spans on branch** | ~21 | 18 | 38 | +20 |
 | **Unique span names** | — | 18 | 37 | +19 |
 | **Wall-clock time** | Unknown | 52.4 min | ~80 min | +28 min (more files) |
 | **PR artifact** | Created (--no-pr) | Failed (git push auth) | Failed (32 test failures) | Different failure |
@@ -89,17 +89,17 @@ Run-4 processed 29 files (up from 21) with a fresh orbweaver build, resolving al
 
 | File | Run-2 | Run-3 | Run-4 | Change |
 |------|-------|-------|-------|--------|
-| claude-collector.js | Instrumented (1) | Instrumented (1) | Instrumented (3) | +2 spans |
-| git-collector.js | Instrumented (2) | Instrumented (3) | Instrumented (5) | +2 spans |
+| claude-collector.js | Instrumented (1) | Instrumented (1) | Instrumented (1) | Same |
+| git-collector.js | Instrumented (2) | Instrumented (3) | Instrumented (3) | Same |
 | journal-graph.js | **Failed** (token budget) | **Failed** (oscillation) | **Instrumented (4)** | **Rescued** |
-| guidelines/index.js | Instrumented (1) | Instrumented (1) | Instrumented (1) | Same |
-| index.js | Instrumented (1) | Instrumented (1) | Instrumented (4) | +3 spans, but missing root |
+| guidelines/index.js | Instrumented (1) | Instrumented (1) | Skipped (0) | Correctly skipped |
+| index.js | Instrumented (1) | Instrumented (1) | Instrumented (2) | +1 span, but missing root |
 | context-integrator.js | **Failed** (NDS-003) | **Failed** (NDS-003) | **Instrumented (1)** | **Rescued** |
-| message-filter.js | Instrumented (1) | Instrumented (1) | Instrumented (2) | +1 span |
+| message-filter.js | Instrumented (1) | Instrumented (1) | Instrumented (1) | Same |
 | sensitive-filter.js | **Failed** (null output) | **Failed** (null output) | **Partial** (2, not committed) | Improved |
 | token-filter.js | Instrumented (2) | Instrumented (2) | Instrumented (3) | +1 span (over-instrumented) |
 | journal-manager.js | **Failed** (NDS-003) | **Failed** (NDS-003 x5) | **Partial** (0 useful spans) | Marginal |
-| mcp/server.js | Instrumented (1) | Instrumented (1) | Instrumented (2) | +1 span |
+| mcp/server.js | Instrumented (1) | Instrumented (1) | Instrumented (1) | Same |
 | context-capture-tool.js | Instrumented (2) | Instrumented (2) | Instrumented (2) | Same |
 | reflection-tool.js | Instrumented (2) | Instrumented (2) | Instrumented (2) | Same |
 | journal-paths.js | Instrumented (1) | Instrumented (1) | Instrumented (1) | Same |
@@ -108,9 +108,9 @@ Run-4 processed 29 files (up from 21) with a fresh orbweaver build, resolving al
 | 5 prompt files | Skipped (0 each) | Skipped (0 each) | Skipped (0 each) | Same |
 | **New in run-4:** | | | | |
 | summarize.js | — | — | Instrumented (3) | New file |
-| auto-summarize.js | — | — | Instrumented (2) | New file |
-| summary-manager.js | — | — | Instrumented (4) | New file |
-| summary-detector.js | — | — | Instrumented (2) | New file |
+| auto-summarize.js | — | — | Instrumented (3) | New file |
+| summary-manager.js | — | — | Instrumented (3) | New file |
+| summary-detector.js | — | — | Instrumented (5) | New file |
 | summary-graph.js | — | — | **Partial** (6, not committed) | New file |
 | monthly-summary-prompt.js | — | — | Skipped (0) | New file |
 | 3 more prompt files | — | — | Skipped (0 each) | New files |
@@ -218,7 +218,7 @@ Schema evolution was completely broken in run-4 (all extensions rejected as unpa
 
 - **API dimension (0% → 33% → 100%):** The clearest improvement trajectory. Each run fixed more dependency management issues. Run-4's fresh build eliminated the last stale-build repeat.
 - **File success rate:** 48% (10/21) → 52% (11/21) → 55% (16/29). Steady increase, with function-level fallback as the key enabler for run-4.
-- **Span density:** ~2.1 spans/file (run-2) → ~1.6 spans/file (run-3) → ~3.0 spans/file (run-4). The agent is finding more instrumentation opportunities per file.
+- **Span density:** ~2.1 spans/file (run-2) → ~1.6 spans/file (run-3) → ~2.4 spans/file (run-4). The agent is finding more instrumentation opportunities per file.
 
 ### Regressing
 
