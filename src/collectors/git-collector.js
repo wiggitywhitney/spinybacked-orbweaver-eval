@@ -5,10 +5,12 @@
  * to prevent context pollution in AI generation.
  */
 
+import { trace, SpanStatusCode } from '@opentelemetry/api';
 import { execFile } from 'node:child_process';
 import { promisify } from 'node:util';
 
 const execFileAsync = promisify(execFile);
+const tracer = trace.getTracer('unknown_service');
 
 /**
  * Run a git command and return stdout
@@ -18,23 +20,30 @@ const execFileAsync = promisify(execFile);
  * @returns {Promise<string>} - Command output
  */
 async function runGit(args, { commitRef } = {}) {
-  try {
-    const { stdout } = await execFileAsync('git', args, {
-      maxBuffer: 10 * 1024 * 1024, // 10MB for large diffs
-    });
-    return stdout;
-  } catch (error) {
-    if (error.code === 128) {
-      if (error.stderr?.includes('not a git repository')) {
-        throw new Error('Not a git repository');
+  return tracer.startActiveSpan('commit_story.git.execute', async (span) => {
+    span.setAttribute('commit_story.git.subcommand', args[0]);
+    try {
+      const { stdout } = await execFileAsync('git', args, {
+        maxBuffer: 10 * 1024 * 1024, // 10MB for large diffs
+      });
+      return stdout;
+    } catch (error) {
+      span.recordException(error);
+      span.setStatus({ code: SpanStatusCode.ERROR });
+      if (error.code === 128) {
+        if (error.stderr?.includes('not a git repository')) {
+          throw new Error('Not a git repository');
+        }
+        if (error.stderr?.includes('unknown revision') || error.stderr?.includes('bad revision')) {
+          const ref = commitRef ?? args[args.length - 1];
+          throw new Error(`Invalid commit reference: ${ref}`);
+        }
       }
-      if (error.stderr?.includes('unknown revision') || error.stderr?.includes('bad revision')) {
-        const ref = commitRef ?? args[args.length - 1];
-        throw new Error(`Invalid commit reference: ${ref}`);
-      }
+      throw error;
+    } finally {
+      span.end();
     }
-    throw error;
-  }
+  });
 }
 
 /**
@@ -117,14 +126,25 @@ async function getMergeInfo(commitRef = 'HEAD') {
  * @returns {Promise<Date|null>} - Previous commit timestamp, null if first commit
  */
 export async function getPreviousCommitTime(commitRef = 'HEAD') {
-  const output = await runGit(['log', '-2', '--format=%aI', commitRef]);
-  const timestamps = output.trim().split('\n');
+  return tracer.startActiveSpan('commit_story.git.get_previous_commit_time', async (span) => {
+    span.setAttribute('vcs.ref.head.revision', commitRef);
+    try {
+      const output = await runGit(['log', '-2', '--format=%aI', commitRef]);
+      const timestamps = output.trim().split('\n');
 
-  if (timestamps.length < 2) {
-    return null; // First commit, no previous
-  }
+      if (timestamps.length < 2) {
+        return null; // First commit, no previous
+      }
 
-  return new Date(timestamps[1]);
+      return new Date(timestamps[1]);
+    } catch (error) {
+      span.recordException(error);
+      span.setStatus({ code: SpanStatusCode.ERROR });
+      throw error;
+    } finally {
+      span.end();
+    }
+  });
 }
 
 /**
@@ -133,15 +153,31 @@ export async function getPreviousCommitTime(commitRef = 'HEAD') {
  * @returns {Promise<CommitData>}
  */
 export async function getCommitData(commitRef = 'HEAD') {
-  const [metadata, diff, mergeInfo] = await Promise.all([
-    getCommitMetadata(commitRef),
-    getCommitDiff(commitRef),
-    getMergeInfo(commitRef),
-  ]);
+  return tracer.startActiveSpan('commit_story.git.get_commit_data', async (span) => {
+    span.setAttribute('vcs.ref.head.revision', commitRef);
+    try {
+      const [metadata, diff, mergeInfo] = await Promise.all([
+        getCommitMetadata(commitRef),
+        getCommitDiff(commitRef),
+        getMergeInfo(commitRef),
+      ]);
 
-  return {
-    ...metadata,
-    diff,
-    ...mergeInfo,
-  };
+      span.setAttribute('commit_story.commit.author', metadata.author);
+      span.setAttribute('commit_story.commit.message', metadata.subject);
+      span.setAttribute('commit_story.commit.timestamp', metadata.timestamp.toISOString());
+      span.setAttribute('commit_story.commit.parent_count', mergeInfo.parentCount);
+
+      return {
+        ...metadata,
+        diff,
+        ...mergeInfo,
+      };
+    } catch (error) {
+      span.recordException(error);
+      span.setStatus({ code: SpanStatusCode.ERROR });
+      throw error;
+    } finally {
+      span.end();
+    }
+  });
 }
