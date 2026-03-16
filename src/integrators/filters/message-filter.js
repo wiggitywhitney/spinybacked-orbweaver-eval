@@ -6,6 +6,10 @@
  * while preserving human/assistant dialogue and context capture tool calls.
  */
 
+import { trace, SpanStatusCode } from '@opentelemetry/api';
+
+const tracer = trace.getTracer('unknown_service');
+
 /**
  * Detect if a message is too short to be meaningful dialogue
  *
@@ -204,101 +208,116 @@ function extractTextContent(message) {
  * @returns {object} Filtered messages and stats
  */
 export function filterMessages(messages) {
-  const filtered = [];
-  const stats = {
-    total: messages.length,
-    filtered: 0,
-    preserved: 0,
-    // Tracks user messages with meaningful content (50+ chars, not simple commands)
-    // Used downstream to determine if there's enough discussion for dialogue/decision extraction
-    substantialUserMessages: 0,
-    byReason: {
-      noType: 0,
-      wrongType: 0,
-      isMeta: 0,
-      emptyContent: 0,
-      toolUse: 0,
-      toolResult: 0,
-      planInjection: 0,
-      systemNoise: 0,
-      tooShort: 0,
-    },
-  };
+  return tracer.startActiveSpan('commit_story.filter.messages', (span) => {
+    try {
+      span.setAttribute('commit_story.filter.messages_before', messages.length);
+      span.setAttribute('commit_story.filter.type', 'noise_removal');
 
-  for (const message of messages) {
-    if (shouldFilterMessage(message)) {
-      stats.filtered++;
+      const filtered = [];
+      const stats = {
+        total: messages.length,
+        filtered: 0,
+        preserved: 0,
+        // Tracks user messages with meaningful content (50+ chars, not simple commands)
+        // Used downstream to determine if there's enough discussion for dialogue/decision extraction
+        substantialUserMessages: 0,
+        byReason: {
+          noType: 0,
+          wrongType: 0,
+          isMeta: 0,
+          emptyContent: 0,
+          toolUse: 0,
+          toolResult: 0,
+          planInjection: 0,
+          systemNoise: 0,
+          tooShort: 0,
+        },
+      };
 
-      // Track reason for filtering
-      if (!message.type) {
-        stats.byReason.noType++;
-      } else if (!['user', 'assistant'].includes(message.type)) {
-        stats.byReason.wrongType++;
-      } else if (message.isMeta === true) {
-        stats.byReason.isMeta++;
-      } else {
-        const content = message.message?.content;
-        if (!content || (typeof content === 'string' && !content.trim())) {
-          stats.byReason.emptyContent++;
-        } else if (Array.isArray(content)) {
-          if (content.some((c) => c.type === 'tool_result')) {
-            stats.byReason.toolResult++;
-          } else if (content.some((c) => c.type === 'tool_use')) {
-            stats.byReason.toolUse++;
+      for (const message of messages) {
+        if (shouldFilterMessage(message)) {
+          stats.filtered++;
+
+          // Track reason for filtering
+          if (!message.type) {
+            stats.byReason.noType++;
+          } else if (!['user', 'assistant'].includes(message.type)) {
+            stats.byReason.wrongType++;
+          } else if (message.isMeta === true) {
+            stats.byReason.isMeta++;
           } else {
-            stats.byReason.emptyContent++;
+            const content = message.message?.content;
+            if (!content || (typeof content === 'string' && !content.trim())) {
+              stats.byReason.emptyContent++;
+            } else if (Array.isArray(content)) {
+              if (content.some((c) => c.type === 'tool_result')) {
+                stats.byReason.toolResult++;
+              } else if (content.some((c) => c.type === 'tool_use')) {
+                stats.byReason.toolUse++;
+              } else {
+                stats.byReason.emptyContent++;
+              }
+            }
           }
+        } else {
+          // Additional checks for user messages
+          const textContent = extractTextContent(message);
+
+          // Filter system noise (bash output, commands, system tags)
+          if (message.type === 'user' && isSystemNoiseMessage(textContent)) {
+            stats.filtered++;
+            stats.byReason.systemNoise++;
+            continue;
+          }
+
+          // Filter plan-injection messages (AI-generated plans pasted as user messages)
+          if (message.type === 'user' && isPlanInjectionMessage(textContent)) {
+            stats.filtered++;
+            stats.byReason.planInjection++;
+            continue;
+          }
+
+          // Filter very short messages (3 chars or less) - not meaningful dialogue
+          if (message.type === 'user' && isTooShortMessage(textContent)) {
+            stats.filtered++;
+            stats.byReason.tooShort++;
+            continue;
+          }
+
+          stats.preserved++;
+
+          // Track substantial user messages for downstream quality checks
+          if (message.type === 'user' && isSubstantialMessage(textContent)) {
+            stats.substantialUserMessages++;
+          }
+
+          filtered.push({
+            uuid: message.uuid,
+            sessionId: message.sessionId,
+            type: message.type,
+            timestamp: message.timestamp,
+            content: textContent,
+            // Preserve context capture info if present
+            isContextCapture: Array.isArray(message.message?.content)
+              ? message.message.content.some(
+                  (c) => c.type === 'tool_use' && c.name === 'journal_capture_context'
+                )
+              : false,
+          });
         }
       }
-    } else {
-      // Additional checks for user messages
-      const textContent = extractTextContent(message);
 
-      // Filter system noise (bash output, commands, system tags)
-      if (message.type === 'user' && isSystemNoiseMessage(textContent)) {
-        stats.filtered++;
-        stats.byReason.systemNoise++;
-        continue;
-      }
+      span.setAttribute('commit_story.filter.messages_after', filtered.length);
 
-      // Filter plan-injection messages (AI-generated plans pasted as user messages)
-      if (message.type === 'user' && isPlanInjectionMessage(textContent)) {
-        stats.filtered++;
-        stats.byReason.planInjection++;
-        continue;
-      }
-
-      // Filter very short messages (3 chars or less) - not meaningful dialogue
-      if (message.type === 'user' && isTooShortMessage(textContent)) {
-        stats.filtered++;
-        stats.byReason.tooShort++;
-        continue;
-      }
-
-      stats.preserved++;
-
-      // Track substantial user messages for downstream quality checks
-      if (message.type === 'user' && isSubstantialMessage(textContent)) {
-        stats.substantialUserMessages++;
-      }
-
-      filtered.push({
-        uuid: message.uuid,
-        sessionId: message.sessionId,
-        type: message.type,
-        timestamp: message.timestamp,
-        content: textContent,
-        // Preserve context capture info if present
-        isContextCapture: Array.isArray(message.message?.content)
-          ? message.message.content.some(
-              (c) => c.type === 'tool_use' && c.name === 'journal_capture_context'
-            )
-          : false,
-      });
+      return { messages: filtered, stats };
+    } catch (error) {
+      span.recordException(error);
+      span.setStatus({ code: SpanStatusCode.ERROR });
+      throw error;
+    } finally {
+      span.end();
     }
-  }
-
-  return { messages: filtered, stats };
+  });
 }
 
 /**
