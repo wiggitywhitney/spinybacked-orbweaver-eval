@@ -94,7 +94,7 @@
       "rules": {
         "NDS-003": {"result": "pass", "evidence": "Diff shows only instrumentation additions."},
         "NDS-004": {"result": "pass", "evidence": "Exported functions getCommitData and getPreviousCommitTime preserve original signatures."},
-        "NDS-005": {"result": "borderline", "evidence": "Agent's own advisory flags NDS-005 on git-collector.js: 'Original try/catch block (line 21) is missing from instrumented output.' The runGit() try/catch that maps error code 128 to meaningful messages may have been restructured. Needs manual verification.", "severity": "potential_regression"},
+        "NDS-005": {"result": "pass", "evidence": "Verified: runGit() original try/catch with error code 128 mapping is preserved inside the span callback. The catch block still checks error.code === 128 and produces the same conditional throw. Agent advisory was a false positive — the try/catch was moved into the span callback but behavior is identical."},
         "NDS-006": {"result": "pass", "evidence": "ESM imports."},
         "API-001": {"result": "pass", "evidence": "Only '@opentelemetry/api' import."},
         "COV-001": {"result": "pass", "evidence": "getCommitData() (entry point) has a span."},
@@ -125,9 +125,9 @@
       "status": "success",
       "span_names": ["commit_story.summarize.run_daily", "commit_story.summarize.run_weekly", "commit_story.summarize.run_monthly"],
       "rules": {
-        "NDS-003": {"result": "pass", "evidence": "Only instrumentation additions in diff."},
+        "NDS-003": {"result": "fail", "evidence": "In runSummarize(), the original `catch { // Doesn't exist, proceed }` block (access() check for existing summary) was changed to `catch (accessErr) { span.recordException(accessErr); span.setStatus({ code: SpanStatusCode.ERROR }); }`. This records a file-not-found error as a span exception for what is NORMAL control flow (file not existing = generate new summary). Semantic behavioral change."},
         "NDS-004": {"result": "pass", "evidence": "Exported function signatures preserved."},
-        "NDS-005": {"result": "pass", "evidence": "Error handling preserved."},
+        "NDS-005": {"result": "fail", "evidence": "The original `catch { // Doesn't exist, proceed }` intentionally swallowed the fs access error (expected control flow). The instrumented version records this as an exception and sets ERROR status. setStatus is a one-way latch in OTel — once set to ERROR, it cannot be changed back to OK, so the span is permanently marked ERROR even if the function succeeds."},
         "NDS-006": {"result": "pass", "evidence": "ESM imports."},
         "API-001": {"result": "pass", "evidence": "Only '@opentelemetry/api' import."},
         "COV-001": {"result": "pass", "evidence": "handleSummarize entry point covered via summarize.run_daily/weekly/monthly spans."},
@@ -147,7 +147,7 @@
         "SCH-004": {"result": "pass", "evidence": "No redundant attributes — ad-hoc keys are unique domain concepts."},
         "CDQ-001": {"result": "pass", "evidence": "startActiveSpan callback pattern."},
         "CDQ-002": {"result": "fail", "evidence": "trace.getTracer('unknown_service')."},
-        "CDQ-003": {"result": "pass", "evidence": "Standard error recording pattern."},
+        "CDQ-003": {"result": "fail", "evidence": "In runSummarize(), recordException + setStatus(ERROR) used on a non-error control flow path — file-not-found is the expected condition for generating a new summary. Misuse of error recording pattern."},
         "CDQ-005": {"result": "pass", "evidence": "startActiveSpan callback."},
         "CDQ-006": {"result": "pass", "evidence": "No expensive computation in setAttribute calls."},
         "CDQ-007": {"result": "pass", "evidence": "No PII or unbounded attributes."}
@@ -303,7 +303,7 @@
         "COV-004": {"result": "N/A", "evidence": "Synchronous operations."},
         "COV-005": {"result": "pass", "evidence": "Attributes: commit_story.filter.type, commit_story.filter.tokens_before, commit_story.filter.tokens_after — all in registry."},
         "COV-006": {"result": "N/A", "evidence": "No auto-instrumentable operations."},
-        "RST-001": {"result": "pass", "evidence": "estimateTokens (pure math) has no span. formatMessagesForEstimation (pure formatting) has no span."},
+        "RST-001": {"result": "fail", "evidence": "truncateDiff() and truncateMessages() are exported but are pure synchronous data transformation functions with no I/O. They should NOT have their own spans — they are called from applyTokenBudget (which has a span) and from context-integrator.js. Adding spans to pure functions is over-instrumentation. estimateTokens and formatMessagesForEstimation correctly lack spans."},
         "RST-002": {"result": "pass", "evidence": "No trivial accessor spans."},
         "RST-003": {"result": "pass", "evidence": "No wrapper spans."},
         "RST-004": {"result": "pass", "evidence": "No spans on unexported internals."},
@@ -358,9 +358,9 @@
       "status": "success",
       "span_names": ["summary.daily.generate", "summary.weekly.generate", "summary.monthly.generate"],
       "rules": {
-        "NDS-003": {"result": "pass", "evidence": "Only instrumentation additions."},
+        "NDS-003": {"result": "fail", "evidence": "In all 3 generateAndSave* functions, the `access()` catch blocks (which check if file exists) changed from `catch { // Doesn't exist, proceed }` to `catch (error) { span.recordException(error); span.setStatus({ code: SpanStatusCode.ERROR }); }`. ENOENT is the EXPECTED happy path (file doesn't exist = generate new). Recording it as exception + ERROR pollutes telemetry."},
         "NDS-004": {"result": "pass", "evidence": "Exported function signatures preserved."},
-        "NDS-005": {"result": "pass", "evidence": "Error handling preserved."},
+        "NDS-005": {"result": "fail", "evidence": "Original `access()` catch blocks used silent `catch {}` because file-not-found is expected control flow. Instrumented version records these as exceptions and sets ERROR status, changing error handling semantics. Span shows ERROR even when function succeeds."},
         "NDS-006": {"result": "pass", "evidence": "ESM imports."},
         "API-001": {"result": "pass", "evidence": "Only '@opentelemetry/api' import."},
         "COV-001": {"result": "pass", "evidence": "All 3 summary generation entry points have spans."},
@@ -558,7 +558,7 @@
       "rules": {
         "NDS-003": {"result": "pass", "evidence": "Only instrumentation additions."},
         "NDS-004": {"result": "pass", "evidence": "All exported function signatures preserved."},
-        "NDS-005": {"result": "pass", "evidence": "Error handling preserved."},
+        "NDS-005": {"result": "fail", "evidence": "Original `catch {}` blocks (silent catches for readdir on non-existent directories) now have `catch (error) { span.recordException(error); span.setStatus({code: SpanStatusCode.ERROR}); }`. ENOENT on readdir is expected (directory doesn't exist yet) — recording as error pollutes telemetry. Affects getDaysWithEntries (2 catch blocks) and getDaysWithDailySummaries (1 catch block)."},
         "NDS-006": {"result": "pass", "evidence": "ESM imports."},
         "API-001": {"result": "pass", "evidence": "Only '@opentelemetry/api' import."},
         "COV-001": {"result": "pass", "evidence": "All 5 detection functions (entry points) have spans."},
@@ -635,12 +635,12 @@
       "note": "NDS-002 fails at the run level (32 test failures). However, the failing code was never committed to the branch — the branch contains only passing instrumentation. The test failures occurred in the working directory during the run."
     },
     "quality_by_dimension": {
-      "NDS": {"pass": 30, "fail": 1, "borderline": 1, "na": 16, "note": "NDS-004 pass all 16 files. NDS-005 pass 15 files, borderline 1 (git-collector.js). RST-005 N/A all files."},
+      "NDS": {"pass": 26, "fail": 5, "na": 16, "note": "NDS-003 fail: summarize.js, summary-manager.js (ENOENT catch blocks changed to record errors). NDS-005 fail: summarize.js, summary-manager.js, summary-detector.js (expected-condition catch blocks now record exceptions). NDS-004 pass all 16 files. git-collector.js NDS-005 verified pass."},
       "COV": {"pass": 72, "fail": 8, "na": 32, "note": "Key gaps: index.js missing root span (COV-001 fail), claude-collector.js missing findJSONLFiles/parseJSONLFile spans (COV-002 fail), ad-hoc attributes in 3 files (COV-005 fail)."},
-      "RST": {"pass": 79, "fail": 0, "borderline": 2, "na": 16, "note": "Excellent restraint. No utility functions over-instrumented. 2 borderline on RST-004 (unexported I/O helpers)."},
+      "RST": {"pass": 78, "fail": 1, "borderline": 2, "na": 16, "note": "RST-001 fail: token-filter.js (truncateDiff/truncateMessages are pure sync functions with spans). 2 borderline on RST-004 (unexported I/O helpers in MCP tools)."},
       "API": {"pass": 48, "fail": 0, "na": 0, "note": "Perfect API compliance. All imports from @opentelemetry/api only."},
       "SCH": {"pass": 46, "fail": 8, "borderline": 1, "na": 5, "note": "SCH-001 fails: 4 files use non-commit_story.* span names. SCH-002 fails: 3 files use ad-hoc attributes not in registry (broken schema evolution)."},
-      "CDQ": {"pass": 81, "fail": 18, "na": 5, "note": "CDQ-002 fails all 16 files (trace.getTracer('unknown_service')). CDQ-006 fails 2 files (toISOString without isRecording guard). CDQ-003/CDQ-005 pass all files."}
+      "CDQ": {"pass": 78, "fail": 21, "na": 5, "note": "CDQ-002 fails all 16 files (trace.getTracer('unknown_service')). CDQ-003 fails 3 files (summarize.js, summary-manager.js, summary-detector.js — expected ENOENT recorded as errors). CDQ-006 fails 2 files (toISOString without isRecording guard)."}
     },
     "key_findings": [
       "CDQ-002: All 16 files use trace.getTracer('unknown_service') instead of 'commit-story'. This is a systemic agent bug — the library name should match the package name.",
@@ -648,7 +648,8 @@
       "SCH-002: 11 ad-hoc attributes not in registry. These would have been registered via schema evolution if it had worked (orb issue #1). Follow commit_story.* namespace but are not pre-registered.",
       "NDS-002: 32 test failures from function-level fallback missing tracer imports. Changes were never committed to branch — the branch is clean.",
       "COV-001: index.js missing root span on main(). The trace has no top-level CLI operation span.",
-      "NDS-005: git-collector.js has a potential error handling regression flagged by the agent's own advisory — needs manual verification.",
+      "NDS-003/NDS-005: summarize.js, summary-manager.js, summary-detector.js have expected-condition catch blocks (ENOENT file-not-found) changed to record exceptions + set ERROR status. This is a semantic behavioral change — the spans report ERROR for normal control flow. OTel's setStatus is a one-way latch, so the span is permanently marked ERROR even when the function succeeds.",
+      "RST-001: token-filter.js has spans on truncateDiff() and truncateMessages() — pure synchronous data transformation functions that should not be instrumented.",
       "Zero-span decisions: All 10 correct. monthly-summary-prompt.js had unused imports added (minor waste).",
       "Schema evolution broken: All 29 files received identical base schema. 0 extensions were registered across the entire run."
     ]

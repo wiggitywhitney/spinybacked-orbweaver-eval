@@ -82,7 +82,7 @@ Generated from `per-file-evaluation.json` — the canonical source of truth.
 |------|--------|-------|
 | NDS-003 | PASS | Only instrumentation additions |
 | NDS-004 | PASS | Exported signatures preserved |
-| NDS-005 | **BORDERLINE** | Agent advisory flags: "Original try/catch block (line 21) is missing from instrumented output" — runGit() error mapping may be altered |
+| NDS-005 | PASS | Verified: runGit() try/catch with error code 128 mapping preserved inside span callback. Agent advisory was false positive. |
 | COV-001 | PASS | getCommitData entry point spanned |
 | COV-002 | PASS | runGit (child_process) spanned |
 | COV-005 | PASS | All keys in registry including commit_story.git.subcommand |
@@ -98,12 +98,14 @@ Generated from `per-file-evaluation.json` — the canonical source of truth.
 
 | Rule | Result | Notes |
 |------|--------|-------|
-| NDS-003 | PASS | Only instrumentation additions |
+| NDS-003 | **FAIL** | `access()` catch block changed from silent `catch {}` to recording ENOENT as exception + ERROR status. File-not-found is expected control flow (file doesn't exist = generate new summary). Semantic behavioral change. |
 | NDS-004 | PASS | Signatures preserved |
+| NDS-005 | **FAIL** | Original `catch { // Doesn't exist, proceed }` intentionally swallowed fs error. Instrumented version records exception + sets ERROR. OTel's setStatus is a one-way latch — span permanently marked ERROR even when function succeeds. |
 | COV-001 | PASS | All summary operations covered |
 | SCH-001 | PASS | `commit_story.summarize.*` prefix |
 | SCH-002 | **FAIL** | 4 ad-hoc attributes: `commit_story.summarize.{input_count, force, generated_count, failed_count}` |
 | CDQ-002 | **FAIL** | `trace.getTracer('unknown_service')` |
+| CDQ-003 | **FAIL** | recordException + setStatus(ERROR) used on non-error control flow (expected file-not-found) |
 
 ### src/generators/journal-graph.js (4 spans) — RESCUED
 
@@ -182,7 +184,7 @@ Generated from `per-file-evaluation.json` — the canonical source of truth.
 | NDS-003 | PASS | Only instrumentation additions |
 | COV-001 | PASS | applyTokenBudget entry point spanned |
 | COV-005 | PASS | filter.type, filter.tokens_before, filter.tokens_after — all registry |
-| RST-001 | PASS | estimateTokens (pure math) not spanned |
+| RST-001 | **FAIL** | truncateDiff() and truncateMessages() are pure synchronous data transformations with no I/O — should NOT have spans. estimateTokens correctly lacks span. |
 | SCH-001 | PASS | `commit_story.filter.*` prefix |
 | SCH-002 | PASS | All keys in registry |
 | CDQ-002 | **FAIL** | `trace.getTracer('unknown_service')` |
@@ -207,10 +209,12 @@ Generated from `per-file-evaluation.json` — the canonical source of truth.
 
 | Rule | Result | Notes |
 |------|--------|-------|
-| NDS-003 | PASS | Only instrumentation additions |
+| NDS-003 | **FAIL** | In all 3 generateAndSave* functions, `access()` catch blocks changed from `catch {}` to recording ENOENT as exception + ERROR. Same pattern as summarize.js — expected file-not-found recorded as error. |
+| NDS-005 | **FAIL** | Original silent `catch {}` for file existence check now records exception and sets ERROR status. |
 | COV-001 | PASS | All 3 summary generation entry points spanned |
 | SCH-001 | **FAIL** | `summary.*` prefix — should be `commit_story.summary.*` |
 | CDQ-002 | **FAIL** | `trace.getTracer('unknown_service')` |
+| CDQ-003 | **FAIL** | Expected ENOENT recorded as span exception |
 
 ### src/mcp/server.js (1 span)
 
@@ -291,10 +295,12 @@ Generated from `per-file-evaluation.json` — the canonical source of truth.
 | Rule | Result | Notes |
 |------|--------|-------|
 | NDS-003 | PASS | Only instrumentation additions |
+| NDS-005 | **FAIL** | Original `catch {}` for readdir on non-existent directories now records exceptions + ERROR. ENOENT is expected (directory doesn't exist yet). Affects getDaysWithEntries (2 catch blocks) and getDaysWithDailySummaries (1 catch block). |
 | COV-001 | PASS | All 5 detection functions spanned |
 | SCH-001 | PASS | `commit_story.journal.*` prefix |
 | SCH-002 | **FAIL** | 3 ad-hoc attributes: days_found, unsummarized_weeks_count, unsummarized_months_count |
 | CDQ-002 | **FAIL** | `trace.getTracer('unknown_service')` |
+| CDQ-003 | **FAIL** | Expected ENOENT recorded as span exception |
 
 ---
 
@@ -348,9 +354,9 @@ Generated from `per-file-evaluation.json` — the canonical source of truth.
 |------|-------|------|------|------------|
 | NDS-001 (Compilation) | Per-run | 1 | 0 | 0 |
 | NDS-002 (Tests) | Per-run | 0 | 1 | 0 |
-| NDS-003 (Non-instrumentation lines) | Per-file | 16 | 0 | 0 |
+| NDS-003 (Non-instrumentation lines) | Per-file | 14 | 2 | 0 |
 | NDS-004 (Public API) | Per-file | 16 | 0 | 0 |
-| NDS-005 (Error handling) | Per-file | 15 | 0 | 1 |
+| NDS-005 (Error handling) | Per-file | 13 | 3 | 0 |
 | NDS-006 (Module system) | Per-run | 1 | 0 | 0 |
 
 ### Coverage (COV)
@@ -368,7 +374,7 @@ Generated from `per-file-evaluation.json` — the canonical source of truth.
 
 | Rule | Scope | Pass | Fail | Borderline |
 |------|-------|------|------|------------|
-| RST-001 (No utility spans) | Per-file | 16 | 0 | 0 |
+| RST-001 (No utility spans) | Per-file | 15 | 1 | 0 |
 | RST-002 (No accessor spans) | Per-file | 16 | 0 | 0 |
 | RST-003 (No wrapper spans) | Per-file | 16 | 0 | 0 |
 | RST-004 (No internal spans) | Per-file | 14 | 0 | 2 |
@@ -398,7 +404,7 @@ Generated from `per-file-evaluation.json` — the canonical source of truth.
 |------|-------|------|------|
 | CDQ-001 (Spans closed) | Per-file | 16 | 0 |
 | CDQ-002 (Tracer name) | Per-file | 0 | 16 |
-| CDQ-003 (Error recording) | Per-file | 16 | 0 |
+| CDQ-003 (Error recording) | Per-file | 13 | 3 |
 | CDQ-005 (Async context) | Per-file | 16 | 0 |
 | CDQ-006 (Expensive computation) | Per-file | 14 | 2 |
 | CDQ-007 (No PII/unbounded) | Per-file | 16 | 0 |
@@ -412,4 +418,8 @@ Generated from `per-file-evaluation.json` — the canonical source of truth.
 
 2. **SCH-001: 8 of 37 span names deviate from `commit_story.*` convention** — Files processed later in the run (MCP tools, summary-manager, context-integrator) use shorter prefixes (`mcp.*`, `summary.*`, `context.*`). Schema evolution would have enforced naming consistency by making earlier files' span names visible to later files — but schema evolution was broken (orb issue #1).
 
-3. **SCH-002: 11 ad-hoc attributes not in registry** — All follow the `commit_story.*` namespace convention but were never pre-registered. Schema evolution would have added these to the registry progressively — but the extension parser silently rejected all extensions. The ad-hoc attributes are semantically valid domain concepts; the gap is in the registration machinery, not the agent's attribute choices.
+3. **NDS-003/NDS-005/CDQ-003: Expected-condition catch blocks polluted with error recording** — In summarize.js, summary-manager.js, and summary-detector.js, the agent changed silent `catch {}` blocks (for `access()` and `readdir()` on non-existent files/directories) to record exceptions and set ERROR status. These are EXPECTED control flow paths (file doesn't exist = generate new). OTel's `setStatus` is a one-way latch — once ERROR, it cannot revert to OK. This means spans are permanently marked ERROR when the function actually succeeds. 3 files affected, 5+ catch blocks.
+
+4. **RST-001: token-filter.js over-instrumented** — `truncateDiff()` and `truncateMessages()` are pure synchronous data transformations that received their own spans. These should not be instrumented — they have no I/O and are called from `applyTokenBudget()` which already has a span.
+
+5. **SCH-002: 11 ad-hoc attributes not in registry** — All follow the `commit_story.*` namespace convention but were never pre-registered. Schema evolution would have added these to the registry progressively — but the extension parser silently rejected all extensions. The ad-hoc attributes are semantically valid domain concepts; the gap is in the registration machinery, not the agent's attribute choices.

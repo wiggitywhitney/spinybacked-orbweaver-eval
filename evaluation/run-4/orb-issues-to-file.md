@@ -216,7 +216,28 @@ When a file receives 0 spans (correct decision — pure data, config, constant e
 
 ---
 
-## Issue #10: Tracer library name defaults to 'unknown_service' instead of package name
+## Issue #10 (REVISED FROM #9A): Agent records expected-condition exceptions as span errors
+
+**Priority:** High
+**Category:** Agent code generation bug
+
+In 3 files (summarize.js, summary-manager.js, summary-detector.js), the agent changed silent `catch {}` blocks — used for expected control flow (file/directory doesn't exist) — to record exceptions and set ERROR status on spans. This pollutes telemetry with false errors.
+
+The pattern: `fs.access()` or `fs.readdir()` is called to check if a file/directory exists. The original code uses `catch { // Doesn't exist, proceed }` because ENOENT is the expected happy path. The agent changes this to `catch (err) { span.recordException(err); span.setStatus({ code: SpanStatusCode.ERROR }); }`, which marks the span as ERROR for normal control flow. OTel's `setStatus` is a one-way latch — once set to ERROR, it cannot revert to OK — so the span is permanently marked ERROR even when the function succeeds.
+
+**Evidence from run-4:**
+- summarize.js: `access()` check for existing summary — ENOENT = "generate new summary" (expected)
+- summary-manager.js: `access()` in all 3 `generateAndSave*` functions — same pattern (×3)
+- summary-detector.js: `readdir()` in getDaysWithEntries (×2) and getDaysWithDailySummaries (×1) — ENOENT = "directory doesn't exist yet" (expected)
+
+**Acceptance criteria:**
+1. The agent must distinguish between error-handling catch blocks (where recordException is appropriate) and expected-condition catch blocks (where the catch IS the normal path)
+2. For expected-condition catches (file-not-found, directory-not-found), the agent should NOT add recordException or setStatus(ERROR)
+3. If the agent is unsure whether a catch block handles errors or expected conditions, it should err on the side of NOT recording — false positive errors are worse than missing error recording
+
+---
+
+## Issue #11: Tracer library name defaults to 'unknown_service' instead of package name (WAS #10)
 
 **Priority:** High
 **Category:** Agent code generation bug
@@ -235,7 +256,7 @@ All 17 files instrumented in run-4 use `trace.getTracer('unknown_service')` inst
 
 ---
 
-## Issue #11: Span naming inconsistency across file boundaries
+## Issue #12: Span naming inconsistency across file boundaries (WAS #11)
 
 **Priority:** Medium
 **Category:** Agent behavior / schema evolution dependency
@@ -255,7 +276,7 @@ All 17 files instrumented in run-4 use `trace.getTracer('unknown_service')` inst
 
 ---
 
-## Issue #12: Unused OTel imports added to zero-span files
+## Issue #13: Unused OTel imports added to zero-span files (WAS #12)
 
 **Priority:** Low
 **Category:** Agent code generation bug
