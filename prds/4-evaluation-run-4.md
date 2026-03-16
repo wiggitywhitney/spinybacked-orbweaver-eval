@@ -202,7 +202,7 @@ Three-phase approach:
   6. Document in `evaluation/run-4/baseline-comparison.md`
   7. Append any cross-run process observations to `evaluation/run-4/lessons-for-prd5.md`
 
-- [ ] **Actionable fix output** — Produce fix instructions for remaining failures:
+- [x] **Actionable fix output** — Produce fix instructions for remaining failures:
   1. For each remaining quality rule failure: what's wrong, evidence, desired outcome
   2. For each remaining failed file: root cause, desired outcome, orbweaver issue cross-references
   3. Assessment of run-3 orbweaver issues: which were fixed, which remain, any new issues
