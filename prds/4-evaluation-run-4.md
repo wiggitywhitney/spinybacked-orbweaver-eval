@@ -188,17 +188,19 @@ Three-phase approach:
   1. Aggregate per-file agent findings from `evaluation/run-4/per-file-evaluation.json`
   2. Score each dimension (NDS, COV, RST, API, SCH, CDQ) with per-rule evidence
   3. Classify each failure: stale build repeat / new regression / genuine new finding / schema design issue
-  4. Emit as `evaluation/run-4/rubric-scores.json` (machine-readable) and render `evaluation/run-4/rubric-scores.md` from it (run-3-compatible format)
-  5. Append any new rubric gaps or scoring ambiguities to `evaluation/run-4/lessons-for-prd5.md`
-  6. Append any new orbweaver software bugs to `evaluation/run-4/orb-issues-to-file.md`
+  4. **Schema coverage split scoring** (decision log 2026-03-16): Score SCH-001 and SCH-002 separately for schema-covered files (~20, where registry defines expected attributes) vs schema-uncovered files (~9 summary subsystem files, where agent must invent attributes). For uncovered files, evaluate invention quality (namespace adherence, semantic validity) rather than registry match. Report both strict score (all files against registry) and split score (covered strict + uncovered inventions). See `lessons-for-prd5.md` "Schema Coverage Split" section for full methodology.
+  5. Emit as `evaluation/run-4/rubric-scores.json` (machine-readable) and render `evaluation/run-4/rubric-scores.md` from it (run-3-compatible format)
+  6. Append any new rubric gaps or scoring ambiguities to `evaluation/run-4/lessons-for-prd5.md`
+  7. Append any new orbweaver software bugs to `evaluation/run-4/orb-issues-to-file.md`
 
 - [ ] **Baseline comparison and synthesis** — Compare run-4 vs run-3 vs run-2:
   1. Dimension-level trend analysis (4-run where applicable)
   2. File outcome comparison (which files improved, regressed, or stayed the same)
   3. Failure classification: resolved / persistent / new
   4. Assessment of run-3 prediction: did fresh build push quality to ~85%?
-  5. Document in `evaluation/run-4/baseline-comparison.md`
-  6. Append any cross-run process observations to `evaluation/run-4/lessons-for-prd5.md`
+  5. **Schema coverage split context for cross-run SCH comparison**: Run-4 processed ~9 new summary subsystem files that didn't exist in run-3. SCH failures on those files are not regressions — they're new territory with no registry coverage. Compare SCH scores for files common to both runs separately from new files.
+  6. Document in `evaluation/run-4/baseline-comparison.md`
+  7. Append any cross-run process observations to `evaluation/run-4/lessons-for-prd5.md`
 
 - [ ] **Actionable fix output** — Produce fix instructions for remaining failures:
   1. For each remaining quality rule failure: what's wrong, evidence, desired outcome
@@ -211,7 +213,7 @@ Three-phase approach:
   8. Final review of `evaluation/run-4/lessons-for-prd5.md` — ensure all forward-looking items are captured
   9. Final review of `evaluation/run-4/orb-issues-to-file.md` — ensure all orbweaver bugs are captured with acceptance criteria
 
-- [ ] **Draft PRD #5 for next evaluation run** — Create a PRD for evaluation run-5 following the structure of this PRD. Primary inputs: `evaluation/run-4/lessons-for-prd5.md` (process improvements, rubric gaps, evaluation methodology changes) and `evaluation/run-4/orb-issues-to-file.md` (orbweaver software bugs to verify as fixed). Also incorporate run-4 scores as baselines, carry forward unresolved bugs/spec gaps/rubric gaps, and encode process lessons. The goal is a self-improving evaluation chain where each run's PRD encodes the lessons of previous runs.
+- [ ] **Draft PRD #5 for next evaluation run** — Create a PRD for evaluation run-5 following the structure of this PRD. Primary inputs: `evaluation/run-4/lessons-for-prd5.md` (process improvements, rubric gaps, evaluation methodology changes) and `evaluation/run-4/orb-issues-to-file.md` (orbweaver software bugs to verify as fixed). Also incorporate run-4 scores as baselines, carry forward unresolved bugs/spec gaps/rubric gaps, and encode process lessons. **Key methodology to encode**: schema coverage split scoring (do NOT pre-register summary attributes — keep the gap as a test of agent schema extension capability; see decision log 2026-03-16). The goal is a self-improving evaluation chain where each run's PRD encodes the lessons of previous runs.
 
 ---
 
