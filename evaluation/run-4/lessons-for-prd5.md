@@ -183,6 +183,14 @@ Previous runs (implicitly) assumed findings would be filed directly as GitHub is
 
 Both repos are on the same local machine (`/Users/whitney.lee/Documents/Repositories/`). The handoff document uses absolute local paths to evidence files. No cloning or GitHub API access needed. If this changes (different machines, CI environments), the handoff doc should use GitHub URLs instead.
 
+## Evaluation Branch Lifecycle
+
+Evaluation run branches (feature/prd-N-evaluation-run-*) are **never merged to main**. PRs are created so CodeRabbit can review the evaluation artifacts, but the PR is closed after review, not merged. The evaluation data lives only on the feature branch.
+
+**Implications for PRD drafting:** When a PRD milestone says "draft PRD #N+1 for the next evaluation run," that PRD file must be created on main via a separate branch or direct commit — it cannot be placed on the evaluation branch because evaluation branches never merge. Similarly, any artifact needed on main for future work (rubric updates, schema changes, etc.) must be committed to main independently of the evaluation branch.
+
+**Historical pattern:** All prior evaluation PRD branches in this repo follow this pattern — see closed PRs for PRDs #2, #3, #4.
+
 ## Carry-Forward Items
 
 Unresolved issues, open questions, and items deferred to run-5.

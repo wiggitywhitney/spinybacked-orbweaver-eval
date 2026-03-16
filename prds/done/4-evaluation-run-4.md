@@ -1,6 +1,6 @@
 # PRD #4: Evaluation Run-4 — SpinybackedOrbWeaver with Fresh Build
 
-**Status:** In Progress
+**Status:** Complete (2026-03-16)
 **Created:** 2026-03-13
 **GitHub Issue:** TBD (create after PRD #3 merges)
 **Depends on:** PRD #3 (run-3 complete, findings documented, 11 orbweaver issues identified)
@@ -213,7 +213,7 @@ Three-phase approach:
   8. Final review of `evaluation/run-4/lessons-for-prd5.md` — ensure all forward-looking items are captured
   9. Final review of `evaluation/run-4/orb-findings.md` — ensure all orbweaver bugs are captured with acceptance criteria
 
-- [ ] **Draft PRD #5 for next evaluation run** — Create a PRD for evaluation run-5 following the structure of this PRD. Primary inputs: `evaluation/run-4/lessons-for-prd5.md` (process improvements, rubric gaps, evaluation methodology changes), `evaluation/run-4/orb-findings.md` (orbweaver software bugs to verify as fixed), and `evaluation/run-4/handoff-to-orbweaver.md` (the recommendation document sent to orbweaver for triage). Also incorporate run-4 scores as baselines, carry forward unresolved bugs/spec gaps/rubric gaps, and encode process lessons. **Key methodology to encode**: (1) schema coverage split scoring (do NOT pre-register summary attributes — keep the gap as a test of agent schema extension capability; see decision log 2026-03-16); (2) recommendation-document handoff process — evaluation produces a recommendation doc with evidence links, the target repo AI verifies and triages into PRDs/issues (see decision log 2026-03-16). The goal is a self-improving evaluation chain where each run's PRD encodes the lessons of previous runs.
+- [x] **Draft PRD #5 for next evaluation run** — Create a PRD for evaluation run-5 following the structure of this PRD. Primary inputs: `evaluation/run-4/lessons-for-prd5.md` (process improvements, rubric gaps, evaluation methodology changes), `evaluation/run-4/orb-findings.md` (orbweaver software bugs to verify as fixed), and `evaluation/run-4/handoff-to-orbweaver.md` (the recommendation document sent to orbweaver for triage). Also incorporate run-4 scores as baselines, carry forward unresolved bugs/spec gaps/rubric gaps, and encode process lessons. **Key methodology to encode**: (1) schema coverage split scoring (do NOT pre-register summary attributes — keep the gap as a test of agent schema extension capability; see decision log 2026-03-16); (2) recommendation-document handoff process — evaluation produces a recommendation doc with evidence links, the target repo AI verifies and triages into PRDs/issues (see decision log 2026-03-16). The goal is a self-improving evaluation chain where each run's PRD encodes the lessons of previous runs.
 
 ---
 
