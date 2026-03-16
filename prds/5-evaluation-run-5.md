@@ -58,7 +58,7 @@ Verify that orbweaver's critical infrastructure fixes (schema evolution, validat
 
 | Outcome | Count | Files |
 |---------|-------|-------|
-| Instrumented on branch | 16 | claude-collector, git-collector, journal-graph, index, context-integrator, message-filter, token-filter, journal-manager, mcp/server, context-capture-tool, reflection-tool, journal-paths, commit-analyzer, summarize, auto-summarize, summary-manager, summary-detector |
+| Instrumented on branch | 16 | claude-collector, git-collector, journal-graph, index, context-integrator, message-filter, token-filter, mcp/server, context-capture-tool, reflection-tool, journal-paths, commit-analyzer, summarize, auto-summarize, summary-manager, summary-detector |
 | Correctly skipped (0 spans) | 10 | config, 5 prompt files, guidelines/index, monthly-summary-prompt, 2 more prompt files |
 | Partial (not committed) | 3 | summary-graph (tracer import), sensitive-filter (tracer import + regex), journal-manager (NDS-003 persistent) |
 
@@ -334,7 +334,7 @@ These are the run-4 projections. Run-5 should validate them and update the proje
 - NDS-005: FAIL → PASS
 - CDQ-002: FAIL → PASS
 - COV-001: FAIL → PASS
-- Expected: **85% adjusted** (22/26), ~69% strict (18/26)
+- Expected: **85% canonical** (22/26). Note: run-4 projected this as "85% adjusted" — run-5's canonical methodology (per-file + schema split) subsumes the run-4 adjusted scoring.
 
 ### Stretch (all genuine findings — additionally #10, #12)
 
