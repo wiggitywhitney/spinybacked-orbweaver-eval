@@ -65,6 +65,16 @@ Observations from the full 32-rule per-file evaluation that affect future evalua
 - **CDQ-006 violations (2 files) are minor.** `toISOString()` is a cheap operation — the `isRecording()` guard is technically correct per rubric but adds no meaningful performance benefit. Consider whether CDQ-006 should have a "cheap computation" exemption.
 - **monthly-summary-prompt.js got unused imports despite 0 spans.** The agent added `import { trace, SpanStatusCode } from '@opentelemetry/api'` and `const tracer = trace.getTracer('unknown_service')` to a file that received zero spans. This is a minor agent bug — unused imports should be cleaned up when no spans are added.
 
+## PR Artifact Evaluation Observations
+
+Observations from evaluating the PR summary as a reviewer-facing deliverable.
+
+- **PR summary document is high-quality content, but delivery failed.** The 106KB summary has detailed per-file tables, agent reasoning notes, advisory findings with line numbers, and span category breakdowns. As a review document, it would enable informed merge decisions. But it was never posted as an actual PR because test failures blocked creation. Run-5 should consider orbweaver issue #7 (create draft PR even when tests fail) to bridge this gap.
+- **Advisory findings lack severity.** 34 findings presented equally (COV-004 optional enhancements alongside NDS-005 potential regressions). A severity column would help reviewers prioritize. Consider adding severity to the advisory finding output format.
+- **Per-file table conflates run state with branch state.** The PR summary reports "partial (12/12 functions)" for summary-graph.js, but those changes were never committed to the branch. Run-5's PR evaluation should verify per-file claims against the actual branch content, not the summary's self-report. Consider adding a `committed: yes/no` column.
+- **Token usage section needs interpretation guidance.** The $5.84 vs $67.86 ceiling looks like efficiency but indicates broken schema evolution. A healthy cost ratio range or a "cost anomaly" flag would help reviewers and operators spot issues without OTel/orbweaver expertise.
+- **Warnings section is O(n²) and unusable.** Each file's warning repeats the full cumulative extension list. By file 29, this is 40+ IDs per line × 16 lines. A deduplicated summary or per-file delta format would make this section useful.
+
 ## Carry-Forward Items
 
 Unresolved issues, open questions, and items deferred to run-5.

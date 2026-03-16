@@ -176,7 +176,7 @@ Three-phase approach:
   8. Append any rubric scoring ambiguities or methodology observations to `evaluation/run-4/lessons-for-prd5.md`
   9. Append any new orbweaver software bugs discovered during evaluation to `evaluation/run-4/orb-issues-to-file.md`
 
-- [ ] **PR artifact evaluation** — Evaluate the PR as a first-class deliverable:
+- [x] **PR artifact evaluation** — Evaluate the PR as a first-class deliverable:
   1. If PR exists: evaluate description quality, per-file table, span counts, agent decision notes
   2. Assess: Does the PR help a reviewer understand what the agent did and make informed merge decisions?
   3. If PR was lost: document why and assess whether orbweaver issue #12 (credential validation) and #13 (local summary) were fixed
