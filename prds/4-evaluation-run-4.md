@@ -193,7 +193,7 @@ Three-phase approach:
   6. Append any new rubric gaps or scoring ambiguities to `evaluation/run-4/lessons-for-prd5.md`
   7. Append any new orbweaver software bugs to `evaluation/run-4/orb-findings.md`
 
-- [ ] **Baseline comparison and synthesis** — Compare run-4 vs run-3 vs run-2:
+- [x] **Baseline comparison and synthesis** — Compare run-4 vs run-3 vs run-2:
   1. Dimension-level trend analysis (4-run where applicable)
   2. File outcome comparison (which files improved, regressed, or stayed the same)
   3. Failure classification: resolved / persistent / new

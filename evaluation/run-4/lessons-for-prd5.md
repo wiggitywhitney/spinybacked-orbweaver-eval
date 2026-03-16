@@ -149,6 +149,16 @@ Observations from the rubric scoring aggregation milestone.
 - **Rule-level pass/fail penalizes more files.** Run-4 has 16 instrumented files vs run-3's 11. With rule-level pass/fail scoring (any file fails = rule fails), more files means more surface area for failures. This is mathematically correct but can be misleading in cross-run comparisons. Consider adding per-file instance counts alongside rule-level scores to provide nuance.
 - **85% target unreachable without fixing 3 specific bugs.** Under the most favorable scoring variant (methodology-adjusted + split = 73%), fixing CDQ-002 (unknown_service), NDS-005 (expected-condition catches), and COV-001 (index.js root span) — all tracked as orbweaver findings — would reach 22/26 = 85%.
 
+## Cross-Run Comparison Observations
+
+Observations from the baseline comparison milestone that affect run-5 methodology.
+
+- **Run-3 prediction ("fresh build → ~85%") was wrong because it assumed the same file set at the same quality.** Run-4 processed 8 more files, each adding surface area for new failure classes. Run-5 predictions must account for expanded scope — more files means more opportunities for new failure types, not just "fix N rules → +N% score."
+- **Score comparison across methodology changes requires multiple variants.** Run-4 provides 4 score variants (strict, methodology-adjusted, schema split, split+adjusted). Run-5 should establish the per-file evaluation as the canonical methodology and provide adjusted scores only for backward compatibility with runs 2-3.
+- **Persistent failures track better at the file level than the rule level.** SCH-001 has "failed" in every run, but the root cause changed each time (registry mismatch → stale build → schema evolution broken). File-level tracking (journal-manager.js blocked by NDS-003 in all 3 runs) tells a clearer story. Run-5 should track both rule persistence and file persistence.
+- **Cost anomaly as a diagnostic.** Run-4's cost at 8.6% of ceiling was a symptom of broken schema evolution. Run-5 should add a "cost sanity check": if actual < 15% of ceiling, investigate whether the prompt is actually changing between files.
+- **PR delivery has never succeeded for this codebase.** Run-3: auth failure. Run-4: test failure. Run-5 should verify PR creation capability end-to-end in pre-run (push a test branch, delete it).
+
 ## Carry-Forward Items
 
 Unresolved issues, open questions, and items deferred to run-5.
