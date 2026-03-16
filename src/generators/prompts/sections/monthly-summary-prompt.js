@@ -1,6 +1,10 @@
 // ABOUTME: Prompt template for monthly summary generation (consolidates a month's weekly summaries)
 // ABOUTME: Produces four sections: Month in Review, Accomplishments, Growth, Looking Ahead
 
+import { trace, SpanStatusCode } from '@opentelemetry/api';
+
+const tracer = trace.getTracer('unknown_service');
+
 /**
  * Generates the monthly summary prompt for consolidating a month's weekly summaries.
  *
