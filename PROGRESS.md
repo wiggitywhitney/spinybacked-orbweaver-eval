@@ -25,3 +25,6 @@ Entry format: `- (YYYY-MM-DD) Description of feature-level change (PRD #X, miles
 
 ### Changed
 - (2026-03-15) Renamed all "orb" references to "orbweaver" in PRD #4 and evaluation docs to match CLI rename (spinybacked-orbweaver #123)
+- (2026-03-15) Added PII acceptance annotation to `commit_story.commit.author` in Weaver registry — git author names are public, accepted with documentation (PRD #4, schema and rubric updates)
+- (2026-03-15) Added `commit_story.commit.parent_count` and `commit_story.git.subcommand` to Weaver registry — pre-registering ad-hoc attributes from run-3 SCH-002 findings (PRD #4, schema and rubric updates)
+- (2026-03-15) Updated rubric-codebase-mapping COV-006 with OpenLLMetry research — JS package covers LangChain chat models but NOT LangGraph orchestration; manual spans justified for graph nodes (PRD #4, schema and rubric updates)

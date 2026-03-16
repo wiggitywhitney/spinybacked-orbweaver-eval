@@ -129,13 +129,13 @@ Three-phase approach:
   7. Verify codebase is clean: `git status` on main, no leftover orbweaver branches or artifacts
   8. Record which fixes are verified vs still open — this determines expected score ceiling
 
-- [ ] **Schema and rubric updates** — Address rubric gaps and schema issues identified in run-3 before evaluation:
-  1. **CDQ-007 PII decision**: Decide on `commit_story.commit.author` — hash/anonymize in schema, add PII annotation, or accept risk with documentation. Update Weaver registry accordingly
-  2. **SCH-002 ad-hoc attributes**: Decide whether to add `commit_story.git.subcommand` and `commit_story.commit.parent_count` to the Weaver registry or remove them from the agent's output
-  3. **API-004 SDK setup carve-out**: Add explicit carve-out to the rubric: "API-001 and API-004 evaluate application source files only. The SDK setup file (configured as `sdkInitFile` in orbweaver.yaml) is exempt."
-  4. **Coverage scoring guidance**: Add to rubric: "Coverage rules (COV-001 through COV-006) are evaluated against instrumented files only. Files that failed instrumentation are assessed in the failure analysis."
-  5. **NDS-006 module system consistency**: Propose new gate check — instrumentation code must use the same module system as the target project
-  6. **COV-006 OpenLLMetry coverage**: Research `@traceloop/instrumentation-langchain` exact coverage of LangChain/LangGraph operations. Confirm which operations get auto-instrumented vs need manual spans. Update rubric-codebase-mapping with findings
+- [x] **Schema and rubric updates** — Address rubric gaps and schema issues identified in run-3 before evaluation:
+  1. **CDQ-007 PII decision**: Accepted `commit_story.commit.author` with PII annotation — git author names are public metadata and author attribution is core to journal purpose. Added `note` to registry attribute.
+  2. **SCH-002 ad-hoc attributes**: Added `commit_story.git.subcommand` and `commit_story.commit.parent_count` to Weaver registry. Filed commit-story-v2#49 for upstream sync.
+  3. **API-004 SDK setup carve-out**: Already in rubric (orbweaver #105, closed). Fixed `orb.yaml` → `orbweaver.yaml` reference.
+  4. **Coverage scoring guidance**: Already in rubric (orbweaver #105, closed).
+  5. **NDS-006 module system consistency**: Already in rubric (orbweaver #105, closed). Rule count now 32.
+  6. **COV-006 OpenLLMetry coverage**: JS package partially covers LangChain (chat model calls via callback injection) but has significant LangGraph gaps — node execution, state transitions, graph compilation NOT instrumented. Manual spans justified for graph orchestration. Updated rubric-codebase-mapping.
 
 - [ ] **Evaluation run-4** — Execute `orbweaver instrument` with all process improvements:
   1. Clean codebase state: start from main branch with evaluation config (orbweaver.yaml, instrumentation.js, semconv/)
@@ -316,3 +316,6 @@ Encoded in the milestones but listed explicitly for reference:
 | 2026-03-13 | Create `lessons-for-prd5.md` at start of evaluation and append throughout | Run-3 created `lessons-for-prd4.md` mid-evaluation (decision log entry 2026-03-13). PRD #4 formalizes this as a milestone that runs in parallel with all evaluation milestones, ensuring lessons are captured while context is fresh |
 | 2026-03-13 | Use canonical JSON artifacts as source of truth for all evaluation docs | Run-3 had drift risk between per-file-evaluation.md, rubric-scores.md, and actionable-fix-output.md since all were authored independently. PRD #4 emits per-file-evaluation.json and rubric-scores.json first, then renders markdown from them. CodeRabbit review of PR #6 flagged this pattern |
 | 2026-03-15 | Rename all "orb" references to "orbweaver" in PRD and evaluation docs | CLI was renamed from `orb` to `orbweaver` in spinybacked-orbweaver #123. Config file already renamed to `orbweaver.yaml`. PRD and evaluation docs updated for consistency. Historical filenames (`orb-output.log`, `orb-issues-to-file.md`) and branch names (`orb/instrument-*`) preserved as-is |
+| 2026-03-15 | Accept `commit_story.commit.author` as PII with annotation | Git author names are public metadata on every commit; author attribution is core to journal purpose. Added `note` to registry attribute rather than hashing or removing. CDQ-007 evaluators can see PII was consciously accepted |
+| 2026-03-15 | Add `commit_story.git.subcommand` and `commit_story.commit.parent_count` to Weaver registry | Both were ad-hoc attributes the agent invented in run-3 (SCH-002). They're legitimate domain attributes. Orbweaver #102 and #147 fixed agent-side handling; registry pre-registration removes a known failure point. Filed commit-story-v2#49 for upstream sync |
+| 2026-03-15 | Manual spans justified for LangGraph orchestration despite OpenLLMetry availability | `@traceloop/instrumentation-langchain` JS package covers LangChain chat model calls but NOT LangGraph node execution, state transitions, or graph compilation. Python package is more mature. Manual spans on graph nodes are the correct pattern for commit-story-v2 |

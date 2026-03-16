@@ -30,6 +30,10 @@ groups:
         type: string
         stability: development
         brief: The commit author name
+        note: >
+          Contains personal data (person name). Accepted for this project because
+          git author names are public metadata on every commit and author attribution
+          is core to the journal's purpose. Evaluate CDQ-007 as pass for this attribute.
         examples:
           - "Whitney Lee"
 
@@ -40,6 +44,17 @@ groups:
         examples:
           - "2026-02-03T10:30:00Z"
 
+      - id: commit_story.commit.parent_count
+        type: int
+        stability: development
+        brief: Number of parent commits (1 for regular commits, 2+ for merges)
+        note: >
+          Useful for merge commit detection. Added to registry after run-3
+          evaluation found it as an ad-hoc attribute (SCH-002).
+        examples:
+          - 1
+          - 2
+
       - id: commit_story.commit.files_changed
         type: int
         stability: development
@@ -47,6 +62,29 @@ groups:
         examples:
           - 3
           - 12
+
+  # ==========================================================================
+  # GIT OPERATION ATTRIBUTES
+  # Attributes for git CLI operations performed during data collection
+  # ==========================================================================
+  - id: registry.commit_story.git
+    type: attribute_group
+    display_name: Git Operation Attributes
+    brief: Attributes for git CLI operations performed by commit-story
+    attributes:
+      - id: commit_story.git.subcommand
+        type: string
+        stability: development
+        brief: The git subcommand being executed
+        note: >
+          Records which git operation is being traced (e.g., show, diff-tree,
+          rev-list). Added to registry after run-3 evaluation found it as an
+          ad-hoc attribute (SCH-002).
+        examples:
+          - "show"
+          - "diff-tree"
+          - "rev-list"
+          - "log"
 
   # ==========================================================================
   # CONTEXT COLLECTION ATTRIBUTES
