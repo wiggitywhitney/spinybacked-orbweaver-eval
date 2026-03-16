@@ -213,3 +213,60 @@ When a file receives 0 spans (correct decision — pure data, config, constant e
 1. When a file receives 0 spans and no changes were made, skip the commit step entirely
 2. Log "skipped commit (no changes)" or similar instead of a commit failure error
 3. The run tally should distinguish "0 spans (correct skip)" from actual failures
+
+---
+
+## Issue #10: Tracer library name defaults to 'unknown_service' instead of package name
+
+**Priority:** High
+**Category:** Agent code generation bug
+
+All 17 files instrumented in run-4 use `trace.getTracer('unknown_service')` instead of `trace.getTracer('commit-story')`. The tracer library name should match the target project's package name from `package.json`. This means all spans are attributed to "unknown_service" in trace analysis tools, fragmenting trace views and making service identification impossible.
+
+**Evidence from run-4:**
+- 17 instances of `trace.getTracer('unknown_service')` across all instrumented files
+- The package name is `commit-story` (from `package.json#name`)
+- CDQ-002 fails for all 16 files on the branch
+
+**Acceptance criteria:**
+1. The agent reads the target project's `package.json#name` and uses it as the tracer library name
+2. `trace.getTracer('commit-story')` (or the actual package name) appears in all instrumented files
+3. If package name is not available, the agent should use a meaningful fallback (e.g., the directory name), never 'unknown_service'
+
+---
+
+## Issue #11: Span naming inconsistency across file boundaries
+
+**Priority:** Medium
+**Category:** Agent behavior / schema evolution dependency
+
+8 of 37 span names in run-4 deviate from the `commit_story.*` convention used by the majority (29/37). The deviating names use `context.*`, `mcp.*`, and `summary.*` prefixes. This inconsistency correlates with file processing order — earlier files use consistent naming, later files deviate.
+
+**Root cause:** Without schema evolution, each file's agent invocation has no visibility into what span names previous files used. The agent reinvents naming conventions per-file. Schema evolution (when fixed) should solve this by making earlier span names visible to later files.
+
+**Evidence from run-4:**
+- Consistent: `commit_story.context.collect` (claude-collector), `commit_story.git.*` (git-collector, commit-analyzer), `commit_story.ai.*` (journal-graph), `commit_story.filter.*` (filters), `commit_story.journal.*` (journal-paths, summary-detector, auto-summarize)
+- Inconsistent: `context.gather_for_commit` (context-integrator), `mcp.server.start` (server), `mcp.tool.*` (MCP tools), `summary.*.generate` (summary-manager), `context.capture.save` (context-capture-tool)
+
+**Acceptance criteria:**
+1. After schema evolution is fixed: all span names in a run should use a consistent prefix convention
+2. Consider a span naming template in the agent prompt that enforces `{namespace}.{domain}.{operation}` pattern
+3. Alternative: the prompt should explicitly reference earlier files' span naming convention when processing later files
+
+---
+
+## Issue #12: Unused OTel imports added to zero-span files
+
+**Priority:** Low
+**Category:** Agent code generation bug
+
+In run-4, `monthly-summary-prompt.js` received `import { trace, SpanStatusCode } from '@opentelemetry/api'` and `const tracer = trace.getTracer('unknown_service')` despite the agent determining 0 spans were needed. The imports are unused dead code.
+
+**Evidence from run-4:**
+- git diff shows 4 lines added to monthly-summary-prompt.js: import statement, blank line, tracer initialization, blank line
+- 0 spans added — the imports are entirely unused
+- The other 9 zero-span files did NOT receive these imports (per-file commit failed with "nothing staged")
+
+**Acceptance criteria:**
+1. When the agent determines a file needs 0 spans, do not add any imports or tracer initialization
+2. If imports are added speculatively, clean them up before the per-file commit when no spans result

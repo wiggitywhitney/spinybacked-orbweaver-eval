@@ -43,11 +43,27 @@ Better ways to score, new agent patterns, tooling improvements.
 
 Wrong classifications, missing auto-instrumentation coverage, or mapping errors.
 
+- **Rubric-codebase mapping says commit-story-v2 is a CLI tool (application)** and `@opentelemetry/api` should be in `dependencies`. Per user feedback, commit-story-v2 is actually distributed as a library — `peerDependencies` is correct. The mapping document should be updated.
+- **COV-006 evaluation guidance works well.** The decision tree for auto-instrumentation vs manual spans correctly handled the LangGraph gap case. No corrections needed.
+- **RST-004 precedence note is valuable.** The "unexported I/O function" exemption guidance (span belongs on calling handler, not private helper) helped evaluate MCP tool files correctly.
+
 ## Schema Decisions
 
 Registry changes, attribute decisions, or semantic convention updates that affect future runs.
 
 - **Schema evolution bug means run-4 extensions are unreliable.** Since no file saw extensions from previous files, duplicate/conflicting span names and attributes may exist across files. Run-5 (after the bug is fixed) will produce a different extension set because later files will see what earlier files defined. Don't treat run-4's extension inventory as authoritative.
+
+## Per-File Evaluation Observations
+
+Observations from the full 32-rule per-file evaluation that affect future evaluation methodology.
+
+- **"Partial" status is misleading when changes aren't committed.** summary-graph.js (6 spans), sensitive-filter.js (2 spans), and journal-manager.js (0 spans) are all reported as "partial" in the PR summary, but NONE of their changes exist on the orbweaver branch. The evaluation should compare against the branch state (the deliverable), not the PR summary's self-reported status. PRD #5 should evaluate branch content, not agent claims.
+- **CDQ-002 failure is systemic, not per-file.** All 16 files use `trace.getTracer('unknown_service')`. This should be treated as a single agent configuration bug, not 16 independent failures. The rubric scoring should reflect this — one root cause, not 16 rule violations.
+- **SCH-001 naming inconsistency correlates with file processing order.** Files processed earlier (collectors, generators) use `commit_story.*` prefix consistently. Files processed later (MCP tools, summary-manager) deviate to `mcp.*`, `summary.*`, `context.*`. This suggests the agent loses naming convention context over the run. Schema evolution would fix this by making earlier span names visible.
+- **11 ad-hoc attributes (SCH-002) are all semantically valid.** They follow `commit_story.*` namespace and represent legitimate domain concepts (unsummarized_count, generated_count, etc.). The failure is in the registration machinery (broken schema evolution), not the agent's attribute choices. Run-5 scoring should distinguish "agent invented valid attributes that weren't registered" from "agent used wrong attribute names."
+- **NDS-005 advisory finding needs manual verification.** The orbweaver agent's own advisory flagged git-collector.js for a potential NDS-005 regression (try/catch at line 21). Future evaluations should verify this finding against the actual diff.
+- **CDQ-006 violations (2 files) are minor.** `toISOString()` is a cheap operation — the `isRecording()` guard is technically correct per rubric but adds no meaningful performance benefit. Consider whether CDQ-006 should have a "cheap computation" exemption.
+- **monthly-summary-prompt.js got unused imports despite 0 spans.** The agent added `import { trace, SpanStatusCode } from '@opentelemetry/api'` and `const tracer = trace.getTracer('unknown_service')` to a file that received zero spans. This is a minor agent bug — unused imports should be cleaned up when no spans are added.
 
 ## Carry-Forward Items
 

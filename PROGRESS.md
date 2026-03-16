@@ -28,6 +28,7 @@ Entry format: `- (YYYY-MM-DD) Description of feature-level change (PRD #X, miles
 - (2026-03-16) Identified 9 orbweaver issues from run-4: schema evolution, test/retry gaps, missing tracer import, validation gaps, output discoverability, draft PR proposal, LOC-based test cadence (PRD #4, evaluation run-4)
 - (2026-03-16) Created lessons-for-prd5.md with rubric gaps, process improvements, methodology observations, and carry-forward items (PRD #4, collect lessons)
 - (2026-03-16) Completed failure deep-dives: 3 partial files analyzed (summary-graph.js, sensitive-filter.js, journal-manager.js), 2 rescued files documented, 4 run-level failures analyzed (push auth, schema evolution, test suite, commit noise). Added orb issue #9 (PRD #4, failure deep-dives)
+- (2026-03-16) Completed per-file evaluation: full 32-rule rubric on 29 files using multi-agent architecture. Created canonical per-file-evaluation.json artifact. Key findings: CDQ-002 systemic failure (unknown_service tracer name in all 16 files), 8/37 span names deviate from commit_story.* convention, 11 ad-hoc attributes not in registry, NDS-002 gate fail (32 test failures from working-directory-only changes). Discovered partial files have NO changes on branch. Added 3 new orb issues (#10-#12) (PRD #4, per-file evaluation)
 
 ### Changed
 - (2026-03-15) Renamed all "orb" references to "orbweaver" in PRD #4 and evaluation docs to match CLI rename (spinybacked-orbweaver #123)

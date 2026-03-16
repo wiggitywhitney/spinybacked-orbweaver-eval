@@ -165,7 +165,7 @@ Three-phase approach:
   6. Document findings in `evaluation/run-4/failure-deep-dives.md`
   7. Append any new rubric gaps or process observations to `evaluation/run-4/lessons-for-prd5.md`
 
-- [ ] **Per-file evaluation** — Full 31-rule rubric applied to all files using structured evaluation:
+- [x] **Per-file evaluation** — Full 31-rule rubric applied to all files using structured evaluation:
   1. **Gate checks + per-run rules (single agent)**: NDS-001, NDS-002, NDS-003, API-001, API-002, API-003, API-004, CDQ-008 — needs cross-file context
   2. **Per-file quality rules (per-file agents)**: Each agent gets the rubric + one file's diff + Weaver schema. Rules: NDS-004, NDS-005, COV-001 through COV-006, RST-001 through RST-005, SCH-001 through SCH-004, CDQ-001 through CDQ-007
   3. **Zero-span files**: Verify correct skip decisions for files with 0 spans
