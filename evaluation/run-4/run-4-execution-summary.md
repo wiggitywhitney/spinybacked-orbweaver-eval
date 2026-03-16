@@ -67,7 +67,7 @@
 - **Success:** 26 (including 10 correct 0-span skips)
 - **Partial:** 3 (summary-graph.js, sensitive-filter.js, journal-manager.js)
 - **Failed:** 0
-- **Total spans added:** ~48
+- **Total spans added:** 38 (on branch; 48 included working-directory-only changes from partial files never committed)
 
 ## Persistent File Rescue (vs run-2/run-3)
 
