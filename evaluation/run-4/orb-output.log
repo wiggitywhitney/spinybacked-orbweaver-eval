@@ -1,0 +1,527 @@
+=== Run-4 Start ===
+Start timestamp: 2026-03-15 21:24:28 CDT
+========================
+Loading config from /Users/whitney.lee/Documents/Repositories/commit-story-v2-eval/orbweaver.yaml
+Config loaded from /Users/whitney.lee/Documents/Repositories/commit-story-v2-eval/orbweaver.yaml
+Processing file 1 of 29: /Users/whitney.lee/Documents/Repositories/commit-story-v2-eval/src/collectors/claude-collector.js
+  /Users/whitney.lee/Documents/Repositories/commit-story-v2-eval/src/collectors/claude-collector.js: success (1 spans)
+Processing file 2 of 29: /Users/whitney.lee/Documents/Repositories/commit-story-v2-eval/src/collectors/git-collector.js
+  /Users/whitney.lee/Documents/Repositories/commit-story-v2-eval/src/collectors/git-collector.js: success (3 spans)
+Processing file 3 of 29: /Users/whitney.lee/Documents/Repositories/commit-story-v2-eval/src/commands/summarize.js
+  /Users/whitney.lee/Documents/Repositories/commit-story-v2-eval/src/commands/summarize.js: success (3 spans)
+Processing file 4 of 29: /Users/whitney.lee/Documents/Repositories/commit-story-v2-eval/src/generators/journal-graph.js
+  /Users/whitney.lee/Documents/Repositories/commit-story-v2-eval/src/generators/journal-graph.js: success (4 spans)
+Processing file 5 of 29: /Users/whitney.lee/Documents/Repositories/commit-story-v2-eval/src/generators/prompts/guidelines/accessibility.js
+  /Users/whitney.lee/Documents/Repositories/commit-story-v2-eval/src/generators/prompts/guidelines/accessibility.js: success (0 spans)
+Per-file commit failed for /Users/whitney.lee/Documents/Repositories/commit-story-v2-eval/src/generators/prompts/guidelines/accessibility.js: Failed to commit src/generators/prompts/guidelines/accessibility.js: Nothing staged to commit
+Processing file 6 of 29: /Users/whitney.lee/Documents/Repositories/commit-story-v2-eval/src/generators/prompts/guidelines/anti-hallucination.js
+  /Users/whitney.lee/Documents/Repositories/commit-story-v2-eval/src/generators/prompts/guidelines/anti-hallucination.js: success (0 spans)
+Processing file 7 of 29: /Users/whitney.lee/Documents/Repositories/commit-story-v2-eval/src/generators/prompts/guidelines/index.js
+Per-file commit failed for /Users/whitney.lee/Documents/Repositories/commit-story-v2-eval/src/generators/prompts/guidelines/anti-hallucination.js: Failed to commit src/generators/prompts/guidelines/anti-hallucination.js: Nothing staged to commit
+  /Users/whitney.lee/Documents/Repositories/commit-story-v2-eval/src/generators/prompts/guidelines/index.js: success (0 spans)
+Processing file 8 of 29: /Users/whitney.lee/Documents/Repositories/commit-story-v2-eval/src/generators/prompts/sections/daily-summary-prompt.js
+Per-file commit failed for /Users/whitney.lee/Documents/Repositories/commit-story-v2-eval/src/generators/prompts/guidelines/index.js: Failed to commit src/generators/prompts/guidelines/index.js: Nothing staged to commit
+  /Users/whitney.lee/Documents/Repositories/commit-story-v2-eval/src/generators/prompts/sections/daily-summary-prompt.js: success (0 spans)
+Processing file 9 of 29: /Users/whitney.lee/Documents/Repositories/commit-story-v2-eval/src/generators/prompts/sections/dialogue-prompt.js
+Per-file commit failed for /Users/whitney.lee/Documents/Repositories/commit-story-v2-eval/src/generators/prompts/sections/daily-summary-prompt.js: Failed to commit src/generators/prompts/sections/daily-summary-prompt.js: Nothing staged to commit
+  /Users/whitney.lee/Documents/Repositories/commit-story-v2-eval/src/generators/prompts/sections/dialogue-prompt.js: success (0 spans)
+Processing file 10 of 29: /Users/whitney.lee/Documents/Repositories/commit-story-v2-eval/src/generators/prompts/sections/monthly-summary-prompt.js
+Per-file commit failed for /Users/whitney.lee/Documents/Repositories/commit-story-v2-eval/src/generators/prompts/sections/dialogue-prompt.js: Failed to commit src/generators/prompts/sections/dialogue-prompt.js: Nothing staged to commit
+  /Users/whitney.lee/Documents/Repositories/commit-story-v2-eval/src/generators/prompts/sections/monthly-summary-prompt.js: success (0 spans)
+Processing file 11 of 29: /Users/whitney.lee/Documents/Repositories/commit-story-v2-eval/src/generators/prompts/sections/summary-prompt.js
+  /Users/whitney.lee/Documents/Repositories/commit-story-v2-eval/src/generators/prompts/sections/summary-prompt.js: success (0 spans)
+Processing file 12 of 29: /Users/whitney.lee/Documents/Repositories/commit-story-v2-eval/src/generators/prompts/sections/technical-decisions-prompt.js
+Per-file commit failed for /Users/whitney.lee/Documents/Repositories/commit-story-v2-eval/src/generators/prompts/sections/summary-prompt.js: Failed to commit src/generators/prompts/sections/summary-prompt.js: Nothing staged to commit
+  /Users/whitney.lee/Documents/Repositories/commit-story-v2-eval/src/generators/prompts/sections/technical-decisions-prompt.js: success (0 spans)
+Processing file 13 of 29: /Users/whitney.lee/Documents/Repositories/commit-story-v2-eval/src/generators/prompts/sections/weekly-summary-prompt.js
+Per-file commit failed for /Users/whitney.lee/Documents/Repositories/commit-story-v2-eval/src/generators/prompts/sections/technical-decisions-prompt.js: Failed to commit src/generators/prompts/sections/technical-decisions-prompt.js: Nothing staged to commit
+  /Users/whitney.lee/Documents/Repositories/commit-story-v2-eval/src/generators/prompts/sections/weekly-summary-prompt.js: success (0 spans)
+Processing file 14 of 29: /Users/whitney.lee/Documents/Repositories/commit-story-v2-eval/src/generators/summary-graph.js
+Per-file commit failed for /Users/whitney.lee/Documents/Repositories/commit-story-v2-eval/src/generators/prompts/sections/weekly-summary-prompt.js: Failed to commit src/generators/prompts/sections/weekly-summary-prompt.js: Nothing staged to commit
+  /Users/whitney.lee/Documents/Repositories/commit-story-v2-eval/src/generators/summary-graph.js: partial
+Processing file 15 of 29: /Users/whitney.lee/Documents/Repositories/commit-story-v2-eval/src/index.js
+  /Users/whitney.lee/Documents/Repositories/commit-story-v2-eval/src/index.js: success (2 spans)
+Processing file 16 of 29: /Users/whitney.lee/Documents/Repositories/commit-story-v2-eval/src/integrators/context-integrator.js
+  /Users/whitney.lee/Documents/Repositories/commit-story-v2-eval/src/integrators/context-integrator.js: success (1 spans)
+Processing file 17 of 29: /Users/whitney.lee/Documents/Repositories/commit-story-v2-eval/src/integrators/filters/message-filter.js
+  /Users/whitney.lee/Documents/Repositories/commit-story-v2-eval/src/integrators/filters/message-filter.js: success (1 spans)
+Processing file 18 of 29: /Users/whitney.lee/Documents/Repositories/commit-story-v2-eval/src/integrators/filters/sensitive-filter.js
+  /Users/whitney.lee/Documents/Repositories/commit-story-v2-eval/src/integrators/filters/sensitive-filter.js: partial
+Processing file 19 of 29: /Users/whitney.lee/Documents/Repositories/commit-story-v2-eval/src/integrators/filters/token-filter.js
+  /Users/whitney.lee/Documents/Repositories/commit-story-v2-eval/src/integrators/filters/token-filter.js: success (3 spans)
+Processing file 20 of 29: /Users/whitney.lee/Documents/Repositories/commit-story-v2-eval/src/managers/auto-summarize.js
+  /Users/whitney.lee/Documents/Repositories/commit-story-v2-eval/src/managers/auto-summarize.js: success (3 spans)
+Processing file 21 of 29: /Users/whitney.lee/Documents/Repositories/commit-story-v2-eval/src/managers/journal-manager.js
+  /Users/whitney.lee/Documents/Repositories/commit-story-v2-eval/src/managers/journal-manager.js: partial
+Processing file 22 of 29: /Users/whitney.lee/Documents/Repositories/commit-story-v2-eval/src/managers/summary-manager.js
+  /Users/whitney.lee/Documents/Repositories/commit-story-v2-eval/src/managers/summary-manager.js: success (3 spans)
+Processing file 23 of 29: /Users/whitney.lee/Documents/Repositories/commit-story-v2-eval/src/mcp/server.js
+  /Users/whitney.lee/Documents/Repositories/commit-story-v2-eval/src/mcp/server.js: success (1 spans)
+Processing file 24 of 29: /Users/whitney.lee/Documents/Repositories/commit-story-v2-eval/src/mcp/tools/context-capture-tool.js
+  /Users/whitney.lee/Documents/Repositories/commit-story-v2-eval/src/mcp/tools/context-capture-tool.js: success (2 spans)
+Processing file 25 of 29: /Users/whitney.lee/Documents/Repositories/commit-story-v2-eval/src/mcp/tools/reflection-tool.js
+  /Users/whitney.lee/Documents/Repositories/commit-story-v2-eval/src/mcp/tools/reflection-tool.js: success (2 spans)
+Processing file 26 of 29: /Users/whitney.lee/Documents/Repositories/commit-story-v2-eval/src/utils/commit-analyzer.js
+  /Users/whitney.lee/Documents/Repositories/commit-story-v2-eval/src/utils/commit-analyzer.js: success (6 spans)
+Processing file 27 of 29: /Users/whitney.lee/Documents/Repositories/commit-story-v2-eval/src/utils/config.js
+  /Users/whitney.lee/Documents/Repositories/commit-story-v2-eval/src/utils/config.js: success (0 spans)
+Processing file 28 of 29: /Users/whitney.lee/Documents/Repositories/commit-story-v2-eval/src/utils/journal-paths.js
+Per-file commit failed for /Users/whitney.lee/Documents/Repositories/commit-story-v2-eval/src/utils/config.js: Failed to commit src/utils/config.js: Nothing staged to commit
+  /Users/whitney.lee/Documents/Repositories/commit-story-v2-eval/src/utils/journal-paths.js: success (1 spans)
+Processing file 29 of 29: /Users/whitney.lee/Documents/Repositories/commit-story-v2-eval/src/utils/summary-detector.js
+  /Users/whitney.lee/Documents/Repositories/commit-story-v2-eval/src/utils/summary-detector.js: success (5 spans)
+
+Run complete: 26 succeeded, 0 failed, 0 skipped
+PR summary saved to /Users/whitney.lee/Documents/Repositories/commit-story-v2-eval/orbweaver-pr-summary.md
+Push failed — skipping PR creation: Pushing to https://github.com/wiggitywhitney/commit-story-v2-eval.git
+remote: Invalid username or token. Password authentication is not supported for Git operations.
+fatal: Authentication failed for 'https://github.com/wiggitywhitney/commit-story-v2-eval.git/'
+
+29 files processed: 26 succeeded, 0 failed, 0 skipped
+Live-check: OK
+Warning: Schema extensions rejected by namespace enforcement: (unparseable): commit_story.context.collect
+Warning: Schema extensions rejected by namespace enforcement: (unparseable): commit_story.context.collect, (unparseable): span:commit_story.git.execute, (unparseable): span:commit_story.git.get_previous_commit_time, (unparseable): span:commit_story.git.get_commit_data
+Warning: Schema extensions rejected by namespace enforcement: (unparseable): commit_story.context.collect, (unparseable): span:commit_story.git.execute, (unparseable): span:commit_story.git.get_previous_commit_time, (unparseable): span:commit_story.git.get_commit_data, (unparseable): commit_story.summarize.run_daily, (unparseable): commit_story.summarize.run_weekly, (unparseable): commit_story.summarize.run_monthly, (unparseable): commit_story.summarize.input_count, (unparseable): commit_story.summarize.force, (unparseable): commit_story.summarize.generated_count, (unparseable): commit_story.summarize.failed_count
+Warning: Schema extensions rejected by namespace enforcement: (unparseable): commit_story.context.collect, (unparseable): span:commit_story.git.execute, (unparseable): span:commit_story.git.get_previous_commit_time, (unparseable): span:commit_story.git.get_commit_data, (unparseable): commit_story.summarize.run_daily, (unparseable): commit_story.summarize.run_weekly, (unparseable): commit_story.summarize.run_monthly, (unparseable): commit_story.summarize.input_count, (unparseable): commit_story.summarize.force, (unparseable): commit_story.summarize.generated_count, (unparseable): commit_story.summarize.failed_count, (unparseable): span:commit_story.journal.generate, (unparseable): span:commit_story.ai.generate_summary, (unparseable): span:commit_story.ai.generate_technical_decisions, (unparseable): span:commit_story.ai.generate_dialogue
+Warning: Schema extensions rejected by namespace enforcement: (unparseable): commit_story.context.collect, (unparseable): span:commit_story.git.execute, (unparseable): span:commit_story.git.get_previous_commit_time, (unparseable): span:commit_story.git.get_commit_data, (unparseable): commit_story.summarize.run_daily, (unparseable): commit_story.summarize.run_weekly, (unparseable): commit_story.summarize.run_monthly, (unparseable): commit_story.summarize.input_count, (unparseable): commit_story.summarize.force, (unparseable): commit_story.summarize.generated_count, (unparseable): commit_story.summarize.failed_count, (unparseable): span:commit_story.journal.generate, (unparseable): span:commit_story.ai.generate_summary, (unparseable): span:commit_story.ai.generate_technical_decisions, (unparseable): span:commit_story.ai.generate_dialogue, (unparseable): commit_story.journal.generate, (unparseable): commit_story.summarize.handle
+Warning: Schema extensions rejected by namespace enforcement: (unparseable): commit_story.context.collect, (unparseable): span:commit_story.git.execute, (unparseable): span:commit_story.git.get_previous_commit_time, (unparseable): span:commit_story.git.get_commit_data, (unparseable): commit_story.summarize.run_daily, (unparseable): commit_story.summarize.run_weekly, (unparseable): commit_story.summarize.run_monthly, (unparseable): commit_story.summarize.input_count, (unparseable): commit_story.summarize.force, (unparseable): commit_story.summarize.generated_count, (unparseable): commit_story.summarize.failed_count, (unparseable): span:commit_story.journal.generate, (unparseable): span:commit_story.ai.generate_summary, (unparseable): span:commit_story.ai.generate_technical_decisions, (unparseable): span:commit_story.ai.generate_dialogue, (unparseable): commit_story.journal.generate, (unparseable): commit_story.summarize.handle, (unparseable): span:context.gather_for_commit
+Warning: Schema extensions rejected by namespace enforcement: (unparseable): commit_story.context.collect, (unparseable): span:commit_story.git.execute, (unparseable): span:commit_story.git.get_previous_commit_time, (unparseable): span:commit_story.git.get_commit_data, (unparseable): commit_story.summarize.run_daily, (unparseable): commit_story.summarize.run_weekly, (unparseable): commit_story.summarize.run_monthly, (unparseable): commit_story.summarize.input_count, (unparseable): commit_story.summarize.force, (unparseable): commit_story.summarize.generated_count, (unparseable): commit_story.summarize.failed_count, (unparseable): span:commit_story.journal.generate, (unparseable): span:commit_story.ai.generate_summary, (unparseable): span:commit_story.ai.generate_technical_decisions, (unparseable): span:commit_story.ai.generate_dialogue, (unparseable): commit_story.journal.generate, (unparseable): commit_story.summarize.handle, (unparseable): span:context.gather_for_commit, (unparseable): commit_story.filter.messages
+Warning: Schema extensions rejected by namespace enforcement: (unparseable): commit_story.context.collect, (unparseable): span:commit_story.git.execute, (unparseable): span:commit_story.git.get_previous_commit_time, (unparseable): span:commit_story.git.get_commit_data, (unparseable): commit_story.summarize.run_daily, (unparseable): commit_story.summarize.run_weekly, (unparseable): commit_story.summarize.run_monthly, (unparseable): commit_story.summarize.input_count, (unparseable): commit_story.summarize.force, (unparseable): commit_story.summarize.generated_count, (unparseable): commit_story.summarize.failed_count, (unparseable): span:commit_story.journal.generate, (unparseable): span:commit_story.ai.generate_summary, (unparseable): span:commit_story.ai.generate_technical_decisions, (unparseable): span:commit_story.ai.generate_dialogue, (unparseable): commit_story.journal.generate, (unparseable): commit_story.summarize.handle, (unparseable): span:context.gather_for_commit, (unparseable): commit_story.filter.messages, (unparseable): commit_story.filter.truncate_diff, (unparseable): commit_story.filter.truncate_messages, (unparseable): commit_story.filter.apply_token_budget
+Warning: Schema extensions rejected by namespace enforcement: (unparseable): commit_story.context.collect, (unparseable): span:commit_story.git.execute, (unparseable): span:commit_story.git.get_previous_commit_time, (unparseable): span:commit_story.git.get_commit_data, (unparseable): commit_story.summarize.run_daily, (unparseable): commit_story.summarize.run_weekly, (unparseable): commit_story.summarize.run_monthly, (unparseable): commit_story.summarize.input_count, (unparseable): commit_story.summarize.force, (unparseable): commit_story.summarize.generated_count, (unparseable): commit_story.summarize.failed_count, (unparseable): span:commit_story.journal.generate, (unparseable): span:commit_story.ai.generate_summary, (unparseable): span:commit_story.ai.generate_technical_decisions, (unparseable): span:commit_story.ai.generate_dialogue, (unparseable): commit_story.journal.generate, (unparseable): commit_story.summarize.handle, (unparseable): span:context.gather_for_commit, (unparseable): commit_story.filter.messages, (unparseable): commit_story.filter.truncate_diff, (unparseable): commit_story.filter.truncate_messages, (unparseable): commit_story.filter.apply_token_budget, (unparseable): commit_story.journal.unsummarized_count, (unparseable): commit_story.journal.generated_count, (unparseable): commit_story.journal.skipped_count, (unparseable): commit_story.journal.failed_count, (unparseable): span:commit_story.journal.trigger_auto_summaries, (unparseable): span:commit_story.journal.trigger_auto_weekly_summaries, (unparseable): span:commit_story.journal.trigger_auto_monthly_summaries
+Warning: Schema extensions rejected by namespace enforcement: (unparseable): commit_story.context.collect, (unparseable): span:commit_story.git.execute, (unparseable): span:commit_story.git.get_previous_commit_time, (unparseable): span:commit_story.git.get_commit_data, (unparseable): commit_story.summarize.run_daily, (unparseable): commit_story.summarize.run_weekly, (unparseable): commit_story.summarize.run_monthly, (unparseable): commit_story.summarize.input_count, (unparseable): commit_story.summarize.force, (unparseable): commit_story.summarize.generated_count, (unparseable): commit_story.summarize.failed_count, (unparseable): span:commit_story.journal.generate, (unparseable): span:commit_story.ai.generate_summary, (unparseable): span:commit_story.ai.generate_technical_decisions, (unparseable): span:commit_story.ai.generate_dialogue, (unparseable): commit_story.journal.generate, (unparseable): commit_story.summarize.handle, (unparseable): span:context.gather_for_commit, (unparseable): commit_story.filter.messages, (unparseable): commit_story.filter.truncate_diff, (unparseable): commit_story.filter.truncate_messages, (unparseable): commit_story.filter.apply_token_budget, (unparseable): commit_story.journal.unsummarized_count, (unparseable): commit_story.journal.generated_count, (unparseable): commit_story.journal.skipped_count, (unparseable): commit_story.journal.failed_count, (unparseable): span:commit_story.journal.trigger_auto_summaries, (unparseable): span:commit_story.journal.trigger_auto_weekly_summaries, (unparseable): span:commit_story.journal.trigger_auto_monthly_summaries, (unparseable): summary.daily.generate, (unparseable): summary.weekly.generate, (unparseable): summary.monthly.generate
+Warning: Schema extensions rejected by namespace enforcement: (unparseable): commit_story.context.collect, (unparseable): span:commit_story.git.execute, (unparseable): span:commit_story.git.get_previous_commit_time, (unparseable): span:commit_story.git.get_commit_data, (unparseable): commit_story.summarize.run_daily, (unparseable): commit_story.summarize.run_weekly, (unparseable): commit_story.summarize.run_monthly, (unparseable): commit_story.summarize.input_count, (unparseable): commit_story.summarize.force, (unparseable): commit_story.summarize.generated_count, (unparseable): commit_story.summarize.failed_count, (unparseable): span:commit_story.journal.generate, (unparseable): span:commit_story.ai.generate_summary, (unparseable): span:commit_story.ai.generate_technical_decisions, (unparseable): span:commit_story.ai.generate_dialogue, (unparseable): commit_story.journal.generate, (unparseable): commit_story.summarize.handle, (unparseable): span:context.gather_for_commit, (unparseable): commit_story.filter.messages, (unparseable): commit_story.filter.truncate_diff, (unparseable): commit_story.filter.truncate_messages, (unparseable): commit_story.filter.apply_token_budget, (unparseable): commit_story.journal.unsummarized_count, (unparseable): commit_story.journal.generated_count, (unparseable): commit_story.journal.skipped_count, (unparseable): commit_story.journal.failed_count, (unparseable): span:commit_story.journal.trigger_auto_summaries, (unparseable): span:commit_story.journal.trigger_auto_weekly_summaries, (unparseable): span:commit_story.journal.trigger_auto_monthly_summaries, (unparseable): summary.daily.generate, (unparseable): summary.weekly.generate, (unparseable): summary.monthly.generate, (unparseable): span.mcp.server.start
+Warning: Schema extensions rejected by namespace enforcement: (unparseable): commit_story.context.collect, (unparseable): span:commit_story.git.execute, (unparseable): span:commit_story.git.get_previous_commit_time, (unparseable): span:commit_story.git.get_commit_data, (unparseable): commit_story.summarize.run_daily, (unparseable): commit_story.summarize.run_weekly, (unparseable): commit_story.summarize.run_monthly, (unparseable): commit_story.summarize.input_count, (unparseable): commit_story.summarize.force, (unparseable): commit_story.summarize.generated_count, (unparseable): commit_story.summarize.failed_count, (unparseable): span:commit_story.journal.generate, (unparseable): span:commit_story.ai.generate_summary, (unparseable): span:commit_story.ai.generate_technical_decisions, (unparseable): span:commit_story.ai.generate_dialogue, (unparseable): commit_story.journal.generate, (unparseable): commit_story.summarize.handle, (unparseable): span:context.gather_for_commit, (unparseable): commit_story.filter.messages, (unparseable): commit_story.filter.truncate_diff, (unparseable): commit_story.filter.truncate_messages, (unparseable): commit_story.filter.apply_token_budget, (unparseable): commit_story.journal.unsummarized_count, (unparseable): commit_story.journal.generated_count, (unparseable): commit_story.journal.skipped_count, (unparseable): commit_story.journal.failed_count, (unparseable): span:commit_story.journal.trigger_auto_summaries, (unparseable): span:commit_story.journal.trigger_auto_weekly_summaries, (unparseable): span:commit_story.journal.trigger_auto_monthly_summaries, (unparseable): summary.daily.generate, (unparseable): summary.weekly.generate, (unparseable): summary.monthly.generate, (unparseable): span.mcp.server.start, (unparseable): span.context.capture.save, (unparseable): span.mcp.tool.journal_capture_context
+Warning: Schema extensions rejected by namespace enforcement: (unparseable): commit_story.context.collect, (unparseable): span:commit_story.git.execute, (unparseable): span:commit_story.git.get_previous_commit_time, (unparseable): span:commit_story.git.get_commit_data, (unparseable): commit_story.summarize.run_daily, (unparseable): commit_story.summarize.run_weekly, (unparseable): commit_story.summarize.run_monthly, (unparseable): commit_story.summarize.input_count, (unparseable): commit_story.summarize.force, (unparseable): commit_story.summarize.generated_count, (unparseable): commit_story.summarize.failed_count, (unparseable): span:commit_story.journal.generate, (unparseable): span:commit_story.ai.generate_summary, (unparseable): span:commit_story.ai.generate_technical_decisions, (unparseable): span:commit_story.ai.generate_dialogue, (unparseable): commit_story.journal.generate, (unparseable): commit_story.summarize.handle, (unparseable): span:context.gather_for_commit, (unparseable): commit_story.filter.messages, (unparseable): commit_story.filter.truncate_diff, (unparseable): commit_story.filter.truncate_messages, (unparseable): commit_story.filter.apply_token_budget, (unparseable): commit_story.journal.unsummarized_count, (unparseable): commit_story.journal.generated_count, (unparseable): commit_story.journal.skipped_count, (unparseable): commit_story.journal.failed_count, (unparseable): span:commit_story.journal.trigger_auto_summaries, (unparseable): span:commit_story.journal.trigger_auto_weekly_summaries, (unparseable): span:commit_story.journal.trigger_auto_monthly_summaries, (unparseable): summary.daily.generate, (unparseable): summary.weekly.generate, (unparseable): summary.monthly.generate, (unparseable): span.mcp.server.start, (unparseable): span.context.capture.save, (unparseable): span.mcp.tool.journal_capture_context, (unparseable): commit_story.journal.save_reflection, (unparseable): mcp.tool.journal_add_reflection
+Warning: Schema extensions rejected by namespace enforcement: (unparseable): commit_story.context.collect, (unparseable): span:commit_story.git.execute, (unparseable): span:commit_story.git.get_previous_commit_time, (unparseable): span:commit_story.git.get_commit_data, (unparseable): commit_story.summarize.run_daily, (unparseable): commit_story.summarize.run_weekly, (unparseable): commit_story.summarize.run_monthly, (unparseable): commit_story.summarize.input_count, (unparseable): commit_story.summarize.force, (unparseable): commit_story.summarize.generated_count, (unparseable): commit_story.summarize.failed_count, (unparseable): span:commit_story.journal.generate, (unparseable): span:commit_story.ai.generate_summary, (unparseable): span:commit_story.ai.generate_technical_decisions, (unparseable): span:commit_story.ai.generate_dialogue, (unparseable): commit_story.journal.generate, (unparseable): commit_story.summarize.handle, (unparseable): span:context.gather_for_commit, (unparseable): commit_story.filter.messages, (unparseable): commit_story.filter.truncate_diff, (unparseable): commit_story.filter.truncate_messages, (unparseable): commit_story.filter.apply_token_budget, (unparseable): commit_story.journal.unsummarized_count, (unparseable): commit_story.journal.generated_count, (unparseable): commit_story.journal.skipped_count, (unparseable): commit_story.journal.failed_count, (unparseable): span:commit_story.journal.trigger_auto_summaries, (unparseable): span:commit_story.journal.trigger_auto_weekly_summaries, (unparseable): span:commit_story.journal.trigger_auto_monthly_summaries, (unparseable): summary.daily.generate, (unparseable): summary.weekly.generate, (unparseable): summary.monthly.generate, (unparseable): span.mcp.server.start, (unparseable): span.context.capture.save, (unparseable): span.mcp.tool.journal_capture_context, (unparseable): commit_story.journal.save_reflection, (unparseable): mcp.tool.journal_add_reflection, (unparseable): commit_story.git.get_changed_files, (unparseable): commit_story.git.is_merge_commit, (unparseable): commit_story.git.get_commit_metadata
+Warning: Schema extensions rejected by namespace enforcement: (unparseable): commit_story.context.collect, (unparseable): span:commit_story.git.execute, (unparseable): span:commit_story.git.get_previous_commit_time, (unparseable): span:commit_story.git.get_commit_data, (unparseable): commit_story.summarize.run_daily, (unparseable): commit_story.summarize.run_weekly, (unparseable): commit_story.summarize.run_monthly, (unparseable): commit_story.summarize.input_count, (unparseable): commit_story.summarize.force, (unparseable): commit_story.summarize.generated_count, (unparseable): commit_story.summarize.failed_count, (unparseable): span:commit_story.journal.generate, (unparseable): span:commit_story.ai.generate_summary, (unparseable): span:commit_story.ai.generate_technical_decisions, (unparseable): span:commit_story.ai.generate_dialogue, (unparseable): commit_story.journal.generate, (unparseable): commit_story.summarize.handle, (unparseable): span:context.gather_for_commit, (unparseable): commit_story.filter.messages, (unparseable): commit_story.filter.truncate_diff, (unparseable): commit_story.filter.truncate_messages, (unparseable): commit_story.filter.apply_token_budget, (unparseable): commit_story.journal.unsummarized_count, (unparseable): commit_story.journal.generated_count, (unparseable): commit_story.journal.skipped_count, (unparseable): commit_story.journal.failed_count, (unparseable): span:commit_story.journal.trigger_auto_summaries, (unparseable): span:commit_story.journal.trigger_auto_weekly_summaries, (unparseable): span:commit_story.journal.trigger_auto_monthly_summaries, (unparseable): summary.daily.generate, (unparseable): summary.weekly.generate, (unparseable): summary.monthly.generate, (unparseable): span.mcp.server.start, (unparseable): span.context.capture.save, (unparseable): span.mcp.tool.journal_capture_context, (unparseable): commit_story.journal.save_reflection, (unparseable): mcp.tool.journal_add_reflection, (unparseable): commit_story.git.get_changed_files, (unparseable): commit_story.git.is_merge_commit, (unparseable): commit_story.git.get_commit_metadata, (unparseable): commit_story.journal.ensure_directory
+Warning: Schema extensions rejected by namespace enforcement: (unparseable): commit_story.context.collect, (unparseable): span:commit_story.git.execute, (unparseable): span:commit_story.git.get_previous_commit_time, (unparseable): span:commit_story.git.get_commit_data, (unparseable): commit_story.summarize.run_daily, (unparseable): commit_story.summarize.run_weekly, (unparseable): commit_story.summarize.run_monthly, (unparseable): commit_story.summarize.input_count, (unparseable): commit_story.summarize.force, (unparseable): commit_story.summarize.generated_count, (unparseable): commit_story.summarize.failed_count, (unparseable): span:commit_story.journal.generate, (unparseable): span:commit_story.ai.generate_summary, (unparseable): span:commit_story.ai.generate_technical_decisions, (unparseable): span:commit_story.ai.generate_dialogue, (unparseable): commit_story.journal.generate, (unparseable): commit_story.summarize.handle, (unparseable): span:context.gather_for_commit, (unparseable): commit_story.filter.messages, (unparseable): commit_story.filter.truncate_diff, (unparseable): commit_story.filter.truncate_messages, (unparseable): commit_story.filter.apply_token_budget, (unparseable): commit_story.journal.unsummarized_count, (unparseable): commit_story.journal.generated_count, (unparseable): commit_story.journal.skipped_count, (unparseable): commit_story.journal.failed_count, (unparseable): span:commit_story.journal.trigger_auto_summaries, (unparseable): span:commit_story.journal.trigger_auto_weekly_summaries, (unparseable): span:commit_story.journal.trigger_auto_monthly_summaries, (unparseable): summary.daily.generate, (unparseable): summary.weekly.generate, (unparseable): summary.monthly.generate, (unparseable): span.mcp.server.start, (unparseable): span.context.capture.save, (unparseable): span.mcp.tool.journal_capture_context, (unparseable): commit_story.journal.save_reflection, (unparseable): mcp.tool.journal_add_reflection, (unparseable): commit_story.git.get_changed_files, (unparseable): commit_story.git.is_merge_commit, (unparseable): commit_story.git.get_commit_metadata, (unparseable): commit_story.journal.ensure_directory, (unparseable): span:commit_story.journal.get_days_with_entries, (unparseable): span:commit_story.journal.find_unsummarized_days, (unparseable): span:commit_story.journal.get_days_with_daily_summaries, (unparseable): span:commit_story.journal.find_unsummarized_weeks, (unparseable): span:commit_story.journal.find_unsummarized_months, (unparseable): attr:commit_story.journal.days_found, (unparseable): attr:commit_story.journal.unsummarized_weeks_count, (unparseable): attr:commit_story.journal.unsummarized_months_count
+Warning: End-of-run test suite failed: Command failed: sh -c npm test
+
+[31m⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 32 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m tests/generators/monthly-summary-graph.test.js[2m > [22mmonthlySummaryNode[2m > [22msends weekly summaries to LLM and returns parsed sections
+[31m[1mReferenceError[22m: tracer is not defined[39m
+[36m [2m❯[22m Module.monthlySummaryNode src/generators/summary-graph.js:[2m653:3[22m[39m
+    [90m651| [39m */[39m
+    [90m652| [39m[35mexport[39m [35masync[39m [35mfunction[39m [34mmonthlySummaryNode[39m(state) {
+    [90m653| [39m  return tracer.startActiveSpan('commit_story.ai.monthly_summary', asy…
+    [90m   | [39m  [31m^[39m
+    [90m654| [39m    [35mtry[39m {
+    [90m655| [39m      [35mconst[39m { weeklySummaries[33m,[39m monthLabel } [33m=[39m state[33m;[39m
+[90m [2m❯[22m tests/generators/monthly-summary-graph.test.js:[2m198:26[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/32]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m tests/generators/monthly-summary-graph.test.js[2m > [22mmonthlySummaryNode[2m > [22mreturns early with message when no weekly summaries provided
+[31m[1mReferenceError[22m: tracer is not defined[39m
+[36m [2m❯[22m Module.monthlySummaryNode src/generators/summary-graph.js:[2m653:3[22m[39m
+    [90m651| [39m */[39m
+    [90m652| [39m[35mexport[39m [35masync[39m [35mfunction[39m [34mmonthlySummaryNode[39m(state) {
+    [90m653| [39m  return tracer.startActiveSpan('commit_story.ai.monthly_summary', asy…
+    [90m   | [39m  [31m^[39m
+    [90m654| [39m    [35mtry[39m {
+    [90m655| [39m      [35mconst[39m { weeklySummaries[33m,[39m monthLabel } [33m=[39m state[33m;[39m
+[90m [2m❯[22m tests/generators/monthly-summary-graph.test.js:[2m213:26[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/32]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m tests/generators/monthly-summary-graph.test.js[2m > [22mmonthlySummaryNode[2m > [22mreturns early for null weekly summaries
+[31m[1mReferenceError[22m: tracer is not defined[39m
+[36m [2m❯[22m Module.monthlySummaryNode src/generators/summary-graph.js:[2m653:3[22m[39m
+    [90m651| [39m */[39m
+    [90m652| [39m[35mexport[39m [35masync[39m [35mfunction[39m [34mmonthlySummaryNode[39m(state) {
+    [90m653| [39m  return tracer.startActiveSpan('commit_story.ai.monthly_summary', asy…
+    [90m   | [39m  [31m^[39m
+    [90m654| [39m    [35mtry[39m {
+    [90m655| [39m      [35mconst[39m { weeklySummaries[33m,[39m monthLabel } [33m=[39m state[33m;[39m
+[90m [2m❯[22m tests/generators/monthly-summary-graph.test.js:[2m223:26[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/32]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m tests/generators/monthly-summary-graph.test.js[2m > [22mmonthlySummaryNode[2m > [22mhandles LLM errors gracefully
+[31m[1mReferenceError[22m: tracer is not defined[39m
+[36m [2m❯[22m Module.monthlySummaryNode src/generators/summary-graph.js:[2m653:3[22m[39m
+    [90m651| [39m */[39m
+    [90m652| [39m[35mexport[39m [35masync[39m [35mfunction[39m [34mmonthlySummaryNode[39m(state) {
+    [90m653| [39m  return tracer.startActiveSpan('commit_story.ai.monthly_summary', asy…
+    [90m   | [39m  [31m^[39m
+    [90m654| [39m    [35mtry[39m {
+    [90m655| [39m      [35mconst[39m { weeklySummaries[33m,[39m monthLabel } [33m=[39m state[33m;[39m
+[90m [2m❯[22m tests/generators/monthly-summary-graph.test.js:[2m233:26[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/32]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m tests/generators/monthly-summary-graph.test.js[2m > [22mmonthlySummaryNode[2m > [22mhandles LLM output missing sections
+[31m[1mReferenceError[22m: tracer is not defined[39m
+[36m [2m❯[22m Module.monthlySummaryNode src/generators/summary-graph.js:[2m653:3[22m[39m
+    [90m651| [39m */[39m
+    [90m652| [39m[35mexport[39m [35masync[39m [35mfunction[39m [34mmonthlySummaryNode[39m(state) {
+    [90m653| [39m  return tracer.startActiveSpan('commit_story.ai.monthly_summary', asy…
+    [90m   | [39m  [31m^[39m
+    [90m654| [39m    [35mtry[39m {
+    [90m655| [39m      [35mconst[39m { weeklySummaries[33m,[39m monthLabel } [33m=[39m state[33m;[39m
+[90m [2m❯[22m tests/generators/monthly-summary-graph.test.js:[2m244:26[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/32]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m tests/generators/monthly-summary-graph.test.js[2m > [22mgenerateMonthlySummary[2m > [22mgenerates a monthly summary from weekly summaries
+[31m[1mReferenceError[22m: tracer is not defined[39m
+[36m [2m❯[22m Module.generateMonthlySummary src/generators/summary-graph.js:[2m744:3[22m[39m
+    [90m742| [39m */[39m
+    [90m743| [39mexport async function generateMonthlySummary(weeklySummaries, monthLab…
+    [90m744| [39m  return tracer.startActiveSpan('commit_story.ai.generate_monthly_summ…
+    [90m   | [39m  [31m^[39m
+    [90m745| [39m    [35mtry[39m {
+    [90m746| [39m      span[33m.[39m[34msetAttribute[39m([32m'commit_story.ai.section_type'[39m[33m,[39m [32m'summary'[39m)[33m;[39m
+[90m [2m❯[22m tests/generators/monthly-summary-graph.test.js:[2m289:26[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/32]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m tests/generators/summary-graph.test.js[2m > [22mdailySummaryNode[2m > [22msends entries to LLM and returns parsed sections
+[31m[1mReferenceError[22m: tracer is not defined[39m
+[36m [2m❯[22m Module.dailySummaryNode src/generators/summary-graph.js:[2m181:3[22m[39m
+    [90m179| [39m */[39m
+    [90m180| [39m[35mexport[39m [35masync[39m [35mfunction[39m [34mdailySummaryNode[39m(state) {
+    [90m181| [39m  return tracer.startActiveSpan('commit_story.ai.generate_daily_summar…
+    [90m   | [39m  [31m^[39m
+    [90m182| [39m    [35mtry[39m {
+    [90m183| [39m      [35mconst[39m { entries[33m,[39m date } [33m=[39m state[33m;[39m
+[90m [2m❯[22m tests/generators/summary-graph.test.js:[2m167:26[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[7/32]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m tests/generators/summary-graph.test.js[2m > [22mdailySummaryNode[2m > [22mreturns early with message when no entries provided
+[31m[1mReferenceError[22m: tracer is not defined[39m
+[36m [2m❯[22m Module.dailySummaryNode src/generators/summary-graph.js:[2m181:3[22m[39m
+    [90m179| [39m */[39m
+    [90m180| [39m[35mexport[39m [35masync[39m [35mfunction[39m [34mdailySummaryNode[39m(state) {
+    [90m181| [39m  return tracer.startActiveSpan('commit_story.ai.generate_daily_summar…
+    [90m   | [39m  [31m^[39m
+    [90m182| [39m    [35mtry[39m {
+    [90m183| [39m      [35mconst[39m { entries[33m,[39m date } [33m=[39m state[33m;[39m
+[90m [2m❯[22m tests/generators/summary-graph.test.js:[2m181:26[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[8/32]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m tests/generators/summary-graph.test.js[2m > [22mdailySummaryNode[2m > [22mhandles LLM errors gracefully
+[31m[1mReferenceError[22m: tracer is not defined[39m
+[36m [2m❯[22m Module.dailySummaryNode src/generators/summary-graph.js:[2m181:3[22m[39m
+    [90m179| [39m */[39m
+    [90m180| [39m[35mexport[39m [35masync[39m [35mfunction[39m [34mdailySummaryNode[39m(state) {
+    [90m181| [39m  return tracer.startActiveSpan('commit_story.ai.generate_daily_summar…
+    [90m   | [39m  [31m^[39m
+    [90m182| [39m    [35mtry[39m {
+    [90m183| [39m      [35mconst[39m { entries[33m,[39m date } [33m=[39m state[33m;[39m
+[90m [2m❯[22m tests/generators/summary-graph.test.js:[2m193:26[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[9/32]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m tests/generators/summary-graph.test.js[2m > [22mdailySummaryNode[2m > [22mhandles LLM output missing sections
+[31m[1mReferenceError[22m: tracer is not defined[39m
+[36m [2m❯[22m Module.dailySummaryNode src/generators/summary-graph.js:[2m181:3[22m[39m
+    [90m179| [39m */[39m
+    [90m180| [39m[35mexport[39m [35masync[39m [35mfunction[39m [34mdailySummaryNode[39m(state) {
+    [90m181| [39m  return tracer.startActiveSpan('commit_story.ai.generate_daily_summar…
+    [90m   | [39m  [31m^[39m
+    [90m182| [39m    [35mtry[39m {
+    [90m183| [39m      [35mconst[39m { entries[33m,[39m date } [33m=[39m state[33m;[39m
+[90m [2m❯[22m tests/generators/summary-graph.test.js:[2m204:26[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[10/32]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m tests/generators/summary-graph.test.js[2m > [22mgenerateDailySummary[2m > [22mgenerates a daily summary from entries
+[31m[1mReferenceError[22m: tracer is not defined[39m
+[36m [2m❯[22m Module.generateDailySummary src/generators/summary-graph.js:[2m268:3[22m[39m
+    [90m266| [39m */[39m
+    [90m267| [39m[35mexport[39m [35masync[39m [35mfunction[39m [34mgenerateDailySummary[39m(entries[33m,[39m date) {
+    [90m268| [39m  return tracer.startActiveSpan('commit_story.ai.generate', async (spa…
+    [90m   | [39m  [31m^[39m
+    [90m269| [39m    [35mtry[39m {
+    [90m270| [39m      span[33m.[39m[34msetAttribute[39m([32m'commit_story.ai.section_type'[39m[33m,[39m [32m'summary'[39m)[33m;[39m
+[90m [2m❯[22m tests/generators/summary-graph.test.js:[2m240:26[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[11/32]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m tests/generators/weekly-summary-graph.test.js[2m > [22mweeklySummaryNode[2m > [22msends daily summaries to LLM and returns parsed sections
+[31m[1mReferenceError[22m: tracer is not defined[39m
+[36m [2m❯[22m Module.weeklySummaryNode src/generators/summary-graph.js:[2m415:3[22m[39m
+    [90m413| [39m */[39m
+    [90m414| [39m[35mexport[39m [35masync[39m [35mfunction[39m [34mweeklySummaryNode[39m(state) {
+    [90m415| [39m  return tracer.startActiveSpan('commit_story.ai.generate_weekly_summa…
+    [90m   | [39m  [31m^[39m
+    [90m416| [39m    [35mtry[39m {
+    [90m417| [39m      [35mconst[39m { dailySummaries[33m,[39m weekLabel } [33m=[39m state[33m;[39m
+[90m [2m❯[22m tests/generators/weekly-summary-graph.test.js:[2m177:26[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[12/32]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m tests/generators/weekly-summary-graph.test.js[2m > [22mweeklySummaryNode[2m > [22mreturns early with message when no daily summaries provided
+[31m[1mReferenceError[22m: tracer is not defined[39m
+[36m [2m❯[22m Module.weeklySummaryNode src/generators/summary-graph.js:[2m415:3[22m[39m
+    [90m413| [39m */[39m
+    [90m414| [39m[35mexport[39m [35masync[39m [35mfunction[39m [34mweeklySummaryNode[39m(state) {
+    [90m415| [39m  return tracer.startActiveSpan('commit_story.ai.generate_weekly_summa…
+    [90m   | [39m  [31m^[39m
+    [90m416| [39m    [35mtry[39m {
+    [90m417| [39m      [35mconst[39m { dailySummaries[33m,[39m weekLabel } [33m=[39m state[33m;[39m
+[90m [2m❯[22m tests/generators/weekly-summary-graph.test.js:[2m191:26[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[13/32]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m tests/generators/weekly-summary-graph.test.js[2m > [22mweeklySummaryNode[2m > [22mreturns early for null daily summaries
+[31m[1mReferenceError[22m: tracer is not defined[39m
+[36m [2m❯[22m Module.weeklySummaryNode src/generators/summary-graph.js:[2m415:3[22m[39m
+    [90m413| [39m */[39m
+    [90m414| [39m[35mexport[39m [35masync[39m [35mfunction[39m [34mweeklySummaryNode[39m(state) {
+    [90m415| [39m  return tracer.startActiveSpan('commit_story.ai.generate_weekly_summa…
+    [90m   | [39m  [31m^[39m
+    [90m416| [39m    [35mtry[39m {
+    [90m417| [39m      [35mconst[39m { dailySummaries[33m,[39m weekLabel } [33m=[39m state[33m;[39m
+[90m [2m❯[22m tests/generators/weekly-summary-graph.test.js:[2m200:26[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[14/32]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m tests/generators/weekly-summary-graph.test.js[2m > [22mweeklySummaryNode[2m > [22mhandles LLM errors gracefully
+[31m[1mReferenceError[22m: tracer is not defined[39m
+[36m [2m❯[22m Module.weeklySummaryNode src/generators/summary-graph.js:[2m415:3[22m[39m
+    [90m413| [39m */[39m
+    [90m414| [39m[35mexport[39m [35masync[39m [35mfunction[39m [34mweeklySummaryNode[39m(state) {
+    [90m415| [39m  return tracer.startActiveSpan('commit_story.ai.generate_weekly_summa…
+    [90m   | [39m  [31m^[39m
+    [90m416| [39m    [35mtry[39m {
+    [90m417| [39m      [35mconst[39m { dailySummaries[33m,[39m weekLabel } [33m=[39m state[33m;[39m
+[90m [2m❯[22m tests/generators/weekly-summary-graph.test.js:[2m210:26[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[15/32]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m tests/generators/weekly-summary-graph.test.js[2m > [22mweeklySummaryNode[2m > [22mhandles LLM output missing sections
+[31m[1mReferenceError[22m: tracer is not defined[39m
+[36m [2m❯[22m Module.weeklySummaryNode src/generators/summary-graph.js:[2m415:3[22m[39m
+    [90m413| [39m */[39m
+    [90m414| [39m[35mexport[39m [35masync[39m [35mfunction[39m [34mweeklySummaryNode[39m(state) {
+    [90m415| [39m  return tracer.startActiveSpan('commit_story.ai.generate_weekly_summa…
+    [90m   | [39m  [31m^[39m
+    [90m416| [39m    [35mtry[39m {
+    [90m417| [39m      [35mconst[39m { dailySummaries[33m,[39m weekLabel } [33m=[39m state[33m;[39m
+[90m [2m❯[22m tests/generators/weekly-summary-graph.test.js:[2m221:26[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[16/32]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m tests/generators/weekly-summary-graph.test.js[2m > [22mgenerateWeeklySummary[2m > [22mgenerates a weekly summary from daily summaries
+[31m[1mReferenceError[22m: tracer is not defined[39m
+[36m [2m❯[22m Module.generateWeeklySummary src/generators/summary-graph.js:[2m503:3[22m[39m
+    [90m501| [39m */[39m
+    [90m502| [39mexport async function generateWeeklySummary(dailySummaries, weekLabel)…
+    [90m503| [39m  return tracer.startActiveSpan('commit_story.ai.generate_weekly_summa…
+    [90m   | [39m  [31m^[39m
+    [90m504| [39m    [35mtry[39m {
+    [90m505| [39m      span[33m.[39m[34msetAttribute[39m([32m'gen_ai.operation.name'[39m[33m,[39m [32m'invoke_agent'[39m)[33m;[39m
+[90m [2m❯[22m tests/generators/weekly-summary-graph.test.js:[2m258:26[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[17/32]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m tests/managers/monthly-summary-manager.test.js[2m > [22mgenerateAndSaveMonthlySummary[2m > [22mgenerates and saves monthly summary from weekly summaries
+[31m[1mReferenceError[22m: tracer is not defined[39m
+[36m [2m❯[22m generateMonthlySummary src/generators/summary-graph.js:[2m744:3[22m[39m
+    [90m742| [39m */[39m
+    [90m743| [39mexport async function generateMonthlySummary(weeklySummaries, monthLab…
+    [90m744| [39m  return tracer.startActiveSpan('commit_story.ai.generate_monthly_summ…
+    [90m   | [39m  [31m^[39m
+    [90m745| [39m    [35mtry[39m {
+    [90m746| [39m      span[33m.[39m[34msetAttribute[39m([32m'commit_story.ai.section_type'[39m[33m,[39m [32m'summary'[39m)[33m;[39m
+[90m [2m❯[22m src/managers/summary-manager.js:[2m525:50[22m[39m
+[90m [2m❯[22m tests/managers/monthly-summary-manager.test.js:[2m270:20[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[18/32]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m tests/managers/monthly-summary-manager.test.js[2m > [22mgenerateAndSaveMonthlySummary[2m > [22mregenerates when --force is used
+[31m[1mReferenceError[22m: tracer is not defined[39m
+[36m [2m❯[22m generateMonthlySummary src/generators/summary-graph.js:[2m744:3[22m[39m
+    [90m742| [39m */[39m
+    [90m743| [39mexport async function generateMonthlySummary(weeklySummaries, monthLab…
+    [90m744| [39m  return tracer.startActiveSpan('commit_story.ai.generate_monthly_summ…
+    [90m   | [39m  [31m^[39m
+    [90m745| [39m    [35mtry[39m {
+    [90m746| [39m      span[33m.[39m[34msetAttribute[39m([32m'commit_story.ai.section_type'[39m[33m,[39m [32m'summary'[39m)[33m;[39m
+[90m [2m❯[22m src/managers/summary-manager.js:[2m525:50[22m[39m
+[90m [2m❯[22m tests/managers/monthly-summary-manager.test.js:[2m328:20[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[19/32]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m tests/managers/weekly-summary-manager.test.js[2m > [22mgenerateAndSaveWeeklySummary[2m > [22mgenerates and saves weekly summary from daily summaries
+[31m[1mReferenceError[22m: tracer is not defined[39m
+[36m [2m❯[22m generateWeeklySummary src/generators/summary-graph.js:[2m503:3[22m[39m
+    [90m501| [39m */[39m
+    [90m502| [39mexport async function generateWeeklySummary(dailySummaries, weekLabel)…
+    [90m503| [39m  return tracer.startActiveSpan('commit_story.ai.generate_weekly_summa…
+    [90m   | [39m  [31m^[39m
+    [90m504| [39m    [35mtry[39m {
+    [90m505| [39m      span[33m.[39m[34msetAttribute[39m([32m'gen_ai.operation.name'[39m[33m,[39m [32m'invoke_agent'[39m)[33m;[39m
+[90m [2m❯[22m src/managers/summary-manager.js:[2m328:49[22m[39m
+[90m [2m❯[22m tests/managers/weekly-summary-manager.test.js:[2m277:20[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[20/32]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m tests/managers/weekly-summary-manager.test.js[2m > [22mgenerateAndSaveWeeklySummary[2m > [22mregenerates when --force is used
+[31m[1mReferenceError[22m: tracer is not defined[39m
+[36m [2m❯[22m generateWeeklySummary src/generators/summary-graph.js:[2m503:3[22m[39m
+    [90m501| [39m */[39m
+    [90m502| [39mexport async function generateWeeklySummary(dailySummaries, weekLabel)…
+    [90m503| [39m  return tracer.startActiveSpan('commit_story.ai.generate_weekly_summa…
+    [90m   | [39m  [31m^[39m
+    [90m504| [39m    [35mtry[39m {
+    [90m505| [39m      span[33m.[39m[34msetAttribute[39m([32m'gen_ai.operation.name'[39m[33m,[39m [32m'invoke_agent'[39m)[33m;[39m
+[90m [2m❯[22m src/managers/summary-manager.js:[2m328:49[22m[39m
+[90m [2m❯[22m tests/managers/weekly-summary-manager.test.js:[2m331:20[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[21/32]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m tests/integrators/filters/sensitive-filter.test.js[2m > [22mredactMessages[2m > [22mreturns empty result for null input
+[31m[1mReferenceError[22m: tracer is not defined[39m
+[36m [2m❯[22m redactMessages src/integrators/filters/sensitive-filter.js:[2m171:3[22m[39m
+    [90m169| [39m */[39m
+    [90m170| [39m[35mexport[39m [35mfunction[39m [34mredactMessages[39m(messages[33m,[39m options [33m=[39m {}) {
+    [90m171| [39m  return tracer.startActiveSpan('commit_story.filter.redact_messages',…
+    [90m   | [39m  [31m^[39m
+    [90m172| [39m    [35mtry[39m {
+    [90m173| [39m      span[33m.[39m[34msetAttribute[39m([32m'commit_story.filter.type'[39m[33m,[39m [32m'sensitive_data'[39m)[33m;[39m
+[90m [2m❯[22m tests/integrators/filters/sensitive-filter.test.js:[2m220:34[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[22/32]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m tests/integrators/filters/sensitive-filter.test.js[2m > [22mredactMessages[2m > [22mreturns empty result for empty array
+[31m[1mReferenceError[22m: tracer is not defined[39m
+[36m [2m❯[22m redactMessages src/integrators/filters/sensitive-filter.js:[2m171:3[22m[39m
+    [90m169| [39m */[39m
+    [90m170| [39m[35mexport[39m [35mfunction[39m [34mredactMessages[39m(messages[33m,[39m options [33m=[39m {}) {
+    [90m171| [39m  return tracer.startActiveSpan('commit_story.filter.redact_messages',…
+    [90m   | [39m  [31m^[39m
+    [90m172| [39m    [35mtry[39m {
+    [90m173| [39m      span[33m.[39m[34msetAttribute[39m([32m'commit_story.filter.type'[39m[33m,[39m [32m'sensitive_data'[39m)[33m;[39m
+[90m [2m❯[22m tests/integrators/filters/sensitive-filter.test.js:[2m227:34[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[23/32]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m tests/integrators/filters/sensitive-filter.test.js[2m > [22mredactMessages[2m > [22mredacts sensitive data in message content
+[31m[1mReferenceError[22m: tracer is not defined[39m
+[36m [2m❯[22m redactMessages src/integrators/filters/sensitive-filter.js:[2m171:3[22m[39m
+    [90m169| [39m */[39m
+    [90m170| [39m[35mexport[39m [35mfunction[39m [34mredactMessages[39m(messages[33m,[39m options [33m=[39m {}) {
+    [90m171| [39m  return tracer.startActiveSpan('commit_story.filter.redact_messages',…
+    [90m   | [39m  [31m^[39m
+    [90m172| [39m    [35mtry[39m {
+    [90m173| [39m      span[33m.[39m[34msetAttribute[39m([32m'commit_story.filter.type'[39m[33m,[39m [32m'sensitive_data'[39m)[33m;[39m
+[90m [2m❯[22m tests/integrators/filters/sensitive-filter.test.js:[2m237:34[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[24/32]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m tests/integrators/filters/sensitive-filter.test.js[2m > [22mredactMessages[2m > [22mpreserves other message fields
+[31m[1mReferenceError[22m: tracer is not defined[39m
+[36m [2m❯[22m redactMessages src/integrators/filters/sensitive-filter.js:[2m171:3[22m[39m
+    [90m169| [39m */[39m
+    [90m170| [39m[35mexport[39m [35mfunction[39m [34mredactMessages[39m(messages[33m,[39m options [33m=[39m {}) {
+    [90m171| [39m  return tracer.startActiveSpan('commit_story.filter.redact_messages',…
+    [90m   | [39m  [31m^[39m
+    [90m172| [39m    [35mtry[39m {
+    [90m173| [39m      span[33m.[39m[34msetAttribute[39m([32m'commit_story.filter.type'[39m[33m,[39m [32m'sensitive_data'[39m)[33m;[39m
+[90m [2m❯[22m tests/integrators/filters/sensitive-filter.test.js:[2m248:34[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[25/32]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m tests/integrators/filters/sensitive-filter.test.js[2m > [22mredactMessages[2m > [22mtracks redactions by type across messages
+[31m[1mReferenceError[22m: tracer is not defined[39m
+[36m [2m❯[22m redactMessages src/integrators/filters/sensitive-filter.js:[2m171:3[22m[39m
+    [90m169| [39m */[39m
+    [90m170| [39m[35mexport[39m [35mfunction[39m [34mredactMessages[39m(messages[33m,[39m options [33m=[39m {}) {
+    [90m171| [39m  return tracer.startActiveSpan('commit_story.filter.redact_messages',…
+    [90m   | [39m  [31m^[39m
+    [90m172| [39m    [35mtry[39m {
+    [90m173| [39m      span[33m.[39m[34msetAttribute[39m([32m'commit_story.filter.type'[39m[33m,[39m [32m'sensitive_data'[39m)[33m;[39m
+[90m [2m❯[22m tests/integrators/filters/sensitive-filter.test.js:[2m260:34[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[26/32]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m tests/integrators/filters/sensitive-filter.test.js[2m > [22mapplySensitiveFilter[2m > [22mredacts secrets in diff
+[31m[1mReferenceError[22m: tracer is not defined[39m
+[36m [2m❯[22m applySensitiveFilter src/integrators/filters/sensitive-filter.js:[2m232:3[22m[39m
+    [90m230| [39m */[39m
+    [90m231| [39m[35mexport[39m [35mfunction[39m [34mapplySensitiveFilter[39m(context[33m,[39m options [33m=[39m {}) {
+    [90m232| [39m  return tracer.startActiveSpan('commit_story.filter.apply', (span) =>…
+    [90m   | [39m  [31m^[39m
+    [90m233| [39m    [35mtry[39m {
+    [90m234| [39m      span[33m.[39m[34msetAttribute[39m([32m'commit_story.filter.type'[39m[33m,[39m [32m'sensitive_data'[39m)[33m;[39m
+[90m [2m❯[22m tests/integrators/filters/sensitive-filter.test.js:[2m302:40[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[27/32]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m tests/integrators/filters/sensitive-filter.test.js[2m > [22mapplySensitiveFilter[2m > [22mredacts secrets in commit message
+[31m[1mReferenceError[22m: tracer is not defined[39m
+[36m [2m❯[22m applySensitiveFilter src/integrators/filters/sensitive-filter.js:[2m232:3[22m[39m
+    [90m230| [39m */[39m
+    [90m231| [39m[35mexport[39m [35mfunction[39m [34mapplySensitiveFilter[39m(context[33m,[39m options [33m=[39m {}) {
+    [90m232| [39m  return tracer.startActiveSpan('commit_story.filter.apply', (span) =>…
+    [90m   | [39m  [31m^[39m
+    [90m233| [39m    [35mtry[39m {
+    [90m234| [39m      span[33m.[39m[34msetAttribute[39m([32m'commit_story.filter.type'[39m[33m,[39m [32m'sensitive_data'[39m)[33m;[39m
+[90m [2m❯[22m tests/integrators/filters/sensitive-filter.test.js:[2m312:40[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[28/32]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m tests/integrators/filters/sensitive-filter.test.js[2m > [22mapplySensitiveFilter[2m > [22mredacts secrets in chat messages
+[31m[1mReferenceError[22m: tracer is not defined[39m
+[36m [2m❯[22m applySensitiveFilter src/integrators/filters/sensitive-filter.js:[2m232:3[22m[39m
+    [90m230| [39m */[39m
+    [90m231| [39m[35mexport[39m [35mfunction[39m [34mapplySensitiveFilter[39m(context[33m,[39m options [33m=[39m {}) {
+    [90m232| [39m  return tracer.startActiveSpan('commit_story.filter.apply', (span) =>…
+    [90m   | [39m  [31m^[39m
+    [90m233| [39m    [35mtry[39m {
+    [90m234| [39m      span[33m.[39m[34msetAttribute[39m([32m'commit_story.filter.type'[39m[33m,[39m [32m'sensitive_data'[39m)[33m;[39m
+[90m [2m❯[22m tests/integrators/filters/sensitive-filter.test.js:[2m324:40[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[29/32]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m tests/integrators/filters/sensitive-filter.test.js[2m > [22mapplySensitiveFilter[2m > [22mcalculates total redactions across all sources
+[31m[1mReferenceError[22m: tracer is not defined[39m
+[36m [2m❯[22m applySensitiveFilter src/integrators/filters/sensitive-filter.js:[2m232:3[22m[39m
+    [90m230| [39m */[39m
+    [90m231| [39m[35mexport[39m [35mfunction[39m [34mapplySensitiveFilter[39m(context[33m,[39m options [33m=[39m {}) {
+    [90m232| [39m  return tracer.startActiveSpan('commit_story.filter.apply', (span) =>…
+    [90m   | [39m  [31m^[39m
+    [90m233| [39m    [35mtry[39m {
+    [90m234| [39m      span[33m.[39m[34msetAttribute[39m([32m'commit_story.filter.type'[39m[33m,[39m [32m'sensitive_data'[39m)[33m;[39m
+[90m [2m❯[22m tests/integrators/filters/sensitive-filter.test.js:[2m338:40[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[30/32]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m tests/integrators/filters/sensitive-filter.test.js[2m > [22mapplySensitiveFilter[2m > [22mreturns unchanged context when no secrets found
+[31m[1mReferenceError[22m: tracer is not defined[39m
+[36m [2m❯[22m applySensitiveFilter src/integrators/filters/sensitive-filter.js:[2m232:3[22m[39m
+    [90m230| [39m */[39m
+    [90m231| [39m[35mexport[39m [35mfunction[39m [34mapplySensitiveFilter[39m(context[33m,[39m options [33m=[39m {}) {
+    [90m232| [39m  return tracer.startActiveSpan('commit_story.filter.apply', (span) =>…
+    [90m   | [39m  [31m^[39m
+    [90m233| [39m    [35mtry[39m {
+    [90m234| [39m      span[33m.[39m[34msetAttribute[39m([32m'commit_story.filter.type'[39m[33m,[39m [32m'sensitive_data'[39m)[33m;[39m
+[90m [2m❯[22m tests/integrators/filters/sensitive-filter.test.js:[2m348:40[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[31/32]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m tests/integrators/filters/sensitive-filter.test.js[2m > [22mapplySensitiveFilter[2m > [22mpasses redactEmails option through
+[31m[1mReferenceError[22m: tracer is not defined[39m
+[36m [2m❯[22m applySensitiveFilter src/integrators/filters/sensitive-filter.js:[2m232:3[22m[39m
+    [90m230| [39m */[39m
+    [90m231| [39m[35mexport[39m [35mfunction[39m [34mapplySensitiveFilter[39m(context[33m,[39m options [33m=[39m {}) {
+    [90m232| [39m  return tracer.startActiveSpan('commit_story.filter.apply', (span) =>…
+    [90m   | [39m  [31m^[39m
+    [90m233| [39m    [35mtry[39m {
+    [90m234| [39m      span[33m.[39m[34msetAttribute[39m([32m'commit_story.filter.type'[39m[33m,[39m [32m'sensitive_data'[39m)[33m;[39m
+[90m [2m❯[22m tests/integrators/filters/sensitive-filter.test.js:[2m362:50[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[32/32]⎯[22m[39m
+
+
+Warning: SDK init file does not match recognized NodeSDK pattern. Instrumentation config written to orbweaver-instrumentations.js — integrate manually into your telemetry setup.
+Branch: orbweaver/instrument-1773627869602
+========================
+End timestamp: 2026-03-15 22:44:49 CDT
+=== Run-4 End ===

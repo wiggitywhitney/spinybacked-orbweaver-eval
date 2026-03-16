@@ -23,6 +23,11 @@ Entry format: `- (YYYY-MM-DD) Description of feature-level change (PRD #X, miles
 - (2026-03-15) Brought run-3 evaluation artifacts (7 files) from prd-3 branch to run-4 branch for baseline reference (PRD #4, pre-run verification)
 - (2026-03-15) Documented 9 new source files since run-3 — run-4 will process ~30 files vs 21 in run-3 (PRD #4, pre-run verification)
 
+- (2026-03-16) Completed evaluation run-4: 29 files processed, 26 success, 3 partial, 0 failed. Rescued journal-graph.js and context-integrator.js from persistent failure. Cost $5.84 in 1h20m (PRD #4, evaluation run-4)
+- (2026-03-16) Discovered critical schema evolution bug — agent outputs string IDs, parser expects YAML objects. Schema never evolved across files. Filed as run-4 orb issue #1 (PRD #4, evaluation run-4)
+- (2026-03-16) Identified 9 orbweaver issues from run-4: schema evolution, test/retry gaps, missing tracer import, validation gaps, output discoverability, draft PR proposal, LOC-based test cadence (PRD #4, evaluation run-4)
+- (2026-03-16) Created lessons-for-prd5.md with rubric gaps, process improvements, methodology observations, and carry-forward items (PRD #4, collect lessons)
+
 ### Changed
 - (2026-03-15) Renamed all "orb" references to "orbweaver" in PRD #4 and evaluation docs to match CLI rename (spinybacked-orbweaver #123)
 - (2026-03-15) Added PII acceptance annotation to `commit_story.commit.author` in Weaver registry — git author names are public, accepted with documentation (PRD #4, schema and rubric updates)

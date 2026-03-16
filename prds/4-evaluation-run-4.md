@@ -137,7 +137,7 @@ Three-phase approach:
   5. **NDS-006 module system consistency**: Already in rubric (orbweaver #105, closed). Rule count now 32.
   6. **COV-006 OpenLLMetry coverage**: JS package partially covers LangChain (chat model calls via callback injection) but has significant LangGraph gaps — node execution, state transitions, graph compilation NOT instrumented. Manual spans justified for graph orchestration. Updated rubric-codebase-mapping.
 
-- [ ] **Evaluation run-4** — Execute `orbweaver instrument` with all process improvements:
+- [x] **Evaluation run-4** — Execute `orbweaver instrument` with all process improvements:
   1. Clean codebase state: start from main branch with evaluation config (orbweaver.yaml, instrumentation.js, semconv/)
   2. Run in foreground for real-time visibility: `orbweaver instrument src/ --verbose -y`
   3. Record wall-clock start timestamp
@@ -148,7 +148,7 @@ Three-phase approach:
   8. Capture all output to `evaluation/run-4/orb-output.log`
   9. Record final tally: files instrumented / correctly skipped / failed
 
-- [ ] **Collect lessons for PRD #5** — Create `evaluation/run-4/lessons-for-prd5.md` at the START of evaluation work and append to it throughout all subsequent milestones. Capture:
+- [x] **Collect lessons for PRD #5** — Create `evaluation/run-4/lessons-for-prd5.md` at the START of evaluation work and append to it throughout all subsequent milestones. Capture:
   1. Rubric gaps discovered during evaluation (new rules needed, scoring ambiguities)
   2. Process improvements (things that worked well, things that didn't)
   3. Evaluation methodology changes (better ways to score, new agent patterns)
@@ -319,3 +319,5 @@ Encoded in the milestones but listed explicitly for reference:
 | 2026-03-15 | Accept `commit_story.commit.author` as PII with annotation | Git author names are public metadata on every commit; author attribution is core to journal purpose. Added `note` to registry attribute rather than hashing or removing. CDQ-007 evaluators can see PII was consciously accepted |
 | 2026-03-15 | Add `commit_story.git.subcommand` and `commit_story.commit.parent_count` to Weaver registry | Both were ad-hoc attributes the agent invented in run-3 (SCH-002). They're legitimate domain attributes. Orbweaver #102 and #147 fixed agent-side handling; registry pre-registration removes a known failure point. Filed commit-story-v2#49 for upstream sync |
 | 2026-03-15 | Manual spans justified for LangGraph orchestration despite OpenLLMetry availability | `@traceloop/instrumentation-langchain` JS package covers LangChain chat model calls but NOT LangGraph node execution, state transitions, or graph compilation. Python package is more mature. Manual spans on graph nodes are the correct pattern for commit-story-v2 |
+| 2026-03-16 | Track orbweaver issues and evaluation process lessons in separate documents | Run-4 discovered both categories simultaneously. `orb-issues-to-file.md` feeds GitHub issues on spinybacked-orbweaver; `lessons-for-prd5.md` feeds PRD #5. The distinction prevents mixing software bugs with process improvements |
+| 2026-03-16 | Schema evolution broken — format mismatch between agent output and parser | Agent outputs schemaExtensions as string IDs per prompt spec; parseExtension() expects YAML objects with id field. All extensions rejected as "(unparseable)". Schema never evolved across 29 files. Critical orbweaver bug — filed as run-4 orb issue #1 |
