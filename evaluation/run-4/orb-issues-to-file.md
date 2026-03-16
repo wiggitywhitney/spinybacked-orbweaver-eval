@@ -120,33 +120,7 @@ The "Schema extensions rejected by namespace enforcement" warning in the PR summ
 
 ---
 
-## Issue #6: Create draft PR even when tests fail
-
-**Priority:** Medium
-**Category:** UX / workflow improvement
-**Status:** Idea — needs design decision
-
-When the end-of-run test suite fails, orbweaver skips PR creation entirely. The instrumented code is committed to a local branch and the PR summary is saved to `orbweaver-pr-summary.md`, but a user would have to know to look for both. A draft PR would put everything in one place — the diff, the agent notes, the advisory findings — making it easy to review, cherry-pick good files, and fix small issues manually.
-
-**Current behavior:**
-- Tests fail → no push, no PR
-- Code lives on a local branch the user may not know about
-- PR summary saved to a file the user may not know about
-- User gets a wall of test failure output and nothing actionable
-
-**Proposed behavior:**
-- Tests fail → push branch, create **draft** PR with test failure summary appended
-- Draft PR shows the full diff, agent notes, and a clear "tests failed — here's what broke" section
-- User can review the diff, fix small issues (e.g., add a missing import), and promote to ready
-
-**Acceptance criteria (if adopted):**
-1. When end-of-run tests fail, orbweaver still pushes the branch and creates a draft PR
-2. The draft PR body includes the standard PR summary plus a "Test Failures" section listing which tests failed and why
-3. The draft status signals to reviewers that the instrumentation needs human attention
-
----
-
-## Issue #7: CLI output doesn't tell the user where to find results
+## Issue #6: CLI output doesn't tell the user where to find results
 
 **Priority:** High
 **Category:** UX / output clarity
@@ -171,13 +145,13 @@ When the run ends — especially when it ends with test failures — the CLI out
 
 ---
 
-## Issue #8: Create draft PR even when tests fail
+## Issue #7: Create draft PR even when tests fail
 
 **Priority:** Medium
 **Category:** UX / workflow improvement
 **Status:** Idea — needs design decision
 
-(Complements Issue #7 — even with better CLI output, a draft PR puts everything in one place.)
+(Complements Issue #6 — even with better CLI output, a draft PR puts everything in one place.)
 
 When the end-of-run test suite fails, orbweaver skips PR creation entirely. The instrumented code is committed to a local branch and the PR summary is saved to `orbweaver-pr-summary.md`, but a user would have to know to look for both. A draft PR would put everything in one place — the diff, the agent notes, the advisory findings — making it easy to review, cherry-pick good files, and fix small issues manually.
 
@@ -199,7 +173,7 @@ When the end-of-run test suite fails, orbweaver skips PR creation entirely. The 
 
 ---
 
-## Issue #9: Test cadence should be LOC-aware, not just file-count-based
+## Issue #8: Test cadence should be LOC-aware, not just file-count-based
 
 
 **Priority:** Medium
