@@ -11,7 +11,7 @@
     "files_zero_span": 10,
     "files_failed": 3,
     "total_spans": 48,
-    "note": "summary-graph.js, sensitive-filter.js, and journal-manager.js are reported as 'partial' in the PR summary but have NO changes on the orbweaver branch — their instrumentation was never committed. They are evaluated as failed files."
+    "file_count_note": "files_on_branch (17) vs files_with_spans (16): monthly-summary-prompt.js is on the branch with unused OTel imports but 0 spans, accounting for the difference. files_failed (3) are summary-graph.js, sensitive-filter.js, and journal-manager.js — reported as 'partial' in the PR summary but have NO changes on the orbweaver branch (instrumentation never committed). rubric-scores.json uses files_instrumented_on_branch (16) which equals files_with_spans."
   },
   "per_run": {
     "NDS-001": {
