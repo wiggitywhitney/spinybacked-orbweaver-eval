@@ -174,6 +174,7 @@ Three-phase approach:
   6. Emit per-file evaluation results as a canonical JSON artifact (`evaluation/run-4/per-file-evaluation.json`) — render the markdown report from it to prevent drift between evaluation docs
   7. Document in `evaluation/run-4/per-file-evaluation.md` (generated from the JSON artifact)
   8. Append any rubric scoring ambiguities or methodology observations to `evaluation/run-4/lessons-for-prd5.md`
+  9. Append any new orbweaver software bugs discovered during evaluation to `evaluation/run-4/orb-issues-to-file.md`
 
 - [ ] **PR artifact evaluation** — Evaluate the PR as a first-class deliverable:
   1. If PR exists: evaluate description quality, per-file table, span counts, agent decision notes
@@ -181,12 +182,15 @@ Three-phase approach:
   3. If PR was lost: document why and assess whether orbweaver issue #12 (credential validation) and #13 (local summary) were fixed
   4. Document in `evaluation/run-4/pr-evaluation.md`
   5. Append any PR quality observations to `evaluation/run-4/lessons-for-prd5.md`
+  6. Append any new orbweaver software bugs to `evaluation/run-4/orb-issues-to-file.md`
 
 - [ ] **Rubric scoring** — Synthesize per-file findings into dimension-level scores:
   1. Aggregate per-file agent findings from `evaluation/run-4/per-file-evaluation.json`
   2. Score each dimension (NDS, COV, RST, API, SCH, CDQ) with per-rule evidence
   3. Classify each failure: stale build repeat / new regression / genuine new finding / schema design issue
   4. Emit as `evaluation/run-4/rubric-scores.json` (machine-readable) and render `evaluation/run-4/rubric-scores.md` from it (run-3-compatible format)
+  5. Append any new rubric gaps or scoring ambiguities to `evaluation/run-4/lessons-for-prd5.md`
+  6. Append any new orbweaver software bugs to `evaluation/run-4/orb-issues-to-file.md`
 
 - [ ] **Baseline comparison and synthesis** — Compare run-4 vs run-3 vs run-2:
   1. Dimension-level trend analysis (4-run where applicable)
@@ -194,6 +198,7 @@ Three-phase approach:
   3. Failure classification: resolved / persistent / new
   4. Assessment of run-3 prediction: did fresh build push quality to ~85%?
   5. Document in `evaluation/run-4/baseline-comparison.md`
+  6. Append any cross-run process observations to `evaluation/run-4/lessons-for-prd5.md`
 
 - [ ] **Actionable fix output** — Produce fix instructions for remaining failures:
   1. For each remaining quality rule failure: what's wrong, evidence, desired outcome
@@ -204,8 +209,9 @@ Three-phase approach:
   6. Generate from the canonical JSON artifacts (`per-file-evaluation.json`, `rubric-scores.json`) to prevent drift between evaluation docs
   7. Document in `evaluation/run-4/actionable-fix-output.md`
   8. Final review of `evaluation/run-4/lessons-for-prd5.md` — ensure all forward-looking items are captured
+  9. Final review of `evaluation/run-4/orb-issues-to-file.md` — ensure all orbweaver bugs are captured with acceptance criteria
 
-- [ ] **Draft PRD #5 for next evaluation run** — Create a PRD for evaluation run-5 following the structure of this PRD. Primary input: `evaluation/run-4/lessons-for-prd5.md` (rubric gaps, process improvements, evaluation methodology changes collected throughout run-4). Also incorporate run-4 scores as baselines, carry forward unresolved bugs/spec gaps/rubric gaps, and encode process lessons. The goal is a self-improving evaluation chain where each run's PRD encodes the lessons of previous runs.
+- [ ] **Draft PRD #5 for next evaluation run** — Create a PRD for evaluation run-5 following the structure of this PRD. Primary inputs: `evaluation/run-4/lessons-for-prd5.md` (process improvements, rubric gaps, evaluation methodology changes) and `evaluation/run-4/orb-issues-to-file.md` (orbweaver software bugs to verify as fixed). Also incorporate run-4 scores as baselines, carry forward unresolved bugs/spec gaps/rubric gaps, and encode process lessons. The goal is a self-improving evaluation chain where each run's PRD encodes the lessons of previous runs.
 
 ---
 
@@ -321,3 +327,4 @@ Encoded in the milestones but listed explicitly for reference:
 | 2026-03-15 | Manual spans justified for LangGraph orchestration despite OpenLLMetry availability | `@traceloop/instrumentation-langchain` JS package covers LangChain chat model calls but NOT LangGraph node execution, state transitions, or graph compilation. Python package is more mature. Manual spans on graph nodes are the correct pattern for commit-story-v2 |
 | 2026-03-16 | Track orbweaver issues and evaluation process lessons in separate documents | Run-4 discovered both categories simultaneously. `orb-issues-to-file.md` feeds GitHub issues on spinybacked-orbweaver; `lessons-for-prd5.md` feeds PRD #5. The distinction prevents mixing software bugs with process improvements |
 | 2026-03-16 | Schema evolution broken — format mismatch between agent output and parser | Agent outputs schemaExtensions as string IDs per prompt spec; parseExtension() expects YAML objects with id field. All extensions rejected as "(unparseable)". Schema never evolved across 29 files. Critical orbweaver bug — filed as run-4 orb issue #1 |
+| 2026-03-16 | Every evaluation milestone must update both output documents | Failure deep-dives revealed the two output streams (`orb-issues-to-file.md` for orbweaver bugs, `lessons-for-prd5.md` for process improvements) were only referenced in some milestones. Added explicit update steps to all remaining milestones to prevent findings from being lost |
