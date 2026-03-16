@@ -10,10 +10,11 @@ Run-4 had **0 full failures** and **3 partial results** — a significant improv
 |------|-------|-------|-------|---------|
 | journal-graph.js | failed (token budget) | failed (oscillation) | success (4 spans) | **Rescued** |
 | context-integrator.js | failed (NDS-003) | failed (NDS-003) | success (1 span) | **Rescued** |
+| summary-graph.js | failed (token budget) | failed (oscillation) | partial (12/12 fn, 6 spans) | Improved |
 | sensitive-filter.js | failed (null output) | failed (null output) | partial (2/3 fn, 2 spans) | Improved |
 | journal-manager.js | failed (NDS-003) | failed (NDS-003 x5) | partial (1/3 fn, 0 spans) | Improved |
 
-**2 of 4 persistent failures fully rescued, 2 improved to partial.** However, both partial files committed broken code (missing `tracer` import) that caused 32 test failures discovered only at end-of-run.
+**2 of 5 persistent failures fully rescued, 3 improved to partial.** However, summary-graph.js and sensitive-filter.js committed broken code (missing `tracer` import) that caused 32 test failures (21 + 11) discovered only at end-of-run.
 
 ---
 
