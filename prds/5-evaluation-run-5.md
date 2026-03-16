@@ -144,7 +144,7 @@ Four-phase approach:
   7. **Systemic bug classification** — When one root cause causes N files to fail the same rule (e.g., CDQ-002 unknown_service → 16 files), classify as a single systemic bug with N affected instances, not N independent violations.
   8. **Branch state verification** — Evaluate `git diff main..orbweaver-branch` for ground truth about what was delivered. Do not trust the PR summary's self-reported per-file status table. Run-4 found 3 "partial" files with NO changes on the branch.
   9. **Cost anomaly as diagnostic signal** — Add to evaluation methodology: if actual cost < 15% of ceiling, investigate whether the prompt is changing between files (symptom of broken schema evolution or over-aggressive caching).
-  10. Apply rubric changes to `spinybacked-orbweaver/research/evaluation-rubric.md` and update `rubric-codebase-mapping.md` if commit-story-v2 library classification needs correction (currently says CLI tool; should say library → peerDependencies is correct for @opentelemetry/api).
+  10. Apply rubric changes to `spinybacked-orbweaver/research/evaluation-rubric.md`. Update `rubric-codebase-mapping.md` to correct the commit-story-v2 classification from "CLI tool" to "library" — `peerDependencies` is the correct placement for `@opentelemetry/api`.
   11. Append any new rubric gaps or methodology observations to `evaluation/run-5/lessons-for-prd6.md`
 
 - [ ] **Pre-run verification** — Verify orbweaver fixes and validate run prerequisites:
