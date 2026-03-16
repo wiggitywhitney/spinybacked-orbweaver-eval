@@ -6,6 +6,8 @@ Each finding includes priority classification (Critical/High/Medium/Low), recomm
 
 **Baseline**: Run-4 produced 13 findings (`evaluation/run-4/orb-findings.md`). Run-5 findings build on that baseline, tracking which were resolved, which persist, and what's new.
 
+**Cross-run comparability note**: Run-5 is the first evaluation where SCH-001 through SCH-004 validation fires during the agent's fix loop (PR #173) and where prompt changes affect span naming guidance (PR #175). All prior run SCH scores reflect an agent that never received schema feedback during instrumentation. Score changes in the SCH dimension should be attributed to this infrastructure change, not solely to agent quality improvement.
+
 ---
 
 ## Resolved from Run-4
