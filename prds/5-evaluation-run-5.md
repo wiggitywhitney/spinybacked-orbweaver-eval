@@ -2,7 +2,7 @@
 
 **Status:** Draft
 **Created:** 2026-03-16
-**GitHub Issue:** TBD (create after PRD is on main)
+**GitHub Issue:** #11
 **Depends on:** PRD #4 (run-4 complete, 13 findings documented, handoff delivered to orbweaver)
 
 ---
