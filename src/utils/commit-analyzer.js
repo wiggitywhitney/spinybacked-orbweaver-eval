@@ -5,7 +5,10 @@
  * Checks for journal-only commits and merge commits.
  */
 
+import { trace, SpanStatusCode } from '@opentelemetry/api';
 import { execFileSync } from 'node:child_process';
+
+const tracer = trace.getTracer('unknown_service');
 
 /**
  * Validate that a string is a safe git ref (no shell metacharacters)
@@ -28,17 +31,26 @@ export function isSafeGitRef(ref) {
  * @returns {string[]} Array of file paths
  */
 export function getChangedFiles(commitRef) {
-  if (!isSafeGitRef(commitRef)) {
-    return [];
-  }
-  try {
-    const output = execFileSync('git', ['diff-tree', '--no-commit-id', '--name-only', '-r', commitRef], {
-      encoding: 'utf-8',
-    });
-    return output.trim().split('\n').filter(Boolean);
-  } catch {
-    return [];
-  }
+  return tracer.startActiveSpan('commit_story.git.get_changed_files', (span) => {
+    span.setAttribute('vcs.ref.head.revision', commitRef);
+    span.setAttribute('commit_story.git.subcommand', 'diff-tree');
+    if (!isSafeGitRef(commitRef)) {
+      span.end();
+      return [];
+    }
+    try {
+      const output = execFileSync('git', ['diff-tree', '--no-commit-id', '--name-only', '-r', commitRef], {
+        encoding: 'utf-8',
+      });
+      return output.trim().split('\n').filter(Boolean);
+    } catch (error) {
+      span.recordException(error);
+      span.setStatus({ code: SpanStatusCode.ERROR });
+      return [];
+    } finally {
+      span.end();
+    }
+  });
 }
 
 /**
@@ -70,25 +82,34 @@ export function isJournalEntriesOnlyCommit(commitRef) {
  * @returns {{ isMerge: boolean, parentCount: number }}
  */
 export function isMergeCommit(commitRef) {
-  if (!isSafeGitRef(commitRef)) {
-    return { isMerge: false, parentCount: 1 };
-  }
-  try {
-    // Get commit object and count parent lines
-    const output = execFileSync('git', ['cat-file', '-p', commitRef], { encoding: 'utf-8' });
-    const parentLines = output.split('\n').filter((line) => line.startsWith('parent '));
-    const parentCount = parentLines.length;
-
-    return {
-      isMerge: parentCount > 1,
-      parentCount,
-    };
-  } catch {
-    return {
-      isMerge: false,
-      parentCount: 1,
-    };
-  }
+  return tracer.startActiveSpan('commit_story.git.is_merge_commit', (span) => {
+    span.setAttribute('vcs.ref.head.revision', commitRef);
+    span.setAttribute('commit_story.git.subcommand', 'cat-file');
+    if (!isSafeGitRef(commitRef)) {
+      span.end();
+      return { isMerge: false, parentCount: 1 };
+    }
+    try {
+      // Get commit object and count parent lines
+      const output = execFileSync('git', ['cat-file', '-p', commitRef], { encoding: 'utf-8' });
+      const parentLines = output.split('\n').filter((line) => line.startsWith('parent '));
+      const parentCount = parentLines.length;
+      span.setAttribute('commit_story.commit.parent_count', parentCount);
+      return {
+        isMerge: parentCount > 1,
+        parentCount,
+      };
+    } catch (error) {
+      span.recordException(error);
+      span.setStatus({ code: SpanStatusCode.ERROR });
+      return {
+        isMerge: false,
+        parentCount: 1,
+      };
+    } finally {
+      span.end();
+    }
+  });
 }
 
 /**
@@ -128,27 +149,40 @@ export function shouldSkipMergeCommit(commitRef, context) {
  * @returns {Object} Commit metadata
  */
 export function getCommitMetadata(commitRef) {
-  if (!isSafeGitRef(commitRef)) {
-    throw new Error(`Invalid commit reference: ${commitRef}`);
-  }
-  try {
-    // Get formatted commit info
-    const format = '%H%n%h%n%s%n%an%n%ae%n%cI';
-    const output = execFileSync('git', ['log', '-1', `--format=${format}`, commitRef], {
-      encoding: 'utf-8',
-    });
+  return tracer.startActiveSpan('commit_story.git.get_commit_metadata', (span) => {
+    span.setAttribute('vcs.ref.head.revision', commitRef);
+    span.setAttribute('commit_story.git.subcommand', 'log');
+    if (!isSafeGitRef(commitRef)) {
+      span.setStatus({ code: SpanStatusCode.ERROR });
+      span.end();
+      throw new Error(`Invalid commit reference: ${commitRef}`);
+    }
+    try {
+      // Get formatted commit info
+      const format = '%H%n%h%n%s%n%an%n%ae%n%cI';
+      const output = execFileSync('git', ['log', '-1', `--format=${format}`, commitRef], {
+        encoding: 'utf-8',
+      });
 
-    const [hash, shortHash, subject, author, authorEmail, timestamp] = output.trim().split('\n');
+      const [hash, shortHash, subject, author, authorEmail, timestamp] = output.trim().split('\n');
 
-    return {
-      hash,
-      shortHash,
-      subject,
-      author,
-      authorEmail,
-      timestamp: new Date(timestamp),
-    };
-  } catch (error) {
-    throw new Error(`Failed to get commit metadata: ${error.message}`);
-  }
+      span.setAttribute('commit_story.commit.author', author);
+      span.setAttribute('commit_story.commit.message', subject);
+      span.setAttribute('commit_story.commit.timestamp', timestamp);
+      return {
+        hash,
+        shortHash,
+        subject,
+        author,
+        authorEmail,
+        timestamp: new Date(timestamp),
+      };
+    } catch (error) {
+      span.recordException(error);
+      span.setStatus({ code: SpanStatusCode.ERROR });
+      throw new Error(`Failed to get commit metadata: ${error.message}`);
+    } finally {
+      span.end();
+    }
+  });
 }
