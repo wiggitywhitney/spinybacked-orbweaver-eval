@@ -5,6 +5,10 @@
  * Truncates large diffs first, then older messages if needed.
  */
 
+import { trace, SpanStatusCode } from '@opentelemetry/api';
+
+const tracer = trace.getTracer('unknown_service');
+
 /**
  * Estimate token count using character-based heuristic
  * Claude uses ~4 characters per token on average
@@ -40,42 +44,61 @@ function formatMessagesForEstimation(messages) {
  * @returns {object} Truncated diff and metadata
  */
 export function truncateDiff(diff, maxTokens) {
-  if (!diff) {
-    return { diff: '', truncated: false, originalTokens: 0 };
-  }
+  return tracer.startActiveSpan('commit_story.filter.truncate_diff', (span) => {
+    try {
+      span.setAttribute('commit_story.filter.type', 'token_budget');
 
-  const originalTokens = estimateTokens(diff);
+      if (!diff) {
+        span.setAttribute('commit_story.filter.tokens_before', 0);
+        span.setAttribute('commit_story.filter.tokens_after', 0);
+        return { diff: '', truncated: false, originalTokens: 0 };
+      }
 
-  if (originalTokens <= maxTokens) {
-    return { diff, truncated: false, originalTokens };
-  }
+      const originalTokens = estimateTokens(diff);
 
-  // Calculate target character length
-  const targetChars = Math.floor(maxTokens * 3.5);
+      if (originalTokens <= maxTokens) {
+        span.setAttribute('commit_story.filter.tokens_before', originalTokens);
+        span.setAttribute('commit_story.filter.tokens_after', originalTokens);
+        return { diff, truncated: false, originalTokens };
+      }
 
-  // Try to truncate at a file boundary (diff --git line)
-  const truncated = diff.substring(0, targetChars);
-  const lastFileStart = truncated.lastIndexOf('\ndiff --git ');
+      // Calculate target character length
+      const targetChars = Math.floor(maxTokens * 3.5);
 
-  let finalDiff;
-  if (lastFileStart > targetChars * 0.5) {
-    // Keep complete files up to the boundary
-    finalDiff = truncated.substring(0, lastFileStart);
-  } else {
-    // Just truncate at character limit and add indicator
-    finalDiff = truncated;
-  }
+      // Try to truncate at a file boundary (diff --git line)
+      const truncated = diff.substring(0, targetChars);
+      const lastFileStart = truncated.lastIndexOf('\ndiff --git ');
 
-  // Add truncation indicator
-  const truncationMessage = `\n\n[DIFF TRUNCATED - Original: ${originalTokens} tokens, Shown: ~${estimateTokens(finalDiff)} tokens]`;
-  const finalDiffWithMessage = finalDiff + truncationMessage;
+      let finalDiff;
+      if (lastFileStart > targetChars * 0.5) {
+        // Keep complete files up to the boundary
+        finalDiff = truncated.substring(0, lastFileStart);
+      } else {
+        // Just truncate at character limit and add indicator
+        finalDiff = truncated;
+      }
 
-  return {
-    diff: finalDiffWithMessage,
-    truncated: true,
-    originalTokens,
-    shownTokens: estimateTokens(finalDiffWithMessage),
-  };
+      // Add truncation indicator
+      const truncationMessage = `\n\n[DIFF TRUNCATED - Original: ${originalTokens} tokens, Shown: ~${estimateTokens(finalDiff)} tokens]`;
+      const finalDiffWithMessage = finalDiff + truncationMessage;
+
+      span.setAttribute('commit_story.filter.tokens_before', originalTokens);
+      span.setAttribute('commit_story.filter.tokens_after', estimateTokens(finalDiffWithMessage));
+
+      return {
+        diff: finalDiffWithMessage,
+        truncated: true,
+        originalTokens,
+        shownTokens: estimateTokens(finalDiffWithMessage),
+      };
+    } catch (error) {
+      span.recordException(error);
+      span.setStatus({ code: SpanStatusCode.ERROR });
+      throw error;
+    } finally {
+      span.end();
+    }
+  });
 }
 
 /**
@@ -86,37 +109,62 @@ export function truncateDiff(diff, maxTokens) {
  * @returns {object} Truncated messages and metadata
  */
 export function truncateMessages(messages, maxTokens) {
-  if (!messages || messages.length === 0) {
-    return { messages: [], truncated: false, originalCount: 0 };
-  }
+  return tracer.startActiveSpan('commit_story.filter.truncate_messages', (span) => {
+    try {
+      span.setAttribute('commit_story.filter.type', 'token_budget');
 
-  const originalCount = messages.length;
-  const fullText = formatMessagesForEstimation(messages);
-  const originalTokens = estimateTokens(fullText);
+      if (!messages || messages.length === 0) {
+        span.setAttribute('commit_story.filter.messages_before', 0);
+        span.setAttribute('commit_story.filter.messages_after', 0);
+        span.setAttribute('commit_story.filter.tokens_before', 0);
+        span.setAttribute('commit_story.filter.tokens_after', 0);
+        return { messages: [], truncated: false, originalCount: 0 };
+      }
 
-  if (originalTokens <= maxTokens) {
-    return { messages, truncated: false, originalCount, originalTokens };
-  }
+      const originalCount = messages.length;
+      const fullText = formatMessagesForEstimation(messages);
+      const originalTokens = estimateTokens(fullText);
 
-  // Remove oldest messages until we fit
-  // Messages should already be sorted chronologically
-  let truncatedMessages = [...messages];
-  let currentTokens = originalTokens;
+      if (originalTokens <= maxTokens) {
+        span.setAttribute('commit_story.filter.messages_before', originalCount);
+        span.setAttribute('commit_story.filter.messages_after', originalCount);
+        span.setAttribute('commit_story.filter.tokens_before', originalTokens);
+        span.setAttribute('commit_story.filter.tokens_after', originalTokens);
+        return { messages, truncated: false, originalCount, originalTokens };
+      }
 
-  while (truncatedMessages.length > 1 && currentTokens > maxTokens) {
-    // Remove oldest (first) message
-    truncatedMessages.shift();
-    currentTokens = estimateTokens(formatMessagesForEstimation(truncatedMessages));
-  }
+      // Remove oldest messages until we fit
+      // Messages should already be sorted chronologically
+      let truncatedMessages = [...messages];
+      let currentTokens = originalTokens;
 
-  return {
-    messages: truncatedMessages,
-    truncated: true,
-    originalCount,
-    preservedCount: truncatedMessages.length,
-    originalTokens,
-    finalTokens: currentTokens,
-  };
+      while (truncatedMessages.length > 1 && currentTokens > maxTokens) {
+        // Remove oldest (first) message
+        truncatedMessages.shift();
+        currentTokens = estimateTokens(formatMessagesForEstimation(truncatedMessages));
+      }
+
+      span.setAttribute('commit_story.filter.messages_before', originalCount);
+      span.setAttribute('commit_story.filter.messages_after', truncatedMessages.length);
+      span.setAttribute('commit_story.filter.tokens_before', originalTokens);
+      span.setAttribute('commit_story.filter.tokens_after', currentTokens);
+
+      return {
+        messages: truncatedMessages,
+        truncated: true,
+        originalCount,
+        preservedCount: truncatedMessages.length,
+        originalTokens,
+        finalTokens: currentTokens,
+      };
+    } catch (error) {
+      span.recordException(error);
+      span.setStatus({ code: SpanStatusCode.ERROR });
+      throw error;
+    } finally {
+      span.end();
+    }
+  });
 }
 
 /**
@@ -127,71 +175,87 @@ export function truncateMessages(messages, maxTokens) {
  * @returns {object} Context with budget applied
  */
 export function applyTokenBudget(context, options = {}) {
-  const { totalBudget = 150000, diffBudget = 50000, chatBudget = 80000 } = options;
+  return tracer.startActiveSpan('commit_story.filter.apply_token_budget', (span) => {
+    try {
+      span.setAttribute('commit_story.filter.type', 'token_budget');
+      span.setAttribute('commit_story.filter.messages_before', context.chat && context.chat.messages ? context.chat.messages.length : 0);
 
-  const result = {
-    ...context,
-    metadata: {
-      ...context.metadata,
-      tokenBudget: {
-        total: totalBudget,
-        diffBudget,
-        chatBudget,
-      },
-    },
-  };
+      const { totalBudget = 150000, diffBudget = 50000, chatBudget = 80000 } = options;
 
-  // 1. Estimate commit metadata tokens (always included)
-  const commitMetaTokens = estimateTokens(
-    JSON.stringify({
-      hash: context.commit.hash,
-      message: context.commit.message,
-      author: context.commit.author,
-      timestamp: context.commit.timestamp,
-    })
-  );
+      const result = {
+        ...context,
+        metadata: {
+          ...context.metadata,
+          tokenBudget: {
+            total: totalBudget,
+            diffBudget,
+            chatBudget,
+          },
+        },
+      };
 
-  // 2. Process diff with budget
-  const diffResult = truncateDiff(context.commit.diff, diffBudget);
-  result.commit = {
-    ...context.commit,
-    diff: diffResult.diff,
-  };
-  result.metadata.tokenBudget.diffTruncated = diffResult.truncated;
-  result.metadata.tokenBudget.diffOriginalTokens = diffResult.originalTokens;
+      // 1. Estimate commit metadata tokens (always included)
+      const commitMetaTokens = estimateTokens(
+        JSON.stringify({
+          hash: context.commit.hash,
+          message: context.commit.message,
+          author: context.commit.author,
+          timestamp: context.commit.timestamp,
+        })
+      );
 
-  // 3. Process messages with budget
-  const messageResult = truncateMessages(context.chat.messages, chatBudget);
-  result.chat = {
-    ...context.chat,
-    messages: messageResult.messages,
-  };
-  result.metadata.tokenBudget.messagesTruncated = messageResult.truncated;
-  if (messageResult.truncated) {
-    result.metadata.tokenBudget.messagesOriginalCount = messageResult.originalCount;
-    result.metadata.tokenBudget.messagesPreservedCount = messageResult.preservedCount;
-  }
+      // 2. Process diff with budget
+      const diffResult = truncateDiff(context.commit.diff, diffBudget);
+      result.commit = {
+        ...context.commit,
+        diff: diffResult.diff,
+      };
+      result.metadata.tokenBudget.diffTruncated = diffResult.truncated;
+      result.metadata.tokenBudget.diffOriginalTokens = diffResult.originalTokens;
 
-  // 4. Calculate final token estimate
-  let diffTokens = estimateTokens(diffResult.diff);
-  let chatTokens = estimateTokens(formatMessagesForEstimation(messageResult.messages));
-  let tokenEstimate = commitMetaTokens + diffTokens + chatTokens;
+      // 3. Process messages with budget
+      const messageResult = truncateMessages(context.chat.messages, chatBudget);
+      result.chat = {
+        ...context.chat,
+        messages: messageResult.messages,
+      };
+      result.metadata.tokenBudget.messagesTruncated = messageResult.truncated;
+      if (messageResult.truncated) {
+        result.metadata.tokenBudget.messagesOriginalCount = messageResult.originalCount;
+        result.metadata.tokenBudget.messagesPreservedCount = messageResult.preservedCount;
+      }
 
-  // 5. Enforce totalBudget - if still over, truncate messages further
-  if (tokenEstimate > totalBudget && result.chat.messages.length > 1) {
-    const remainingBudget = totalBudget - commitMetaTokens - diffTokens;
-    if (remainingBudget > 0) {
-      const furtherTruncation = truncateMessages(result.chat.messages, remainingBudget);
-      result.chat.messages = furtherTruncation.messages;
-      result.metadata.tokenBudget.messagesTruncated = true;
-      result.metadata.tokenBudget.messagesOriginalCount = messageResult.originalCount;
-      result.metadata.tokenBudget.messagesPreservedCount = furtherTruncation.messages.length;
-      chatTokens = estimateTokens(formatMessagesForEstimation(furtherTruncation.messages));
-      tokenEstimate = commitMetaTokens + diffTokens + chatTokens;
+      // 4. Calculate final token estimate
+      let diffTokens = estimateTokens(diffResult.diff);
+      let chatTokens = estimateTokens(formatMessagesForEstimation(messageResult.messages));
+      let tokenEstimate = commitMetaTokens + diffTokens + chatTokens;
+
+      // 5. Enforce totalBudget - if still over, truncate messages further
+      if (tokenEstimate > totalBudget && result.chat.messages.length > 1) {
+        const remainingBudget = totalBudget - commitMetaTokens - diffTokens;
+        if (remainingBudget > 0) {
+          const furtherTruncation = truncateMessages(result.chat.messages, remainingBudget);
+          result.chat.messages = furtherTruncation.messages;
+          result.metadata.tokenBudget.messagesTruncated = true;
+          result.metadata.tokenBudget.messagesOriginalCount = messageResult.originalCount;
+          result.metadata.tokenBudget.messagesPreservedCount = furtherTruncation.messages.length;
+          chatTokens = estimateTokens(formatMessagesForEstimation(furtherTruncation.messages));
+          tokenEstimate = commitMetaTokens + diffTokens + chatTokens;
+        }
+      }
+
+      result.metadata.tokenEstimate = tokenEstimate;
+
+      span.setAttribute('commit_story.filter.messages_after', result.chat.messages.length);
+      span.setAttribute('commit_story.filter.tokens_after', tokenEstimate);
+
+      return result;
+    } catch (error) {
+      span.recordException(error);
+      span.setStatus({ code: SpanStatusCode.ERROR });
+      throw error;
+    } finally {
+      span.end();
     }
-  }
-
-  result.metadata.tokenEstimate = tokenEstimate;
-
-  return result;
+  });
 }
