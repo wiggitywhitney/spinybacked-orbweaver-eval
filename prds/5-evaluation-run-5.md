@@ -212,7 +212,7 @@ Four-phase approach:
   1. Aggregate from `evaluation/run-5/per-file-evaluation.json`.
   2. Score each dimension with per-rule evidence AND per-file instance counts (files passing/failing each rule).
   3. Apply schema coverage split scoring as standard (SCH-002 split by covered/uncovered files).
-  4. Classify each failure: persistent / new regression / genuine new finding / methodology-driven.
+  4. Classify each failure as persistent, new regression, genuine new finding, or methodology-driven.
   5. Apply systemic bug classification where applicable (one root cause → one finding, N affected instances).
   6. **Single canonical score** using per-file evaluation + schema coverage split. Provide methodology-adjusted comparison ONLY for backward compatibility with runs 2-4.
   7. Emit as `evaluation/run-5/rubric-scores.json` (canonical) and render `evaluation/run-5/rubric-scores.md`.
