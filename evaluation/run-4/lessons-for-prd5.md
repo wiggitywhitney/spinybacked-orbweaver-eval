@@ -22,10 +22,14 @@ What worked well, what didn't, and what should change for run-5.
 - **End-of-run-only test execution** — 32 test failures discovered only after all 29 files were processed. A per-file static check or unit test run would have caught the `tracer` import bug on file 14 instead of file 29.
 - **Schema evolution completely broken** — the central design feature of the Weaver architecture was non-functional. All extensions rejected as "unparseable" due to format mismatch between agent output (string IDs) and parser (expects YAML objects). No file saw extensions from previous files.
 - **"Partial" status masks broken code** — files marked "partial" had instrumentation committed that crashes at runtime (ReferenceError). "Partial" should mean "some functions instrumented, tests still pass" not "instrumentation committed but broken."
+- **Push authentication failed despite pre-run validation.** `git ls-remote origin` passed at pre-run, but `git push` failed 80 minutes later with "Invalid username or token." The pre-run credential check validates read access, not push access. Run-5 should verify push capability explicitly (e.g., `git push --dry-run` or push a test tag).
+- **0-span files produce noisy "commit failed" output.** 10 files correctly received 0 spans, but orbweaver still attempted a per-file git commit for each — generating "Nothing staged to commit" errors that pollute the output and make it harder to spot real failures. Orbweaver should skip the commit step when no changes were made.
 
 ### Changes for run-5
 - **Verify schema evolution is working** before processing more than 2 files. Add a pre-run check: instrument a test file, verify `agent-extensions.yaml` was written, resolve schema, confirm extensions appear.
 - **Track two separate issue streams** from the start: orbweaver software issues (→ GitHub issues) vs evaluation process lessons (→ lessons-for-prd6.md). Run-4 established this pattern mid-stream; run-5 should start with both documents created and the distinction clear.
+- **Pre-run push verification.** Replace `git ls-remote origin` with a push-capability check (e.g., `git push --dry-run` to a test branch). Read access alone is insufficient — the 80-minute run is wasted if push fails at the end.
+- **Failure deep-dives should cover run-level failures, not just file-level.** Run-4's deep-dive initially focused only on partial files. The push failure, schema evolution breakdown, test suite failure, and commit noise are equally important to document and cross-reference with orbweaver issues. PRD #5 should explicitly list both file-level and run-level failures in the milestone description.
 
 ## Evaluation Methodology
 

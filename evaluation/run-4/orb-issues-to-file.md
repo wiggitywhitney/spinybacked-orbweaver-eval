@@ -194,3 +194,22 @@ A tiered strategy mirroring real project CI, where the trigger for running tests
 1. At minimum, a static parse/lint check runs after every file before commit
 2. Unit tests run more frequently for larger diffs than smaller ones
 3. The specific thresholds and triggers are configurable
+
+---
+
+## Issue #9: Skip per-file commit for zero-change files
+
+**Priority:** Low
+**Category:** UX / output noise
+
+When a file receives 0 spans (correct decision — pure data, config, constant exports), orbweaver still attempts a per-file git commit. Since no changes were made, the commit fails with "Nothing staged to commit." In run-4, this produced 10 spurious error messages that pollute the output and make it harder to spot real failures.
+
+**Evidence from run-4:**
+- 10 files correctly received 0 spans (accessibility.js, anti-hallucination.js, index.js, daily-summary-prompt.js, dialogue-prompt.js, monthly-summary-prompt.js, summary-prompt.js, technical-decisions-prompt.js, weekly-summary-prompt.js, config.js)
+- Each generated a "Per-file commit failed" error in the output
+- These interleaved with real processing output, making the log harder to scan
+
+**Acceptance criteria:**
+1. When a file receives 0 spans and no changes were made, skip the commit step entirely
+2. Log "skipped commit (no changes)" or similar instead of a commit failure error
+3. The run tally should distinguish "0 spans (correct skip)" from actual failures

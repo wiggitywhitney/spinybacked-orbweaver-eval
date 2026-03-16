@@ -156,7 +156,7 @@ Three-phase approach:
   5. Schema decisions that affect future runs
   6. Items to carry forward (unresolved issues, open questions)
 
-- [ ] **Failure deep-dives** — For each failed file, understand the root cause deeply:
+- [x] **Failure deep-dives** — For each failed file, understand the root cause deeply:
   1. For each failed file: read the orbweaver output log for all attempt details
   2. Identify the specific validation rule(s) that blocked instrumentation
   3. Determine if the failure is a known issue (mapped to an orbweaver issue) or a new discovery
