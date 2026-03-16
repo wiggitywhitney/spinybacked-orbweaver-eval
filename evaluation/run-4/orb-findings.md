@@ -51,7 +51,7 @@ The central design feature of orbweaver — schema evolution across files — is
 2. After fix: `agent-extensions.yaml` should exist in the registry after the first file that invents a new span/attribute
 3. After fix: file N+1's resolved schema should include extensions from file N
 4. After fix: the `(unparseable)` rejection count should be 0 for well-formed extensions
-5. Test: instrument 3 files sequentially where file 2 should reuse a span name invented by file 1 — verify file 2's agent sees the span name in its schema
+5. **Permanent integration test in the orbweaver test suite**: Instrument 3 files sequentially where file 2 should reuse a span name invented by file 1 — verify file 2's agent sees the span name in its resolved schema. This is core functionality that must not silently regress. The test should fail if schema evolution breaks again, catching it in CI instead of during an 80-minute evaluation run.
 
 ---
 

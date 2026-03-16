@@ -74,6 +74,8 @@ These block the entire evaluation pipeline's value. Fix before run-5.
 
 **Eval AI's recommended action:** PRD (design decisions needed: change prompt format, change parser, or both)
 
+**Critical testing requirement:** Schema evolution is core functionality — it must have a permanent integration test in the orbweaver test suite that instruments 3+ files sequentially and verifies cross-file extension visibility. This bug was completely silent (no errors, no warnings) and was only discovered during an 80-minute evaluation run by noticing that the cost was suspiciously low. A regression test would catch this in CI.
+
 ---
 
 ### Finding #2: Validation Pipeline — No Per-File Checks, No Fix/Retry
