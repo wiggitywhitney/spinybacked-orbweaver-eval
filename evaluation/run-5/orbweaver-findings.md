@@ -222,6 +222,15 @@ All 13 run-4 findings were filed by the orbweaver AI (none rejected) and merged 
 - **Evidence**: summary-manager.js generateAndSaveMonthlySummary LINT failure in `evaluation/run-5/orbweaver-pr-summary.md`.
 - **Acceptance Criteria**: After function-level fallback assembles the final file, run a whole-file syntax check (`node --check` or equivalent) before committing.
 
+### DEEP-8: Date object passed to span.setAttribute (invalid OTel attribute type)
+
+- **Priority**: Low
+- **Recommended Action**: Issue
+- **Description**: In summary-manager.js `saveMonthlySummary`, the agent passes a Date object (`firstDay`) to `span.setAttribute('commit_story.journal.entry_date', firstDay)`. OTel attributes must be primitive types (string, number, boolean, or arrays thereof). Date objects are silently coerced or dropped depending on the SDK version. Other functions in the same file correctly use string representations (`dateStr`, `weekStr`). CodeRabbit CLI flagged this in run-5 review.
+- **Impact**: Low — the attribute may be silently dropped at export time, losing the entry date from the span. No runtime error.
+- **Evidence**: `evaluation/run-5/partial-diffs/summary-manager.diff` line 420. CodeRabbit CLI review finding.
+- **Acceptance Criteria**: The CDQ-006 or SCH-002 validator should check attribute value types against OTel spec (string/number/boolean/array). Or the prompt should instruct the agent to convert Date objects to ISO strings before passing to setAttribute.
+
 ### EVAL-1: Schema-uncovered files lack domain-specific attributes
 
 - **Priority**: Medium
