@@ -62,11 +62,25 @@ Observations, rubric gaps, process improvements, and methodology notes captured 
 
 ---
 
+## Failure Deep-Dive Observations
+
+*Insights from root cause analysis of all failed/partial files.*
+
+- **COV-003/NDS-005b conflict is the dominant failure pattern.** 5 of 8 problematic files are affected. The validator requires error recording on ALL catch blocks within spans, but expected-condition catches should not record exceptions. The evaluation rubric (NDS-005b) and the orbweaver validator (COV-003) directly contradict each other. This must be resolved before the next evaluation run — it's the single highest-impact fix.
+- **Validation pipeline traded coverage for quality.** Run-5 committed 9 files vs run-4's 16 — a 44% regression. But the 9 committed files are higher quality (schema-compliant, properly validated). The trade-off is correct in principle but the coverage loss is too severe. Fixing DEEP-1 (COV-003 exemption) would recover most of the lost coverage.
+- **NDS-005b violations are IN the committed code, not just partial code.** journal-manager.js, summary-manager.js, and summary-detector.js all have `recordException`/`setStatus(ERROR)` on expected-condition catches in their committed diffs. The per-file evaluation must flag these — they will cause false error signals in production.
+- **5 regressions are all caused by the new validation pipeline (PRs #171, #173), not agent quality degradation.** The agent's instrumentation decisions are generally sound. The regressions are infrastructure bugs: COV-003/NDS-005b conflict, SCH-002 on schema-uncovered attributes, function-level fallback code synthesis errors.
+- **Schema-uncovered files are the key challenge going forward.** Both failed files (summarize.js, index.js) and many partial files need attributes for operations not in the Weaver schema. Either register more attributes or relax SCH-002 for namespace-compliant extensions.
+- **Function-level fallback scope is too narrow.** It only processes exported functions, losing coverage on valuable internal functions (e.g., journal-graph.js node functions). It also has code synthesis bugs (corrupted imports).
+
+---
+
 ## Carry-Forward Items
 
 *Unresolved items from prior runs that should appear in PRD #6. Orbweaver software issues are tracked in orbweaver-findings.md — this section lists only eval-process carry-forwards.*
 
 - Finding #3 (expected-condition catches) has prompt-only fix with no automated validator — needs evaluation in per-file analysis
-- Run-5 file outcome comparison needed: 5 regressions (journal-graph, index, summarize, summary-manager, summary-detector), 2 improvements (message-filter and token-filter correctly skipped)
+- Run-5 file outcome comparison needed: 5 regressions (journal-graph, index, summarize, summary-manager, summary-detector), 2 improvements (summary-graph, journal-manager)
 - Per-retry visibility not available — partial diffs only capture final state, not intermediate attempts. Consider requesting per-retry snapshots from orbweaver (see finding RUN-5)
-- Orbweaver software findings to include in handoff: PRE-1, PRE-2, RUN-1 through RUN-5, plus persistent push auth failure (see orbweaver-findings.md)
+- Orbweaver software findings to include in handoff: PRE-1, PRE-2, RUN-1 through RUN-5, DEEP-1 through DEEP-5, plus persistent push auth failure (see orbweaver-findings.md)
+- **Failure trajectory data**: Track across runs whether the same root cause persists or changes for each problematic file. Run-5 showed root cause changes on 5 of 8 files (from run-4 issues to validation pipeline issues)

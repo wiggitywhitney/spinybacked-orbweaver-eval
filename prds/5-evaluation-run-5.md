@@ -179,7 +179,7 @@ Four-phase approach:
   12. **Branch deliverable check**: Verify all files reported as instrumented have actual changes on the branch: `git diff main..orbweaver-branch --stat`. Cross-reference against agent's self-reported per-file status.
   13. Append any run observations to `evaluation/run-5/lessons-for-prd6.md` and `evaluation/run-5/orbweaver-findings.md`.
 
-- [ ] **Failure deep-dives** — For each failed file AND each run-level failure:
+- [x] **Failure deep-dives** — For each failed file AND each run-level failure:
   1. **File-level failures**: For each failed/partial file: read orbweaver output log, identify validation rules that blocked instrumentation, map to orbweaver findings (run-4 and run-5), assess whether orbweaver fixes helped.
   2. **Run-level failures**: Push failures, test suite failures, schema evolution issues, commit noise — all get deep-dive treatment, not just file-level failures. Run-4 initially missed run-level failure analysis.
   3. For persistent failures (files that failed in runs 2-4): track the failure trajectory. Is the root cause the same or different each run?

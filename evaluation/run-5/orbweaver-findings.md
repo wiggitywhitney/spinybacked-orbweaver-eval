@@ -122,6 +122,51 @@ All 13 run-4 findings were filed by the orbweaver AI (none rejected) and merged 
 - **Evidence**: `evaluation/run-5/orbweaver-output.md` — start time recorded externally, end time marked as "indeterminate."
 - **Acceptance Criteria**: Orbweaver output should include: (a) run start/end timestamps, (b) per-file start/end timestamps or duration, (c) retry count per file. These should appear in both stdout and the PR summary.
 
+### DEEP-1: COV-003 validator lacks expected-condition catch exemption
+
+- **Priority**: High
+- **Recommended Action**: Issue
+- **Description**: COV-003 requires `span.recordException()` + `span.setStatus({code: ERROR})` on ALL catch blocks within spans, with no exemption for expected-condition catches (file-not-found, empty directories, graceful degradation returns). This forces the agent into a lose-lose: comply with COV-003 → produce NDS-005b violations (expected conditions recorded as errors, polluting metrics), or comply with NDS-005b → fail validation entirely. Five of 8 problematic files in run-5 are affected by this single conflict.
+- **Impact**: Dominant failure pattern in run-5. Causes partial status on summary-graph.js (1 function), journal-manager.js (1 function), summary-manager.js (multiple functions), summary-detector.js (1 function), and contributes to summarize.js failure.
+- **Evidence**: `evaluation/run-5/failure-deep-dives.md` systemic root causes section 1. Partial diffs show NDS-005b violations in committed code where agent complied with COV-003 on expected-condition catches.
+- **Acceptance Criteria**: COV-003 validator should classify catch blocks as expected-condition vs genuine-error. Expected-condition catches (identified by: return default value, continue loop, catch without rethrow for file/directory operations) should be exempt from error recording requirements.
+
+### DEEP-2: Function-level fallback generates corrupted imports
+
+- **Priority**: Medium
+- **Recommended Action**: Issue
+- **Description**: The function-level fallback's code generation produces corrupted import statements (`imimport` instead of `import` in summary-manager.js generateAndSaveMonthlySummary) and loses module context (NDS-003 "original line 1 missing/modified" on 3 other functions in summary-manager.js). The fallback generates self-contained function code that doesn't preserve the module's import structure.
+- **Impact**: 4 of 5 failed functions in summary-manager.js are caused by fallback code generation issues.
+- **Evidence**: `evaluation/run-5/orbweaver-pr-summary.md` function-level fallback results for summary-manager.js. `evaluation/run-5/failure-deep-dives.md` partial file section 7.
+- **Acceptance Criteria**: Function-level fallback generates syntactically valid code that preserves the module's import structure. No LINT failures from synthesis errors.
+
+### DEEP-3: NDS-005b violations in committed code from COV-003 compliance
+
+- **Priority**: Medium
+- **Recommended Action**: Issue (evaluate alongside DEEP-1)
+- **Description**: When the agent CAN satisfy COV-003, it adds `span.recordException()` and `span.setStatus({code: ERROR})` on expected-condition catches in committed code, producing NDS-005b violations. The agent notes claim these aren't added, but the actual diffs show they are. Files affected: journal-manager.js (file-not-found catch), summary-manager.js (5 access/readdir/readFile expected-condition catches), summary-detector.js (2 readdir expected-condition catches).
+- **Impact**: Committed instrumentation will generate false error signals in production traces when normal conditions occur (e.g., file doesn't exist yet, directory is empty). This pollutes error metrics and creates noise in observability tools.
+- **Evidence**: Partial diffs in `evaluation/run-5/partial-diffs/` — journal-manager.diff lines 127-129, summary-manager.diff lines 69-71/197-199/325-327/351-353/428-430, summary-detector.diff lines 62-65/81-83.
+- **Acceptance Criteria**: Agent should not add error recording on catch blocks it classifies as expected-condition handlers, even when COV-003 validator would accept it. Fixing DEEP-1 (validator exemption) would also resolve this, since the agent would no longer need to comply with COV-003 on these catches.
+
+### DEEP-4: Duplicate JSDoc comments in instrumented output
+
+- **Priority**: Low
+- **Recommended Action**: Issue
+- **Description**: All partial diffs show duplicate JSDoc blocks — the agent generates a new JSDoc comment above each function and also preserves the original, resulting in two identical comment blocks per function. This is cosmetic but increases file size and creates maintenance confusion.
+- **Impact**: Cosmetic. Does not affect functionality or test results.
+- **Evidence**: All 5 partial diffs in `evaluation/run-5/partial-diffs/`.
+- **Acceptance Criteria**: Instrumented output should have exactly one JSDoc block per function — either the original preserved or a replacement, not both.
+
+### DEEP-5: SDK init file detection should skip library projects
+
+- **Priority**: Low
+- **Recommended Action**: Issue
+- **Description**: Orbweaver generates `orbweaver-instrumentations.js` (SDK init fallback) because it can't find a recognized NodeSDK init pattern. But commit-story-v2 is a library — libraries should not initialize the OTel SDK. The tool should detect library projects (check for `peerDependencies` on `@opentelemetry/api` in package.json) and skip SDK init file detection.
+- **Impact**: Low — the fallback file is generated but not wired into the project. Actual OTel API imports work correctly.
+- **Evidence**: `evaluation/run-5/orbweaver-output.md` run-level issues section 4.
+- **Acceptance Criteria**: Orbweaver detects library vs application projects and skips SDK init file detection for libraries.
+
 ---
 
 ## Carry-Forward from Prior Runs
