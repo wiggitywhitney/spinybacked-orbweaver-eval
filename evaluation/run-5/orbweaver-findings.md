@@ -8,6 +8,28 @@ Each finding includes priority classification (Critical/High/Medium/Low), recomm
 
 **Cross-run comparability note**: Run-5 is the first evaluation where SCH-001 through SCH-004 validation fires during the agent's fix loop (PR #173) and where prompt changes affect span naming guidance (PR #175). All prior run SCH scores reflect an agent that never received schema feedback during instrumentation. Score changes in the SCH dimension should be attributed to this infrastructure change, not solely to agent quality improvement.
 
+### Supporting Documentation
+
+All evidence referenced below lives in the eval repo on branch `feature/prd-5-evaluation-run-5`.
+
+**Eval repo root**: `/Users/whitney.lee/Documents/Repositories/commit-story-v2-eval`
+**Orbweaver repo root**: `/Users/whitney.lee/Documents/Repositories/spinybacked-orbweaver`
+
+Paths in this document are relative to the eval repo root unless otherwise noted.
+
+| Document | Path | What it contains |
+|----------|------|-----------------|
+| Failure deep-dives | `evaluation/run-5/failure-deep-dives.md` | Root cause analysis for each failed/partial file, systemic patterns, failure trajectories |
+| Orbweaver output log | `evaluation/run-5/orbweaver-output.md` | Per-file results, schema evolution status, run-level issues |
+| PR summary | `evaluation/run-5/orbweaver-pr-summary.md` | Full agent output: per-file table, agent notes, advisory findings, token usage |
+| Partial diffs | `evaluation/run-5/partial-diffs/*.diff` | Working tree diffs for 5 partial files (not committed to orbweaver branch) |
+| Per-file evaluation | `evaluation/run-5/per-file-evaluation.json` | Canonical per-file rubric results (when complete) |
+| Evaluation methodology | `evaluation/run-5/evaluation-methodology.md` | Rubric clarifications and scoring rules for run-5 |
+| Lessons for PRD #6 | `evaluation/run-5/lessons-for-prd6.md` | Process improvements, methodology observations, carry-forward items |
+| Orbweaver branch | `orbweaver/instrument-1773706515431` | The actual instrumented code (9 committed files) |
+| Evaluation rubric | `spinybacked-orbweaver/research/evaluation-rubric.md` (orbweaver repo) | 32-rule rubric used for evaluation |
+| Rubric-codebase mapping | `spinybacked-orbweaver/research/rubric-codebase-mapping.md` (orbweaver repo) | Maps rubric rules to orbweaver source code |
+
 ---
 
 ## Resolved from Run-4
@@ -81,7 +103,7 @@ All 13 run-4 findings were filed by the orbweaver AI (none rejected) and merged 
 - **Recommended Action**: Issue
 - **Description**: index.js failed with "Oscillation detected during fresh regeneration: Error count increased for SCH-002: 9 → 12". The fix/retry loop detected that the agent's correction attempt made SCH-002 violations worse, not better. The agent adds attributes that don't match the schema, gets told to fix them, and creates even more non-compliant attributes in the retry.
 - **Impact**: index.js is the application entry point — losing root span instrumentation here is the COV-001 regression from run-4. The oscillation detection correctly prevents infinite loops but doesn't help the agent converge. **Additionally, entry point failure silently degrades live-check** — see DEEP-6.
-- **Evidence**: `evaluation/run-5/orbweaver-output.log` file 15, `evaluation/run-5/orbweaver-pr-summary.md` advisory findings.
+- **Evidence**: `evaluation/run-5/orbweaver-output.log` file 15, `evaluation/run-5/orbweaver-pr-summary.md` advisory findings. Root cause analysis: `evaluation/run-5/failure-deep-dives.md` failed file section 2 and systemic root cause section 4.
 - **Investigation needed**: Confirm the resolved schema (with agent-extensions.yaml merged) is actually being passed to the agent during retries. If the agent is instrumenting against the base schema without its own extensions, it would explain why it can't satisfy SCH-002. Also check whether the application entry point (index.js) has special instrumentation needs that a generic file-level approach can't handle.
 - **Acceptance Criteria**: The fix/retry loop should either (a) provide more specific guidance about which attribute names are rejected and what the valid alternatives are, (b) accept partial schema compliance (commit non-violating spans, skip violating ones) rather than failing the entire file, (c) switch to function-by-function instrumentation mode instead of whole-file mode — this gives the agent more refined per-function feedback and produces partial output even when some functions can't satisfy validation, or (d) use a two-pass approach: first pass registers schema extensions, second pass validates against the extended schema (avoids the chicken-and-egg problem where extensions can't be registered because validation blocks the first attempt).
 
@@ -91,7 +113,7 @@ All 13 run-4 findings were filed by the orbweaver AI (none rejected) and merged 
 - **Recommended Action**: PRD (use failed files as test cases)
 - **Description**: Run-5 committed 9 files vs run-4's 16 files — a 44% regression in instrumented file coverage. The validation pipeline (run-4 finding #2, PRD #156) correctly catches quality issues but causes 6 files to become "partial" (uncommitted) and 2 to "fail" outright. Files that previously "succeeded" (journal-graph, summary-manager, summary-detector, index.js, summarize.js) now fail because SCH-002 validation was silent in run-4 but active in run-5.
 - **Impact**: The validation pipeline traded coverage for quality — fewer files instrumented but those that are instrumented pass validation. The next full evaluation run should not happen until these problematic files can be consistently instrumented properly by the software.
-- **Evidence**: Compare `evaluation/run-5/orbweaver-output.md` vs run-4 per-file results. Partial diffs saved in `evaluation/run-5/partial-diffs/`.
+- **Evidence**: Compare `evaluation/run-5/orbweaver-output.md` vs run-4 per-file results. Partial diffs saved in `evaluation/run-5/partial-diffs/`. Full analysis: `evaluation/run-5/failure-deep-dives.md` (all 8 files analyzed with run-4→run-5 trajectories).
 - **Recommended approach**: Port the 8 failed/partial files (summarize.js, index.js, journal-graph.js, summary-graph.js, sensitive-filter.js, journal-manager.js, summary-manager.js, summary-detector.js) into the orbweaver test suite as acceptance criteria. Refine the software until these files are consistently instrumented completely and correctly. Also test that PRs are consistently created as part of this effort. Do not run another full evaluation until these files pass consistently.
 - **Acceptance Criteria**: All 8 problematic files pass orbweaver's instrumentation pipeline consistently (multiple runs, not just once). PR creation works end-to-end.
 
@@ -101,7 +123,7 @@ All 13 run-4 findings were filed by the orbweaver AI (none rejected) and merged 
 - **Recommended Action**: Issue
 - **Description**: stdout summary reports "21 succeeded, 2 failed, 0 skipped" (23/29 files), omitting the 6 partial files. The PR summary correctly reports all three categories (21 success, 2 failed, 6 partial). The stdout discrepancy could confuse operators monitoring the run.
 - **Impact**: Cosmetic — PR summary is correct. But operators watching stdout would miss 6 files.
-- **Evidence**: `evaluation/run-5/orbweaver-output.log` final summary vs PR summary.
+- **Evidence**: `evaluation/run-5/orbweaver-output.log` final summary vs PR summary. See also `evaluation/run-5/failure-deep-dives.md` run-level failures section.
 - **Acceptance Criteria**: stdout final tally should include partial count: "21 succeeded, 2 failed, 6 partial, 0 skipped".
 
 ### RUN-4: Extended run duration from validation retries
@@ -110,7 +132,7 @@ All 13 run-4 findings were filed by the orbweaver AI (none rejected) and merged 
 - **Recommended Action**: Issue (investigate)
 - **Description**: Run-5 took significantly longer than run-4 (~80 min). The validation/retry loop adds multiple LLM calls per file — each retry involves a full re-analysis. Complex files (summary-graph, summary-manager) took 10+ minutes each going through retries before giving up.
 - **Impact**: Longer runs cost more (multiple LLM calls per retry) and reduce iteration speed.
-- **Evidence**: `evaluation/run-5/orbweaver-output.log` timestamps. Run started 2026-03-17T00:14:59Z, completed overnight.
+- **Evidence**: `evaluation/run-5/orbweaver-output.log` timestamps. Run started 2026-03-17T00:14:59Z, completed overnight. Cost comparison: `evaluation/run-5/failure-deep-dives.md` extended run duration section.
 - **Acceptance Criteria**: Add retry budget configuration (max retries, max time per file) and report retry count in per-file output. Consider a fast-fail mode that skips retries for files with > N validation errors.
 
 ### RUN-5: No timestamps in orbweaver output
@@ -139,6 +161,15 @@ All 13 run-4 findings were filed by the orbweaver AI (none rejected) and merged 
 - **Impact**: 4 of 5 failed functions in summary-manager.js are caused by fallback code generation issues. The import ordering error affects whole-file output for summary-manager.js.
 - **Evidence**: `evaluation/run-5/orbweaver-pr-summary.md` function-level fallback results for summary-manager.js. `evaluation/run-5/partial-diffs/summary-manager.diff` lines 9-14 (import ordering). `evaluation/run-5/failure-deep-dives.md` partial file section 7.
 - **Acceptance Criteria**: Function-level fallback generates syntactically valid code that preserves the module's import structure. Whole-file instrumentation places tracer initialization after all imports. No LINT failures from synthesis errors.
+
+### DEEP-2b: Function-level fallback only processes exported functions
+
+- **Priority**: Medium
+- **Recommended Action**: Issue (evaluate alongside DEEP-2)
+- **Description**: When whole-file instrumentation fails and the function-level fallback activates, it only retries exported functions individually. Non-exported functions that were instrumentation targets in the whole-file attempt are silently dropped. In journal-graph.js, this reduced coverage from 4 spans (generateJournalSections + summaryNode + technicalNode + dialogueNode) to 1 span (only the exported generateJournalSections). The 3 internal LangGraph node functions are high diagnostic value targets but are lost in fallback. Additionally, the fallback processes functions where the expected outcome is 0 spans (e.g., sensitive-filter.js redactSensitiveData) — wasting retries and producing failures on functions that don't need instrumentation.
+- **Impact**: journal-graph.js regressed from 4 spans (run-4) to 1 span (run-5) solely due to fallback scope. Sensitive-filter.js shows as "partial" despite the correct outcome being 0 spans.
+- **Evidence**: `evaluation/run-5/orbweaver-pr-summary.md` — journal-graph.js "Function-level fallback: 1/1 functions instrumented" (only exported). sensitive-filter.js "Function-level fallback: 2/3 functions" (failure on a zero-span target). `evaluation/run-5/failure-deep-dives.md` sections 3 and 5.
+- **Acceptance Criteria**: (a) Function-level fallback includes non-exported functions that were instrumentation targets in the whole-file attempt. (b) Fallback skips functions where the expected outcome is 0 spans (no instrumentation needed).
 
 ### DEEP-3: NDS-005b violations in committed code from COV-003 compliance
 

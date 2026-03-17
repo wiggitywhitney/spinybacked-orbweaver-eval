@@ -87,7 +87,7 @@ Observations, rubric gaps, process improvements, and methodology notes captured 
 - Finding #3 (expected-condition catches) has prompt-only fix with no automated validator — needs evaluation in per-file analysis
 - Run-5 file outcome comparison needed: 5 regressions (journal-graph, index, summarize, summary-manager, summary-detector), 2 improvements (summary-graph, journal-manager)
 - Per-retry visibility not available — partial diffs only capture final state, not intermediate attempts. Consider requesting per-retry snapshots from orbweaver (see finding RUN-5)
-- Orbweaver software findings to include in handoff: PRE-1, PRE-2, RUN-1 through RUN-5, DEEP-1 through DEEP-7, plus persistent push auth failure (see orbweaver-findings.md)
+- Orbweaver software findings to include in handoff: PRE-1, PRE-2, RUN-1 through RUN-5, DEEP-1, DEEP-2, DEEP-2b, DEEP-3 through DEEP-7, EVAL-1, EVAL-2, plus persistent push auth failure (see orbweaver-findings.md)
 - **Failure trajectory data**: Track across runs whether the same root cause persists or changes for each problematic file. Run-5 showed root cause changes on 5 of 8 files (from run-4 issues to validation pipeline issues)
 
 ---
