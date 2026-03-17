@@ -199,7 +199,7 @@ Four-phase approach:
   9. Emit as `evaluation/run-5/per-file-evaluation.json` (canonical) and render `evaluation/run-5/per-file-evaluation.md` from it.
   10. Append to `evaluation/run-5/lessons-for-prd6.md` and `evaluation/run-5/orbweaver-findings.md`.
 
-- [ ] **PR artifact evaluation** — Evaluate the PR as a first-class deliverable:
+- [x] **PR artifact evaluation** — Evaluate the PR as a first-class deliverable:
   1. If PR exists (including draft PR): evaluate description quality, per-file table accuracy, span counts, agent decision notes.
   2. **Verify per-file table claims against branch state.** Run-4 found 3 files where the PR summary reported work that was never committed.
   3. Assess: Does the PR help a reviewer understand what the agent did and make informed merge decisions?

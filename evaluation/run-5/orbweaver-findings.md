@@ -249,6 +249,42 @@ All 13 run-4 findings were filed by the orbweaver AI (none rejected) and merged 
 - **Evidence**: `git diff main..orbweaver/instrument-1773706515431 -- package.json`
 - **Acceptance Criteria**: For library projects (detected by `@opentelemetry/api` in peerDependencies), the agent should not add auto-instrumentation packages to package.json. These should be documented as recommended companion packages in the PR description instead.
 
+### PR-1: PR summary schema extensions column misleads on partial/failed files
+
+- **Priority**: Low
+- **Recommended Action**: Issue
+- **Description**: The per-file table's Schema Extensions column lists extension names for partial and failed files alongside committed files, with no visual distinction. For example, summarize.js (FAILED) shows 12 extension names that were never delivered to the branch. A reviewer scanning the table could assume these extensions exist in the codebase.
+- **Impact**: Low — a careful reviewer will notice the status column, but the table design invites misreading.
+- **Evidence**: `evaluation/run-5/pr-evaluation.md` section 2.
+- **Acceptance Criteria**: Schema extensions column should either (a) show `—` for non-committed files, (b) use visual distinction (strikethrough, italics, parenthetical "(not committed)"), or (c) split into "Committed Extensions" and "Attempted Extensions" columns.
+
+### PR-2: Advisory findings contradict agent skip decisions
+
+- **Priority**: Medium
+- **Recommended Action**: Issue
+- **Description**: 28 of 34 advisory findings are COV-004 suggestions to add spans to functions the agent explicitly chose to skip with documented reasoning (RST-001, RST-004). The advisory engine doesn't have access to the agent's skip decisions, creating internal contradictions in the PR description. This undermines reviewer confidence in both sections.
+- **Impact**: Creates a "boy who cried wolf" problem — reviewers stop reading advisories because most are contradicted by the agent's own notes.
+- **Evidence**: `evaluation/run-5/pr-evaluation.md` section 5.
+- **Acceptance Criteria**: Advisory findings should be filtered against the agent's skip decisions. If a function was deliberately skipped with a rubric-rule justification, the corresponding COV-004 advisory should be suppressed or downgraded to a note.
+
+### PR-3: auto_summarize span names not registered in agent-extensions.yaml
+
+- **Priority**: Medium
+- **Recommended Action**: Issue
+- **Description**: auto-summarize.js uses 3 span names (`commit_story.auto_summarize.generate_daily/weekly/monthly`) that are not registered in `semconv/agent-extensions.yaml`. All other committed files' span names appear in the extensions file. The agent notes explain that attributes were removed to satisfy SCH-002, but the span name registration gap is not explained.
+- **Impact**: Inconsistency in schema extension tracking. If downstream tools consume agent-extensions.yaml to understand what spans exist, they'll miss the auto_summarize spans.
+- **Evidence**: `evaluation/run-5/pr-evaluation.md` section 2 (Span Name Claims vs Branch State).
+- **Acceptance Criteria**: All span names used in committed code should appear in agent-extensions.yaml (or the base schema). No gap between code and registry.
+
+### PR-4: Partial file instrumentation should be committable
+
+- **Priority**: High
+- **Recommended Action**: Issue (evaluate alongside RUN-2)
+- **Description**: When the function-level fallback successfully instruments some functions but others fail, the entire file's changes are discarded. For example, summary-graph.js had 11/12 functions pass validation — only weeklySummaryNode failed COV-003. The 11 passing functions represent real, validated instrumentation work that is lost. Similarly, summary-detector.js (4/5 passed), journal-manager.js (2/3 passed). The validation pipeline should commit the functions that passed and skip the ones that didn't, rather than treating each file as all-or-nothing.
+- **Impact**: This is a primary contributor to the run-5 coverage regression (9 committed files vs run-4's 16). If partial commits were supported, summary-graph.js alone would add 5 spans to the branch.
+- **Evidence**: `evaluation/run-5/orbweaver-pr-summary.md` function-level fallback results. `evaluation/run-5/pr-evaluation.md` section 2.
+- **Acceptance Criteria**: Function-level fallback should assemble a file containing only the successfully instrumented functions. If N of M functions pass validation, commit the file with N functions instrumented (the other M-N functions remain in their original uninstrumented state).
+
 ---
 
 ## Carry-Forward from Prior Runs
