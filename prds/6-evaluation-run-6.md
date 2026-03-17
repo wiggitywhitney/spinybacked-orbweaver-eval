@@ -75,7 +75,7 @@ Recover file coverage (target: 14-16 committed files) while retaining 92%+ quali
 | EVAL-1 | Schema-uncovered file attribute strategy | High | Fixes last 2 canonical failures |
 | DEEP-6 | Entry point special handling | High | Prevents entry point single point of failure |
 | PR-4 | Partial file commits (function-level) | High | Coverage multiplier when N of M functions pass |
-| DEEP-2/2b | Function-level fallback quality | Medium | Corrupted imports + exported-only scope |
+| DEEP-2/2b | Function-level fallback quality | Medium | Two bugs: corrupted imports + exported-only scope |
 | DEEP-7 | Whole-file syntax check after assembly | Medium | Catch synthesis bugs in import merging |
 | RUN-2 | Validation regression tracking | Medium | Prevent validation from blocking previously-passing files |
 | Push auth | Push authentication failure | Medium | 3rd consecutive failure — persistent |
@@ -83,7 +83,6 @@ Recover file coverage (target: 14-16 committed files) while retaining 92%+ quali
 | PR-3 | auto_summarize span names not registered | Medium | Data consistency gap |
 | PRE-1 | npm package name collision | Medium | `npx orbweaver` runs wrong tool |
 | NDS-005b | LLM failure fallback boundary | Medium | Eval/CodeRabbit disagree on classification |
-| DEEP-2/2b | Function-level fallback quality | Medium | Two bugs: corrupted imports + exported-only scope |
 | DEEP-5 | SDK init skip for libraries | Low | Cosmetic |
 | DEEP-8 | Date object in setAttribute | Low | Minor type mismatch |
 | RUN-3 | Summary tally omits partial files | Low | Operator visibility |
@@ -129,7 +128,7 @@ Four-phase approach (same structure as run-5, with coverage recovery as the prim
 
 ## Success Criteria
 
-1. Push authentication resolved — PR successfully created (not draft, not failed)
+1. Push authentication resolved — PR successfully created (draft allowed only if test failures are documented; failed/no PR is a failure)
 2. At least 14 files committed (up from 9) — validates coverage recovery
 3. Quality score of 92%+ canonical retained (no regression from coverage recovery)
 4. Superficial resolutions tracked: NDS-005, CDQ-003, RST-001 verified in recovered files
