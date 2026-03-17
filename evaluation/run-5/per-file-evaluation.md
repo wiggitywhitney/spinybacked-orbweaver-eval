@@ -219,11 +219,11 @@ Partial files have diffs but were NOT committed to the branch. Evaluated against
 | Dimension | Rules Evaluated | Rules Passed | Pass Rate | Files Affected by Failures |
 |-----------|----------------|--------------|-----------|---------------------------|
 | Non-Destructiveness (NDS) | 2 quality + 4 gates | 6/6 | 100% | — |
-| Coverage (COV) | 4 applicable | 3/4 | 75% | auto-summarize (COV-005), server (COV-005) |
-| Restraint (RST) | 3 applicable | 3/3 | 100% | — |
-| API-Only Dependency (API) | 4 | 4/4 | 100% | — |
-| Schema Fidelity (SCH) | 3 applicable | 3/3 | 100% | — |
-| Code Quality (CDQ) | 6 applicable | 6/6 | 100% | — |
+| Coverage (COV) | 5 applicable (COV-006 N/A) | 3/5 | 60% | index.js (COV-001, not committed), auto-summarize (COV-005), server (COV-005) |
+| Restraint (RST) | 4 applicable (RST-005 N/A) | 4/4 | 100% | — |
+| API-Only Dependency (API) | 3 quality + 1 gate | 4/4 | 100% | — |
+| Schema Fidelity (SCH) | 4 applicable | 4/4 | 100% | — |
+| Code Quality (CDQ) | 7 applicable | 7/7 | 100% | — |
 
 ### Per-Rule Instance Counts (Committed Files)
 

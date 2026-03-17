@@ -2,7 +2,7 @@
   "meta": {
     "run": 5,
     "date": "2026-03-17",
-    "orbweaver_version": "0.2.0",
+    "orbweaver_version": "0.1.0",
     "orbweaver_branch": "orbweaver/instrument-1773706515431",
     "rubric_version": "32 rules (5 gates + 27 quality), 2026-03-17 clarifications applied",
     "methodology": "canonical (per-file evaluation + schema coverage split)",

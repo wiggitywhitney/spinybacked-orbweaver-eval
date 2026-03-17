@@ -1,7 +1,7 @@
 # Evaluation Run 5: Rubric Scores
 
 **Date:** 2026-03-17
-**Tool:** SpinybackedOrbWeaver 0.2.0
+**Tool:** SpinybackedOrbWeaver 0.1.0
 **Branch:** `orbweaver/instrument-1773706515431`
 **Codebase:** commit-story-v2-eval (29 JavaScript files processed, 9 committed on branch)
 **Evaluator:** Multi-agent evaluation (per-file agents + synthesis)
