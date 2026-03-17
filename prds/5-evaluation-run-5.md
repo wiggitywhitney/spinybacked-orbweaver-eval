@@ -247,7 +247,7 @@ Four-phase approach:
   4. Include "What the Eval AI Got Wrong Before" section. → **Covered**: §4 Resolution Quality Assessment documents 3 superficial resolutions and calibration notes.
   5. Include handoff process retrospective. → **Covered**: §4 summary and lessons-for-prd6.md handoff observations.
 
-- [ ] **Draft PRD #6 for next evaluation run** — Create PRD #6 on a separate branch from main (evaluation branches never merge):
+- [x] **Draft PRD #6 for next evaluation run** — Create PRD #6 on a separate branch from main (evaluation branches never merge):
   1. Run-5 scores as baselines.
   2. All items from `evaluation/run-5/lessons-for-prd6.md`.
   3. Carry forward unresolved findings and spec gaps from `evaluation/run-5/actionable-fix-output.md` §11 (carry-forwards) and §12 (failing files as test cases).

@@ -56,6 +56,8 @@ Entry format: `- (YYYY-MM-DD) Description of feature-level change (PRD #X, miles
 
 - (2026-03-17) Completed handoff to orbweaver: actionable-fix-output.md serves as the handoff document (no separate handoff-to-orbweaver.md). Removed PRD/Issue classification from eval side — orbweaver team right-sizes work based on their codebase knowledge. Cross-document audit agent caught 22 missing items before handoff (PRD #5, handoff to orbweaver)
 
+- (2026-03-17) Drafted PRD #6 for evaluation run-6: coverage recovery (14-16 files) while retaining 92%+ quality. Critical path DEEP-1 → RUN-1 → DEEP-4 → EVAL-1. Created on separate branch from main (PR #12) since eval branches never merge. All 12 milestones of PRD #5 complete (PRD #5, draft PRD #6)
+
 ### Changed
 - (2026-03-16) Fixed span count discrepancy: total_spans_on_branch corrected from 48 to 38 in per-file-evaluation.json and rubric-scores.json (48 included working-directory-only changes from partial files not committed to branch). Updated baseline-comparison.md table to match canonical per-file-evaluation.json (PRD #4, CodeRabbit finding fix)
 - (2026-03-15) Renamed all "orb" references to "orbweaver" in PRD #4 and evaluation docs to match CLI rename (spinybacked-orbweaver #123)
