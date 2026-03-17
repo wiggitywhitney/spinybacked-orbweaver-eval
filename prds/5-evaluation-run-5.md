@@ -147,7 +147,7 @@ Four-phase approach:
   10. Apply rubric changes to `spinybacked-orbweaver/research/evaluation-rubric.md`. Update `rubric-codebase-mapping.md` to correct the commit-story-v2 classification from "CLI tool" to "library" — `peerDependencies` is the correct placement for `@opentelemetry/api`.
   11. Append any new rubric gaps or methodology observations to `evaluation/run-5/lessons-for-prd6.md`
 
-- [ ] **Pre-run verification** — Verify orbweaver fixes and validate run prerequisites:
+- [x] **Pre-run verification** — Verify orbweaver fixes and validate run prerequisites:
   1. **Handoff triage review**: Read orbweaver's triage of `evaluation/run-4/handoff-to-orbweaver.md`. Compare what they filed vs what the eval recommended. Note any findings the orbweaver AI rejected and why — this validates the handoff process.
   2. **Schema evolution smoke test**: Instrument one test file, verify `agent-extensions.yaml` was written, resolve schema, confirm extensions appear in the resolved prompt for file 2. If this fails, STOP — schema evolution fix is a blocking prerequisite.
   3. **Push capability test**: Run `git push --dry-run` to verify push access (not just `git ls-remote` which tests read access only). Run-4 had read access validated at pre-run but push failed 80 minutes later.

@@ -19,6 +19,8 @@ Observations, rubric gaps, process improvements, and methodology notes captured 
 *Workflow changes that would make the next evaluation run smoother.*
 
 - **Include failing file reproductions in orbweaver handoff.** Run-3 ported specific files that were failing to the orbweaver repo as test cases — the fix isn't done until instrumentation on that particular file works. Run-4 skipped this, making it harder to verify fixes were actually effective. PRD #6 handoff should include concrete failing files so orbweaver can use them as acceptance criteria for each fix.
+- **Always use local binary path for orbweaver, never npx.** `npx orbweaver` resolves to an unrelated webcrawler package on npm (punkave/orbweaver v0.1.4). The correct invocation is `node /path/to/spinybacked-orbweaver/bin/orbweaver.js`. Document this in PRD evaluation run setup instructions.
+- **Recommendation-document handoff validated.** All 13 run-4 findings were filed and merged. The orbweaver AI right-sized work correctly (downgraded one PRD to Issue, folded one Issue into a PRD). Three additional bugs were discovered during fix implementation. The handoff process works and should be continued.
 
 ---
 
@@ -56,3 +58,7 @@ Observations, rubric gaps, process improvements, and methodology notes captured 
 ## Carry-Forward Items
 
 *Unresolved items from prior runs that should appear in PRD #6.*
+
+- npm package name collision: `orbweaver` on npm is a different project (see orbweaver-findings.md PRE-1)
+- Schema extension namespace enforcement may reject span-type extensions incorrectly (see orbweaver-findings.md PRE-2)
+- Finding #3 (expected-condition catches) has prompt-only fix with no automated validator — highest risk for regression in run-5
