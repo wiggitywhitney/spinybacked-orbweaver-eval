@@ -250,10 +250,12 @@ Four-phase approach:
 - [ ] **Draft PRD #6 for next evaluation run** — Create PRD #6 on a separate branch from main (evaluation branches never merge):
   1. Run-5 scores as baselines.
   2. All items from `evaluation/run-5/lessons-for-prd6.md`.
-  3. Carry forward unresolved findings and spec gaps.
-  4. Encode process lessons: handoff process refinements, evaluation methodology standardization, schema coverage split continuation.
+  3. Carry forward unresolved findings and spec gaps from `evaluation/run-5/actionable-fix-output.md` §11 (carry-forwards) and §12 (failing files as test cases).
+  4. Encode process lessons: handoff process refinements, evaluation methodology standardization, schema coverage split continuation. (Updated per Decision 2026-03-17: handoff IS the actionable-fix-output — no separate handoff document needed. PRD #6 should use the same pattern.)
   5. Validate run-5 score projections against actual results and update projection methodology if needed.
   6. Create on a separate branch from main and PR to main — evaluation branches are never merged, so the PRD must reach main independently.
+  7. PRD #6 actionable-fix-output milestone must include a cross-document audit agent step as the final sub-item (Updated per Decision 2026-03-17: audit agent caught 22 missing items in run-5).
+  8. PRD #6 should NOT include PRD/Issue classification for findings — provide priority recommendations only, let orbweaver team right-size the work (Updated per Decision 2026-03-17).
 
 ---
 
