@@ -72,6 +72,9 @@ Observations, rubric gaps, process improvements, and methodology notes captured 
 - **5 regressions are all caused by the new validation pipeline (PRs #171, #173), not agent quality degradation.** The agent's instrumentation decisions are generally sound. The regressions are infrastructure bugs: COV-003/NDS-005b conflict, SCH-002 on schema-uncovered attributes, function-level fallback code synthesis errors.
 - **Schema-uncovered files are the key challenge going forward.** Both failed files (summarize.js, index.js) and many partial files need attributes for operations not in the Weaver schema. Either register more attributes or relax SCH-002 for namespace-compliant extensions.
 - **Function-level fallback scope is too narrow.** It only processes exported functions, losing coverage on valuable internal functions (e.g., journal-graph.js node functions). It also has code synthesis bugs (corrupted imports).
+- **Entry point file needs special handling.** index.js is a single point of failure for live-check — when it fails instrumentation, live-check silently degrades to meaningless ("OK" with no telemetry from the primary code path). Entry point should get relaxed validation (partial schema compliance, strip failing attributes) and live-check should report "DEGRADED" when the entry point failed. See finding DEEP-6.
+- **Live-check should cross-reference instrumented files vs telemetry output.** Currently live-check has no visibility into which files were instrumented — it can't flag missing telemetry from failed files. Adding this cross-reference would catch entry point failures and other gaps.
+- **No whole-file syntax check after function-level assembly.** Per-function LINT caught the `imimport` corruption, but there's no `node --check` or equivalent on the reassembled file. This is a latent gap — synthesis errors in import merging or scope assembly could slip through. See finding DEEP-7.
 
 ---
 

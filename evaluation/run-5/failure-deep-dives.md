@@ -310,6 +310,24 @@ These are **infrastructure bugs in the validation pipeline**, not agent quality 
 
 **Recommended fix**: Provide valid alternatives in fix feedback (not just "this attribute is invalid" but "use commit_story.journal.entry_date instead"). Alternatively, accept partial compliance — commit the spans that passed validation, strip the invalid attributes rather than rejecting the whole file.
 
+### 5. Entry Point File as Single Point of Live-Check Failure
+
+**Files affected**: index.js
+
+**The issue**: The entry point is special — it's where the root span lives, it's the primary code path tests exercise, and live-check's value depends on it being instrumented. When index.js fails, orbweaver restores the original, tests run against uninstrumented code, and live-check reports "OK" — silently degrading to meaningless. Run-5's "Live-Check Compliance: OK" is misleading because no telemetry was emitted from the primary code path.
+
+**Fix priority**: HIGH — live-check is a key quality signal, and its reliability depends on entry point instrumentation.
+
+**Recommended fix**: Entry point should get relaxed validation (accept partial schema compliance, strip failing attributes rather than rejecting the file), priority retry budget, and live-check should report "DEGRADED" when the entry point failed.
+
+### 6. No Whole-File Syntax Check After Function-Level Assembly
+
+**Files affected**: summary-manager.js (LINT failure on `imimport`)
+
+**The issue**: The function-level fallback processes each function independently and runs LINT per-function, but there's no whole-file syntax verification after all functions are reassembled. The `imimport` corruption was caught by per-function LINT, but similar synthesis errors in the assembly step (import merging, scope conflicts) could slip through. Live-check would catch these at runtime (test failures), but an earlier `node --check` on the assembled file would be faster and more targeted.
+
+**Fix priority**: MEDIUM — per-function LINT caught this case, but the gap is a latent risk.
+
 ---
 
 ## New Findings for orbweaver-findings.md

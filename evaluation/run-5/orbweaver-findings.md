@@ -80,7 +80,7 @@ All 13 run-4 findings were filed by the orbweaver AI (none rejected) and merged 
 - **Priority**: High
 - **Recommended Action**: Issue
 - **Description**: index.js failed with "Oscillation detected during fresh regeneration: Error count increased for SCH-002: 9 → 12". The fix/retry loop detected that the agent's correction attempt made SCH-002 violations worse, not better. The agent adds attributes that don't match the schema, gets told to fix them, and creates even more non-compliant attributes in the retry.
-- **Impact**: index.js is the application entry point — losing root span instrumentation here is the COV-001 regression from run-4. The oscillation detection correctly prevents infinite loops but doesn't help the agent converge.
+- **Impact**: index.js is the application entry point — losing root span instrumentation here is the COV-001 regression from run-4. The oscillation detection correctly prevents infinite loops but doesn't help the agent converge. **Additionally, entry point failure silently degrades live-check** — see DEEP-6.
 - **Evidence**: `evaluation/run-5/orbweaver-output.log` file 15, `evaluation/run-5/orbweaver-pr-summary.md` advisory findings.
 - **Investigation needed**: Confirm the resolved schema (with agent-extensions.yaml merged) is actually being passed to the agent during retries. If the agent is instrumenting against the base schema without its own extensions, it would explain why it can't satisfy SCH-002. Also check whether the application entry point (index.js) has special instrumentation needs that a generic file-level approach can't handle.
 - **Acceptance Criteria**: The fix/retry loop should either (a) provide more specific guidance about which attribute names are rejected and what the valid alternatives are, (b) accept partial schema compliance (commit non-violating spans, skip violating ones) rather than failing the entire file, or (c) switch to function-by-function instrumentation mode instead of whole-file mode — this gives the agent more refined per-function feedback and produces partial output even when some functions can't satisfy validation.
@@ -135,10 +135,10 @@ All 13 run-4 findings were filed by the orbweaver AI (none rejected) and merged 
 
 - **Priority**: Medium
 - **Recommended Action**: Issue
-- **Description**: The function-level fallback's code generation produces corrupted import statements (`imimport` instead of `import` in summary-manager.js generateAndSaveMonthlySummary) and loses module context (NDS-003 "original line 1 missing/modified" on 3 other functions in summary-manager.js). The fallback generates self-contained function code that doesn't preserve the module's import structure.
-- **Impact**: 4 of 5 failed functions in summary-manager.js are caused by fallback code generation issues.
-- **Evidence**: `evaluation/run-5/orbweaver-pr-summary.md` function-level fallback results for summary-manager.js. `evaluation/run-5/failure-deep-dives.md` partial file section 7.
-- **Acceptance Criteria**: Function-level fallback generates syntactically valid code that preserves the module's import structure. No LINT failures from synthesis errors.
+- **Description**: The function-level fallback's code generation produces corrupted import statements (`imimport` instead of `import` in summary-manager.js generateAndSaveMonthlySummary) and loses module context (NDS-003 "original line 1 missing/modified" on 3 other functions in summary-manager.js). The fallback generates self-contained function code that doesn't preserve the module's import structure. Additionally, the whole-file instrumentation path places `const tracer = trace.getTracer('commit-story')` between import statements — an ES module syntax error (all imports must precede other statements). CodeRabbit CLI review flagged this in summary-manager.diff lines 9-14.
+- **Impact**: 4 of 5 failed functions in summary-manager.js are caused by fallback code generation issues. The import ordering error affects whole-file output for summary-manager.js.
+- **Evidence**: `evaluation/run-5/orbweaver-pr-summary.md` function-level fallback results for summary-manager.js. `evaluation/run-5/partial-diffs/summary-manager.diff` lines 9-14 (import ordering). `evaluation/run-5/failure-deep-dives.md` partial file section 7.
+- **Acceptance Criteria**: Function-level fallback generates syntactically valid code that preserves the module's import structure. Whole-file instrumentation places tracer initialization after all imports. No LINT failures from synthesis errors.
 
 ### DEEP-3: NDS-005b violations in committed code from COV-003 compliance
 
@@ -166,6 +166,30 @@ All 13 run-4 findings were filed by the orbweaver AI (none rejected) and merged 
 - **Impact**: Low — the fallback file is generated but not wired into the project. Actual OTel API imports work correctly.
 - **Evidence**: `evaluation/run-5/orbweaver-output.md` run-level issues section 4.
 - **Acceptance Criteria**: Orbweaver detects library vs application projects and skips SDK init file detection for libraries.
+
+### DEEP-6: Entry point file needs special handling — live-check depends on it
+
+- **Priority**: High
+- **Recommended Action**: Issue (or fold into RUN-1/RUN-2 PRD)
+- **Description**: The entry point file (index.js for applications, main export for libraries) is a single point of failure for live-check validation. When it fails instrumentation, orbweaver restores the original file, tests run against uninstrumented code, and live-check reports "OK" — silently degrading from meaningful validation to a no-op. In run-5, index.js failed due to SCH-002 oscillation, and live-check reported "OK" despite having no telemetry from the primary code path. The entry point also affects other instrumented files: without a root span, child spans from other files lack parent context and test-driven telemetry coverage drops.
+- **Impact**: Live-check compliance is unreliable whenever the entry point fails. Run-5's "Live-Check Compliance: OK" is misleading — it should report "DEGRADED" or "INCOMPLETE."
+- **Evidence**: `evaluation/run-5/orbweaver-pr-summary.md` — "Live-Check Compliance: OK" despite index.js FAILED status. Live-check implementation in `src/coordinator/live-check.ts` has no cross-reference to per-file instrumentation results.
+- **Recommended approach** (in priority order — try each before escalating):
+  1. **Per-function handling**: Entry point gets function-level fallback with its functions prioritized. If `main()` can be instrumented with just a root span but `handleSummarize()` fails on SCH-002, commit `main()` alone. This keeps committed code fully schema-compliant. Currently, the function-level fallback has code synthesis bugs (DEEP-2) that prevent this from working — fix those first.
+  2. **Relaxed validation (last resort)**: Only if per-function handling can't produce even a root span — accept partial schema compliance for the root span specifically (strip failing attributes rather than rejecting the file).
+  3. **Priority retry budget**: More retries for the entry point, or a simpler fallback strategy (just the root span, minimal attributes).
+  4. **Live-check gating**: If the entry point failed instrumentation, live-check should report "DEGRADED" with an explanation, not "OK."
+  5. **Cross-reference**: Live-check should compare which files were instrumented vs which emit telemetry, flagging gaps.
+- **Acceptance Criteria**: (a) Entry point failure triggers degraded live-check status, (b) per-function fallback works correctly for entry point files, (c) relaxed validation available as last resort, (d) live-check cross-references instrumented files against telemetry output.
+
+### DEEP-7: Live-check should catch malformed imports and lint failures
+
+- **Priority**: Medium
+- **Recommended Action**: Issue
+- **Description**: The function-level fallback generated `imimport` (corrupted import) in summary-manager.js, which was caught by the LINT validator in the static validation pass. But if a similar corruption slipped past static checks (e.g., valid syntax but wrong import path), live-check should catch it at runtime — the module would fail to load, tests would fail, and Weaver would see missing telemetry. Currently, the LINT check runs per-function during fallback but there's no whole-file syntax verification after all functions are assembled. A `node --check` or lint pass on the reassembled file would catch these synthesis errors earlier.
+- **Impact**: Medium — static LINT caught this specific case, but the gap in whole-file verification after function-level assembly is a latent risk.
+- **Evidence**: summary-manager.js generateAndSaveMonthlySummary LINT failure in `evaluation/run-5/orbweaver-pr-summary.md`.
+- **Acceptance Criteria**: After function-level fallback assembles the final file, run a whole-file syntax check (`node --check` or equivalent) before committing.
 
 ---
 
