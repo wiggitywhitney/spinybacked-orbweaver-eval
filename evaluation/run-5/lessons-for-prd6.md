@@ -80,6 +80,20 @@ Observations, rubric gaps, process improvements, and methodology notes captured 
 
 ---
 
+## Rubric Scoring Observations
+
+*Added during rubric scoring milestone.*
+
+- **Canonical score: 23/25 (92%).** First clean gate pass (5/5). But only 9/29 files committed — quality-vs-coverage tradeoff. The validation pipeline achieves high quality by filtering aggressively.
+- **Quality-vs-coverage tradeoff must be the primary focus for PRD #6.** 92% quality on 9 files is less useful than 73% quality on 16 files. The handoff should prioritize DEEP-1 (COV-003 exemption), DEEP-2/DEEP-2b (fallback quality), and PR-4 (partial commits) — all coverage multipliers.
+- **Superficial resolutions inflate the score.** NDS-005, CDQ-003, and RST-001 appear "resolved" but the underlying behaviors are unchanged — the validation pipeline filtered out violating files. PRD #6 should track these as latent failures that will regress if the pipeline is relaxed.
+- **COV-006 became N/A due to journal-graph.js not committed.** This reduces the denominator from 26 (run-4) to 25 (run-5). PRD #6 should note this when comparing scores across runs.
+- **Score projection methodology needs updating.** Run-4 predicted stretch 92% through rule fixes on a stable file set. Run-5 achieved 92% through a different mechanism (fewer files + fixes). PRD #6 projections should account for: (a) the file set will change as fixes land, (b) "resolved" rules may regress when more files commit, (c) 3-tier projections with explicit file-set assumptions for each tier.
+- **Only 2 canonical failures remain: COV-001 (entry point) and COV-005 (zero attributes).** Both are in the COV dimension (60%). All other dimensions are at 100%. PRD #6 should focus on these 2 rules specifically.
+- **Run-5's 92% should NOT be compared directly to run-4's 58%.** Different denominators (25 vs 26), different file sets (9 vs 16), and methodology changes make the comparison misleading. The meaningful comparison is dimension-level trends + file-level trajectories, not aggregate percentages.
+
+---
+
 ## Carry-Forward Items
 
 *Unresolved items from prior runs that should appear in PRD #6. Orbweaver software issues are tracked in orbweaver-findings.md — this section lists only eval-process carry-forwards.*

@@ -208,7 +208,7 @@ Four-phase approach:
   6. Document in `evaluation/run-5/pr-evaluation.md`.
   7. Append to `evaluation/run-5/lessons-for-prd6.md` and `evaluation/run-5/orbweaver-findings.md`.
 
-- [ ] **Rubric scoring** — Synthesize per-file findings into dimension-level scores:
+- [x] **Rubric scoring** — Synthesize per-file findings into dimension-level scores:
   1. Aggregate from `evaluation/run-5/per-file-evaluation.json`.
   2. Score each dimension with per-rule evidence AND per-file instance counts (files passing/failing each rule).
   3. Apply schema coverage split scoring as standard (SCH-002 split by covered/uncovered files).

@@ -48,6 +48,8 @@ Entry format: `- (YYYY-MM-DD) Description of feature-level change (PRD #X, miles
 
 - (2026-03-17) Completed PR artifact evaluation: no GitHub PR created (push failed 3rd consecutive run), draft PR feature untested. Local PR summary verified accurate — all 17 span counts and 9 committed file statuses match branch state (improvement over run-4's 3 phantom changes). Found schema extension gap (3 auto_summarize span names unregistered), advisory findings contradicting agent skip decisions, live-check "OK" misleading on uninstrumented entry point. Filed 4 new findings (PR-1 through PR-4) including partial file commit support as high-priority (PRD #5, PR artifact evaluation)
 
+- (2026-03-17) Completed rubric scoring: canonical 23/25 (92%) quality, 5/5 gates — first clean gate pass across all runs. Only 2 failures: COV-001 (entry point missing) and COV-005 (zero attributes on schema-uncovered files). Documented quality-vs-coverage tradeoff (92% on 9 files vs 73% on 16), classified 4 systemic bugs, flagged 3 superficial resolutions (NDS-005/CDQ-003/RST-001 filtered by validation, not fixed). Added priority ordering and per-file cost breakdown to orbweaver findings for handoff (PRD #5, rubric scoring)
+
 ### Changed
 - (2026-03-16) Fixed span count discrepancy: total_spans_on_branch corrected from 48 to 38 in per-file-evaluation.json and rubric-scores.json (48 included working-directory-only changes from partial files not committed to branch). Updated baseline-comparison.md table to match canonical per-file-evaluation.json (PRD #4, CodeRabbit finding fix)
 - (2026-03-15) Renamed all "orb" references to "orbweaver" in PRD #4 and evaluation docs to match CLI rename (spinybacked-orbweaver #123)

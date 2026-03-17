@@ -142,7 +142,7 @@ All 13 run-4 findings were filed by the orbweaver AI (none rejected) and merged 
 - **Description**: Orbweaver does not emit start/end timestamps or per-file durations in its stdout or PR summary. Run-5's end time was lost because the external process recording timestamps required manual approval that came hours after completion.
 - **Impact**: Evaluation runs cannot accurately report wall-clock duration or per-file processing time, making it harder to measure the cost of validation retries or detect performance regressions.
 - **Evidence**: `evaluation/run-5/orbweaver-output.md` — start time recorded externally, end time marked as "indeterminate."
-- **Acceptance Criteria**: Orbweaver output should include: (a) run start/end timestamps, (b) per-file start/end timestamps or duration, (c) retry count per file. These should appear in both stdout and the PR summary.
+- **Acceptance Criteria**: Orbweaver output should include: (a) run start/end timestamps, (b) per-file start/end timestamps or duration, (c) retry count per file, (d) per-file token/cost breakdown in the PR summary (total cost is reported but not attributed to individual files — with 8 files going through retry loops, per-file costs identify expensive files and evaluate retry budget effectiveness). These should appear in both stdout and the PR summary.
 
 ### DEEP-1: COV-003 validator lacks expected-condition catch exemption
 
@@ -284,6 +284,40 @@ All 13 run-4 findings were filed by the orbweaver AI (none rejected) and merged 
 - **Impact**: This is a primary contributor to the run-5 coverage regression (9 committed files vs run-4's 16). If partial commits were supported, summary-graph.js alone would add 5 spans to the branch.
 - **Evidence**: `evaluation/run-5/orbweaver-pr-summary.md` function-level fallback results. `evaluation/run-5/pr-evaluation.md` section 2.
 - **Acceptance Criteria**: Function-level fallback should assemble a file containing only the successfully instrumented functions. If N of M functions pass validation, commit the file with N functions instrumented (the other M-N functions remain in their original uninstrumented state).
+
+---
+
+## Rubric Scoring Synthesis
+
+*Added during rubric scoring milestone. Quantitative context for prioritizing findings.*
+
+**Canonical score: 23/25 (92%) quality rules pass, 5/5 gates pass.** This is the highest score across all evaluation runs. However, it comes with a major caveat: only 9/29 files were committed (vs 16/29 in run-4). The validation pipeline achieved high quality by filtering out lower-quality work.
+
+### Priority ordering (based on impact analysis)
+
+1. **DEEP-1 (COV-003/NDS-005b conflict)** — Highest impact single fix. Resolves the dominant failure pattern affecting 5 of 8 problematic files. Unblocks partial file commits (PR-4). Must be fixed BEFORE relaxing commit policy, or NDS-005b violations will reach the branch.
+
+2. **RUN-1 + DEEP-6 (SCH-002 oscillation / entry point handling)** — Second priority. COV-001 is one of only 2 canonical failures. Entry point failure silently degrades live-check. The acceptance criteria in RUN-1 provide 4 options; the per-function approach (DEEP-6 option 1) depends on DEEP-2/DEEP-2b being fixed first.
+
+3. **DEEP-2 + DEEP-2b (function-level fallback quality)** — Enables partial file commits and entry point recovery. Corrupted imports and exported-only scope are blocking issues for the fallback path.
+
+4. **EVAL-1 (zero attributes on schema-uncovered files)** — One of only 2 canonical failures (COV-005). The agent CAN add attributes when guided by the registry; it needs prompt guidance to add contextual attributes even without registry definitions.
+
+5. **PR-4 (partial file commits)** — Coverage multiplier. If partial commits worked, summary-graph alone would add 5 spans. But requires DEEP-1 resolution first to prevent NDS-005b leaking into branch.
+
+6. **Push authentication (persistent)** — 3rd consecutive failure. The PR artifact has never been tested live. Blocking evaluation of PR quality and draft-PR-on-failure feature.
+
+### "Resolved" findings that are actually superficial
+
+Three run-4 failures appear resolved in run-5 scoring but the underlying agent behavior is unchanged:
+
+| Rule | Run-4 | Run-5 | Why superficial |
+|------|-------|-------|----------------|
+| NDS-005 | FAIL (3 files) | PASS | Violating files filtered out by validation — behavior NOT fixed. 8 NDS-005b instances in partial files. |
+| CDQ-003 | FAIL (summarize.js) | PASS | summarize.js failed instrumentation entirely. Latent CDQ-003 misuse in partial files. |
+| RST-001 | FAIL (token-filter) | PASS | token-filter.js correctly skipped — genuine improvement in skip decisions, but agent may still over-instrument if file complexity changes. |
+
+The orbweaver maintainer should prioritize DEEP-1 (COV-003 expected-condition exemption) over trusting the NDS-005/CDQ-003 "resolution." These will regress if the validation pipeline is relaxed.
 
 ---
 

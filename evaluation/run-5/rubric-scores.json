@@ -1,0 +1,557 @@
+{
+  "meta": {
+    "run": 5,
+    "date": "2026-03-17",
+    "orbweaver_version": "0.2.0",
+    "orbweaver_branch": "orbweaver/instrument-1773706515431",
+    "rubric_version": "32 rules (5 gates + 27 quality), 2026-03-17 clarifications applied",
+    "methodology": "canonical (per-file evaluation + schema coverage split)",
+    "files_processed": 29,
+    "files_committed_on_branch": 9,
+    "files_correctly_skipped": 12,
+    "files_partial": 6,
+    "files_failed": 2,
+    "total_spans_committed": 17,
+    "total_span_names": 17,
+    "cost_actual": 9.72,
+    "cost_ceiling": 67.86,
+    "cost_ratio_pct": 14.3,
+    "source_artifact": "per-file-evaluation.json"
+  },
+  "gates": {
+    "total_pass": 5,
+    "total_fail": 0,
+    "results": {
+      "NDS-001": {
+        "result": "pass",
+        "evidence": "All 9 committed files pass node --check. Orbweaver pipeline validates syntax before commit."
+      },
+      "NDS-002": {
+        "result": "pass",
+        "evidence": "Test suite passes for committed files. Partial/failed files were NOT committed, preserving test suite integrity. Improvement from run-4 FAIL (32 test failures from tracer ReferenceError in working directory)."
+      },
+      "NDS-003": {
+        "result": "pass",
+        "evidence": "All 9 committed files have instrumentation-only changes. No non-instrumentation modifications in delivered code.",
+        "note": "5 partial files (not committed) fail NDS-003 due to duplicate JSDoc blocks (DEEP-4). These violations exist only in the working tree."
+      },
+      "API-001": {
+        "result": "pass",
+        "files_evaluated": 9,
+        "files_passing": 9,
+        "evidence": "All 9 committed files import only from '@opentelemetry/api'. No SDK or instrumentation package imports."
+      },
+      "NDS-006": {
+        "result": "pass",
+        "files_evaluated": 9,
+        "files_passing": 9,
+        "evidence": "All files use ESM imports. No require() or module.exports. Project has 'type': 'module' in package.json."
+      }
+    },
+    "verdict": "All 5 gates PASS. First clean gate pass across all evaluation runs (run-4: 4/5, run-3: 4/5, run-2: 3/5)."
+  },
+  "quality_rules": {
+    "NDS-004": {
+      "result": "pass",
+      "dimension": "NDS",
+      "files_evaluated": 9,
+      "files_pass": 9,
+      "files_fail": 0,
+      "evidence": "All 9 committed files preserve all exported function signatures. startActiveSpan callbacks wrap function bodies without modifying parameter lists, return types, or export declarations.",
+      "category": "persistent_pass",
+      "run4_result": "pass"
+    },
+    "NDS-005": {
+      "result": "pass",
+      "dimension": "NDS",
+      "files_evaluated": 9,
+      "files_pass": 9,
+      "files_fail": 0,
+      "evidence": "All 9 committed files preserve error handling behavior. No expected-condition catches modified in delivered code.",
+      "category": "resolved",
+      "run4_result": "fail",
+      "run4_note": "Run-4 failed: 3 files (summarize, summary-manager, summary-detector) had NDS-005b violations ON THE BRANCH. Run-5: those files are not committed. However, 3 partial files (journal-manager, summary-manager, summary-detector) show 8 NDS-005b violations in working-tree diffs (not delivered). The underlying agent behavior is NOT fixed — the validation pipeline prevented the violations from reaching the branch.",
+      "latent_issues": {
+        "partial_file_violations": 8,
+        "affected_partial_files": [
+          "src/managers/journal-manager.js",
+          "src/managers/summary-manager.js",
+          "src/utils/summary-detector.js"
+        ],
+        "root_cause": "DEEP-1: COV-003 validator requires error recording on ALL catches including expected-condition handlers. Agent complies with COV-003 → produces NDS-005b violations."
+      }
+    },
+    "COV-001": {
+      "result": "fail",
+      "dimension": "COV",
+      "files_evaluated": 9,
+      "files_pass": 8,
+      "files_na": 1,
+      "committed_file_result": "pass",
+      "evidence": "All committed entry-point files have spans. However, the application's primary entry point (src/index.js main()) failed instrumentation entirely (SCH-002 oscillation) and has NO span. Without a root span, the trace has no top-level operation. This is a persistent failure from run-4.",
+      "category": "persistent",
+      "run4_result": "fail",
+      "run4_note": "Run-4: index.js was on branch but lacked root span. Run-5: index.js failed instrumentation entirely — worse outcome, same rule failure.",
+      "finding_ref": "RUN-1, DEEP-6"
+    },
+    "COV-002": {
+      "result": "pass",
+      "dimension": "COV",
+      "files_evaluated": 2,
+      "files_pass": 2,
+      "files_na": 7,
+      "evidence": "git-collector.js wraps execFileAsync in spans. commit-analyzer.js wraps execFileSync calls in spans. Other committed files have no outbound calls requiring individual spans.",
+      "category": "resolved",
+      "run4_result": "fail",
+      "run4_note": "Run-4 failed COV-002 on claude-collector (internal fs helpers) and index.js (git validation calls). Run-5 canonical methodology: claude-collector's sync fs helpers are N/A (internal operations), and index.js is not on the branch."
+    },
+    "COV-003": {
+      "result": "pass",
+      "dimension": "COV",
+      "files_evaluated": 9,
+      "files_pass": 9,
+      "files_fail": 0,
+      "evidence": "All 9 committed files have recordException + setStatus(ERROR) in catch blocks. Standard error recording pattern followed consistently across all 17 spans.",
+      "category": "persistent_pass",
+      "run4_result": "pass"
+    },
+    "COV-004": {
+      "result": "pass",
+      "dimension": "COV",
+      "files_evaluated": 9,
+      "files_pass": 9,
+      "files_fail": 0,
+      "evidence": "All async/long-running functions in committed files have spans. No unspanned async operations.",
+      "category": "resolved",
+      "run4_result": "fail",
+      "run4_note": "Run-4 failed on claude-collector and git-collector internal async helpers, and index.js. Run-5 canonical methodology resolves the internal helper question; index.js is not on branch."
+    },
+    "COV-005": {
+      "result": "fail",
+      "dimension": "COV",
+      "files_evaluated": 9,
+      "files_pass": 7,
+      "files_fail": 2,
+      "failing_files": [
+        "src/managers/auto-summarize.js",
+        "src/mcp/server.js"
+      ],
+      "evidence": "auto-summarize.js: 3 spans with ZERO attributes. server.js: 1 span with ZERO attributes. Both are schema-uncovered files. The agent strips attributes to pass SCH-002 validation but doesn't add schema-compliant alternatives. Schema-covered files have rich attributes (context-integrator.js has 10).",
+      "category": "genuine_new_finding",
+      "run4_result": "fail",
+      "run4_note": "Run-4 failed COV-005 on auto-summarize (4 ad-hoc attrs) and summary-detector (3 ad-hoc attrs). Run-5: auto-summarize now has ZERO attributes (worse), server.js is new failure. Root cause shifted from 'wrong attributes' to 'no attributes' — validation pipeline trades attribute presence for schema compliance.",
+      "systemic_bug": "EVAL-1",
+      "finding_ref": "EVAL-1"
+    },
+    "COV-006": {
+      "result": "N/A",
+      "dimension": "COV",
+      "evidence": "No committed files have applicable auto-instrumentation coverage decisions. journal-graph.js (run-4's COV-006 target) is partial in run-5, not committed.",
+      "run4_result": "pass",
+      "run4_note": "Run-4: journal-graph.js justified manual LangGraph spans. Run-5: file is partial, so COV-006 has no applicable files."
+    },
+    "RST-001": {
+      "result": "pass",
+      "dimension": "RST",
+      "files_evaluated": 9,
+      "files_pass": 9,
+      "files_fail": 0,
+      "evidence": "No utility functions have spans in committed files. Only I/O-performing and entry-point functions are instrumented.",
+      "category": "resolved",
+      "run4_result": "fail",
+      "run4_note": "Run-4 failed on token-filter.js (truncateDiff/truncateMessages are pure sync functions). Run-5: token-filter.js is correctly skipped (not instrumented at all)."
+    },
+    "RST-002": {
+      "result": "pass",
+      "dimension": "RST",
+      "files_evaluated": 9,
+      "files_pass": 9,
+      "files_fail": 0,
+      "evidence": "No trivial accessor spans in any committed file.",
+      "category": "persistent_pass",
+      "run4_result": "pass"
+    },
+    "RST-003": {
+      "result": "pass",
+      "dimension": "RST",
+      "files_evaluated": 9,
+      "files_pass": 9,
+      "files_fail": 0,
+      "evidence": "No duplicate spans on thin wrappers.",
+      "category": "persistent_pass",
+      "run4_result": "pass"
+    },
+    "RST-004": {
+      "result": "pass",
+      "dimension": "RST",
+      "files_evaluated": 9,
+      "files_pass": 9,
+      "files_fail": 0,
+      "evidence": "All spanned unexported functions perform I/O (RST-004 exemption applies). saveContext, saveReflection (MCP tools) do file I/O. runGit (git-collector) does subprocess I/O.",
+      "category": "persistent_pass",
+      "run4_result": "pass"
+    },
+    "RST-005": {
+      "result": "N/A",
+      "dimension": "RST",
+      "evidence": "First instrumentation run on this codebase. No pre-existing instrumentation to re-instrument.",
+      "run4_result": "N/A"
+    },
+    "API-002": {
+      "result": "pass",
+      "dimension": "API",
+      "evidence": "@opentelemetry/api in peerDependencies (^1.9.0). Correct for library project. Agent also added @traceloop/instrumentation-langchain and @traceloop/instrumentation-mcp as optional peerDependencies — architecturally questionable but non-blocking (see EVAL-2).",
+      "category": "persistent_pass",
+      "run4_result": "pass",
+      "finding_ref": "EVAL-2"
+    },
+    "API-003": {
+      "result": "pass",
+      "dimension": "API",
+      "evidence": "No vendor-specific SDK packages. @traceloop packages are community auto-instrumentation, not vendor SDKs.",
+      "category": "persistent_pass",
+      "run4_result": "pass"
+    },
+    "API-004": {
+      "result": "pass",
+      "dimension": "API",
+      "files_evaluated": 9,
+      "files_passing": 9,
+      "evidence": "No @opentelemetry/sdk-* or @opentelemetry/instrumentation-* imports in source files.",
+      "category": "persistent_pass",
+      "run4_result": "pass"
+    },
+    "SCH-001": {
+      "result": "pass",
+      "dimension": "SCH",
+      "files_evaluated": 9,
+      "files_pass": 9,
+      "files_fail": 0,
+      "spans_evaluated": 17,
+      "spans_compliant": 17,
+      "evidence": "All 17 span names across 9 committed files follow the commit_story.* namespace convention. Consistent naming: commit_story.{subsystem}.{operation}.",
+      "category": "resolved",
+      "run4_result": "fail",
+      "run4_note": "Run-4: 8/37 span names (22%) deviated from commit_story.* (context.*, summary.*, mcp.* prefixes). Run-5: all committed spans use commit_story.* consistently. Schema evolution propagation and prompt naming guidance (PR #170, #175) resolved this.",
+      "note": "Partial files (not committed) show naming inconsistencies — summary-graph.js has mixed ai/journal namespaces. The validation pipeline's SCH-001 check prevents these from reaching the branch."
+    },
+    "SCH-002": {
+      "result": "pass",
+      "dimension": "SCH",
+      "methodology": "schema_coverage_split",
+      "schema_covered_files": {
+        "count": 7,
+        "pass": 7,
+        "fail": 0,
+        "evidence": "All schema-covered and partially-covered committed files use only registry-defined attribute keys. Zero ad-hoc attributes in covered files.",
+        "files": [
+          "src/collectors/claude-collector.js",
+          "src/collectors/git-collector.js",
+          "src/integrators/context-integrator.js",
+          "src/mcp/tools/context-capture-tool.js",
+          "src/mcp/tools/reflection-tool.js",
+          "src/utils/commit-analyzer.js",
+          "src/utils/journal-paths.js"
+        ]
+      },
+      "schema_uncovered_files": {
+        "count": 2,
+        "result": "N/A",
+        "evidence": "auto-summarize.js and server.js have zero attributes — nothing to evaluate for invention quality. COV-005 captures the absence; SCH-002 is N/A when no attributes exist.",
+        "files": [
+          "src/managers/auto-summarize.js",
+          "src/mcp/server.js"
+        ]
+      },
+      "category": "resolved",
+      "run4_result": "fail",
+      "run4_note": "Run-4 strict: 11 ad-hoc attribute keys in 3 files. Run-4 split: PASS (covered files compliant, uncovered invention quality high). Run-5 canonical: PASS (covered files compliant, uncovered files have no attributes to evaluate).",
+      "note": "The SCH-002 'resolution' in run-5 is a side-effect of zero attributes on uncovered files, not improved attribute compliance. Run-4 had ad-hoc attributes that were well-formed; run-5 has no attributes at all. COV-005 captures this regression."
+    },
+    "SCH-003": {
+      "result": "pass",
+      "dimension": "SCH",
+      "files_evaluated": 9,
+      "files_pass": 9,
+      "evidence": "All attribute values conform to registry types. Enums use valid members, strings/ints/booleans use correct types. toISOString() produces valid ISO 8601 strings.",
+      "category": "persistent_pass",
+      "run4_result": "pass"
+    },
+    "SCH-004": {
+      "result": "pass",
+      "dimension": "SCH",
+      "files_evaluated": 9,
+      "files_pass": 9,
+      "evidence": "No redundant schema entries in committed files. All attributes capture distinct domain concepts.",
+      "category": "persistent_pass",
+      "run4_result": "pass"
+    },
+    "CDQ-001": {
+      "result": "pass",
+      "dimension": "CDQ",
+      "files_evaluated": 9,
+      "files_pass": 9,
+      "spans_evaluated": 17,
+      "evidence": "All 17 spans use startActiveSpan callback + finally { span.end() }. No span leaks.",
+      "category": "persistent_pass",
+      "run4_result": "pass"
+    },
+    "CDQ-002": {
+      "result": "pass",
+      "dimension": "CDQ",
+      "files_evaluated": 9,
+      "files_pass": 9,
+      "evidence": "All 9 committed files use trace.getTracer('commit-story'). Library name matches package.json#name. Semantic check (name correctness): PASS.",
+      "category": "resolved",
+      "run4_result": "fail",
+      "run4_note": "Run-4: all 16 files used 'unknown_service'. Systemic bug — single root cause, 16 affected files. Run-5: agent correctly reads package.json name. Fix: orbweaver PR #165 (prompt guidance for tracer name)."
+    },
+    "CDQ-003": {
+      "result": "pass",
+      "dimension": "CDQ",
+      "files_evaluated": 9,
+      "files_pass": 9,
+      "evidence": "Standard error recording pattern (recordException + setStatus(ERROR) + re-throw for genuine errors) in all committed files. No misuse on expected-condition catches in delivered code.",
+      "category": "resolved",
+      "run4_result": "fail",
+      "run4_note": "Run-4: summarize.js used recordException on expected-condition catches (file-not-found). Run-5: summarize.js failed instrumentation and was not committed. Partial files still show CDQ-003 misuse (DEEP-3) but this is not in the delivered code."
+    },
+    "CDQ-005": {
+      "result": "pass",
+      "dimension": "CDQ",
+      "files_evaluated": 9,
+      "files_pass": 9,
+      "evidence": "All spans use startActiveSpan callback pattern, automatically maintaining async context.",
+      "category": "persistent_pass",
+      "run4_result": "pass"
+    },
+    "CDQ-006": {
+      "result": "pass",
+      "dimension": "CDQ",
+      "files_evaluated": 9,
+      "files_pass": 9,
+      "evidence": "toISOString() calls exempt under cheap computation rule (run-5 methodology clarification). Property access (.size, .length) and trivial conversions do not require isRecording() guards.",
+      "category": "methodology_resolved",
+      "run4_result": "fail",
+      "run4_note": "Run-4: toISOString() flagged as needing isRecording() guard. Run-5 methodology clarification: cheap computations (toISOString, String(), Number()) exempt. This makes CDQ-006 consistent across runs."
+    },
+    "CDQ-007": {
+      "result": "pass",
+      "dimension": "CDQ",
+      "files_evaluated": 9,
+      "files_pass": 9,
+      "evidence": "No unbounded or PII attributes in committed files. commit.author is in registry with PII annotation (accepted).",
+      "category": "persistent_pass",
+      "run4_result": "pass"
+    },
+    "CDQ-008": {
+      "result": "pass",
+      "dimension": "CDQ",
+      "files_evaluated": 9,
+      "files_pass": 9,
+      "evidence": "All 9 files use trace.getTracer('commit-story'). Single naming convention, consistent and correct.",
+      "category": "persistent_pass",
+      "run4_result": "pass"
+    }
+  },
+  "dimension_scores": {
+    "NDS": {
+      "rules_applicable": 2,
+      "rules_pass": 2,
+      "rules_fail": 0,
+      "score_pct": 100,
+      "rules": ["NDS-004", "NDS-005"],
+      "run4_score": "1/2 (50%)",
+      "change": "improvement"
+    },
+    "COV": {
+      "rules_applicable": 5,
+      "rules_pass": 3,
+      "rules_fail": 2,
+      "rules_na": 1,
+      "score_pct": 60,
+      "rules": ["COV-001", "COV-002", "COV-003", "COV-004", "COV-005"],
+      "na_rules": ["COV-006"],
+      "run4_score": "2/6 (33%)",
+      "change": "improvement"
+    },
+    "RST": {
+      "rules_applicable": 4,
+      "rules_pass": 4,
+      "rules_fail": 0,
+      "rules_na": 1,
+      "score_pct": 100,
+      "rules": ["RST-001", "RST-002", "RST-003", "RST-004"],
+      "na_rules": ["RST-005"],
+      "run4_score": "3/4 (75%)",
+      "change": "improvement"
+    },
+    "API": {
+      "rules_applicable": 3,
+      "rules_pass": 3,
+      "rules_fail": 0,
+      "score_pct": 100,
+      "rules": ["API-002", "API-003", "API-004"],
+      "run4_score": "3/3 (100%)",
+      "change": "unchanged"
+    },
+    "SCH": {
+      "rules_applicable": 4,
+      "rules_pass": 4,
+      "rules_fail": 0,
+      "score_pct": 100,
+      "rules": ["SCH-001", "SCH-002", "SCH-003", "SCH-004"],
+      "run4_score": "2/4 (50%)",
+      "change": "improvement"
+    },
+    "CDQ": {
+      "rules_applicable": 7,
+      "rules_pass": 7,
+      "rules_fail": 0,
+      "score_pct": 100,
+      "rules": ["CDQ-001", "CDQ-002", "CDQ-003", "CDQ-005", "CDQ-006", "CDQ-007", "CDQ-008"],
+      "run4_score": "4/7 (57%)",
+      "change": "improvement"
+    }
+  },
+  "overall": {
+    "canonical_score": {
+      "pass": 23,
+      "fail": 2,
+      "na": 2,
+      "applicable": 25,
+      "pct": 92,
+      "methodology": "per-file evaluation + schema coverage split (canonical)"
+    },
+    "gate_score": {
+      "pass": 5,
+      "fail": 0,
+      "total": 5,
+      "pct": 100
+    },
+    "failures": [
+      {
+        "rule": "COV-001",
+        "category": "persistent",
+        "evidence": "Application entry point (index.js main()) has no span — failed instrumentation entirely due to SCH-002 oscillation. Persistent from run-4.",
+        "finding_ref": "RUN-1, DEEP-6"
+      },
+      {
+        "rule": "COV-005",
+        "category": "genuine_new_finding",
+        "evidence": "auto-summarize.js (3 spans, 0 attributes) and server.js (1 span, 0 attributes). Schema-uncovered files have zero attributes — agent strips all attributes to pass SCH-002 validation.",
+        "systemic_bug": "EVAL-1",
+        "finding_ref": "EVAL-1"
+      }
+    ]
+  },
+  "systemic_bugs": [
+    {
+      "id": "SYS-1",
+      "title": "Schema-uncovered files get zero attributes",
+      "root_cause": "Agent strips all attributes to satisfy SCH-002 validation on files without registry definitions, but doesn't add schema-compliant alternatives.",
+      "affected_rules": ["COV-005"],
+      "affected_files": ["src/managers/auto-summarize.js", "src/mcp/server.js"],
+      "affected_instances": 4,
+      "in_canonical_score": true,
+      "finding_ref": "EVAL-1"
+    },
+    {
+      "id": "SYS-2",
+      "title": "Entry point SCH-002 oscillation",
+      "root_cause": "Agent can't converge on schema-compliant attributes for index.js during fix/retry loop. Correction attempts increase violation count.",
+      "affected_rules": ["COV-001"],
+      "affected_files": ["src/index.js"],
+      "affected_instances": 1,
+      "in_canonical_score": true,
+      "finding_ref": "RUN-1"
+    },
+    {
+      "id": "SYS-3",
+      "title": "COV-003/NDS-005b validator conflict (latent)",
+      "root_cause": "COV-003 validator requires error recording on ALL catch blocks including expected-condition handlers. Agent complies → produces NDS-005b violations. Affects uncommitted partial files only.",
+      "affected_rules": ["NDS-005"],
+      "affected_files": ["src/managers/journal-manager.js", "src/managers/summary-manager.js", "src/utils/summary-detector.js"],
+      "affected_instances": 8,
+      "in_canonical_score": false,
+      "note": "Not in canonical score because affected files are partial (not committed). Would become canonical failures if validation pipeline is relaxed to commit partial files.",
+      "finding_ref": "DEEP-1, DEEP-3"
+    },
+    {
+      "id": "SYS-4",
+      "title": "Duplicate JSDoc comments (latent)",
+      "root_cause": "Agent generates new JSDoc comment AND preserves original, producing duplicate blocks.",
+      "affected_rules": ["NDS-003"],
+      "affected_files": ["src/generators/journal-graph.js", "src/generators/summary-graph.js", "src/managers/journal-manager.js", "src/managers/summary-manager.js", "src/utils/summary-detector.js"],
+      "affected_instances": 5,
+      "in_canonical_score": false,
+      "finding_ref": "DEEP-4"
+    }
+  ],
+  "failure_classification": {
+    "resolved_from_run4": [
+      {"rule": "NDS-005", "run4_category": "genuine_new_finding", "resolution": "Violating files not committed (validation pipeline filtered). Underlying behavior NOT fixed — latent in partial files."},
+      {"rule": "COV-002", "run4_category": "methodology_change", "resolution": "Canonical methodology: internal sync helpers are N/A for COV-002."},
+      {"rule": "COV-004", "run4_category": "methodology_change", "resolution": "Canonical methodology resolves parent-span-coverage debate."},
+      {"rule": "RST-001", "run4_category": "genuine_new_finding", "resolution": "token-filter.js correctly skipped in run-5."},
+      {"rule": "SCH-001", "run4_category": "schema_evolution_dependency", "resolution": "Schema evolution working + prompt naming guidance → all committed spans use commit_story.* namespace."},
+      {"rule": "SCH-002", "run4_category": "schema_evolution_dependency", "resolution": "Schema coverage split: covered files compliant. Uncovered files have zero attributes (N/A for SCH-002, captured as COV-005 failure)."},
+      {"rule": "CDQ-002", "run4_category": "genuine_new_finding", "resolution": "Agent reads package.json name correctly. Orbweaver PR #165 fixed prompt guidance."},
+      {"rule": "CDQ-003", "run4_category": "genuine_new_finding", "resolution": "Violating file (summarize.js) not committed. Latent in partial files."},
+      {"rule": "CDQ-006", "run4_category": "methodology_change", "resolution": "Cheap computation exemption standardized in run-5 methodology."}
+    ],
+    "persistent_from_run4": [
+      {"rule": "COV-001", "evidence": "index.js entry point still has no span. Run-4: on branch but missing root span. Run-5: failed instrumentation entirely."}
+    ],
+    "genuine_new_findings": [
+      {"rule": "COV-005", "evidence": "auto-summarize.js and server.js have zero attributes. Different failure mode from run-4 (which had wrong attributes, not zero attributes). Root cause: validation pipeline forces attribute removal on schema-uncovered files."}
+    ]
+  },
+  "quality_vs_coverage_tradeoff": {
+    "summary": "Run-5's validation pipeline traded coverage for quality. The canonical score (92%) is high because lower-quality instrumentation was filtered out before reaching the branch.",
+    "metrics": {
+      "run4_committed_files": 16,
+      "run5_committed_files": 9,
+      "file_coverage_delta": -7,
+      "file_coverage_delta_pct": -44,
+      "run4_committed_spans": 38,
+      "run5_committed_spans": 17,
+      "span_coverage_delta": -21,
+      "span_coverage_delta_pct": -55,
+      "run4_canonical_quality": "58% (15/26 strict) | 73% (19/26 split+adjusted)",
+      "run5_canonical_quality": "92% (23/25)"
+    },
+    "interpretation": "The validation pipeline is working as designed — it prevents low-quality instrumentation from being committed. But the net effect is reduced coverage. 8 files that were instrumented in run-4 are not instrumented in run-5. The next priority should be improving the agent's ability to pass validation on these files (finding RUN-2), not relaxing validation.",
+    "files_regressed": [
+      {"file": "src/generators/journal-graph.js", "run4": "committed (4 spans)", "run5": "partial (1 function, not committed)", "cause": "Function-level fallback loses non-exported functions (DEEP-2b)"},
+      {"file": "src/index.js", "run4": "committed (no root span)", "run5": "failed (SCH-002 oscillation)", "cause": "SCH-002 validation causes oscillation (RUN-1)"},
+      {"file": "src/commands/summarize.js", "run4": "committed", "run5": "failed (COV-003 + SCH-002)", "cause": "COV-003/NDS-005b conflict (DEEP-1)"},
+      {"file": "src/integrators/filters/message-filter.js", "run4": "committed", "run5": "correctly skipped", "cause": "Pure sync filter — correct skip decision in run-5"},
+      {"file": "src/integrators/filters/token-filter.js", "run4": "committed (RST-001 violation)", "run5": "correctly skipped", "cause": "Pure sync utility — correct skip decision in run-5 (RST-001 fix)"},
+      {"file": "src/managers/summary-manager.js", "run4": "committed", "run5": "partial (9/14 functions, not committed)", "cause": "COV-003/NDS-005b conflict + function-level fallback issues (DEEP-1, DEEP-2)"},
+      {"file": "src/utils/summary-detector.js", "run4": "committed", "run5": "partial (4/5 functions, not committed)", "cause": "NDS-005b violations in expected-condition catches (DEEP-1)"}
+    ],
+    "files_improved_skip_decisions": [
+      {"file": "src/integrators/filters/message-filter.js", "note": "Correctly skipped in run-5 (pure sync filter). Was over-instrumented in run-4."},
+      {"file": "src/integrators/filters/token-filter.js", "note": "Correctly skipped in run-5 (pure sync utility). Run-4 RST-001 violation."}
+    ]
+  },
+  "backward_compatibility": {
+    "note": "Provided for comparison with runs 2-4. Not the canonical score.",
+    "run4_comparison": {
+      "run4_strict": "15/26 (58%)",
+      "run4_split_adjusted": "19/26 (73%)",
+      "run5_canonical": "23/25 (92%)",
+      "delta_from_strict": "+34 percentage points",
+      "delta_from_split_adjusted": "+19 percentage points",
+      "caveat": "Denominators differ (26 vs 25) due to COV-006 becoming N/A. File coverage regressed (9 vs 16 committed files). Direct percentage comparison understates the coverage tradeoff."
+    },
+    "run4_projection_validation": {
+      "minimum_projection": "62-65% (critical infra only)",
+      "target_projection": "85% canonical (22/26)",
+      "stretch_projection": "92% adjusted (24/26)",
+      "actual": "92% canonical (23/25)",
+      "assessment": "Actual score matches stretch projection numerically but through a different mechanism. Run-4 projected fixes to specific rules would raise the score. Run-5's score increase is partly from fixes AND partly from fewer committed files reducing the failure surface. The projection methodology assumed a stable file set, which didn't hold."
+    }
+  }
+}
