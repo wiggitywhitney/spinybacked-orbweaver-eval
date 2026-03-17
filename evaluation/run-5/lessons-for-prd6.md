@@ -89,3 +89,21 @@ Observations, rubric gaps, process improvements, and methodology notes captured 
 - Per-retry visibility not available — partial diffs only capture final state, not intermediate attempts. Consider requesting per-retry snapshots from orbweaver (see finding RUN-5)
 - Orbweaver software findings to include in handoff: PRE-1, PRE-2, RUN-1 through RUN-5, DEEP-1 through DEEP-7, plus persistent push auth failure (see orbweaver-findings.md)
 - **Failure trajectory data**: Track across runs whether the same root cause persists or changes for each problematic file. Run-5 showed root cause changes on 5 of 8 files (from run-4 issues to validation pipeline issues)
+
+---
+
+## Per-File Evaluation Observations
+
+*Added during per-file evaluation milestone.*
+
+- **Committed file quality is high.** 7 of 9 committed files pass ALL applicable rules (22/22). Only COV-005 failures on 2 schema-uncovered files (auto-summarize.js, server.js) which set zero attributes.
+- **Schema-uncovered files with zero attributes are the gap.** COV-005 evaluates schema-uncovered files on "invention quality" — whether the agent adds domain-relevant attributes even without registry guidance. auto-summarize.js and server.js both failed this: 3+1 spans with zero attributes, providing minimal observability beyond "function was called."
+- **CDQ-002 fully resolved.** All 9 files use `trace.getTracer('commit-story')` matching package.json name. Run-4's systemic 'unknown_service' bug is confirmed fixed.
+- **CDQ-008 fully resolved.** Single consistent tracer naming pattern across all files. Run-4's 4-convention inconsistency is gone.
+- **Schema evolution attributes are well-formed.** Agent-extensions.yaml contains 14 attributes, all correctly namespaced. Schema-covered files use registry attributes correctly (types match, enum values valid).
+- **NDS-005b is confirmed as the dominant partial-file quality issue.** 8 instances across 3 partial files (journal-manager, summary-manager, summary-detector). Systemic root cause: DEEP-1 (COV-003 validator lacks expected-condition exemption).
+- **NDS-003 violations in ALL partial files from duplicate JSDoc.** The agent generates a second JSDoc block before each function it instruments. Cosmetic but systematic — every function touched gets duplicate documentation. DEEP-4 finding confirmed as universal.
+- **Borderline NDS-005 cases in committed code.** commit-analyzer.js getChangedFiles and isMergeCommit have catch blocks returning defaults — borderline between "expected condition" and "defensive error handling." Classified as PASS because git failure is genuinely an error (unlike file-not-found on first run). PRD #6 should refine the NDS-005b boundary: "expected condition" = the catch is the NORMAL path for first-run/optional resources; "defensive error handling" = the catch handles genuine failures gracefully.
+- **@traceloop packages in peerDependencies.** Agent added auto-instrumentation packages as optional peerDependencies. Doesn't fail any rubric rule (API-003 covers vendor-specific SDKs) but contradicts the OTel principle that libraries should depend only on the API. Consider adding a rubric rule for library dependency hygiene.
+- **Per-item error recording in loops (auto-summarize.js).** Agent calls `span.setStatus({code: ERROR})` inside per-item catch in a loop. If one item fails but others succeed, the span shows ERROR. Semantically imprecise but CDQ-003 pattern is correct. Consider adding a CDQ rule for span status accuracy in batch operations.
+- **Summary-graph.js namespace inconsistency (partial, not committed).** `generateMonthlySummary` uses `commit_story.ai.*` namespace while `generateDailySummary` uses `commit_story.journal.*`. Would fail SCH-001 naming consistency if committed. Observation for future run evaluation.

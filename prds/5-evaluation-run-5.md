@@ -187,7 +187,7 @@ Four-phase approach:
   5. Document in `evaluation/run-5/failure-deep-dives.md`.
   6. Append to `evaluation/run-5/lessons-for-prd6.md` and `evaluation/run-5/orbweaver-findings.md`.
 
-- [ ] **Per-file evaluation** — Full rubric applied to all files using standardized per-file agent methodology:
+- [x] **Per-file evaluation** — Full rubric applied to all files using standardized per-file agent methodology:
   1. **Gate checks + per-run rules (single agent)**: NDS-001, NDS-002, NDS-003, NDS-006, API-001, API-002, API-003, API-004, CDQ-008.
   2. **Per-file quality rules (per-file agents)**: Each agent gets rubric + one file's diff + Weaver schema + registry. Rules: NDS-004, NDS-005, COV-001 through COV-006, RST-001 through RST-005, SCH-001 through SCH-004, CDQ-001 through CDQ-007.
   3. **Apply rubric clarifications**: CDQ-002 semantic check, CDQ-006 cheap computation exemption, NDS-005 sub-classification.

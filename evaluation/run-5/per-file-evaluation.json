@@ -1,0 +1,468 @@
+{
+  "metadata": {
+    "run": 5,
+    "branch": "orbweaver/instrument-1773706515431",
+    "evaluator": "per-file-agent-methodology",
+    "rubric_version": "2026-03-17",
+    "methodology": "canonical (per-file evaluation + schema coverage split)",
+    "files_total": 29,
+    "files_committed": 9,
+    "files_skipped": 12,
+    "files_partial": 6,
+    "files_failed": 2
+  },
+  "schema_classification": {
+    "schema_covered": [
+      "src/collectors/claude-collector.js",
+      "src/collectors/git-collector.js",
+      "src/integrators/context-integrator.js",
+      "src/utils/commit-analyzer.js",
+      "src/utils/journal-paths.js"
+    ],
+    "schema_uncovered": [
+      "src/managers/auto-summarize.js",
+      "src/mcp/server.js"
+    ],
+    "partially_covered": [
+      "src/mcp/tools/context-capture-tool.js",
+      "src/mcp/tools/reflection-tool.js"
+    ],
+    "note": "Partially covered files use agent-discovered span names (mcp.*) but some attributes (journal.file_path) match the base registry."
+  },
+  "gate_checks": {
+    "NDS-001": {
+      "result": "pass",
+      "scope": "per-run",
+      "evidence": "All 9 committed files pass node --check validation (orbweaver pipeline validated before commit)."
+    },
+    "NDS-002": {
+      "result": "pass",
+      "scope": "per-run",
+      "evidence": "Test suite passes for committed files (orbweaver pipeline runs tests before commit). Failed/partial files were NOT committed, preserving test suite integrity."
+    },
+    "API-001": {
+      "result": "pass",
+      "scope": "per-file",
+      "files_evaluated": 9,
+      "files_passing": 9,
+      "evidence": "All 9 committed files import only from '@opentelemetry/api'. No SDK or instrumentation package imports in source files."
+    },
+    "NDS-006": {
+      "result": "pass",
+      "scope": "per-file",
+      "files_evaluated": 9,
+      "files_passing": 9,
+      "evidence": "All files use ESM imports. No require() or module.exports detected. Project has 'type': 'module' in package.json."
+    },
+    "API-002": {
+      "result": "pass",
+      "scope": "per-run",
+      "evidence": "@opentelemetry/api is in peerDependencies (correct for library project). Agent also added @traceloop/instrumentation-langchain and @traceloop/instrumentation-mcp as optional peerDependencies — these are auto-instrumentation packages, not vendor-specific SDKs, but adding them to a library's dependencies is architecturally questionable (see note).",
+      "note": "Library projects should depend only on the OTel API. The @traceloop packages are auto-instrumentation libraries that belong in the deployer's SDK configuration, not the library's package.json. However, they are marked as optional peerDependencies, which softens the impact."
+    },
+    "API-003": {
+      "result": "pass",
+      "scope": "per-run",
+      "evidence": "No vendor-specific SDK packages (dd-trace, @newrelic/telemetry-sdk, @splunk/otel, etc.) found in package.json."
+    },
+    "API-004": {
+      "result": "pass",
+      "scope": "per-file",
+      "files_evaluated": 9,
+      "files_passing": 9,
+      "evidence": "No imports from @opentelemetry/sdk-*, @opentelemetry/exporter-*, or @opentelemetry/instrumentation-* in any source file."
+    },
+    "CDQ-008": {
+      "result": "pass",
+      "scope": "per-run",
+      "evidence": "All 9 committed files use trace.getTracer('commit-story'). Single naming pattern — project name from package.json. No outliers."
+    }
+  },
+  "per_file_evaluations": {
+    "committed": [
+      {
+        "file": "src/collectors/claude-collector.js",
+        "schema_coverage": "covered",
+        "spans": 1,
+        "span_names": ["commit_story.context.collect_chat_messages"],
+        "rules": {
+          "NDS-003": {"result": "pass", "evidence": "Only instrumentation additions: import, tracer, span wrapping, attributes, try/catch/finally. Business logic preserved."},
+          "NDS-004": {"result": "pass", "evidence": "collectChatMessages signature preserved. 7 other exported functions unmodified."},
+          "NDS-005": {"result": "pass", "sub": "N/A", "evidence": "No pre-existing error handling modified. Agent added new try/catch/finally for span lifecycle only."},
+          "COV-001": {"result": "pass", "evidence": "collectChatMessages (exported async entry point) has span."},
+          "COV-002": {"result": "N/A", "evidence": "No outbound network/DB calls. Internal fs operations via sync helpers."},
+          "COV-003": {"result": "pass", "evidence": "Span has try/catch/finally with recordException + setStatus(ERROR) + re-throw."},
+          "COV-004": {"result": "pass", "evidence": "Async function with span."},
+          "COV-005": {"result": "pass", "evidence": "5 attributes set, all matching registry: context.source, context.time_window_start/end, context.sessions_count, context.messages_count."},
+          "COV-006": {"result": "N/A", "evidence": "No auto-instrumentation library covers file system operations."},
+          "RST-001": {"result": "pass", "evidence": "Only the main exported async function instrumented. No utility functions have spans."},
+          "RST-002": {"result": "N/A"},
+          "RST-003": {"result": "N/A"},
+          "RST-004": {"result": "pass", "evidence": "7 unexported helper functions (getClaudeProjectsDir, findJSONLFiles, etc.) not instrumented."},
+          "RST-005": {"result": "N/A", "evidence": "No pre-existing instrumentation."},
+          "SCH-001": {"result": "pass", "mode": "naming_quality", "evidence": "commit_story.context.collect_chat_messages: bounded cardinality, consistent namespace convention."},
+          "SCH-002": {"result": "pass", "evidence": "All 5 attribute keys match registry definitions (context.source, time_window_start/end, sessions_count, messages_count)."},
+          "SCH-003": {"result": "pass", "evidence": "context.source='claude_code' matches enum. Counts are ints. Timestamps are strings (ISO 8601)."},
+          "SCH-004": {"result": "pass", "evidence": "No ad-hoc attributes outside registry."},
+          "CDQ-001": {"result": "pass", "evidence": "startActiveSpan callback + finally { span.end() }."},
+          "CDQ-002": {"result": "pass", "evidence": "trace.getTracer('commit-story') matches package.json name."},
+          "CDQ-003": {"result": "pass", "evidence": "Standard pattern: recordException(error) + setStatus({code: ERROR}) + re-throw."},
+          "CDQ-005": {"result": "pass", "evidence": "startActiveSpan callback manages context automatically."},
+          "CDQ-006": {"result": "pass", "evidence": "toISOString() calls exempt (cheap computation). sessions.size and allMessages.length are property access."},
+          "CDQ-007": {"result": "pass", "evidence": "All attributes are bounded (counts, timestamps, enum). No PII."}
+        }
+      },
+      {
+        "file": "src/collectors/git-collector.js",
+        "schema_coverage": "covered",
+        "spans": 3,
+        "span_names": ["commit_story.git.run", "commit_story.git.get_previous_commit_time", "commit_story.git.collect_commit_data"],
+        "rules": {
+          "NDS-003": {"result": "pass", "evidence": "Only instrumentation additions. Existing error handling in runGit preserved inside span callback."},
+          "NDS-004": {"result": "pass", "evidence": "getPreviousCommitTime and getCommitData signatures preserved. runGit (unexported) signature preserved."},
+          "NDS-005": {"result": "pass", "sub": "N/A", "evidence": "runGit had existing try/catch with error.code === 128 checks. Agent added recordException BEFORE existing handling. Re-throws are genuine errors (git failures), not expected conditions."},
+          "COV-001": {"result": "pass", "evidence": "getPreviousCommitTime and getCommitData (exported async entry points) have spans."},
+          "COV-002": {"result": "pass", "evidence": "runGit wraps execFileAsync('git', args) — subprocess execution — in a span."},
+          "COV-003": {"result": "pass", "evidence": "All 3 spans have error recording in catch blocks."},
+          "COV-004": {"result": "pass", "evidence": "All async functions with spans."},
+          "COV-005": {"result": "pass", "evidence": "Uses vcs.ref.head.revision (OTel semconv), commit_story.context.source, commit_story.commit.author/message/timestamp. All in registry."},
+          "COV-006": {"result": "N/A", "evidence": "No auto-instrumentation for child_process."},
+          "RST-001": {"result": "pass", "evidence": "No utility functions instrumented."},
+          "RST-002": {"result": "N/A"},
+          "RST-003": {"result": "N/A"},
+          "RST-004": {"result": "pass", "evidence": "runGit is unexported but performs subprocess I/O (execFileAsync). RST-004 I/O exemption applies."},
+          "RST-005": {"result": "N/A"},
+          "SCH-001": {"result": "pass", "mode": "naming_quality", "evidence": "All span names follow commit_story.git.* namespace: run, get_previous_commit_time, collect_commit_data."},
+          "SCH-002": {"result": "pass", "evidence": "All attribute keys in registry or OTel semconv refs (vcs.ref.head.revision)."},
+          "SCH-003": {"result": "pass", "evidence": "Types match: strings for messages/authors/timestamps, revision is string."},
+          "SCH-004": {"result": "pass", "evidence": "No ad-hoc attributes."},
+          "CDQ-001": {"result": "pass", "evidence": "All 3 spans use startActiveSpan + finally { span.end() }."},
+          "CDQ-002": {"result": "pass", "evidence": "trace.getTracer('commit-story')."},
+          "CDQ-003": {"result": "pass", "evidence": "Standard error recording pattern in all catch blocks."},
+          "CDQ-005": {"result": "pass", "evidence": "startActiveSpan callback pattern."},
+          "CDQ-006": {"result": "pass", "evidence": "toISOString() exempt. Property access for other values."},
+          "CDQ-007": {"result": "pass", "evidence": "Commit author is in registry definition (expected). No unbounded values."}
+        }
+      },
+      {
+        "file": "src/integrators/context-integrator.js",
+        "schema_coverage": "covered",
+        "spans": 1,
+        "span_names": ["commit_story.context.gather_context_for_commit"],
+        "rules": {
+          "NDS-003": {"result": "pass", "evidence": "Business logic wrapped in span callback without modification."},
+          "NDS-004": {"result": "pass", "evidence": "gatherContextForCommit(commitRef, options) signature preserved."},
+          "NDS-005": {"result": "pass", "sub": "N/A", "evidence": "No pre-existing error handling."},
+          "COV-001": {"result": "pass", "evidence": "Main orchestration entry point has span."},
+          "COV-002": {"result": "N/A", "evidence": "Calls internal functions (getCommitData, collectChatMessages) which have their own spans."},
+          "COV-003": {"result": "pass", "evidence": "try/catch/finally with error recording."},
+          "COV-004": {"result": "pass", "evidence": "Async function with span."},
+          "COV-005": {"result": "pass", "evidence": "10 attributes from 4 registry groups: vcs.ref.head.revision, commit.message/author/timestamp, context.messages_count/sessions_count/time_window_start/end, filter.messages_before/after."},
+          "COV-006": {"result": "N/A"},
+          "RST-001": {"result": "pass"},
+          "RST-002": {"result": "N/A"},
+          "RST-003": {"result": "N/A"},
+          "RST-004": {"result": "pass", "evidence": "Only exported function instrumented."},
+          "RST-005": {"result": "N/A"},
+          "SCH-001": {"result": "pass", "mode": "naming_quality", "evidence": "commit_story.context.gather_context_for_commit: consistent namespace."},
+          "SCH-002": {"result": "pass", "evidence": "All 10 attribute keys match registry."},
+          "SCH-003": {"result": "pass", "evidence": "Types match registry definitions."},
+          "SCH-004": {"result": "pass", "evidence": "No ad-hoc attributes."},
+          "CDQ-001": {"result": "pass"},
+          "CDQ-002": {"result": "pass"},
+          "CDQ-003": {"result": "pass"},
+          "CDQ-005": {"result": "pass"},
+          "CDQ-006": {"result": "pass", "evidence": "toISOString() calls exempt (3 instances)."},
+          "CDQ-007": {"result": "pass"}
+        }
+      },
+      {
+        "file": "src/managers/auto-summarize.js",
+        "schema_coverage": "uncovered",
+        "spans": 3,
+        "span_names": ["commit_story.auto_summarize.generate_daily", "commit_story.auto_summarize.generate_weekly", "commit_story.auto_summarize.generate_monthly"],
+        "rules": {
+          "NDS-003": {"result": "pass", "evidence": "Business logic wrapped without modification."},
+          "NDS-004": {"result": "pass", "evidence": "All 3 exported function signatures preserved."},
+          "NDS-005": {"result": "pass", "sub": "N/A", "evidence": "Inner per-item catches handle genuine generation failures (not expected conditions). Existing error handling preserved."},
+          "COV-001": {"result": "pass", "evidence": "All 3 exported async entry points have spans."},
+          "COV-002": {"result": "N/A"},
+          "COV-003": {"result": "pass", "evidence": "Error recording in both inner per-item catches and outer catch. Note: setting ERROR status on per-item failure in a loop is semantically questionable but pattern is correct."},
+          "COV-004": {"result": "pass", "evidence": "Async functions with spans."},
+          "COV-005": {"result": "fail", "evidence": "Zero attributes set across all 3 spans. Schema-uncovered evaluation: no domain-relevant attributes (no date, item count, basePath). Misses observability value."},
+          "COV-006": {"result": "N/A"},
+          "RST-001": {"result": "pass"},
+          "RST-002": {"result": "N/A"},
+          "RST-003": {"result": "N/A"},
+          "RST-004": {"result": "pass"},
+          "RST-005": {"result": "N/A"},
+          "SCH-001": {"result": "pass", "mode": "naming_quality", "evidence": "commit_story.auto_summarize.generate_daily/weekly/monthly: bounded cardinality, consistent namespace."},
+          "SCH-002": {"result": "N/A", "evidence": "No attributes set. Cannot evaluate keys."},
+          "SCH-003": {"result": "N/A"},
+          "SCH-004": {"result": "N/A"},
+          "CDQ-001": {"result": "pass"},
+          "CDQ-002": {"result": "pass"},
+          "CDQ-003": {"result": "pass", "evidence": "Standard pattern. Per-item setStatus(ERROR) in loop is semantically imprecise but pattern is valid."},
+          "CDQ-005": {"result": "pass"},
+          "CDQ-006": {"result": "N/A"},
+          "CDQ-007": {"result": "N/A"}
+        }
+      },
+      {
+        "file": "src/mcp/server.js",
+        "schema_coverage": "uncovered",
+        "spans": 1,
+        "span_names": ["commit_story.mcp.server"],
+        "rules": {
+          "NDS-003": {"result": "pass"},
+          "NDS-004": {"result": "pass", "evidence": "main() and createServer() are unexported. No public API changes."},
+          "NDS-005": {"result": "pass", "sub": "N/A"},
+          "COV-001": {"result": "pass", "evidence": "MCP server entry point (main) has span."},
+          "COV-002": {"result": "N/A"},
+          "COV-003": {"result": "pass"},
+          "COV-004": {"result": "pass"},
+          "COV-005": {"result": "fail", "evidence": "Zero attributes on server span. Schema-uncovered evaluation: no transport type, server name, or connection info. Minimal observability value."},
+          "COV-006": {"result": "N/A"},
+          "RST-001": {"result": "pass"},
+          "RST-002": {"result": "N/A"},
+          "RST-003": {"result": "N/A"},
+          "RST-004": {"result": "pass", "evidence": "main() is unexported but performs I/O (server connection). RST-004 I/O exemption."},
+          "RST-005": {"result": "N/A"},
+          "SCH-001": {"result": "pass", "mode": "naming_quality"},
+          "SCH-002": {"result": "N/A"},
+          "SCH-003": {"result": "N/A"},
+          "SCH-004": {"result": "N/A"},
+          "CDQ-001": {"result": "pass"},
+          "CDQ-002": {"result": "pass"},
+          "CDQ-003": {"result": "pass"},
+          "CDQ-005": {"result": "pass"},
+          "CDQ-006": {"result": "N/A"},
+          "CDQ-007": {"result": "N/A"}
+        }
+      },
+      {
+        "file": "src/mcp/tools/context-capture-tool.js",
+        "schema_coverage": "partially_covered",
+        "spans": 2,
+        "span_names": ["commit_story.mcp.save_context", "commit_story.mcp.capture_context"],
+        "rules": {
+          "NDS-003": {"result": "pass"},
+          "NDS-004": {"result": "pass", "evidence": "registerContextCaptureTool(server) signature preserved."},
+          "NDS-005": {"result": "pass", "sub": "N/A", "evidence": "Handler catch returns error response — genuine failure (save failed), not expected condition. Existing error handling preserved inside span."},
+          "COV-001": {"result": "pass", "evidence": "Both saveContext and handler have spans."},
+          "COV-002": {"result": "N/A"},
+          "COV-003": {"result": "pass"},
+          "COV-004": {"result": "pass"},
+          "COV-005": {"result": "pass", "evidence": "commit_story.journal.file_path set in both spans. Attribute is in base registry."},
+          "COV-006": {"result": "N/A"},
+          "RST-001": {"result": "pass"},
+          "RST-002": {"result": "N/A"},
+          "RST-003": {"result": "N/A"},
+          "RST-004": {"result": "pass", "evidence": "saveContext is unexported but performs I/O (fs.mkdir, fs.appendFile). Exemption applies."},
+          "RST-005": {"result": "N/A"},
+          "SCH-001": {"result": "pass", "mode": "naming_quality"},
+          "SCH-002": {"result": "pass", "evidence": "commit_story.journal.file_path in base registry."},
+          "SCH-003": {"result": "pass"},
+          "SCH-004": {"result": "pass"},
+          "CDQ-001": {"result": "pass"},
+          "CDQ-002": {"result": "pass"},
+          "CDQ-003": {"result": "pass"},
+          "CDQ-005": {"result": "pass"},
+          "CDQ-006": {"result": "N/A"},
+          "CDQ-007": {"result": "pass"}
+        }
+      },
+      {
+        "file": "src/mcp/tools/reflection-tool.js",
+        "schema_coverage": "partially_covered",
+        "spans": 2,
+        "span_names": ["commit_story.mcp.save_reflection", "commit_story.mcp.journal_add_reflection"],
+        "rules": {
+          "NDS-003": {"result": "pass"},
+          "NDS-004": {"result": "pass", "evidence": "registerReflectionTool(server) signature preserved."},
+          "NDS-005": {"result": "pass", "sub": "N/A", "evidence": "Same pattern as context-capture-tool: handler catch is genuine failure."},
+          "COV-001": {"result": "pass"},
+          "COV-002": {"result": "N/A"},
+          "COV-003": {"result": "pass"},
+          "COV-004": {"result": "pass"},
+          "COV-005": {"result": "pass", "evidence": "commit_story.journal.file_path (base registry) set in both spans."},
+          "COV-006": {"result": "N/A"},
+          "RST-001": {"result": "pass"},
+          "RST-002": {"result": "N/A"},
+          "RST-003": {"result": "N/A"},
+          "RST-004": {"result": "pass", "evidence": "saveReflection unexported with I/O exemption."},
+          "RST-005": {"result": "N/A"},
+          "SCH-001": {"result": "pass", "mode": "naming_quality"},
+          "SCH-002": {"result": "pass"},
+          "SCH-003": {"result": "pass"},
+          "SCH-004": {"result": "pass"},
+          "CDQ-001": {"result": "pass"},
+          "CDQ-002": {"result": "pass"},
+          "CDQ-003": {"result": "pass"},
+          "CDQ-005": {"result": "pass"},
+          "CDQ-006": {"result": "N/A"},
+          "CDQ-007": {"result": "pass"}
+        }
+      },
+      {
+        "file": "src/utils/commit-analyzer.js",
+        "schema_coverage": "covered",
+        "spans": 3,
+        "span_names": ["commit_story.git.get_changed_files", "commit_story.git.is_merge_commit", "commit_story.git.get_commit_metadata"],
+        "rules": {
+          "NDS-003": {"result": "pass", "evidence": "Business logic wrapped in span callbacks without modification."},
+          "NDS-004": {"result": "pass", "evidence": "getChangedFiles, isMergeCommit, getCommitMetadata signatures preserved. isSafeGitRef, isJournalEntriesOnlyCommit, shouldSkipMergeCommit unmodified."},
+          "NDS-005": {"result": "pass", "sub": "borderline", "evidence": "getChangedFiles and isMergeCommit have catch blocks returning defaults ([] and {isMerge: false}). Agent adds recordException + setStatus(ERROR). These are defensive fallbacks for git failures — genuinely errors, not expected conditions. Borderline NDS-005b but classified as pass: git failing IS an error, the function just handles it gracefully."},
+          "COV-001": {"result": "pass", "evidence": "All 3 exported functions that perform I/O have spans."},
+          "COV-002": {"result": "pass", "evidence": "All 3 wrap execFileSync (subprocess execution)."},
+          "COV-003": {"result": "pass", "evidence": "Error recording in all catch blocks."},
+          "COV-004": {"result": "pass", "evidence": "Synchronous I/O functions with spans."},
+          "COV-005": {"result": "pass", "evidence": "vcs.ref.head.revision (OTel), commit_story.commit.files_changed/author/message/timestamp (registry)."},
+          "COV-006": {"result": "N/A"},
+          "RST-001": {"result": "pass", "evidence": "No utility functions instrumented. isSafeGitRef (sync, 3 lines, no I/O) not instrumented."},
+          "RST-002": {"result": "N/A"},
+          "RST-003": {"result": "N/A"},
+          "RST-004": {"result": "pass"},
+          "RST-005": {"result": "N/A"},
+          "SCH-001": {"result": "pass", "mode": "naming_quality", "evidence": "commit_story.git.get_changed_files/is_merge_commit/get_commit_metadata: consistent namespace."},
+          "SCH-002": {"result": "pass", "evidence": "All attribute keys in registry or OTel semconv."},
+          "SCH-003": {"result": "pass"},
+          "SCH-004": {"result": "pass"},
+          "CDQ-001": {"result": "pass", "evidence": "All 3 use startActiveSpan + finally { span.end() }. Synchronous callbacks (no async) — correct."},
+          "CDQ-002": {"result": "pass"},
+          "CDQ-003": {"result": "pass"},
+          "CDQ-005": {"result": "pass", "evidence": "startActiveSpan callback, synchronous — no async context issue."},
+          "CDQ-006": {"result": "pass"},
+          "CDQ-007": {"result": "pass", "evidence": "commit.author in registry definition. No unbounded values."}
+        }
+      },
+      {
+        "file": "src/utils/journal-paths.js",
+        "schema_coverage": "covered",
+        "spans": 1,
+        "span_names": ["commit_story.journal.ensure_directory"],
+        "rules": {
+          "NDS-003": {"result": "pass"},
+          "NDS-004": {"result": "pass", "evidence": "ensureDirectory(filePath) signature preserved. 8 other exports unmodified."},
+          "NDS-005": {"result": "pass", "sub": "N/A"},
+          "COV-001": {"result": "N/A", "evidence": "Not an entry point; utility with I/O."},
+          "COV-002": {"result": "N/A"},
+          "COV-003": {"result": "pass"},
+          "COV-004": {"result": "pass", "evidence": "Async function with I/O (mkdir) has span."},
+          "COV-005": {"result": "pass", "evidence": "commit_story.journal.file_path set (base registry)."},
+          "COV-006": {"result": "N/A"},
+          "RST-001": {"result": "pass", "evidence": "ensureDirectory is async with I/O (mkdir). Not flagged by RST-001 (which targets sync, no-I/O, <5 line utility functions)."},
+          "RST-002": {"result": "N/A"},
+          "RST-003": {"result": "N/A"},
+          "RST-004": {"result": "pass", "evidence": "Exported function."},
+          "RST-005": {"result": "N/A"},
+          "SCH-001": {"result": "pass", "mode": "naming_quality"},
+          "SCH-002": {"result": "pass"},
+          "SCH-003": {"result": "pass"},
+          "SCH-004": {"result": "pass"},
+          "CDQ-001": {"result": "pass"},
+          "CDQ-002": {"result": "pass"},
+          "CDQ-003": {"result": "pass"},
+          "CDQ-005": {"result": "pass"},
+          "CDQ-006": {"result": "N/A"},
+          "CDQ-007": {"result": "pass"}
+        }
+      }
+    ],
+    "correctly_skipped": [
+      {"file": "src/utils/config.js", "reason": "Configuration file, no I/O or entry points", "verdict": "correct_skip"},
+      {"file": "src/generators/prompts/guidelines/accessibility.js", "reason": "Pure data export (prompt template)", "verdict": "correct_skip"},
+      {"file": "src/generators/prompts/guidelines/anti-hallucination.js", "reason": "Pure data export", "verdict": "correct_skip"},
+      {"file": "src/generators/prompts/guidelines/index.js", "reason": "Re-export aggregator", "verdict": "correct_skip"},
+      {"file": "src/generators/prompts/sections/daily-summary-prompt.js", "reason": "Pure data export", "verdict": "correct_skip"},
+      {"file": "src/generators/prompts/sections/dialogue-prompt.js", "reason": "Pure data export", "verdict": "correct_skip"},
+      {"file": "src/generators/prompts/sections/monthly-summary-prompt.js", "reason": "Pure data export", "verdict": "correct_skip"},
+      {"file": "src/generators/prompts/sections/summary-prompt.js", "reason": "Pure data export", "verdict": "correct_skip"},
+      {"file": "src/generators/prompts/sections/technical-decisions-prompt.js", "reason": "Pure data export", "verdict": "correct_skip"},
+      {"file": "src/generators/prompts/sections/weekly-summary-prompt.js", "reason": "Pure data export", "verdict": "correct_skip"},
+      {"file": "src/integrators/filters/message-filter.js", "reason": "Pure synchronous filtering logic, no I/O", "verdict": "correct_skip"},
+      {"file": "src/integrators/filters/token-filter.js", "reason": "Pure synchronous token math, no I/O", "verdict": "correct_skip"}
+    ],
+    "failed": [
+      {
+        "file": "src/commands/summarize.js",
+        "failure_reason": "COV-003 x4, SCH-002 x18 validation failures",
+        "on_branch": false,
+        "nds_evaluation": "N/A (no changes on branch — file restored to original)",
+        "coverage_impact": "Missing summarize command instrumentation. This file orchestrates the summary pipeline."
+      },
+      {
+        "file": "src/index.js",
+        "failure_reason": "Oscillation detected: SCH-002 count increased 9→12 during fix retry",
+        "on_branch": false,
+        "nds_evaluation": "N/A (no changes on branch — file restored to original)",
+        "coverage_impact": "Missing root span on application entry point (COV-001 regression from run-4). Silently degrades live-check (DEEP-6)."
+      }
+    ],
+    "partial": [
+      {
+        "file": "src/generators/journal-graph.js",
+        "functions_attempted": 1,
+        "functions_succeeded": 1,
+        "on_branch": false,
+        "nds_evaluation": {
+          "NDS-003": {"result": "fail", "evidence": "Duplicate JSDoc comment block added before generateJournalSections (non-instrumentation change). See DEEP-4."},
+          "NDS-004": {"result": "pass", "evidence": "generateJournalSections signature preserved."},
+          "NDS-005": {"result": "pass", "sub": "N/A", "evidence": "No pre-existing error handling modified."}
+        }
+      },
+      {
+        "file": "src/generators/summary-graph.js",
+        "functions_attempted": 12,
+        "functions_succeeded": 11,
+        "on_branch": false,
+        "nds_evaluation": {
+          "NDS-003": {"result": "fail", "evidence": "Duplicate JSDoc blocks on 8+ functions (non-instrumentation change). See DEEP-4."},
+          "NDS-004": {"result": "pass", "evidence": "All exported function signatures preserved."},
+          "NDS-005": {"result": "pass", "sub": "N/A", "evidence": "dailySummaryNode and monthlySummaryNode inner catches handle LLM failures (genuine errors, not expected conditions). Agent adds recordException inside existing catch structure."}
+        },
+        "quality_notes": "Inconsistent span naming: generateMonthlySummary uses commit_story.ai.generate_monthly_summary while generateDailySummary uses commit_story.journal.generate_daily_summary (ai vs journal namespace). Would fail SCH-001 consistency if committed."
+      },
+      {
+        "file": "src/integrators/filters/sensitive-filter.js",
+        "functions_attempted": 3,
+        "functions_succeeded": 2,
+        "on_branch": false,
+        "nds_evaluation": "No diff available for evaluation (partial diff not captured)."
+      },
+      {
+        "file": "src/managers/journal-manager.js",
+        "functions_attempted": 3,
+        "functions_succeeded": 2,
+        "on_branch": false,
+        "nds_evaluation": {
+          "NDS-003": {"result": "fail", "evidence": "1) Duplicate JSDoc blocks (DEEP-4). 2) const tracer placed between import statements (bad style, valid syntax). 3) Bare catch renamed to catch (e) without re-throwing change is acceptable."},
+          "NDS-004": {"result": "pass"},
+          "NDS-005": {"result": "fail", "sub": "005b", "evidence": "saveJournalEntry: file-not-found catch (readFile for duplicate check) gets recordException + setStatus(ERROR). Original catch comment says 'File doesn't exist yet, proceed' — classic expected-condition handler. Recording this as an error pollutes metrics with normal first-run behavior.", "line_ref": "partial-diffs/journal-manager.diff:127-129"}
+        }
+      },
+      {
+        "file": "src/managers/summary-manager.js",
+        "functions_attempted": 14,
+        "functions_succeeded": 9,
+        "on_branch": false,
+        "nds_evaluation": {
+          "NDS-003": {"result": "fail", "evidence": "1) Duplicate JSDoc blocks on 7+ functions. 2) const tracer between import statements. Both are non-instrumentation changes."},
+          "NDS-004": {"result": "pass"},
+          "NDS-005": {"result": "fail", "sub": "005b", "evidence": "5 NDS-005b violations confirmed across 3 functions: (1) generateAndSaveDailySummary access() catch for 'summary exists' check, (2) generateAndSaveWeeklySummary same pattern, (3) saveMonthlySummary same pattern, (4) readMonthWeeklySummaries readdir catch for 'directory not found', (5) readMonthWeeklySummaries readFile catch for 'file unreadable'. All are expected-condition catches (file/directory not found = normal first-run) with added recordException + setStatus(ERROR). Independently confirmed by CodeRabbit CLI review.", "line_refs": ["partial-diffs/summary-manager.diff:222-224", "partial-diffs/summary-manager.diff:350-352", "partial-diffs/summary-manager.diff:580-582", "partial-diffs/summary-manager.diff:478-480", "partial-diffs/summary-manager.diff:504-506"]}
+        }
+      },
+      {
+        "file": "src/utils/summary-detector.js",
+        "functions_attempted": 5,
+        "functions_succeeded": 4,
+        "on_branch": false,
+        "nds_evaluation": {
+          "NDS-003": {"result": "fail", "evidence": "Duplicate JSDoc blocks on 4+ functions (DEEP-4)."},
+          "NDS-004": {"result": "pass"},
+          "NDS-005": {"result": "fail", "sub": "005b", "evidence": "getDaysWithEntries: 2 NDS-005b violations — (1) readdir(entriesDir) catch returns [] for 'entries directory not found' (expected on first run), (2) readdir(monthDir) catch continues loop for 'month directory unreadable'. Both are expected-condition handlers with added recordException + setStatus(ERROR).", "line_refs": ["partial-diffs/summary-detector.diff:668-670", "partial-diffs/summary-detector.diff:688-690"]}
+        }
+      }
+    ]
+  }
+}

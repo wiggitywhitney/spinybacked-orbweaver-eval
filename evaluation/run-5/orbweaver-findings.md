@@ -83,7 +83,7 @@ All 13 run-4 findings were filed by the orbweaver AI (none rejected) and merged 
 - **Impact**: index.js is the application entry point — losing root span instrumentation here is the COV-001 regression from run-4. The oscillation detection correctly prevents infinite loops but doesn't help the agent converge. **Additionally, entry point failure silently degrades live-check** — see DEEP-6.
 - **Evidence**: `evaluation/run-5/orbweaver-output.log` file 15, `evaluation/run-5/orbweaver-pr-summary.md` advisory findings.
 - **Investigation needed**: Confirm the resolved schema (with agent-extensions.yaml merged) is actually being passed to the agent during retries. If the agent is instrumenting against the base schema without its own extensions, it would explain why it can't satisfy SCH-002. Also check whether the application entry point (index.js) has special instrumentation needs that a generic file-level approach can't handle.
-- **Acceptance Criteria**: The fix/retry loop should either (a) provide more specific guidance about which attribute names are rejected and what the valid alternatives are, (b) accept partial schema compliance (commit non-violating spans, skip violating ones) rather than failing the entire file, or (c) switch to function-by-function instrumentation mode instead of whole-file mode — this gives the agent more refined per-function feedback and produces partial output even when some functions can't satisfy validation.
+- **Acceptance Criteria**: The fix/retry loop should either (a) provide more specific guidance about which attribute names are rejected and what the valid alternatives are, (b) accept partial schema compliance (commit non-violating spans, skip violating ones) rather than failing the entire file, (c) switch to function-by-function instrumentation mode instead of whole-file mode — this gives the agent more refined per-function feedback and produces partial output even when some functions can't satisfy validation, or (d) use a two-pass approach: first pass registers schema extensions, second pass validates against the extended schema (avoids the chicken-and-egg problem where extensions can't be registered because validation blocks the first attempt).
 
 ### RUN-2: Validation pipeline causes net regression in file coverage
 
@@ -190,6 +190,24 @@ All 13 run-4 findings were filed by the orbweaver AI (none rejected) and merged 
 - **Impact**: Medium — static LINT caught this specific case, but the gap in whole-file verification after function-level assembly is a latent risk.
 - **Evidence**: summary-manager.js generateAndSaveMonthlySummary LINT failure in `evaluation/run-5/orbweaver-pr-summary.md`.
 - **Acceptance Criteria**: After function-level fallback assembles the final file, run a whole-file syntax check (`node --check` or equivalent) before committing.
+
+### EVAL-1: Schema-uncovered files lack domain-specific attributes
+
+- **Priority**: Medium
+- **Recommended Action**: Issue (prompt improvement)
+- **Description**: When the agent instruments files that have no registry definitions (schema-uncovered), it creates spans but adds zero attributes. auto-summarize.js has 3 spans with 0 attributes. server.js has 1 span with 0 attributes. This provides minimal observability — "the function was called" but no domain context (date, item count, result status). Schema-covered files have rich attributes (context-integrator.js has 10 attributes), showing the agent CAN add attributes when the registry provides guidance.
+- **Impact**: Schema-uncovered spans provide reduced observability value. For the summary subsystem (the largest uncovered area), operators get no insight into what was summarized, how many items processed, or whether results were complete.
+- **Evidence**: `evaluation/run-5/per-file-evaluation.json` — auto-summarize.js and server.js both fail COV-005.
+- **Acceptance Criteria**: Schema-uncovered files should have at least 1-2 domain-relevant attributes per span, even without registry definitions. The prompt should guide the agent to add contextual attributes based on function parameters and return values.
+
+### EVAL-2: @traceloop auto-instrumentation packages added to library peerDependencies
+
+- **Priority**: Low
+- **Recommended Action**: Issue (investigate)
+- **Description**: The agent added `@traceloop/instrumentation-langchain` and `@traceloop/instrumentation-mcp` as optional peerDependencies in package.json. Auto-instrumentation libraries are SDK-level concerns that belong in the deployer's configuration, not a library's dependency tree. The packages are marked optional (peerDependenciesMeta), which softens the impact, but the principle is violated.
+- **Impact**: Low — optional peerDependencies don't force installation. But it sets a bad precedent and could confuse users about whether these packages are required.
+- **Evidence**: `git diff main..orbweaver/instrument-1773706515431 -- package.json`
+- **Acceptance Criteria**: For library projects (detected by `@opentelemetry/api` in peerDependencies), the agent should not add auto-instrumentation packages to package.json. These should be documented as recommended companion packages in the PR description instead.
 
 ---
 
