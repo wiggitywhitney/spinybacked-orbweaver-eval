@@ -41,6 +41,12 @@ Each finding states **what's wrong**, **evidence** (from canonical JSON artifact
 5. **Run-5 rubric gap assessment** — gaps discovered during run-5
 6. **Run-6 verification checklist**
 7. **Score projection for run-6** — 3-tier prediction with explicit assumptions
+8. **Priority action matrix** — all findings ranked by priority with acceptance criteria
+9. **Superficial resolutions** — latent failures that will regress
+10. **Prompt-only fixes** — principle for validator enforcement
+11. **Carry-forward from prior runs** — persistent items across 2-4 runs
+12. **Port failing files as test cases** — acceptance test recommendations
+13. **Final review** — cross-document summary
 
 Orbweaver finding references (e.g., "RUN-1") point to `evaluation/run-5/orbweaver-findings.md`.
 
@@ -66,6 +72,18 @@ Run-5 has only 2 rule failures in the canonical score. Both are in the Coverage 
 **Root cause:** The fix/retry loop has no oscillation detection. When validation failures increase after a fix attempt, the agent should stop and report failure rather than continuing to oscillate.
 
 **Desired outcome:** (1) Oscillation detection in fix/retry loop: if violation count increases after a fix attempt, stop immediately. (2) Entry point file gets special handling — it should be attempted early and treated as high-priority. (3) index.js `main()` has a root span.
+
+**RUN-1 acceptance criteria (4 options, in priority order):**
+- (a) Detect oscillation (violation count increasing) and stop immediately with diagnostic output
+- (b) Two-pass schema registration: register extensions first, then validate against the expanded registry
+- (c) Per-function fallback for entry point (instrument main() as a single function, skip helpers)
+- (d) Relaxed validation for entry point: strip failing attributes rather than reject the entire file
+
+**DEEP-6 acceptance criteria:**
+- (a) Live-check reports "DEGRADED" (not "OK") when entry point file failed instrumentation
+- (b) Entry point gets per-function fallback treatment (main() alone is a valid partial result)
+- (c) Entry point validation is relaxed — partial schema compliance preferred over no instrumentation
+- (d) Live-check cross-references instrumented files against telemetry output to detect missing entry points
 
 **Orbweaver finding:** RUN-1 (oscillation), DEEP-6 (entry point special handling)
 
@@ -455,18 +473,85 @@ Risk: If fixing SYS-3 reveals new failure modes in the recovered files (e.g., ne
 | **Critical** | RUN-1: Oscillation detection in fix/retry | COV-001 | Issue | Recovers index.js entry point — persistent failure |
 | **High** | DEEP-4: Duplicate JSDoc prevention | NDS-003 (latent) | Issue | Unblocks 5 partial files |
 | **High** | EVAL-1: Schema-uncovered file attribute strategy | COV-005 | Issue | Fixes last 2 canonical rule failures |
-| **High** | DEEP-6: Entry point special handling | COV-001 | Issue | Prevents entry point from being a single point of failure |
-| **Medium** | DEEP-2b: Function-level fallback discovery | COV-001 | Issue | Recovers non-exported functions in large files |
-| **Medium** | RUN-2: Validation regression tracking | NDS-002 | Issue | Prevent validation from blocking previously-passing files |
-| **Medium** | Push authentication (persistent) | PR delivery | Investigation | 3rd consecutive failure — needs root cause investigation |
+| **High** | DEEP-6: Entry point special handling | COV-001 | Issue | Prevents entry point from being a single point of failure. See acceptance criteria in §1 above. |
+| **High** | PR-4: Partial file commits (function-level) | Coverage | Issue | When N of M functions pass, commit the N passing functions. summary-graph.js had 11/12 pass — 5 spans lost because 1 function failed. Coverage multiplier. Requires DEEP-1 first to prevent NDS-005b leaking into branch. |
+| **Medium** | DEEP-2/DEEP-2b: Function-level fallback quality | COV-001, NDS-001 | Issue | Two distinct bugs: (a) corrupted imports (`imimport` from token merging), (b) exported-only scope (misses non-exported functions like graph nodes). Also: tracer initialization placed between import statements (ES module syntax error — all imports must precede other statements). |
+| **Medium** | DEEP-7: Whole-file syntax check after assembly | NDS-001 | Issue | After function-level fallback assembles the final file, run `node --check` on the assembled result. Per-function LINT catches some errors but synthesis bugs in import merging or scope assembly can slip through. |
+| **Medium** | RUN-2: Validation regression tracking | NDS-002 | Issue | Prevent validation from blocking previously-passing files. Port the 8 failed/partial files to the orbweaver test suite as acceptance test cases. |
+| **Medium** | Push authentication (persistent) | PR delivery | Investigation | 3rd consecutive failure. Acceptance criteria: (a) configure SSH for push, (b) accept GITHUB_TOKEN from environment, or (c) accept `--push-command` override. Assign explicit ownership — environmental issues persist indefinitely without it. |
+| **Medium** | RUN-4: Retry budget configuration | Performance | Issue | Run-5 took significantly longer due to validation retries on complex files. Need: max retries per file, max time per file, retry count in per-file output, fast-fail mode for files with > N validation errors. |
+| **Medium** | NDS-005b boundary: LLM failure fallbacks | NDS-005 | Rubric/Issue | CodeRabbit and eval disagree on whether `dailySummaryNode` inner catch (LLM fails → return fallback) is NDS-005b. Recommendation: LLM failures should use `span.addEvent('llm.fallback')` instead of `recordException`, preserving observability without polluting error metrics. Define boundary: NDS-005b applies when the catch is normal control flow (file-not-found), NOT when it handles a genuine failure with graceful recovery. |
+| **Medium** | PR-3: auto_summarize span names not registered | SCH | Issue | 3 span names (`commit_story.auto_summarize.generate_daily/weekly/monthly`) used in committed code but not registered in `agent-extensions.yaml`. All other committed span names are registered. Data consistency gap. |
+| **Medium** | PRE-1: npm package name collision | Usability | Issue | `npx orbweaver` resolves to punkave/orbweaver v0.1.4 (unrelated webcrawler). Users following docs will run the wrong tool. |
 | **Low** | DEEP-5: SDK init skip for libraries | CDQ | Issue | Cosmetic — SDK init code is unused for API-only libraries |
 | **Low** | DEEP-8: Date object in setAttribute | CDQ | Issue | Minor — Date.toISOString() is cheap but passing Date objects is a type mismatch |
-| **Low** | PR-1 through PR-4: PR summary improvements | PR quality | Issue | Reviewer experience improvements |
-| **Low** | EVAL-2: @traceloop packages in peerDependencies | API-002 | Issue | Architecturally questionable but non-blocking |
+| **Low** | RUN-3: Summary tally omits partial files | Usability | Issue | stdout reports "21 succeeded, 2 failed, 0 skipped" — omits 6 partial files. Operators monitoring stdout get inaccurate picture. |
+| **Low** | RUN-5: No timestamps or per-file cost breakdown | Observability | Issue | No start/end timestamps, per-file durations, retry counts, or per-file token/cost breakdown in output. Per-file cost attribution needed to evaluate retry budget effectiveness. |
+| **Low** | PRE-2: Span-type extension namespace rejection | SCH | Issue | Span names with correct `commit_story.*` prefix rejected by namespace enforcement filter. Span-type extensions may need different handling from attribute-type extensions. |
+| **Low** | EVAL-2: @traceloop packages in peerDependencies | API-002 | Issue | For library projects, the agent should not add auto-instrumentation packages to package.json. `@traceloop/instrumentation-langchain` and `@traceloop/instrumentation-mcp` belong in the deployer's SDK configuration, not the library's peerDependencies. |
+| **Low** | PR-1: PR summary length (~430 lines) | PR quality | Issue | Agent notes ~300 lines, zero-span justifications repeat RST-001 x12. Needs "key decisions" summary section and grouped zero-span notes. |
+| **Low** | PR-2: Advisory findings contradict skip decisions | PR quality | Issue | 28/34 advisories suggest instrumenting functions the agent deliberately skipped with rubric justification. Advisory engine should consume skip decisions to suppress contradicted advisories. |
+| **Low** | PR-5: Per-file cost/retry breakdown in token usage | PR quality | Issue | Token usage section should include per-file breakdown, not just project totals. |
+| **Low** | Per-item error recording in loops | CDQ (rubric gap) | Rubric | auto-summarize.js calls `setStatus(ERROR)` in per-item catch inside a loop. If one item fails but others succeed, span shows ERROR. Consider CDQ rule for span status accuracy in batch operations. |
 
 ---
 
-## 9. Final Review of Findings and Lessons
+## 9. Superficial Resolutions — Track as Latent Failures
+
+Three run-4 rules appear resolved in run-5 scoring but the underlying agent behavior is unchanged. These will **regress** if the validation pipeline is relaxed or if the affected files are recovered.
+
+| Rule | Run-4 | Run-5 | Why Superficial | What to Track |
+|------|-------|-------|----------------|---------------|
+| NDS-005 | FAIL (3 files) | PASS | Violating files filtered by validation. 8 NDS-005b instances remain in partial files. | Monitor for NDS-005b in recovered files after DEEP-1 fix |
+| CDQ-003 | FAIL (summarize.js) | PASS | summarize.js failed entirely. Latent CDQ-003 misuse in partial files. | Re-evaluate CDQ-003 when summarize.js is recovered |
+| RST-001 | FAIL (token-filter) | PASS | Correct skip decision — genuine improvement. But agent may re-over-instrument if file complexity changes. | Monitor RST-001 if token-filter.js is modified |
+
+**Action for orbweaver team:** Do not trust these as "resolved." Prioritize DEEP-1 (COV-003 exemption) which addresses the NDS-005/CDQ-003 root cause. When DEEP-1 lands and more files commit, verify these rules still pass.
+
+---
+
+## 10. Prompt-Only Fixes Need Validator Enforcement
+
+Run-4 finding #3 (expected-condition catches) was fixed via prompt guidance only — no automated validator backs it. If the LLM ignores the guidance, the validation pipeline won't catch the regression. Run-5 confirmed this: committed files pass (prompt worked), but 8 violations in partial files show the guidance doesn't always hold.
+
+**Principle for orbweaver team:** Every behavioral fix that relies on prompt guidance should have a corresponding validator. DEEP-1 (COV-003 expected-condition exemption) addresses this specific case by adding validator-level enforcement. Apply this principle to future fixes: prompt changes are fragile; validators are durable.
+
+---
+
+## 11. Carry-Forward from Prior Runs
+
+Items that have persisted across multiple evaluation runs without resolution:
+
+| Item | Origin | Runs Open | Current Status |
+|------|--------|-----------|---------------|
+| Push authentication failure | Run-3 | 3 runs | **Persistent** — 3rd consecutive failure. See Priority Matrix (Medium). |
+| NDS-003 blocks instrumentation-motivated refactors | Run-3 (#4) | 3 runs | Open design tension. journal-manager.js blocked in all runs. Not a bug — but limits what the agent can do. |
+| CJS require() in ESM projects | Run-2 (#62) | 4 runs | Open spec gap in spinybacked-orbweaver. |
+| Elision/null output bypass retry loop | Run-2 (#63) | 4 runs | Likely improved (PRD #156 added fix/retry) but not directly tested. |
+| Spec gaps (#66-69) | Run-2 | 4 runs | Open — multiple specification gaps. |
+| Per-retry visibility (snapshots) | Run-5 | New | Partial diffs capture final state only, not intermediate attempts. Per-retry snapshots would help diagnose oscillation and convergence failures. |
+
+---
+
+## 12. Handoff Process Recommendation: Port Failing Files as Test Cases
+
+The 8 failed/partial files should be ported to the orbweaver test suite as concrete acceptance test cases. Run-3 used this approach effectively — the fix isn't done until the specific failing file passes. Run-4 skipped this, making fix verification less rigorous.
+
+**Files to port:**
+- `src/index.js` — tests oscillation detection (RUN-1)
+- `src/commands/summarize.js` — tests COV-003 expected-condition exemption (DEEP-1)
+- `src/managers/summary-manager.js` — tests NDS-005b prevention (DEEP-1) + JSDoc (DEEP-4)
+- `src/utils/summary-detector.js` — tests NDS-005b prevention (DEEP-1)
+- `src/managers/journal-manager.js` — tests NDS-005b + NDS-003 boundary
+- `src/generators/summary-graph.js` — tests JSDoc prevention (DEEP-4) + naming consistency
+- `src/generators/journal-graph.js` — tests function-level fallback scope (DEEP-2b)
+- `src/integrators/filters/sensitive-filter.js` — tests regex preservation
+
+Each file maps to a specific finding — the fix is verified when orbweaver can instrument that file without the failure that blocked it in run-5.
+
+---
+
+## 13. Final Review of Findings and Lessons
 
 ### evaluation/run-5/orbweaver-findings.md
 
@@ -480,3 +565,4 @@ Key lessons for PRD #6:
 - **Score projections must include file delivery counts** — percentage alone is misleading.
 - **Oscillation detection** is a new failure class that needs first-class handling.
 - **Push authentication** must be resolved before run-6 — 3 consecutive failures.
+- **Run a cross-document audit agent** at the end of the actionable-fix-output milestone to verify all items from all evaluation documents are captured. Past runs lost items in the handoff.
