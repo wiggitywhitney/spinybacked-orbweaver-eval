@@ -1,0 +1,363 @@
+diff --git a/src/utils/summary-detector.js b/src/utils/summary-detector.js
+index aea1e01..5c2f3bc 100644
+--- a/src/utils/summary-detector.js
++++ b/src/utils/summary-detector.js
+@@ -4,6 +4,9 @@
+ import { readdir } from 'node:fs/promises';
+ import { join } from 'node:path';
+ import { getISOWeekString, getYearMonth } from './journal-paths.js';
++import { SpanStatusCode, trace } from '@opentelemetry/api';
++
++const tracer = trace.getTracer('commit-story');
+ 
+ /**
+  * Get the current date string in the configured timezone.
+@@ -48,6 +51,12 @@ function getNowDate() {
+   return new Date(now.getFullYear(), now.getMonth(), now.getDate());
+ }
+ 
++/**
++ * Get all dates that have journal entry files.
++ * Scans all YYYY-MM subdirectories under journal/entries/ for YYYY-MM-DD.md files.
++ * @param {string} basePath - Base path for journal (default: current directory)
++ * @returns {Promise<string[]>} Sorted array of date strings (YYYY-MM-DD)
++ */
+ /**
+  * Get all dates that have journal entry files.
+  * Scans all YYYY-MM subdirectories under journal/entries/ for YYYY-MM-DD.md files.
+@@ -55,38 +64,54 @@ function getNowDate() {
+  * @returns {Promise<string[]>} Sorted array of date strings (YYYY-MM-DD)
+  */
+ export async function getDaysWithEntries(basePath = '.') {
+-  const entriesDir = join(basePath, 'journal', 'entries');
+-  const datePattern = /^\d{4}-\d{2}-\d{2}\.md$/;
+-
+-  let monthDirs;
+-  try {
+-    monthDirs = await readdir(entriesDir);
+-  } catch {
+-    return [];
+-  }
+-
+-  const dates = [];
+-
+-  for (const monthDir of monthDirs) {
+-    // Only process YYYY-MM directories
+-    if (!/^\d{4}-\d{2}$/.test(monthDir)) continue;
+-
+-    let files;
++  return tracer.startActiveSpan('commit_story.journal.get_days_with_entries', async (span) => {
+     try {
+-      files = await readdir(join(entriesDir, monthDir));
+-    } catch {
+-      continue;
+-    }
++      const entriesDir = join(basePath, 'journal', 'entries');
++      const datePattern = /^\d{4}-\d{2}-\d{2}\.md$/;
++
++      span.setAttribute('commit_story.journal.file_path', entriesDir);
++
++      let monthDirs;
++      try {
++        monthDirs = await readdir(entriesDir);
++      } catch (error) {
++        span.recordException(error);
++        span.setStatus({ code: SpanStatusCode.ERROR });
++        return [];
++      }
+ 
+-    for (const file of files) {
+-      if (datePattern.test(file)) {
+-        dates.push(file.replace('.md', ''));
++      const dates = [];
++
++      for (const monthDir of monthDirs) {
++        // Only process YYYY-MM directories
++        if (!/^\d{4}-\d{2}$/.test(monthDir)) continue;
++
++        let files;
++        try {
++          files = await readdir(join(entriesDir, monthDir));
++        } catch (error) {
++          span.recordException(error);
++          span.setStatus({ code: SpanStatusCode.ERROR });
++          continue;
++        }
++
++        for (const file of files) {
++          if (datePattern.test(file)) {
++            dates.push(file.replace('.md', ''));
++          }
++        }
+       }
+-    }
+-  }
+ 
+-  dates.sort();
+-  return dates;
++      dates.sort();
++      return dates;
++    } catch (error) {
++      span.recordException(error);
++      span.setStatus({ code: SpanStatusCode.ERROR });
++      throw error;
++    } finally {
++      span.end();
++    }
++  });
+ }
+ 
+ /**
+@@ -114,6 +139,13 @@ async function getSummarizedDays(basePath = '.') {
+   return dates;
+ }
+ 
++/**
++ * Find days that have journal entries but no daily summary.
++ * Excludes today (current day is not yet complete).
++ * @param {string} basePath - Base path for journal (default: current directory)
++ * @param {{ before?: string }} options - Optional cutoff date (exclusive, YYYY-MM-DD)
++ * @returns {Promise<string[]>} Sorted array of unsummarized date strings
++ */
+ /**
+  * Find days that have journal entries but no daily summary.
+  * Excludes today (current day is not yet complete).
+@@ -122,20 +154,30 @@ async function getSummarizedDays(basePath = '.') {
+  * @returns {Promise<string[]>} Sorted array of unsummarized date strings
+  */
+ export async function findUnsummarizedDays(basePath = '.', options = {}) {
+-  const entryDays = await getDaysWithEntries(basePath);
+-  if (entryDays.length === 0) return [];
+-
+-  const summarizedDays = await getSummarizedDays(basePath);
+-  const today = getTodayString();
+-
+-  return entryDays.filter(dateStr => {
+-    // Exclude today — not yet complete
+-    if (dateStr >= today) return false;
+-    // Exclude dates at or after the cutoff
+-    if (options.before && dateStr >= options.before) return false;
+-    // Exclude already summarized
+-    if (summarizedDays.has(dateStr)) return false;
+-    return true;
++  return tracer.startActiveSpan('commit_story.journal.find_unsummarized_days', async (span) => {
++    try {
++      const entryDays = await getDaysWithEntries(basePath);
++      if (entryDays.length === 0) return [];
++
++      const summarizedDays = await getSummarizedDays(basePath);
++      const today = getTodayString();
++
++      return entryDays.filter(dateStr => {
++        // Exclude today — not yet complete
++        if (dateStr >= today) return false;
++        // Exclude dates at or after the cutoff
++        if (options.before && dateStr >= options.before) return false;
++        // Exclude already summarized
++        if (summarizedDays.has(dateStr)) return false;
++        return true;
++      });
++    } catch (error) {
++      span.recordException(error);
++      span.setStatus({ code: SpanStatusCode.ERROR });
++      throw error;
++    } finally {
++      span.end();
++    }
+   });
+ }
+ 
+@@ -190,6 +232,13 @@ export async function getDaysWithDailySummaries(basePath = '.') {
+   return dates;
+ }
+ 
++/**
++ * Find ISO weeks that have daily summaries but no weekly summary.
++ * Excludes the current week (not yet complete).
++ * Groups daily summary dates into ISO weeks, then checks for existing weekly summaries.
++ * @param {string} basePath - Base path for journal (default: current directory)
++ * @returns {Promise<string[]>} Sorted array of unsummarized ISO week strings
++ */
+ /**
+  * Find ISO weeks that have daily summaries but no weekly summary.
+  * Excludes the current week (not yet complete).
+@@ -198,35 +247,47 @@ export async function getDaysWithDailySummaries(basePath = '.') {
+  * @returns {Promise<string[]>} Sorted array of unsummarized ISO week strings
+  */
+ export async function findUnsummarizedWeeks(basePath = '.') {
+-  const dailySummaryDates = await getDaysWithDailySummaries(basePath);
+-  if (dailySummaryDates.length === 0) return [];
+-
+-  // Group daily summary dates into ISO weeks
+-  const weeksWithSummaries = new Set();
+-  for (const dateStr of dailySummaryDates) {
+-    const [year, month, day] = dateStr.split('-').map(Number);
+-    const date = new Date(year, month - 1, day);
+-    const weekStr = getISOWeekString(date);
+-    weeksWithSummaries.add(weekStr);
+-  }
++  return tracer.startActiveSpan('commit_story.journal.find_unsummarized_weeks', async (span) => {
++    try {
++      span.setAttribute('commit_story.journal.file_path', basePath);
++
++      const dailySummaryDates = await getDaysWithDailySummaries(basePath);
++      if (dailySummaryDates.length === 0) return [];
++
++      // Group daily summary dates into ISO weeks
++      const weeksWithSummaries = new Set();
++      for (const dateStr of dailySummaryDates) {
++        const [year, month, day] = dateStr.split('-').map(Number);
++        const date = new Date(year, month - 1, day);
++        const weekStr = getISOWeekString(date);
++        weeksWithSummaries.add(weekStr);
++      }
+ 
+-  // Get current week to exclude it (timezone-aware)
+-  const currentWeek = getISOWeekString(getNowDate());
++      // Get current week to exclude it (timezone-aware)
++      const currentWeek = getISOWeekString(getNowDate());
+ 
+-  // Check which weeks already have weekly summaries
+-  const summarizedWeeks = await getSummarizedWeeks(basePath);
++      // Check which weeks already have weekly summaries
++      const summarizedWeeks = await getSummarizedWeeks(basePath);
+ 
+-  const unsummarized = [];
+-  for (const weekStr of weeksWithSummaries) {
+-    // Exclude current week — not yet complete
+-    if (weekStr >= currentWeek) continue;
+-    // Exclude already summarized
+-    if (summarizedWeeks.has(weekStr)) continue;
+-    unsummarized.push(weekStr);
+-  }
++      const unsummarized = [];
++      for (const weekStr of weeksWithSummaries) {
++        // Exclude current week — not yet complete
++        if (weekStr >= currentWeek) continue;
++        // Exclude already summarized
++        if (summarizedWeeks.has(weekStr)) continue;
++        unsummarized.push(weekStr);
++      }
+ 
+-  unsummarized.sort();
+-  return unsummarized;
++      unsummarized.sort();
++      return unsummarized;
++    } catch (error) {
++      span.recordException(error);
++      span.setStatus({ code: SpanStatusCode.ERROR });
++      throw error;
++    } finally {
++      span.end();
++    }
++  });
+ }
+ 
+ /**
+@@ -280,6 +341,13 @@ async function getWeeksWithWeeklySummaries(basePath = '.') {
+   return weeks;
+ }
+ 
++/**
++ * Find months that have weekly summaries but no monthly summary.
++ * Excludes the current month (not yet complete).
++ * Determines a week's month from its Monday date.
++ * @param {string} basePath - Base path for journal (default: current directory)
++ * @returns {Promise<string[]>} Sorted array of unsummarized month strings (YYYY-MM)
++ */
+ /**
+  * Find months that have weekly summaries but no monthly summary.
+  * Excludes the current month (not yet complete).
+@@ -288,45 +356,55 @@ async function getWeeksWithWeeklySummaries(basePath = '.') {
+  * @returns {Promise<string[]>} Sorted array of unsummarized month strings (YYYY-MM)
+  */
+ export async function findUnsummarizedMonths(basePath = '.') {
+-  const weekLabels = await getWeeksWithWeeklySummaries(basePath);
+-  if (weekLabels.length === 0) return [];
+-
+-  // Map week labels to their Monday's month
+-  const monthsWithWeeklies = new Set();
+-  for (const weekLabel of weekLabels) {
+-    const match = weekLabel.match(/^(\d{4})-W(\d{2})$/);
+-    if (!match) continue;
+-
+-    const [, yearStr, weekNumStr] = match;
+-    const year = parseInt(yearStr);
+-    const week = parseInt(weekNumStr);
+-
+-    // Calculate the Monday of this ISO week
+-    const jan4 = new Date(year, 0, 4);
+-    const jan4Day = jan4.getDay() || 7;
+-    const week1Monday = new Date(jan4);
+-    week1Monday.setDate(jan4.getDate() - (jan4Day - 1));
+-
+-    const monday = new Date(week1Monday);
+-    monday.setDate(week1Monday.getDate() + (week - 1) * 7);
+-
+-    const monthStr = getYearMonth(monday);
+-    monthsWithWeeklies.add(monthStr);
+-  }
++  return tracer.startActiveSpan('commit_story.journal.find_unsummarized_months', async (span) => {
++    try {
++      const weekLabels = await getWeeksWithWeeklySummaries(basePath);
++      if (weekLabels.length === 0) return [];
++
++      // Map week labels to their Monday's month
++      const monthsWithWeeklies = new Set();
++      for (const weekLabel of weekLabels) {
++        const match = weekLabel.match(/^(\d{4})-W(\d{2})$/);
++        if (!match) continue;
++
++        const [, yearStr, weekNumStr] = match;
++        const year = parseInt(yearStr);
++        const week = parseInt(weekNumStr);
++
++        // Calculate the Monday of this ISO week
++        const jan4 = new Date(year, 0, 4);
++        const jan4Day = jan4.getDay() || 7;
++        const week1Monday = new Date(jan4);
++        week1Monday.setDate(jan4.getDate() - (jan4Day - 1));
++
++        const monday = new Date(week1Monday);
++        monday.setDate(week1Monday.getDate() + (week - 1) * 7);
++
++        const monthStr = getYearMonth(monday);
++        monthsWithWeeklies.add(monthStr);
++      }
+ 
+-  // Get current month to exclude it (timezone-aware)
+-  const currentMonth = getYearMonth(getNowDate());
++      // Get current month to exclude it (timezone-aware)
++      const currentMonth = getYearMonth(getNowDate());
+ 
+-  // Check which months already have monthly summaries
+-  const summarizedMonths = await getSummarizedMonths(basePath);
++      // Check which months already have monthly summaries
++      const summarizedMonths = await getSummarizedMonths(basePath);
+ 
+-  const unsummarized = [];
+-  for (const monthStr of monthsWithWeeklies) {
+-    if (monthStr >= currentMonth) continue;
+-    if (summarizedMonths.has(monthStr)) continue;
+-    unsummarized.push(monthStr);
+-  }
++      const unsummarized = [];
++      for (const monthStr of monthsWithWeeklies) {
++        if (monthStr >= currentMonth) continue;
++        if (summarizedMonths.has(monthStr)) continue;
++        unsummarized.push(monthStr);
++      }
+ 
+-  unsummarized.sort();
+-  return unsummarized;
++      unsummarized.sort();
++      return unsummarized;
++    } catch (error) {
++      span.recordException(error);
++      span.setStatus({ code: SpanStatusCode.ERROR });
++      throw error;
++    } finally {
++      span.end();
++    }
++  });
+ }

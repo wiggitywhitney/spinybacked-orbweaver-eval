@@ -42,6 +42,16 @@ All 13 run-4 findings were filed by the orbweaver AI (none rejected) and merged 
 
 *Updated throughout evaluation as findings are confirmed still present.*
 
+### Push authentication failure (Run-3 #12, persistent across 3 runs)
+
+- **Priority**: High
+- **Recommended Action**: Issue
+- **Description**: `git push` failed again with `remote: Invalid username or token. Password authentication is not supported for Git operations.` This is the 3rd consecutive run where push fails despite pre-run `git push --dry-run` succeeding. The orbweaver tool's git context uses HTTPS authentication but the token isn't propagated correctly to the subprocess.
+- **Impact**: No PR created. All 3 evaluation runs (3, 4, 5) lost the PR artifact. The `orbweaver-pr-summary.md` local file serves as fallback, but the PR-as-deliverable is never tested.
+- **Evidence**: `evaluation/run-5/orbweaver-output.log`, final output section.
+- **Run-5 Status**: CONFIRMED PERSISTENT. Pre-run `git push --dry-run` used SSH (which works), but orbweaver's subprocess uses HTTPS.
+- **Acceptance Criteria**: Either (a) configure orbweaver to use SSH for push, (b) accept GITHUB_TOKEN from environment and use token-based HTTPS auth, or (c) accept a `--push-command` override.
+
 ---
 
 ## New Findings
@@ -65,15 +75,51 @@ All 13 run-4 findings were filed by the orbweaver AI (none rejected) and merged 
 - **Impact**: Rejected span extensions may reduce schema coverage scores. Not blocking — these are warnings, not failures.
 - **Evidence**: Smoke test output on `orbweaver/instrument-1773704681144` branch.
 
+### RUN-1: SCH-002 validation causes oscillation failures
+
+- **Priority**: High
+- **Recommended Action**: Issue
+- **Description**: index.js failed with "Oscillation detected during fresh regeneration: Error count increased for SCH-002: 9 → 12". The fix/retry loop detected that the agent's correction attempt made SCH-002 violations worse, not better. The agent adds attributes that don't match the schema, gets told to fix them, and creates even more non-compliant attributes in the retry.
+- **Impact**: index.js is the application entry point — losing root span instrumentation here is the COV-001 regression from run-4. The oscillation detection correctly prevents infinite loops but doesn't help the agent converge.
+- **Evidence**: `evaluation/run-5/orbweaver-output.log` file 15, `evaluation/run-5/orbweaver-pr-summary.md` advisory findings.
+- **Acceptance Criteria**: The fix/retry loop should either (a) provide more specific guidance about which attribute names are rejected and what the valid alternatives are, or (b) accept partial schema compliance (commit non-violating spans, skip violating ones) rather than failing the entire file.
+
+### RUN-2: Validation pipeline causes net regression in file coverage
+
+- **Priority**: High
+- **Recommended Action**: Issue (design review)
+- **Description**: Run-5 committed 9 files vs run-4's 16 files — a 44% regression in instrumented file coverage. The validation pipeline (run-4 finding #2, PRD #156) correctly catches quality issues but causes 6 files to become "partial" (uncommitted) and 2 to "fail" outright. Files that previously "succeeded" (journal-graph, summary-manager, summary-detector, index.js, summarize.js) now fail because SCH-002 validation was silent in run-4 but active in run-5.
+- **Impact**: The validation pipeline traded coverage for quality — fewer files instrumented but those that are instrumented pass validation. Whether this is a net improvement depends on evaluation scoring.
+- **Evidence**: Compare `evaluation/run-5/orbweaver-output.log` vs run-4 per-file results. Partial diffs saved in `evaluation/run-5/partial-diffs/`.
+- **Acceptance Criteria**: Either (a) allow partial commits (instrument what passes, skip what doesn't), (b) implement progressive validation (warn on first pass, enforce on retry), or (c) accept the coverage/quality tradeoff and focus on reducing the remaining SCH-002 violations.
+
+### RUN-3: Summary tally omits partial files
+
+- **Priority**: Low
+- **Recommended Action**: Issue
+- **Description**: stdout summary reports "21 succeeded, 2 failed, 0 skipped" (23/29 files), omitting the 6 partial files. The PR summary correctly reports all three categories (21 success, 2 failed, 6 partial). The stdout discrepancy could confuse operators monitoring the run.
+- **Impact**: Cosmetic — PR summary is correct. But operators watching stdout would miss 6 files.
+- **Evidence**: `evaluation/run-5/orbweaver-output.log` final summary vs PR summary.
+- **Acceptance Criteria**: stdout final tally should include partial count: "21 succeeded, 2 failed, 6 partial, 0 skipped".
+
+### RUN-4: Extended run duration from validation retries
+
+- **Priority**: Medium
+- **Recommended Action**: Issue (investigate)
+- **Description**: Run-5 took significantly longer than run-4 (~80 min). The validation/retry loop adds multiple LLM calls per file — each retry involves a full re-analysis. Complex files (summary-graph, summary-manager) took 10+ minutes each going through retries before giving up.
+- **Impact**: Longer runs cost more (multiple LLM calls per retry) and reduce iteration speed.
+- **Evidence**: `evaluation/run-5/orbweaver-output.log` timestamps. Run started 2026-03-17T00:14:59Z, completed overnight.
+- **Acceptance Criteria**: Add retry budget configuration (max retries, max time per file) and report retry count in per-file output. Consider a fast-fail mode that skips retries for files with > N validation errors.
+
 ---
 
 ## Carry-Forward from Prior Runs
 
 | Item | Origin | Run-5 Status |
 |------|--------|-------------|
-| Run-3 #3: Zero-span files give no reason in CLI | Run-3 | Likely fixed — run-4 finding #5 (CLI artifact locations, issue #152, PR #167 merged) may address this |
+| Run-3 #3: Zero-span files give no reason in CLI | Run-3 | Likely fixed — zero-span files show "success (0 spans)" in verbose output |
 | Run-3 #4: NDS-003 blocks instrumentation-motivated refactors | Run-3 | Open — design tension, not a bug |
-| Run-3 #12: Push validation (read access ≠ push access) | Run-3 | Pre-run push --dry-run succeeded; evaluate during run |
+| Run-3 #12: Push validation (read access ≠ push access) | Run-3 | **CONFIRMED PERSISTENT** — push failed again (see Persistent section above) |
 | spinybacked-orbweaver #62: CJS require() in ESM projects | Run-2 | Open (spec gap) |
-| spinybacked-orbweaver #63: Elision/null output bypass retry loop | Run-2 | Likely improved — PRD #156 added fix/retry logic |
+| spinybacked-orbweaver #63: Elision/null output bypass retry loop | Run-2 | Likely improved — PRD #156 added fix/retry logic, but untested directly |
 | spinybacked-orbweaver #66-69: Spec gaps | Run-2 | Open |

@@ -164,7 +164,7 @@ Four-phase approach:
   2. Create `evaluation/run-5/lessons-for-prd6.md`. Sections: Rubric Gaps, Process Improvements, Evaluation Methodology, Rubric-Codebase Mapping Corrections, Schema Decisions, Carry-Forward Items.
   3. Both documents are updated throughout all subsequent milestones. Every milestone has explicit "append to findings/lessons" steps.
 
-- [ ] **Evaluation run-5** — Execute `orbweaver instrument` with all process improvements:
+- [x] **Evaluation run-5** — Execute `orbweaver instrument` with all process improvements:
   1. Clean codebase state: start from main branch with evaluation config (orbweaver.yaml, instrumentation.js, semconv/).
   2. Run in foreground: `orbweaver instrument src/ --verbose -y`
   3. Record wall-clock start timestamp.
