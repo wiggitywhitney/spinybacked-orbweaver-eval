@@ -229,7 +229,7 @@ Four-phase approach:
   8. Document in `evaluation/run-5/baseline-comparison.md`.
   9. Append to `evaluation/run-5/lessons-for-prd6.md`.
 
-- [ ] **Actionable fix output** — Produce fix instructions for remaining failures:
+- [x] **Actionable fix output** — Produce fix instructions for remaining failures:
   1. For each remaining quality rule failure: what's wrong, evidence, desired outcome.
   2. For each remaining failed file: root cause, desired outcome, finding cross-references.
   3. Assessment of run-4 findings: which were fixed, which remain, any new findings.

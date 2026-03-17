@@ -151,3 +151,15 @@ Observations, rubric gaps, process improvements, and methodology notes captured 
 - **Push authentication is the longest-standing unresolved issue.** 3 consecutive failures. The PR artifact has never been delivered. This blocks evaluation of the draft-PR-on-failure feature (run-4 finding #6, implemented in PR #168).
 - **Quality-coverage tradeoff is the defining tension for PRD #6.** 92% quality on 9 files vs 73% on 16 files. The ideal run-6 target is both metrics improving simultaneously — more files at the same quality. This requires DEEP-1 (COV-003 exemption) and RUN-1 (oscillation handling), not relaxing quality standards.
 - **Handoff process validated.** 13/13 findings filed, 3 bonus bugs discovered. The orbweaver AI right-sized work correctly. Process should continue with improvement: include failing file reproductions as acceptance criteria, and assign explicit ownership for environmental issues.
+
+---
+
+## Actionable Fix Output Observations
+
+*Added during actionable fix output milestone.*
+
+- **Only 2 canonical failures remain.** COV-001 (entry point) and COV-005 (zero attributes), both in COV dimension. All other dimensions at 100%. PRD #6 fix priorities should target these 2 rules specifically.
+- **Score projections must include file delivery counts.** Run-4's stretch prediction (92%) matched numerically but through filtering, not fixing. Run-6 projections state explicit file-set assumptions per tier: minimum (10 files), target (14-16), stretch (15-17).
+- **Run-4 finding resolution quality was mixed.** 9/13 verified fixed, 1 partially fixed, 1 not fixed, 1 not testable, 1 revealed new issue. Three "superficial resolutions" (NDS-005, CDQ-003, SCH-002 passing because violating files filtered) confirm that tracking resolution TYPE (genuine/methodology/superficial) is essential for accurate progress measurement.
+- **Critical path for run-6 is well-defined.** DEEP-1 (COV-003 exemption) → RUN-1 (oscillation detection) → DEEP-4 (duplicate JSDoc) → EVAL-1 (schema extension workflow). These 4 fixes address the 2 canonical failures and all 4 systemic bugs. The first 3 alone should recover 6+ files and reach 96%+ canonical.
+- **"Unmasked bug" risk in projections.** When partial files recover and get committed, they may reveal new failures (e.g., SCH-002 violations, new NDS-005b instances) that weren't visible while those files were filtered. Run-6 projections should discount the stretch tier by ~5% for this risk.
