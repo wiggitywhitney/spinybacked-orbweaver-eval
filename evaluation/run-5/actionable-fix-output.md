@@ -467,32 +467,34 @@ Risk: If fixing SYS-3 reveals new failure modes in the recovered files (e.g., ne
 
 ## 8. Priority Action Matrix
 
-| Priority | Finding | Rules Affected | Type | Impact |
-|----------|---------|---------------|------|--------|
-| **Critical** | DEEP-1: COV-003 expected-condition exemption | NDS-005b (latent), COV-003 | Issue/PRD | Unblocks 5 partial files — dominant systemic root cause |
-| **Critical** | RUN-1: Oscillation detection in fix/retry | COV-001 | Issue | Recovers index.js entry point — persistent failure |
-| **High** | DEEP-4: Duplicate JSDoc prevention | NDS-003 (latent) | Issue | Unblocks 5 partial files |
-| **High** | EVAL-1: Schema-uncovered file attribute strategy | COV-005 | Issue | Fixes last 2 canonical rule failures |
-| **High** | DEEP-6: Entry point special handling | COV-001 | Issue | Prevents entry point from being a single point of failure. See acceptance criteria in §1 above. |
-| **High** | PR-4: Partial file commits (function-level) | Coverage | Issue | When N of M functions pass, commit the N passing functions. summary-graph.js had 11/12 pass — 5 spans lost because 1 function failed. Coverage multiplier. Requires DEEP-1 first to prevent NDS-005b leaking into branch. |
-| **Medium** | DEEP-2/DEEP-2b: Function-level fallback quality | COV-001, NDS-001 | Issue | Two distinct bugs: (a) corrupted imports (`imimport` from token merging), (b) exported-only scope (misses non-exported functions like graph nodes). Also: tracer initialization placed between import statements (ES module syntax error — all imports must precede other statements). |
-| **Medium** | DEEP-7: Whole-file syntax check after assembly | NDS-001 | Issue | After function-level fallback assembles the final file, run `node --check` on the assembled result. Per-function LINT catches some errors but synthesis bugs in import merging or scope assembly can slip through. |
-| **Medium** | RUN-2: Validation regression tracking | NDS-002 | Issue | Prevent validation from blocking previously-passing files. Port the 8 failed/partial files to the orbweaver test suite as acceptance test cases. |
-| **Medium** | Push authentication (persistent) | PR delivery | Investigation | 3rd consecutive failure. Acceptance criteria: (a) configure SSH for push, (b) accept GITHUB_TOKEN from environment, or (c) accept `--push-command` override. Assign explicit ownership — environmental issues persist indefinitely without it. |
-| **Medium** | RUN-4: Retry budget configuration | Performance | Issue | Run-5 took significantly longer due to validation retries on complex files. Need: max retries per file, max time per file, retry count in per-file output, fast-fail mode for files with > N validation errors. |
-| **Medium** | NDS-005b boundary: LLM failure fallbacks | NDS-005 | Rubric/Issue | CodeRabbit and eval disagree on whether `dailySummaryNode` inner catch (LLM fails → return fallback) is NDS-005b. Recommendation: LLM failures should use `span.addEvent('llm.fallback')` instead of `recordException`, preserving observability without polluting error metrics. Define boundary: NDS-005b applies when the catch is normal control flow (file-not-found), NOT when it handles a genuine failure with graceful recovery. |
-| **Medium** | PR-3: auto_summarize span names not registered | SCH | Issue | 3 span names (`commit_story.auto_summarize.generate_daily/weekly/monthly`) used in committed code but not registered in `agent-extensions.yaml`. All other committed span names are registered. Data consistency gap. |
-| **Medium** | PRE-1: npm package name collision | Usability | Issue | `npx orbweaver` resolves to punkave/orbweaver v0.1.4 (unrelated webcrawler). Users following docs will run the wrong tool. |
-| **Low** | DEEP-5: SDK init skip for libraries | CDQ | Issue | Cosmetic — SDK init code is unused for API-only libraries |
-| **Low** | DEEP-8: Date object in setAttribute | CDQ | Issue | Minor — Date.toISOString() is cheap but passing Date objects is a type mismatch |
-| **Low** | RUN-3: Summary tally omits partial files | Usability | Issue | stdout reports "21 succeeded, 2 failed, 0 skipped" — omits 6 partial files. Operators monitoring stdout get inaccurate picture. |
-| **Low** | RUN-5: No timestamps or per-file cost breakdown | Observability | Issue | No start/end timestamps, per-file durations, retry counts, or per-file token/cost breakdown in output. Per-file cost attribution needed to evaluate retry budget effectiveness. |
-| **Low** | PRE-2: Span-type extension namespace rejection | SCH | Issue | Span names with correct `commit_story.*` prefix rejected by namespace enforcement filter. Span-type extensions may need different handling from attribute-type extensions. |
-| **Low** | EVAL-2: @traceloop packages in peerDependencies | API-002 | Issue | For library projects, the agent should not add auto-instrumentation packages to package.json. `@traceloop/instrumentation-langchain` and `@traceloop/instrumentation-mcp` belong in the deployer's SDK configuration, not the library's peerDependencies. |
-| **Low** | PR-1: PR summary length (~430 lines) | PR quality | Issue | Agent notes ~300 lines, zero-span justifications repeat RST-001 x12. Needs "key decisions" summary section and grouped zero-span notes. |
-| **Low** | PR-2: Advisory findings contradict skip decisions | PR quality | Issue | 28/34 advisories suggest instrumenting functions the agent deliberately skipped with rubric justification. Advisory engine should consume skip decisions to suppress contradicted advisories. |
-| **Low** | PR-5: Per-file cost/retry breakdown in token usage | PR quality | Issue | Token usage section should include per-file breakdown, not just project totals. |
-| **Low** | Per-item error recording in loops | CDQ (rubric gap) | Rubric | auto-summarize.js calls `setStatus(ERROR)` in per-item catch inside a loop. If one item fails but others succeed, span shows ERROR. Consider CDQ rule for span status accuracy in batch operations. |
+**Note:** Priority recommendations are from the eval team. The orbweaver team should right-size each item (PRD vs Issue vs skip) based on their codebase knowledge. We recommend priority; you decide scope.
+
+| Priority | Finding | Rules Affected | Impact |
+|----------|---------|---------------|--------|
+| **Critical** | DEEP-1: COV-003 expected-condition exemption | NDS-005b (latent), COV-003 | Unblocks 5 partial files — dominant systemic root cause |
+| **Critical** | RUN-1: Oscillation detection in fix/retry | COV-001 | Recovers index.js entry point — persistent failure |
+| **High** | DEEP-4: Duplicate JSDoc prevention | NDS-003 (latent) | Unblocks 5 partial files |
+| **High** | EVAL-1: Schema-uncovered file attribute strategy | COV-005 | Fixes last 2 canonical rule failures |
+| **High** | DEEP-6: Entry point special handling | COV-001 | Prevents entry point from being a single point of failure. See acceptance criteria in §1 above. |
+| **High** | PR-4: Partial file commits (function-level) | Coverage | When N of M functions pass, commit the N passing functions. summary-graph.js had 11/12 pass — 5 spans lost because 1 function failed. Coverage multiplier. Requires DEEP-1 first to prevent NDS-005b leaking into branch. |
+| **Medium** | DEEP-2/DEEP-2b: Function-level fallback quality | COV-001, NDS-001 | Two distinct bugs: (a) corrupted imports (`imimport` from token merging), (b) exported-only scope (misses non-exported functions like graph nodes). Also: tracer initialization placed between import statements (ES module syntax error — all imports must precede other statements). |
+| **Medium** | DEEP-7: Whole-file syntax check after assembly | NDS-001 | After function-level fallback assembles the final file, run `node --check` on the assembled result. Per-function LINT catches some errors but synthesis bugs in import merging or scope assembly can slip through. |
+| **Medium** | RUN-2: Validation regression tracking | NDS-002 | Prevent validation from blocking previously-passing files. Port the 8 failed/partial files to the orbweaver test suite as acceptance test cases. |
+| **Medium** | Push authentication (persistent) | PR delivery | 3rd consecutive failure. Acceptance criteria: (a) configure SSH for push, (b) accept GITHUB_TOKEN from environment, or (c) accept `--push-command` override. Assign explicit ownership — environmental issues persist indefinitely without it. |
+| **Medium** | RUN-4: Retry budget configuration | Performance | Run-5 took significantly longer due to validation retries on complex files. Need: max retries per file, max time per file, retry count in per-file output, fast-fail mode for files with > N validation errors. |
+| **Medium** | NDS-005b boundary: LLM failure fallbacks | NDS-005 | CodeRabbit and eval disagree on whether `dailySummaryNode` inner catch (LLM fails → return fallback) is NDS-005b. Recommendation: LLM failures should use `span.addEvent('llm.fallback')` instead of `recordException`, preserving observability without polluting error metrics. Define boundary: NDS-005b applies when the catch is normal control flow (file-not-found), NOT when it handles a genuine failure with graceful recovery. |
+| **Medium** | PR-3: auto_summarize span names not registered | SCH | 3 span names (`commit_story.auto_summarize.generate_daily/weekly/monthly`) used in committed code but not registered in `agent-extensions.yaml`. All other committed span names are registered. Data consistency gap. |
+| **Medium** | PRE-1: npm package name collision | Usability | `npx orbweaver` resolves to punkave/orbweaver v0.1.4 (unrelated webcrawler). Users following docs will run the wrong tool. |
+| **Low** | DEEP-5: SDK init skip for libraries | CDQ | Cosmetic — SDK init code is unused for API-only libraries |
+| **Low** | DEEP-8: Date object in setAttribute | CDQ | Minor — Date.toISOString() is cheap but passing Date objects is a type mismatch |
+| **Low** | RUN-3: Summary tally omits partial files | Usability | stdout reports "21 succeeded, 2 failed, 0 skipped" — omits 6 partial files. Operators monitoring stdout get inaccurate picture. |
+| **Low** | RUN-5: No timestamps or per-file cost breakdown | Observability | No start/end timestamps, per-file durations, retry counts, or per-file token/cost breakdown in output. Per-file cost attribution needed to evaluate retry budget effectiveness. |
+| **Low** | PRE-2: Span-type extension namespace rejection | SCH | Span names with correct `commit_story.*` prefix rejected by namespace enforcement filter. Span-type extensions may need different handling from attribute-type extensions. |
+| **Low** | EVAL-2: @traceloop packages in peerDependencies | API-002 | For library projects, the agent should not add auto-instrumentation packages to package.json. `@traceloop/instrumentation-langchain` and `@traceloop/instrumentation-mcp` belong in the deployer's SDK configuration, not the library's peerDependencies. |
+| **Low** | PR-1: PR summary length (~430 lines) | PR quality | Agent notes ~300 lines, zero-span justifications repeat RST-001 x12. Needs "key decisions" summary section and grouped zero-span notes. |
+| **Low** | PR-2: Advisory findings contradict skip decisions | PR quality | 28/34 advisories suggest instrumenting functions the agent deliberately skipped with rubric justification. Advisory engine should consume skip decisions to suppress contradicted advisories. |
+| **Low** | PR-5: Per-file cost/retry breakdown in token usage | PR quality | Token usage section should include per-file breakdown, not just project totals. |
+| **Low** | Per-item error recording in loops | CDQ (rubric gap) | auto-summarize.js calls `setStatus(ERROR)` in per-item catch inside a loop. If one item fails but others succeed, span shows ERROR. Consider CDQ rule for span status accuracy in batch operations. |
 
 ---
 

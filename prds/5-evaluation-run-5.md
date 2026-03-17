@@ -240,12 +240,12 @@ Four-phase approach:
   8. Document in `evaluation/run-5/actionable-fix-output.md`.
   9. Final review of `evaluation/run-5/lessons-for-prd6.md` and `evaluation/run-5/orbweaver-findings.md`.
 
-- [ ] **Handoff to orbweaver** — Produce recommendation document for the target repo:
-  1. Create `evaluation/run-5/handoff-to-orbweaver.md` following the run-4 format: recommendation document, not confirmed bugs.
-  2. All evidence references use absolute local filesystem paths (both repos on the same machine).
-  3. Each finding classified as PRD or Issue with evidence paths.
-  4. Include "What the Eval AI Got Wrong Before" section — run-4 proved predictions can be wrong, building calibration trust.
-  5. Include handoff process retrospective: what worked in the run-4→run-5 handoff, what to improve.
+- [x] **Handoff to orbweaver** — Produce recommendation document for the target repo:
+  1. ~~Create `evaluation/run-5/handoff-to-orbweaver.md` following the run-4 format.~~ **Decision: actionable-fix-output.md IS the handoff.** Separate document would be redundant — the actionable fix output already includes acceptance criteria, carry-forwards, priority matrix, and is written to the orbweaver maintainer. See decision log 2026-03-17.
+  2. All evidence references use absolute local filesystem paths (both repos on the same machine). → **Covered**: orbweaver-findings.md uses local paths.
+  3. ~~Each finding classified as PRD or Issue with evidence paths.~~ **Decision: classification is orbweaver team's responsibility.** Eval provides priority recommendations, orbweaver devs right-size the work (PRD vs Issue) based on their codebase knowledge.
+  4. Include "What the Eval AI Got Wrong Before" section. → **Covered**: §4 Resolution Quality Assessment documents 3 superficial resolutions and calibration notes.
+  5. Include handoff process retrospective. → **Covered**: §4 summary and lessons-for-prd6.md handoff observations.
 
 - [ ] **Draft PRD #6 for next evaluation run** — Create PRD #6 on a separate branch from main (evaluation branches never merge):
   1. Run-5 scores as baselines.
@@ -389,6 +389,9 @@ Run-5 uses the recommendation-document handoff process established in run-4:
 | 2026-03-16 | Use `orbweaver-` filename prefix for run-5+ | CLI renamed from `orb` to `orbweaver` (spinybacked-orbweaver #123). Historical run-1 through run-4 filenames preserved. |
 | 2026-03-16 | Add cost anomaly as standard diagnostic signal | Run-4's $5.84 (8.6% of $67.86 ceiling) was a symptom of broken schema evolution. Low cost:ceiling ratio should trigger investigation, not celebration. |
 | 2026-03-16 | Evaluation branches never merge — PRDs drafted on separate branches from main | Evaluation run branches get PRs for CodeRabbit review only, then are closed. Any files needed on main (PRDs, rubric updates) must be committed independently via their own branch + PR. |
+| 2026-03-17 | Actionable-fix-output.md IS the handoff — no separate handoff document | Run-4 had separate actionable-fix-output.md and handoff-to-orbweaver.md. In run-5, the actionable fix output already includes acceptance criteria, priority matrix, carry-forwards, and is written to the orbweaver maintainer. A separate handoff would be redundant. |
+| 2026-03-17 | PRD/Issue classification is orbweaver team's responsibility, not eval's | Eval provides priority recommendations and acceptance criteria. The orbweaver devs right-size the work (PRD vs Issue) based on their codebase knowledge. Eval was over-prescribing work breakdown in run-4. |
+| 2026-03-17 | Run cross-document audit agent at end of actionable-fix-output milestone | Initial draft missed 22 items from other evaluation documents. An audit agent that reads ALL docs and cross-references against the actionable fix output catches gaps before handoff. |
 
 ---
 

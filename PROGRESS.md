@@ -54,6 +54,8 @@ Entry format: `- (YYYY-MM-DD) Description of feature-level change (PRD #X, miles
 
 - (2026-03-17) Completed actionable fix output: 2 canonical failures (COV-001 entry point, COV-005 zero attributes), 2 latent systemic bugs (COV-003/NDS-005b conflict, duplicate JSDoc), 8 failed/partial file root causes with trajectories, run-4 finding assessment (9 fixed/1 partial/1 not fixed/1 untestable), rubric gap analysis (5 new gaps + 3 clarifications), run-6 verification checklist, 3-tier score projections with file-set assumptions (minimum 96%/target 96-100%/stretch 100%). Critical path: DEEP-1 → RUN-1 → DEEP-4 → EVAL-1 (PRD #5, actionable fix output)
 
+- (2026-03-17) Completed handoff to orbweaver: actionable-fix-output.md serves as the handoff document (no separate handoff-to-orbweaver.md). Removed PRD/Issue classification from eval side — orbweaver team right-sizes work based on their codebase knowledge. Cross-document audit agent caught 22 missing items before handoff (PRD #5, handoff to orbweaver)
+
 ### Changed
 - (2026-03-16) Fixed span count discrepancy: total_spans_on_branch corrected from 48 to 38 in per-file-evaluation.json and rubric-scores.json (48 included working-directory-only changes from partial files not committed to branch). Updated baseline-comparison.md table to match canonical per-file-evaluation.json (PRD #4, CodeRabbit finding fix)
 - (2026-03-15) Renamed all "orb" references to "orbweaver" in PRD #4 and evaluation docs to match CLI rename (spinybacked-orbweaver #123)
