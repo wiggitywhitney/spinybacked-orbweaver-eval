@@ -82,16 +82,18 @@ All 13 run-4 findings were filed by the orbweaver AI (none rejected) and merged 
 - **Description**: index.js failed with "Oscillation detected during fresh regeneration: Error count increased for SCH-002: 9 → 12". The fix/retry loop detected that the agent's correction attempt made SCH-002 violations worse, not better. The agent adds attributes that don't match the schema, gets told to fix them, and creates even more non-compliant attributes in the retry.
 - **Impact**: index.js is the application entry point — losing root span instrumentation here is the COV-001 regression from run-4. The oscillation detection correctly prevents infinite loops but doesn't help the agent converge.
 - **Evidence**: `evaluation/run-5/orbweaver-output.log` file 15, `evaluation/run-5/orbweaver-pr-summary.md` advisory findings.
-- **Acceptance Criteria**: The fix/retry loop should either (a) provide more specific guidance about which attribute names are rejected and what the valid alternatives are, or (b) accept partial schema compliance (commit non-violating spans, skip violating ones) rather than failing the entire file.
+- **Investigation needed**: Confirm the resolved schema (with agent-extensions.yaml merged) is actually being passed to the agent during retries. If the agent is instrumenting against the base schema without its own extensions, it would explain why it can't satisfy SCH-002. Also check whether the application entry point (index.js) has special instrumentation needs that a generic file-level approach can't handle.
+- **Acceptance Criteria**: The fix/retry loop should either (a) provide more specific guidance about which attribute names are rejected and what the valid alternatives are, (b) accept partial schema compliance (commit non-violating spans, skip violating ones) rather than failing the entire file, or (c) switch to function-by-function instrumentation mode instead of whole-file mode — this gives the agent more refined per-function feedback and produces partial output even when some functions can't satisfy validation.
 
 ### RUN-2: Validation pipeline causes net regression in file coverage
 
 - **Priority**: High
-- **Recommended Action**: Issue (design review)
+- **Recommended Action**: PRD (use failed files as test cases)
 - **Description**: Run-5 committed 9 files vs run-4's 16 files — a 44% regression in instrumented file coverage. The validation pipeline (run-4 finding #2, PRD #156) correctly catches quality issues but causes 6 files to become "partial" (uncommitted) and 2 to "fail" outright. Files that previously "succeeded" (journal-graph, summary-manager, summary-detector, index.js, summarize.js) now fail because SCH-002 validation was silent in run-4 but active in run-5.
-- **Impact**: The validation pipeline traded coverage for quality — fewer files instrumented but those that are instrumented pass validation. Whether this is a net improvement depends on evaluation scoring.
-- **Evidence**: Compare `evaluation/run-5/orbweaver-output.log` vs run-4 per-file results. Partial diffs saved in `evaluation/run-5/partial-diffs/`.
-- **Acceptance Criteria**: Either (a) allow partial commits (instrument what passes, skip what doesn't), (b) implement progressive validation (warn on first pass, enforce on retry), or (c) accept the coverage/quality tradeoff and focus on reducing the remaining SCH-002 violations.
+- **Impact**: The validation pipeline traded coverage for quality — fewer files instrumented but those that are instrumented pass validation. The next full evaluation run should not happen until these problematic files can be consistently instrumented properly by the software.
+- **Evidence**: Compare `evaluation/run-5/orbweaver-output.md` vs run-4 per-file results. Partial diffs saved in `evaluation/run-5/partial-diffs/`.
+- **Recommended approach**: Port the 8 failed/partial files (summarize.js, index.js, journal-graph.js, summary-graph.js, sensitive-filter.js, journal-manager.js, summary-manager.js, summary-detector.js) into the orbweaver test suite as acceptance criteria. Refine the software until these files are consistently instrumented completely and correctly. Also test that PRs are consistently created as part of this effort. Do not run another full evaluation until these files pass consistently.
+- **Acceptance Criteria**: All 8 problematic files pass orbweaver's instrumentation pipeline consistently (multiple runs, not just once). PR creation works end-to-end.
 
 ### RUN-3: Summary tally omits partial files
 
@@ -110,6 +112,15 @@ All 13 run-4 findings were filed by the orbweaver AI (none rejected) and merged 
 - **Impact**: Longer runs cost more (multiple LLM calls per retry) and reduce iteration speed.
 - **Evidence**: `evaluation/run-5/orbweaver-output.log` timestamps. Run started 2026-03-17T00:14:59Z, completed overnight.
 - **Acceptance Criteria**: Add retry budget configuration (max retries, max time per file) and report retry count in per-file output. Consider a fast-fail mode that skips retries for files with > N validation errors.
+
+### RUN-5: No timestamps in orbweaver output
+
+- **Priority**: Low
+- **Recommended Action**: Issue
+- **Description**: Orbweaver does not emit start/end timestamps or per-file durations in its stdout or PR summary. Run-5's end time was lost because the external process recording timestamps required manual approval that came hours after completion.
+- **Impact**: Evaluation runs cannot accurately report wall-clock duration or per-file processing time, making it harder to measure the cost of validation retries or detect performance regressions.
+- **Evidence**: `evaluation/run-5/orbweaver-output.md` — start time recorded externally, end time marked as "indeterminate."
+- **Acceptance Criteria**: Orbweaver output should include: (a) run start/end timestamps, (b) per-file start/end timestamps or duration, (c) retry count per file. These should appear in both stdout and the PR summary.
 
 ---
 

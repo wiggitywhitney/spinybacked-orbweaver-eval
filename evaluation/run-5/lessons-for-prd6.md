@@ -22,9 +22,8 @@ Observations, rubric gaps, process improvements, and methodology notes captured 
 - **Always use local binary path for orbweaver, never npx.** `npx orbweaver` resolves to an unrelated webcrawler package on npm (punkave/orbweaver v0.1.4). The correct invocation is `node /path/to/spinybacked-orbweaver/bin/orbweaver.js`. Document this in PRD evaluation run setup instructions.
 - **Recommendation-document handoff validated.** All 13 run-4 findings were filed and merged. The orbweaver AI right-sized work correctly (downgraded one PRD to Issue, folded one Issue into a PRD). Three additional bugs were discovered during fix implementation. The handoff process works and should be continued.
 - **Save partial file diffs before discarding.** Run-5 discovered that orbweaver's partial file changes (working tree modifications for files that weren't committed) leak into other branches when switching. These diffs are valuable evaluation artifacts — save them before discarding. Added `evaluation/run-5/partial-diffs/` pattern.
-- **Validation pipeline introduces coverage/quality tradeoff.** Run-5 committed 9 files vs run-4's 16 — validation catches real issues but prevents files from being delivered. PRD #6 should decide: is partial-but-validated better than complete-but-unvalidated? Consider progressive validation (warn first, enforce on retry).
-- **Run duration unpredictable with retries.** The validation/retry loop turns a predictable ~80-minute run into an overnight run. PRD #6 should recommend retry budget configuration (max retries, max time per file) as an orbweaver feature.
-- **Push authentication persists across 3 runs.** The SSH vs HTTPS git auth mismatch has never been fixed. PRD #6 handoff should escalate this from Low to High priority — it blocks the PR-as-deliverable evaluation every single run.
+- **Avoid shell command substitution for timestamps.** Run-5's end time was lost because `$(date)` triggers manual approval in Claude Code. Use literal `date` commands or `time` prefix instead. Better yet, orbweaver should emit its own timestamps (see finding RUN-5).
+- **Do not run another full evaluation until problematic files pass consistently.** Run-5 had 8 failed/partial files. These should be ported to the orbweaver test suite and used to refine the software before the next full run (see finding RUN-2).
 
 ---
 
@@ -34,8 +33,7 @@ Observations, rubric gaps, process improvements, and methodology notes captured 
 
 - **Schema checks were silently skipped in runs 2-4.** PR #173 (merged before run-5) enables SCH-001 through SCH-004 validation during the agent's fix loop, plus activates the LLM judge during retries. This means run-5 is the first run where the agent gets schema feedback during instrumentation. All prior SCH dimension scores reflect an agent that never received schema validation signals — cross-run SCH comparisons must account for this. Run-4's score projections did not anticipate this change and may underestimate SCH improvement.
 - **Prompt changes between runs affect baseline comparability.** PR #175 (merged before run-5) changes span naming guidance, adds undefined guard constraints, and renames all five prompt examples. Combined with schema checks firing, run-5 agent behavior may differ significantly from run-4. Document which PRs landed between runs as part of pre-run verification to enable accurate attribution when scores change.
-- **Validation raises the bar but lowers coverage.** Run-5 is the first run with active validation. This creates a scoring paradox: fewer files instrumented (worse coverage dimension) but surviving files have higher quality (better quality dimensions). The canonical scoring methodology needs to account for this — perhaps distinguishing "files the agent chose to skip" from "files the agent tried and failed."
-- **Partial files contain valuable diagnostic data.** The 6 partial files show what the agent attempted and where it got stuck. Run-5 saved partial diffs (`evaluation/run-5/partial-diffs/`). These should be standard evaluation artifacts going forward.
+- **Partial files contain valuable diagnostic data.** The 6 partial files show what the agent attempted and where it got stuck. Run-5 saved partial diffs (`evaluation/run-5/partial-diffs/`). These should be standard evaluation artifacts going forward. However, the diffs only capture the final working tree state — they don't show per-retry snapshots. Per-retry visibility (what the agent tried at each iteration) would be a valuable orbweaver feature for diagnosing oscillation and convergence failures.
 - **Oscillation detection is a new failure class.** The fix/retry loop can make things worse (SCH-002 count increased from 9→12 on index.js). The detection works (prevents infinite loops) but the failure mode is new. The per-file evaluation should track oscillation as a distinct failure category.
 
 - Established per-file agent evaluation + schema coverage split as the single canonical methodology. Previous 4-variant scoring (strict/adjusted/split/split+adjusted) dropped.
@@ -66,13 +64,9 @@ Observations, rubric gaps, process improvements, and methodology notes captured 
 
 ## Carry-Forward Items
 
-*Unresolved items from prior runs that should appear in PRD #6.*
+*Unresolved items from prior runs that should appear in PRD #6. Orbweaver software issues are tracked in orbweaver-findings.md — this section lists only eval-process carry-forwards.*
 
-- npm package name collision: `orbweaver` on npm is a different project (see orbweaver-findings.md PRE-1)
-- Schema extension namespace enforcement may reject span-type extensions incorrectly (see orbweaver-findings.md PRE-2)
 - Finding #3 (expected-condition catches) has prompt-only fix with no automated validator — needs evaluation in per-file analysis
-- Push authentication failure persists across 3 runs — escalate to High priority (see orbweaver-findings.md persistent section)
-- SCH-002 oscillation on complex files (see orbweaver-findings.md RUN-1) — needs fix/retry loop improvements
-- Coverage/quality tradeoff from validation pipeline (see orbweaver-findings.md RUN-2) — needs design decision on partial commits
-- Extended run duration from validation retries (see orbweaver-findings.md RUN-4) — needs retry budget configuration
 - Run-5 file outcome comparison needed: 5 regressions (journal-graph, index, summarize, summary-manager, summary-detector), 2 improvements (message-filter and token-filter correctly skipped)
+- Per-retry visibility not available — partial diffs only capture final state, not intermediate attempts. Consider requesting per-retry snapshots from orbweaver (see finding RUN-5)
+- Orbweaver software findings to include in handoff: PRE-1, PRE-2, RUN-1 through RUN-5, plus persistent push auth failure (see orbweaver-findings.md)
