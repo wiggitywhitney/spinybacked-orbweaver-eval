@@ -50,6 +50,8 @@ Entry format: `- (YYYY-MM-DD) Description of feature-level change (PRD #X, miles
 
 - (2026-03-17) Completed rubric scoring: canonical 23/25 (92%) quality, 5/5 gates — first clean gate pass across all runs. Only 2 failures: COV-001 (entry point missing) and COV-005 (zero attributes on schema-uncovered files). Documented quality-vs-coverage tradeoff (92% on 9 files vs 73% on 16), classified 4 systemic bugs, flagged 3 superficial resolutions (NDS-005/CDQ-003/RST-001 filtered by validation, not fixed). Added priority ordering and per-file cost breakdown to orbweaver findings for handoff (PRD #5, rubric scoring)
 
+- (2026-03-17) Completed baseline comparison and synthesis: 4-run dimension trend analysis, file outcome trajectories, failure classification (4 genuine fixes, 3 methodology, 3 superficial), schema evolution impact assessment (SCH 50%→100%), handoff process validated (13/13 findings filed, 3 bonus), run-4 score projection validation (stretch 92% matched via different mechanism), cost comparison ($5.84→$9.72, expected), quality-vs-coverage tradeoff as defining tension for PRD #6 (PRD #5, baseline comparison)
+
 ### Changed
 - (2026-03-16) Fixed span count discrepancy: total_spans_on_branch corrected from 48 to 38 in per-file-evaluation.json and rubric-scores.json (48 included working-directory-only changes from partial files not committed to branch). Updated baseline-comparison.md table to match canonical per-file-evaluation.json (PRD #4, CodeRabbit finding fix)
 - (2026-03-15) Renamed all "orb" references to "orbweaver" in PRD #4 and evaluation docs to match CLI rename (spinybacked-orbweaver #123)

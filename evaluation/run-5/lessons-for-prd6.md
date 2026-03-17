@@ -137,3 +137,17 @@ Observations, rubric gaps, process improvements, and methodology notes captured 
 - **Live-check "OK" is misleading when entry point fails.** index.js failed instrumentation, was restored to original, and live-check ran against uninstrumented code. "OK" provides zero validation. Should report "DEGRADED" or "INCOMPLETE."
 - **PR summary is comprehensive but too long for practical review (~430 lines).** Agent notes section alone is ~300 lines. Zero-span file justifications are repetitive (same RST-001 explanation 12 times). A "key decisions" summary section would help reviewers focus on what matters.
 - **No per-file cost/retry breakdown in token usage.** Total cost ($9.72) is reported but not broken down by file. With 6 partial + 2 failed files going through retry loops, per-file costs would help identify expensive files and evaluate retry budget effectiveness.
+
+---
+
+## Baseline Comparison Observations
+
+*Added during baseline comparison milestone.*
+
+- **Score projection methodology needs file-set assumptions.** Run-4 predicted 92% stretch on 16 files. Run-5 achieved 92% on 9 files. Same percentage, completely different mechanism. PRD #6 projections must state file-set assumptions for each tier and distinguish "fix" (durable) from "filter" (fragile) resolution paths.
+- **Three resolution types must be tracked separately.** Of 10 resolved run-4 rules: 4 genuine fixes, 3 methodology changes, 3 superficial (filtering). Only genuine fixes are durable. Superficial resolutions will regress if the validation pipeline is relaxed.
+- **Schema evolution is the highest-impact single infrastructure change.** SCH dimension jumped 50% → 100%. Span naming consistency (persistent failure across runs 2-4) fully resolved. Cost increased 66% as expected (more cache misses). Run-5's 14.3% cost ratio vs run-4's 8.6% confirms broken evolution was the root cause of the cost anomaly.
+- **COV-001 trajectory is worsening, not stable.** Run-4: index.js on branch but missing root span. Run-5: index.js failed entirely. The root span problem is getting harder to fix as schema validation catches more issues. Entry point handling (DEEP-6) should be highest priority for the handoff.
+- **Push authentication is the longest-standing unresolved issue.** 3 consecutive failures. The PR artifact has never been delivered. This blocks evaluation of the draft-PR-on-failure feature (run-4 finding #6, implemented in PR #168).
+- **Quality-coverage tradeoff is the defining tension for PRD #6.** 92% quality on 9 files vs 73% on 16 files. The ideal run-6 target is both metrics improving simultaneously — more files at the same quality. This requires DEEP-1 (COV-003 exemption) and RUN-1 (oscillation handling), not relaxing quality standards.
+- **Handoff process validated.** 13/13 findings filed, 3 bonus bugs discovered. The orbweaver AI right-sized work correctly. Process should continue with improvement: include failing file reproductions as acceptance criteria, and assign explicit ownership for environmental issues.

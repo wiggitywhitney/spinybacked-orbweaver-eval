@@ -218,7 +218,7 @@ Four-phase approach:
   7. Emit as `evaluation/run-5/rubric-scores.json` (canonical) and render `evaluation/run-5/rubric-scores.md`.
   8. Append to `evaluation/run-5/lessons-for-prd6.md` and `evaluation/run-5/orbweaver-findings.md`.
 
-- [ ] **Baseline comparison and synthesis** — Compare run-5 vs run-4 vs run-3 vs run-2:
+- [x] **Baseline comparison and synthesis** — Compare run-5 vs run-4 vs run-3 vs run-2:
   1. Dimension-level trend analysis (4-run).
   2. File outcome comparison: improved / regressed / same. Track both rule persistence and file persistence.
   3. Failure classification: resolved / persistent / new.
