@@ -39,7 +39,7 @@ Run-5 achieved 92% canonical quality (23/25) with 5/5 gates — the highest qual
 | **Cost (actual)** | ~$5.50-6.50 | Not recorded | $5.84 | **$9.72** | +66% (expected) |
 | **Cost (ceiling)** | Unknown | Unknown | $67.86 | $67.86 | Unchanged |
 | **Cost ratio** | Unknown | Unknown | 8.6% | **14.3%** | +5.7pp |
-| **Orbweaver version** | v1.0.0 | stale build | 0.1.0 | **0.2.0** | Major release |
+| **Orbweaver version** | v1.0.0 | stale build | 0.1.0 | **0.1.0** | Same version, new fixes merged |
 
 **Scoring methodology note:** Run-5 establishes per-file evaluation + schema coverage split as the canonical methodology. Runs 2-4 used various scoring approaches; the run-4 "adjusted + split" score (73%) is the most comparable to run-5's canonical score. Denominators differ: run-2 had 27 rules, runs 3-4 had 26, run-5 has 25 (COV-006 became N/A because journal-graph.js is not committed).
 
