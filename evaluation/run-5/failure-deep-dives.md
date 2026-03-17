@@ -318,7 +318,7 @@ These are **infrastructure bugs in the validation pipeline**, not agent quality 
 
 **Fix priority**: HIGH — live-check is a key quality signal, and its reliability depends on entry point instrumentation.
 
-**Recommended fix**: Entry point should get relaxed validation (accept partial schema compliance, strip failing attributes rather than rejecting the file), priority retry budget, and live-check should report "DEGRADED" when the entry point failed.
+**Recommended fix** (in priority order): (1) Per-function handling first — if `main()` can be instrumented but `handleSummarize()` can't, commit `main()` alone. This keeps committed code fully schema-compliant. (2) Relaxed validation only as last resort — if even per-function can't produce a root span, accept partial schema compliance for the root span specifically. (3) Live-check should report "DEGRADED" when the entry point failed. See DEEP-6 in orbweaver-findings.md for full recommended approach.
 
 ### 6. No Whole-File Syntax Check After Function-Level Assembly
 
