@@ -52,7 +52,7 @@ jobs:
 
       - name: Create timestamped branch
         run: |
-          BRANCH="orb/instrument-$(date -u +'%Y%m%d-%H%M')"
+          BRANCH="orb/instrument-$(date -u +'%Y%m%d-%H%M%S')"
           git checkout -b "$BRANCH"
           echo "BRANCH=$BRANCH" >> "$GITHUB_ENV"
 
