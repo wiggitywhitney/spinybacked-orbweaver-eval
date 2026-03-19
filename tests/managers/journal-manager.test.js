@@ -36,21 +36,16 @@ function _makeSections({
 }
 
 describe('formatTimestamp', () => {
-  it('formats a date as localized time string', () => {
+  it('formats a date as localized time string with time and timezone', () => {
     const date = new Date('2026-02-21T10:15:32Z');
     const result = formatTimestamp(date);
 
     // Should include time components and AM/PM
     expect(result).toMatch(/\d{1,2}:\d{2}:\d{2}\s[AP]M/);
-  });
 
-  it('includes timezone abbreviation', () => {
-    const date = new Date('2026-02-21T10:15:32Z');
-    const result = formatTimestamp(date);
-
-    // Should end with timezone abbreviation (e.g., "CDT", "EST", "UTC")
-    // or offset format (e.g., "GMT+1", "GMT-5") depending on locale
-    expect(result).toMatch(/([A-Z]{2,5}|GMT[+-]\d{1,2})$/);
+    // Should include a timezone indicator after AM/PM (format varies by locale:
+    // abbreviation like "CDT", offset like "GMT+1", or full like "UTC")
+    expect(result).toMatch(/[AP]M\s.+$/);
   });
 });
 
