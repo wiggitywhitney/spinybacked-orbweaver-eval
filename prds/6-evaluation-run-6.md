@@ -3,7 +3,7 @@
 **Status:** Draft
 **Created:** 2026-03-17
 **GitHub Issue:** #17
-**Depends on:** PRD #5 (run-5 complete, 22 findings documented, actionable fix output delivered to orbweaver)
+**Depends on:** PRD #5 (run-5 complete, 22 findings documented, actionable fix output delivered to spiny-orb team)
 
 ---
 
@@ -65,7 +65,7 @@ Recover file coverage (target: 14-16 committed files) while retaining 92%+ quali
 | Partial (not committed) | 6 | journal-graph, summary-graph, sensitive-filter, journal-manager, summary-manager, summary-detector |
 | Failed entirely | 2 | index.js (oscillation), summarize.js (COV-003 + SCH-002) |
 
-### Run-5 Orbweaver Findings (22 new + 1 persistent)
+### Run-5 Spiny-Orb Findings (22 new + 1 persistent)
 
 | # | Title | Priority | Impact |
 |---|-------|----------|--------|
@@ -81,7 +81,7 @@ Recover file coverage (target: 14-16 committed files) while retaining 92%+ quali
 | Push auth | Push authentication failure | Medium | 3rd consecutive failure — persistent |
 | RUN-4 | Retry budget configuration | Medium | Run duration from validation retries |
 | PR-3 | auto_summarize span names not registered | Medium | Data consistency gap |
-| PRE-1 | npm package name collision | Medium | `npx orbweaver` runs wrong tool |
+| PRE-1 | npm package name collision | Medium | Resolved — renamed to `spiny-orb` (#177) |
 | NDS-005b | LLM failure fallback boundary | Medium | Eval/CodeRabbit disagree on classification |
 | DEEP-5 | SDK init skip for libraries | Low | Cosmetic |
 | DEEP-8 | Date object in setAttribute | Low | Minor type mismatch |
@@ -108,8 +108,8 @@ Recover file coverage (target: 14-16 committed files) while retaining 92%+ quali
 
 Four-phase approach (same structure as run-5, with coverage recovery as the primary focus):
 
-1. **Pre-run verification** — Verify orbweaver fixes landed (especially DEEP-1, RUN-1, DEEP-4), validate push capability, confirm file recovery expectations
-2. **Evaluation run** — Execute `orbweaver instrument` with coverage recovery focus
+1. **Pre-run verification** — Verify spiny-orb fixes landed (especially DEEP-1, RUN-1, DEEP-4), validate push capability, confirm file recovery expectations
+2. **Evaluation run** — Execute `spiny-orb instrument` with coverage recovery focus
 3. **Structured evaluation** — Per-file evaluation with canonical methodology (established in run-5), plus superficial resolution regression tracking
 4. **Process refinements** — Encode any methodology changes discovered during evaluation
 
@@ -145,28 +145,28 @@ Four-phase approach (same structure as run-5, with coverage recovery as the prim
 
 ## Milestones
 
-- [ ] **Pre-run verification** — Verify orbweaver fixes and validate run prerequisites:
-  1. **Handoff triage review**: Read orbweaver's triage of `evaluation/run-5/actionable-fix-output.md` (the handoff). Compare what they filed vs what the eval recommended. Note any findings the orbweaver team rejected and why.
+- [x] **Pre-run verification** — Verify spiny-orb fixes and validate run prerequisites:
+  1. **Handoff triage review**: Read the spiny-orb team's triage of `evaluation/run-5/actionable-fix-output.md` (the handoff). Compare what they filed vs what the eval recommended. Note any findings the spiny-orb team rejected and why.
   2. **DEEP-1 verification (critical)**: Verify COV-003 validator has expected-condition catch exemption. Test against `src/commands/summarize.js` — the simplest reproduction of DEEP-1. If this fails, STOP — DEEP-1 is the blocking prerequisite.
   3. **RUN-1 verification (critical)**: Verify fix/retry loop has oscillation detection. Test against `src/index.js` — the file that oscillated in run-5. If this fails, note expected impact on file recovery.
   4. **DEEP-4 verification**: Verify duplicate JSDoc prevention. Check that agent preserves existing JSDoc without generating a duplicate.
   5. **Push capability test**: Run `git push --dry-run` to verify push access. If push auth was addressed, confirm the mechanism (SSH, GITHUB_TOKEN, or `--push-command`).
-  6. Rebuild orbweaver: `cd spinybacked-orbweaver && npm run prepare` — verify build timestamp is after all fix merges.
-  7. `orbweaver --version` — record version for evaluation log.
+  6. Rebuild spiny-orb: `cd spinybacked-orbweaver && npm run prepare` — verify build timestamp is after all fix merges.
+  7. `spiny-orb --version` — record version for evaluation log.
   8. **File recovery expectations**: Based on which fixes landed, predict which of the 8 failed/partial files should recover. Create a pre-run expectation table.
   9. **Superficial resolution tracking setup**: For NDS-005, CDQ-003, RST-001 — document what "genuine resolution" looks like for each rule. These must be evaluated in any recovered files.
-  10. Verify codebase is clean: `git status` on main, no leftover orbweaver branches.
+  10. Verify codebase is clean: `git status` on main, no leftover spiny-orb branches.
   11. Record which run-5 findings are verified fixed vs still open — this determines the expected score ceiling.
   12. Append any pre-run observations to `evaluation/run-6/lessons-for-prd7.md`.
 
-- [ ] **Collect lessons for PRD #7** — Create BOTH output documents at the START and append throughout all subsequent milestones:
-  1. Create `evaluation/run-6/orbweaver-findings.md`. Use findings vocabulary from the start.
+- [x] **Collect lessons for PRD #7** — Create BOTH output documents at the START and append throughout all subsequent milestones:
+  1. Create `evaluation/run-6/spiny-orb-findings.md`. Use findings vocabulary from the start.
   2. Create `evaluation/run-6/lessons-for-prd7.md`. Sections: Rubric Gaps, Process Improvements, Evaluation Methodology, Rubric-Codebase Mapping Corrections, Schema Decisions, Carry-Forward Items.
   3. Both documents are updated throughout all subsequent milestones. Every milestone has explicit "append to findings/lessons" steps.
 
-- [ ] **Evaluation run-6** — Execute `orbweaver instrument` with coverage recovery focus:
-  1. Clean codebase state: start from main branch with evaluation config (orbweaver.yaml, instrumentation.js, semconv/).
-  2. Run in foreground: `orbweaver instrument src/ --verbose -y`
+- [ ] **Evaluation run-6** — Execute `spiny-orb instrument` with coverage recovery focus:
+  1. Clean codebase state: start from main branch with evaluation config (spiny-orb.yaml, instrumentation.js, semconv/).
+  2. Run in foreground: `spiny-orb instrument src/ --verbose -y`
   3. Record wall-clock start timestamp.
   4. **Schema evolution health check (after file 3)**: Compare schemaHashBefore vs schemaHashAfter. Should show evolution (confirmed working in run-5).
   5. **Oscillation monitoring (real-time)**: Watch for any file entering fix/retry > 3 times. If oscillation detection (RUN-1) is working, the file should fail gracefully, not loop.
@@ -175,20 +175,20 @@ Four-phase approach (same structure as run-5, with coverage recovery as the prim
   8. Record wall-clock end timestamp.
   9. If any files failed due to token budget, run supplemental passes with `maxTokensPerFile: 150000`.
   10. Verify PR was created successfully. If tests failed, verify draft PR was created. If push failed (4th consecutive), escalate — this is no longer acceptable.
-  11. Capture all output to `evaluation/run-6/orbweaver-output.log`.
+  11. Capture all output to `evaluation/run-6/spiny-orb-output.log`.
   12. Record final tally: files instrumented / correctly skipped / failed / partial.
   13. **Coverage recovery check**: Compare file tally against pre-run expectation table. Which files recovered? Which didn't? Any surprises?
-  14. **Branch deliverable check**: Verify all files reported as instrumented have actual changes on the branch: `git diff main..orbweaver-branch --stat`.
-  15. Append any run observations to `evaluation/run-6/lessons-for-prd7.md` and `evaluation/run-6/orbweaver-findings.md`.
+  14. **Branch deliverable check**: Verify all files reported as instrumented have actual changes on the branch: `git diff main..spiny-orb-branch --stat`.
+  15. Append any run observations to `evaluation/run-6/lessons-for-prd7.md` and `evaluation/run-6/spiny-orb-findings.md`.
 
 - [ ] **Failure deep-dives** — For each failed file AND each run-level failure:
-  1. **File-level failures**: For each failed/partial file: read orbweaver output log, identify validation rules that blocked instrumentation, map to orbweaver findings (run-5 and run-6), assess whether orbweaver fixes helped.
+  1. **File-level failures**: For each failed/partial file: read spiny-orb output log, identify validation rules that blocked instrumentation, map to spiny-orb findings (run-5 and run-6), assess whether spiny-orb fixes helped.
   2. **Run-level failures**: Push failures, test suite failures, schema evolution issues, commit noise — all get deep-dive treatment.
   3. **Failure trajectory update**: For persistent failures (files that failed in runs 2-5): update the trajectory. Is the root cause the same or different each run? Track per-file failure history across all runs.
   4. **Unmasked bug detection**: For files recovered by DEEP-1/RUN-1/DEEP-4 fixes — check for NEW failure modes that were previously masked. Run-5 warned about this risk.
-  5. For new failures: file findings in `evaluation/run-6/orbweaver-findings.md`.
+  5. For new failures: file findings in `evaluation/run-6/spiny-orb-findings.md`.
   6. Document in `evaluation/run-6/failure-deep-dives.md`.
-  7. Append to `evaluation/run-6/lessons-for-prd7.md` and `evaluation/run-6/orbweaver-findings.md`.
+  7. Append to `evaluation/run-6/lessons-for-prd7.md` and `evaluation/run-6/spiny-orb-findings.md`.
 
 - [ ] **Per-file evaluation** — Full rubric applied to all files using canonical methodology:
   1. **Gate checks + per-run rules (single agent)**: NDS-001, NDS-002, NDS-003, NDS-006, API-001, API-002, API-003, API-004, CDQ-008.
@@ -196,13 +196,13 @@ Four-phase approach (same structure as run-5, with coverage recovery as the prim
   3. **Apply run-5 rubric clarifications**: CDQ-002 semantic check, CDQ-006 cheap computation exemption, NDS-005 sub-classification (NDS-005a/NDS-005b).
   4. **Schema coverage split**: Classify each file as schema-covered or schema-uncovered. For uncovered files, evaluate SCH-002 on invention quality (same as run-5).
   5. **Superficial resolution regression check**: For every file recovered from run-5's partial/failed set, explicitly evaluate NDS-005, CDQ-003, and RST-001. Document whether these are genuinely resolved or still latent.
-  6. **Branch state verification**: Evaluate `git diff main..orbweaver-branch` — do NOT trust the agent's self-reported per-file status.
+  6. **Branch state verification**: Evaluate `git diff main..spiny-orb-branch` — do NOT trust the agent's self-reported per-file status.
   7. Zero-span files: verify correct skip decisions.
   8. Failed files: evaluate against NDS rules only.
   9. **NDS-005b boundary cases**: Apply the run-5 boundary refinement — LLM failure fallbacks use `span.addEvent('llm.fallback')` instead of `recordException`. NDS-005b applies to normal control flow catches, NOT genuine-failure-with-graceful-recovery catches.
   10. Structured output format: `{rule_id} | {pass|fail} | {file_path}:{line_number} | {actionable_message}`
   11. Emit as `evaluation/run-6/per-file-evaluation.json` (canonical) and render `evaluation/run-6/per-file-evaluation.md`.
-  12. Append to `evaluation/run-6/lessons-for-prd7.md` and `evaluation/run-6/orbweaver-findings.md`.
+  12. Append to `evaluation/run-6/lessons-for-prd7.md` and `evaluation/run-6/spiny-orb-findings.md`.
 
 - [ ] **PR artifact evaluation** — Evaluate the PR as a first-class deliverable:
   1. If PR exists: evaluate description quality, per-file table accuracy, span counts, agent decision notes.
@@ -213,7 +213,7 @@ Four-phase approach (same structure as run-5, with coverage recovery as the prim
   6. If draft PR (test failures): evaluate the "Test Failures" section.
   7. If PR was lost (push failure): document and escalate — 4th consecutive failure is unacceptable.
   8. Document in `evaluation/run-6/pr-evaluation.md`.
-  9. Append to `evaluation/run-6/lessons-for-prd7.md` and `evaluation/run-6/orbweaver-findings.md`.
+  9. Append to `evaluation/run-6/lessons-for-prd7.md` and `evaluation/run-6/spiny-orb-findings.md`.
 
 - [ ] **Rubric scoring** — Synthesize per-file findings into dimension-level scores:
   1. Aggregate from `evaluation/run-6/per-file-evaluation.json`.
@@ -224,7 +224,7 @@ Four-phase approach (same structure as run-5, with coverage recovery as the prim
   6. **Single canonical score** using per-file evaluation + schema coverage split. Provide methodology-adjusted comparison ONLY for backward compatibility with runs 2-5.
   7. **Include file delivery count alongside percentage score** (run-5 lesson: "92% with 9 files" vs "92% with 16 files" are very different outcomes).
   8. Emit as `evaluation/run-6/rubric-scores.json` (canonical) and render `evaluation/run-6/rubric-scores.md`.
-  9. Append to `evaluation/run-6/lessons-for-prd7.md` and `evaluation/run-6/orbweaver-findings.md`.
+  9. Append to `evaluation/run-6/lessons-for-prd7.md` and `evaluation/run-6/spiny-orb-findings.md`.
 
 - [ ] **Baseline comparison and synthesis** — Compare run-6 vs run-5 vs run-4 vs run-3 vs run-2:
   1. Dimension-level trend analysis (5-run).
@@ -252,7 +252,7 @@ Four-phase approach (same structure as run-5, with coverage recovery as the prim
   11. **Cross-document audit agent** (final step): Read ALL evaluation documents (findings, lessons, per-file eval, rubric scores, baseline comparison, failure deep-dives, PR eval) and cross-reference against the actionable fix output. Flag any items that appear in source documents but are missing from the actionable fix output. Run-5 audit agent caught 22 missing items.
   12. Generate from canonical JSON artifacts to prevent drift.
   13. Document in `evaluation/run-6/actionable-fix-output.md`.
-  14. Final review of `evaluation/run-6/lessons-for-prd7.md` and `evaluation/run-6/orbweaver-findings.md`.
+  14. Final review of `evaluation/run-6/lessons-for-prd7.md` and `evaluation/run-6/spiny-orb-findings.md`.
 
 - [ ] **Draft PRD #7 for next evaluation run** — Create PRD #7 on a separate branch from main:
   1. Run-6 scores as baselines (include file delivery counts).
@@ -394,10 +394,10 @@ Risk: If fixing SYS-3 reveals new failure modes in recovered files ("unmasked bu
 
 Run-6 uses the same handoff process as run-5:
 
-1. **Evaluation produces findings** — `evaluation/run-6/orbweaver-findings.md` with evidence links, priority, and acceptance criteria
-2. **Actionable fix output IS the handoff** — `evaluation/run-6/actionable-fix-output.md` includes acceptance criteria, priority matrix, carry-forwards, and is written directly to the orbweaver maintainer (run-5 decision: no separate handoff document needed)
-3. **Target repo team triages** — The orbweaver team reads the actionable fix output, verifies claims against their codebase, and right-sizes work (PRD vs Issue — their decision, not eval's)
-4. **Triage report** — The orbweaver team produces a triage report documenting which findings were confirmed, rejected, or reclassified
+1. **Evaluation produces findings** — `evaluation/run-6/spiny-orb-findings.md` with evidence links, priority, and acceptance criteria
+2. **Actionable fix output IS the handoff** — `evaluation/run-6/actionable-fix-output.md` includes acceptance criteria, priority matrix, carry-forwards, and is written directly to the spiny-orb maintainer (run-5 decision: no separate handoff document needed)
+3. **Target repo team triages** — The spiny-orb team reads the actionable fix output, verifies claims against their codebase, and right-sizes work (PRD vs Issue — their decision, not eval's)
+4. **Triage report** — The spiny-orb team produces a triage report documenting which findings were confirmed, rejected, or reclassified
 5. **Run-7 validates** — The next evaluation run checks whether the triage and fixes were effective
 
 ---
@@ -424,10 +424,11 @@ These gaps were identified during run-5 evaluation and should be considered for 
 | 2026-03-17 | Coverage recovery as primary goal | Run-5 achieved 92% quality but only 9 files. The critical path (DEEP-1 → RUN-1 → DEEP-4) has clear fixes that should recover 5-7 files without sacrificing quality. |
 | 2026-03-17 | Inherit all run-5 methodology decisions | Per-file evaluation as canonical, schema coverage split, instance counts, systemic bug classification, 3-tier projections — all established in run-5 and continued without change. |
 | 2026-03-17 | Actionable-fix-output IS the handoff (inherited from run-5) | Run-5 decision: separate handoff document is redundant. |
-| 2026-03-17 | Priority recommendations only — no PRD/Issue classification (inherited from run-5) | Eval provides priority; orbweaver team right-sizes work. |
+| 2026-03-17 | Priority recommendations only — no PRD/Issue classification (inherited from run-5) | Eval provides priority; spiny-orb team right-sizes work. |
 | 2026-03-17 | Cross-document audit agent (inherited from run-5) | Run-5 audit caught 22 missing items. Required at end of actionable-fix-output milestone. |
 | 2026-03-17 | Track superficial resolutions explicitly | 3 rules from run-5 passed only because violating files were filtered. Run-6 must verify these when files are recovered. |
 | 2026-03-17 | Escalate push auth if still failing | 3 consecutive failures. A 4th is unacceptable — needs explicit ownership and resolution mechanism. |
+| 2026-03-19 | Rename all forward-looking references from orbweaver to spiny-orb | CLI, config file, and npm package renamed per spinybacked-orbweaver#177. Repo name unchanged. Historical branch names and run-5 artifact filenames preserved. |
 
 ---
 

@@ -62,6 +62,8 @@ Entry format: `- (YYYY-MM-DD) Description of feature-level change (PRD #X, miles
 - (2026-03-19) Renamed orbweaver.yaml → spiny-orb.yaml per npm package rename (PRD #14, config rename)
 - (2026-03-19) Configured ANTHROPIC_API_KEY as GitHub repo secret for CI use (PRD #14, secret setup)
 
+- (2026-03-19) Completed pre-run verification for run-6: all 22 run-5 findings confirmed fixed (none rejected), handoff triage excellent (14 issues + PRD #179, 60 commits). DEEP-1/RUN-1/DEEP-4/EVAL-1 all verified at code level with acceptance test fixtures (8/8 pass). Push auth resolved. All 8 failed/partial files expected to recover. Renamed all forward-looking references from orbweaver to spiny-orb per #177 (PRD #6, pre-run verification + collect lessons)
+
 ### Changed
 - (2026-03-16) Fixed span count discrepancy: total_spans_on_branch corrected from 48 to 38 in per-file-evaluation.json and rubric-scores.json (48 included working-directory-only changes from partial files not committed to branch). Updated baseline-comparison.md table to match canonical per-file-evaluation.json (PRD #4, CodeRabbit finding fix)
 - (2026-03-15) Renamed all "orb" references to "orbweaver" in PRD #4 and evaluation docs to match CLI rename (spinybacked-orbweaver #123)
