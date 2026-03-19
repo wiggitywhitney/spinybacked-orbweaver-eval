@@ -1,3 +1,4 @@
+// ABOUTME: Tests for journal-manager.js — timestamp formatting, entry formatting, saving, and reflection discovery
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { mkdtempSync, readFileSync, writeFileSync, mkdirSync, rmSync } from 'node:fs';
 import { join } from 'node:path';
@@ -35,20 +36,16 @@ function _makeSections({
 }
 
 describe('formatTimestamp', () => {
-  it('formats a date as localized time string', () => {
+  it('formats a date as localized time string with time and timezone', () => {
     const date = new Date('2026-02-21T10:15:32Z');
     const result = formatTimestamp(date);
 
     // Should include time components and AM/PM
     expect(result).toMatch(/\d{1,2}:\d{2}:\d{2}\s[AP]M/);
-  });
 
-  it('includes timezone abbreviation', () => {
-    const date = new Date('2026-02-21T10:15:32Z');
-    const result = formatTimestamp(date);
-
-    // Should end with timezone (e.g., "CDT", "EST", "UTC")
-    expect(result).toMatch(/[A-Z]{2,5}$/);
+    // Should include a timezone indicator after AM/PM (format varies by locale:
+    // abbreviation like "CDT", offset like "GMT+1", or full like "UTC")
+    expect(result).toMatch(/[AP]M\s.+$/);
   });
 });
 

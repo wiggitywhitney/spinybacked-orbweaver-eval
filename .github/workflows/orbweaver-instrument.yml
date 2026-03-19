@@ -1,0 +1,204 @@
+# Run spinybacked-orbweaver instrumentation agent against this codebase.
+#
+# Builds orbweaver from source (latest main), instruments all JS source files,
+# creates a PR with the changes, and produces a structured job summary + artifact.
+#
+# Trigger: manual dispatch only (costs real LLM tokens).
+# Secrets required: ANTHROPIC_API_KEY
+
+name: Orbweaver Instrumentation
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  instrument:
+    runs-on: ubuntu-latest
+    timeout-minutes: 240
+
+    steps:
+      - name: Checkout commit-story-v2-eval
+        uses: actions/checkout@v4
+
+      - name: Checkout spinybacked-orbweaver
+        uses: actions/checkout@v4
+        with:
+          repository: wiggitywhitney/spinybacked-orbweaver
+          ref: main
+          path: orbweaver-src
+
+      - name: Setup Node.js 24
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+
+      - name: Install orbweaver dependencies
+        working-directory: orbweaver-src
+        run: npm ci
+
+      - name: Install Weaver CLI
+        run: |
+          curl --proto '=https' --tlsv1.2 -LsSf \
+            https://github.com/open-telemetry/weaver/releases/download/v0.21.2/weaver-installer.sh | sh
+          weaver --version
+
+      - name: Exclude build artifacts from git
+        run: |
+          echo "orbweaver-src/" >> .git/info/exclude
+          echo "orbweaver-stderr.log" >> .git/info/exclude
+
+      - name: Create timestamped branch
+        run: |
+          BRANCH="orb/instrument-$(date -u +'%Y%m%d-%H%M%S')"
+          git checkout -b "$BRANCH"
+          echo "BRANCH=$BRANCH" >> "$GITHUB_ENV"
+
+      - name: Run instrumentation
+        id: instrument
+        run: |
+          ORB="node ${GITHUB_WORKSPACE}/orbweaver-src/bin/spiny-orb.js"
+          RESULT_FILE="${RUNNER_TEMP}/orbweaver-result.json"
+
+          ${ORB} instrument --yes --no-pr --output json src/ \
+            > "$RESULT_FILE" 2>orbweaver-stderr.log || EXIT_CODE=$?
+          EXIT_CODE=${EXIT_CODE:-0}
+
+          echo "--- stderr output ---"
+          cat orbweaver-stderr.log
+
+          echo "result_file=${RESULT_FILE}" >> "$GITHUB_OUTPUT"
+          echo "exit_code=${EXIT_CODE}" >> "$GITHUB_OUTPUT"
+
+          # Exit 0 (all success) or 1 (partial) are acceptable
+          if [ "$EXIT_CODE" -gt 1 ]; then
+            echo "::error::Instrumentation failed with exit code ${EXIT_CODE}"
+            exit "$EXIT_CODE"
+          fi
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+
+      - name: Parse results and generate summary
+        id: parse
+        if: always() && steps.instrument.outputs.result_file != ''
+        run: |
+          node -e '
+            const fs = require("fs");
+            const resultFile = process.argv[1];
+            const summaryFile = process.env.GITHUB_STEP_SUMMARY;
+            const outputFile = process.env.GITHUB_OUTPUT;
+            const prFile = process.env.RUNNER_TEMP + "/pr-summary.md";
+
+            let data;
+            try {
+              data = JSON.parse(fs.readFileSync(resultFile, "utf8"));
+            } catch (e) {
+              console.error("Failed to parse result JSON:", e.message);
+              process.exit(1);
+            }
+
+            const fr = data.fileResults || [];
+            const succeeded = fr.filter(f => f.status === "success").length;
+            const failed = fr.filter(f => f.status === "failed").length;
+            const skipped = fr.filter(f => f.status === "skipped").length;
+            const partial = fr.filter(f => f.status === "partial").length;
+
+            // Build markdown summary
+            let md = "## Orbweaver Instrumentation Results\n\n";
+            md += `**${succeeded} succeeded**, ${failed} failed, ${skipped} skipped, ${partial} partial out of ${fr.length} files\n\n`;
+
+            if (data.actualTokenUsage) {
+              const inp = (data.actualTokenUsage.inputTokens || 0).toLocaleString();
+              const out = (data.actualTokenUsage.outputTokens || 0).toLocaleString();
+              md += `**Token usage**: ${inp} input / ${out} output\n\n`;
+            }
+
+            md += "| File | Status | Spans | Schema Ext. | Errors | Tokens (in/out) |\n";
+            md += "|------|--------|------:|------------:|-------:|----------------:|\n";
+
+            for (const f of fr) {
+              const spans = f.spansAdded ?? 0;
+              const exts = (f.schemaExtensions || []).length;
+              const errors = (f.errorProgression || []).length;
+              const tokens = f.tokenUsage
+                ? `${(f.tokenUsage.inputTokens || 0).toLocaleString()} / ${(f.tokenUsage.outputTokens || 0).toLocaleString()}`
+                : "-";
+              const icon = { success: "✅", failed: "❌", partial: "⚠️", skipped: "⏭️" }[f.status] || "❓";
+              md += `| \`${f.path}\` | ${icon} ${f.status} | ${spans} | ${exts} | ${errors} | ${tokens} |\n`;
+            }
+
+            // Advisories
+            const warnings = data.warnings || [];
+            const advisories = data.runLevelAdvisory || [];
+
+            if (warnings.length > 0 || advisories.length > 0) {
+              md += "\n### Advisories\n\n";
+              for (const w of warnings) md += `- ${w}\n`;
+              for (const a of advisories) md += `- ${a}\n`;
+            }
+
+            // Write job summary
+            fs.appendFileSync(summaryFile, md);
+
+            // Write PR body
+            fs.writeFileSync(prFile, md);
+
+            // Emit ::warning annotations
+            for (const f of fr) {
+              if (f.status === "failed") {
+                const msg = (f.lastError || f.reason || "Instrumentation failed").replace(/\n/g, " ");
+                console.log(`::warning file=${f.path}::${msg}`);
+              }
+            }
+            for (const a of advisories) {
+              console.log(`::warning::${a}`);
+            }
+
+            // Set outputs
+            fs.appendFileSync(outputFile, `succeeded=${succeeded}\n`);
+            fs.appendFileSync(outputFile, `failed=${failed}\n`);
+            fs.appendFileSync(outputFile, `skipped=${skipped}\n`);
+            fs.appendFileSync(outputFile, `total=${fr.length}\n`);
+
+            console.log(`Results: ${succeeded} succeeded, ${failed} failed, ${skipped} skipped, ${partial} partial`);
+          ' "${{ steps.instrument.outputs.result_file }}"
+
+      - name: Upload JSON result
+        if: always() && steps.instrument.outputs.result_file != ''
+        uses: actions/upload-artifact@v4
+        with:
+          name: orbweaver-result
+          path: |
+            ${{ steps.instrument.outputs.result_file }}
+            orbweaver-stderr.log
+          retention-days: 30
+
+      - name: Commit and create PR
+        if: always() && steps.parse.outcome == 'success' && (steps.instrument.outputs.exit_code == '0' || steps.instrument.outputs.exit_code == '1')
+        run: |
+          if git diff --quiet && git diff --cached --quiet && [ -z "$(git ls-files --others --exclude-standard)" ]; then
+            echo "No files were modified by instrumentation"
+            exit 0
+          fi
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          git add -A
+          git commit -m "feat: orbweaver instrumentation run $(date -u +'%Y-%m-%d %H:%M UTC')"
+          git push origin "$BRANCH"
+
+          SUCCEEDED="${{ steps.parse.outputs.succeeded || '?' }}"
+          FAILED="${{ steps.parse.outputs.failed || '?' }}"
+          TOTAL="${{ steps.parse.outputs.total || '?' }}"
+
+          gh pr create \
+            --title "Orbweaver instrumentation $(date -u +'%Y-%m-%d') — ${SUCCEEDED}/${TOTAL} succeeded" \
+            --body-file "${RUNNER_TEMP}/pr-summary.md" \
+            --base main \
+            --head "$BRANCH"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

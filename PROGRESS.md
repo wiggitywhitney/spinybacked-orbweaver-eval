@@ -58,6 +58,10 @@ Entry format: `- (YYYY-MM-DD) Description of feature-level change (PRD #X, miles
 
 - (2026-03-17) Drafted PRD #6 for evaluation run-6: coverage recovery (14-16 files) while retaining 92%+ quality. Critical path DEEP-1 → RUN-1 → DEEP-4 → EVAL-1. Created on separate branch from main (PR #12) since eval branches never merge. All 12 milestones of PRD #5 complete (PRD #5, draft PRD #6)
 
+- (2026-03-19) Added GitHub Actions workflow for orbweaver instrumentation: workflow_dispatch trigger, builds orbweaver from source, instruments all JS files, creates PR with structured summary, uploads JSON artifact (PRD #14, workflow file + result parsing + artifact upload + PR creation)
+- (2026-03-19) Renamed orbweaver.yaml → spiny-orb.yaml per npm package rename (PRD #14, config rename)
+- (2026-03-19) Configured ANTHROPIC_API_KEY as GitHub repo secret for CI use (PRD #14, secret setup)
+
 ### Changed
 - (2026-03-16) Fixed span count discrepancy: total_spans_on_branch corrected from 48 to 38 in per-file-evaluation.json and rubric-scores.json (48 included working-directory-only changes from partial files not committed to branch). Updated baseline-comparison.md table to match canonical per-file-evaluation.json (PRD #4, CodeRabbit finding fix)
 - (2026-03-15) Renamed all "orb" references to "orbweaver" in PRD #4 and evaluation docs to match CLI rename (spinybacked-orbweaver #123)

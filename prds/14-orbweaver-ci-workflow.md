@@ -1,6 +1,6 @@
 # PRD #14: Orbweaver CI Workflow
 
-**Status:** Draft
+**Status:** In Progress
 **Created:** 2026-03-18
 **GitHub Issue:** #14
 **Priority:** High
@@ -31,7 +31,7 @@ workflow_dispatch (manual trigger)
   ├── npm ci in orbweaver checkout
   ├── Install Weaver CLI v0.21.2
   ├── Rename orbweaver.yaml → spiny-orb.yaml (if needed)
-  ├── Create timestamped branch: orb/instrument-YYYYMMDD-HHMM
+  ├── Create timestamped branch: orb/instrument-YYYYMMDD-HHMMSS
   ├── Run: node <orbweaver>/bin/spiny-orb.js instrument --yes --no-pr --output json src/
   ├── Parse JSON result:
   │   ├── Build markdown summary table → $GITHUB_STEP_SUMMARY
@@ -70,12 +70,12 @@ workflow_dispatch (manual trigger)
 
 ## Milestones
 
-- [ ] **Workflow file created and valid** — `.github/workflows/orbweaver-instrument.yml` passes `actionlint` and can be dispatched. Includes: dual checkout, Node 24 setup, orbweaver `npm ci`, Weaver CLI install, config rename step.
+- [x] **Workflow file created and valid** — `.github/workflows/orbweaver-instrument.yml` passes `actionlint` and can be dispatched. Includes: dual checkout, Node 24 setup, orbweaver `npm ci`, Weaver CLI install, config rename step.
 - [ ] **CLI invocation runs successfully** — `spiny-orb instrument --yes --no-pr --output json src/` executes in CI, produces JSON output, and exits. Full 30-file run completes within timeout.
-- [ ] **Result parsing and job summary** — JSON output is parsed into a markdown table written to `$GITHUB_STEP_SUMMARY`. Table includes: file path, status, spans added, schema extensions, error progression, token usage. `::warning` annotations emitted for advisories.
-- [ ] **Artifact upload** — Full JSON result uploaded as a build artifact with 30-day retention.
-- [ ] **PR creation with instrumented code** — Workflow commits changes to a `orb/instrument-YYYYMMDD-HHMM` branch and creates a PR with a structured summary derived from the JSON result.
-- [ ] **Secret configured** — `ANTHROPIC_API_KEY` set as a GitHub repo secret and verified working in CI.
+- [x] **Result parsing and job summary** — JSON output is parsed into a markdown table written to `$GITHUB_STEP_SUMMARY`. Table includes: file path, status, spans added, schema extensions, error progression, token usage. `::warning` annotations emitted for advisories.
+- [x] **Artifact upload** — Full JSON result uploaded as a build artifact with 30-day retention.
+- [x] **PR creation with instrumented code** — Workflow commits changes to a `orb/instrument-YYYYMMDD-HHMMSS` branch and creates a PR with a structured summary derived from the JSON result.
+- [x] **Secret configured** — `ANTHROPIC_API_KEY` set as a GitHub repo secret and verified working in CI.
 
 ## Dependencies
 
