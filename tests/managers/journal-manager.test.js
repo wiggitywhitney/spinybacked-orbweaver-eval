@@ -1,3 +1,4 @@
+// ABOUTME: Tests for journal-manager.js — timestamp formatting, entry formatting, saving, and reflection discovery
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { mkdtempSync, readFileSync, writeFileSync, mkdirSync, rmSync } from 'node:fs';
 import { join } from 'node:path';
@@ -47,8 +48,9 @@ describe('formatTimestamp', () => {
     const date = new Date('2026-02-21T10:15:32Z');
     const result = formatTimestamp(date);
 
-    // Should end with timezone (e.g., "CDT", "EST", "UTC")
-    expect(result).toMatch(/[A-Z]{2,5}$/);
+    // Should end with timezone abbreviation (e.g., "CDT", "EST", "UTC")
+    // or offset format (e.g., "GMT+1", "GMT-5") depending on locale
+    expect(result).toMatch(/([A-Z]{2,5}|GMT[+-]\d{1,2})$/);
   });
 });
 
