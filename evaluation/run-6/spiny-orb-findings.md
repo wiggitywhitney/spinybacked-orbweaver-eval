@@ -256,7 +256,35 @@ During a 2+ hour run, the `--verbose` flag only shows one line per file result. 
 
 ---
 
+### RUN6-13: RST-004 violation in git-collector.js — unexported functions instrumented
+
+**Priority**: Medium
+**Impact**: 2 unexported internal functions have spans instead of the exported orchestrator
+
+The agent instrumented `getCommitDiff` (line 79) and `getMergeInfo` (line 115) in git-collector.js. Both are unexported internal functions, explicitly listed in the rubric-codebase mapping as RST-004 violations. They are internal to the exported `getCommitData` function.
+
+The agent should have instrumented `getCommitData` (the exported orchestrator) instead. The current instrumentation provides span coverage for the operations but at the wrong abstraction level.
+
+**Evidence**: `evaluation/run-6/per-file-evaluation.json` git-collector.js RST-004 entry; `git diff main...spiny-orb/instrument-1773996478550 -- src/collectors/git-collector.js`
+
+**Acceptance criteria**: Agent instruments the exported `getCommitData` function with a parent span. Internal functions (`getCommitDiff`, `getMergeInfo`, `getCommitMetadata`) should not have their own spans.
+
+### RUN6-14: server.js span has zero attributes (COV-005)
+
+**Priority**: Medium
+**Impact**: MCP server startup span carries no useful trace information
+
+The server.js `main()` function has a span but zero `setAttribute` calls. No service name, transport type, version, or domain-specific attributes. The span exists but is uninformative.
+
+**Evidence**: `evaluation/run-6/per-file-evaluation.json` server.js COV-005 entry; `git diff main...spiny-orb/instrument-1773996478550 -- src/mcp/server.js`
+
+**Acceptance criteria**: Server startup span includes at least service.name and transport type attributes.
+
+---
+
 ## Persistent Findings
 
 - **Push authentication failure**: Now 4 consecutive runs. #183 closed but fix ineffective. See RUN6-2.
 - **NDS-003 validation failures**: Present since run-3. Agent still makes minor code modifications during instrumentation. See RUN6-5.
+- **COV-001 entry point failure**: 3rd consecutive run. index.js main() has no span. See RUN6-8.
+- **COV-005 zero attributes on server.js**: 2nd consecutive run. See RUN6-14.

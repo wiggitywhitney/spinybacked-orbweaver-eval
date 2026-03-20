@@ -34,12 +34,19 @@ Observations, rubric gaps, process improvements, and methodology notes captured 
 
 - **"Succeeded" classification is misleading.** Spiny-orb reported 21/30 "succeeded" but only 3 files were actually committed to the branch. Many "success" files used function-level fallback where all async functions (the ones needing spans) failed with API errors, resulting in 0 spans. The success/partial/failed tally is useful for spiny-orb diagnostics but NOT for evaluation scoring. Evaluation must count committed files with actual instrumentation changes.
 - **Function-level fallback masks failures as successes.** When a file gets 9/15 functions "instrumented" but all 6 async functions fail, the file reports "success (0 spans)". This inflates the success count. The evaluation should track: (a) files committed with spans, (b) files committed without spans (correct skip), (c) files not committed.
+- **Validator-evaluator conflict on SCH-001.** The validator enforces SCH-001 as strict registry conformance (span name must be in registry). The evaluator interprets SCH-001 as a quality guideline per the rubric-codebase mapping (span name must be meaningful and map to operation). This creates a paradox: files that pass the validator's SCH-001 fail the evaluator's SCH-001 (4/5 committed files). Run-7's rubric should reconcile this.
+- **Run-5 score projections were completely wrong.** All three tiers (minimum 96%/10 files, target 96-100%/14-16 files, stretch 100%/15-17 files) were missed. Actual: 84%/5 files. Root cause: projections assumed fixed blockers wouldn't reveal new blockers. The "unmasked bug" risk was documented but under-weighted. Run-7 projections must account for dominant-blocker peeling.
+- **Superficial resolution tracking worked well.** summary-manager.js (the only file recovered from partial→committed) was verified for NDS-005, CDQ-003, and RST-001. All three are genuinely resolved. The methodology should continue.
 
 ---
 
 ## Rubric-Codebase Mapping Corrections
 
 *Updates needed to `spinybacked-orbweaver/research/rubric-codebase-mapping.md`.*
+
+- **Test count outdated.** Mapping says 320 tests across 11 files. Run-6 has 534 tests across 22 files. Update the test count and file list.
+- **SCH-001 section needs validator alignment note.** The mapping says SCH-001 is a soft quality guideline (evaluator judgment). The spiny-orb validator treats it as strict registry conformance. This divergence should be documented in the mapping with a note about which definition to use.
+- **RST-004 function list may need context-capture-tool/reflection-tool update.** The mapping lists saveContext and saveReflection with a "precedence note." Run-6 agent applied RST-004; run-5 agent applied COV-004. The mapping should provide a definitive answer.
 
 ---
 
