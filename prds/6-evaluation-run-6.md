@@ -254,7 +254,7 @@ Four-phase approach (same structure as run-5, with coverage recovery as the prim
   13. Document in `evaluation/run-6/actionable-fix-output.md`.
   14. Final review of `evaluation/run-6/lessons-for-prd7.md` and `evaluation/run-6/spiny-orb-findings.md`.
 
-- [ ] **Draft PRD #7 for next evaluation run** — Create PRD #7 on a separate branch from main:
+- [x] **Draft PRD #7 for next evaluation run** — Create PRD #7 on a separate branch from main:
   1. Run-6 scores as baselines (include file delivery counts).
   2. All items from `evaluation/run-6/lessons-for-prd7.md`.
   3. Carry forward unresolved findings from `evaluation/run-6/actionable-fix-output.md`.
