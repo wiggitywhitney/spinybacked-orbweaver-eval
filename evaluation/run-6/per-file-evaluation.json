@@ -1,0 +1,710 @@
+{
+  "run": 6,
+  "branch": "spiny-orb/instrument-1773996478550",
+  "evaluator": "claude-opus-4",
+  "timestamp": "2026-03-20T21:25:00Z",
+  "summary": {
+    "files_committed": 5,
+    "files_partial": 6,
+    "files_zero_span": 18,
+    "files_failed": 0,
+    "total_files": 29,
+    "spans_committed": 9,
+    "tests_passed": 534,
+    "tests_total": 534
+  },
+  "gate_checks": {
+    "NDS-001": {
+      "result": "pass",
+      "evidence": "npm test: 534/534 tests pass, 22 test files, 0 failures"
+    },
+    "NDS-002": {
+      "result": "pass",
+      "evidence": "All 534 pre-existing tests pass without modification on spiny-orb branch"
+    },
+    "NDS-003": {
+      "result": "pass",
+      "evidence": "All 5 committed files: diff contains only import additions, tracer acquisition, startActiveSpan wrapping, setAttribute calls, try/catch/finally for span lifecycle. No non-instrumentation lines changed."
+    },
+    "API-001": {
+      "result": "pass",
+      "evidence": "All 5 committed files import only from '@opentelemetry/api'. No SDK, exporter, or instrumentation package imports."
+    },
+    "NDS-006": {
+      "result": "pass",
+      "evidence": "All files use ESM import/export syntax. No require() calls introduced."
+    }
+  },
+  "per_run_rules": {
+    "API-002": {
+      "result": "pass",
+      "evidence": "@opentelemetry/api is in peerDependencies (correct for library distribution). Note: @opentelemetry/sdk-node also in peerDependencies — pre-existing, not agent-caused."
+    },
+    "API-003": {
+      "result": "pass",
+      "evidence": "No vendor-specific SDKs (dd-trace, @datadog/*, @newrelic/*, @splunk/*) in package.json or source code."
+    },
+    "API-004": {
+      "result": "pass",
+      "evidence": "No imports from @opentelemetry/sdk-*, @opentelemetry/exporter-*, or @opentelemetry/instrumentation-* in any source file."
+    },
+    "CDQ-008": {
+      "result": "pass",
+      "evidence": "All 5 committed files use trace.getTracer('commit-story'). Consistent naming convention."
+    }
+  },
+  "per_file_evaluations": [
+    {
+      "file": "src/collectors/claude-collector.js",
+      "status": "committed",
+      "spans": 1,
+      "span_names": ["commit_story.context.collect_chat_messages"],
+      "schema_coverage": "covered",
+      "instrumented_functions": ["collectChatMessages"],
+      "rules": {
+        "NDS-004": {
+          "result": "pass",
+          "evidence": "collectChatMessages(repoPath, commitTime, previousCommitTime) signature unchanged. All other exports (getClaudeProjectPath, findJSONLFiles, parseJSONLFile, filterMessages, groupBySession) untouched."
+        },
+        "NDS-005": {
+          "result": "pass",
+          "evidence": "No pre-existing try/catch in collectChatMessages. Agent-added catch re-throws after recording — error propagation preserved."
+        },
+        "COV-001": { "result": "n/a", "evidence": "Not an entry point." },
+        "COV-002": {
+          "result": "pass",
+          "evidence": "collectChatMessages performs file I/O (readFileSync via helpers) and has a span wrapping all operations."
+        },
+        "COV-003": {
+          "result": "pass",
+          "evidence": "try/catch with recordException(error) + setStatus(SpanStatusCode.ERROR) + re-throw."
+        },
+        "COV-004": {
+          "result": "pass",
+          "evidence": "collectChatMessages is async and has a span."
+        },
+        "COV-005": {
+          "result": "pass",
+          "evidence": "5 domain-specific attributes: commit_story.context.source='claude_code', commit_story.context.time_window_start, commit_story.context.time_window_end, commit_story.context.sessions_count, commit_story.context.messages_count. All from registry."
+        },
+        "COV-006": { "result": "n/a", "evidence": "No auto-instrumentable operations." },
+        "RST-001": {
+          "result": "pass",
+          "evidence": "Only collectChatMessages (orchestrating function) has a span. Helpers (getClaudeProjectPath, findJSONLFiles, parseJSONLFile, filterMessages, groupBySession) correctly have no spans."
+        },
+        "RST-002": { "result": "pass", "evidence": "No trivial accessors instrumented." },
+        "RST-003": { "result": "pass", "evidence": "No thin wrapper duplication." },
+        "RST-004": {
+          "result": "pass",
+          "evidence": "collectChatMessages is exported. No unexported functions instrumented."
+        },
+        "RST-005": { "result": "n/a", "evidence": "No pre-existing OTel code." },
+        "SCH-001": {
+          "result": "pass",
+          "evidence": "Span name 'commit_story.context.collect_chat_messages' is semantically correct — this function literally collects chat messages. Bounded cardinality, consistent convention."
+        },
+        "SCH-002": {
+          "result": "pass",
+          "evidence": "All 5 attribute keys match registry: commit_story.context.source, commit_story.context.time_window_start, commit_story.context.time_window_end, commit_story.context.sessions_count, commit_story.context.messages_count."
+        },
+        "SCH-003": {
+          "result": "pass",
+          "evidence": "source='claude_code' matches enum, timestamps are ISO 8601 strings, counts are integers."
+        },
+        "SCH-004": { "result": "pass", "evidence": "No redundant schema entries." },
+        "CDQ-001": {
+          "result": "pass",
+          "evidence": "startActiveSpan callback + finally { span.end() }. Early return (!projectPath) is inside try block, so finally still executes."
+        },
+        "CDQ-002": {
+          "result": "pass",
+          "evidence": "trace.getTracer('commit-story') — correct library name."
+        },
+        "CDQ-003": {
+          "result": "pass",
+          "evidence": "Standard pattern: recordException(error) + setStatus({ code: SpanStatusCode.ERROR }) + throw."
+        },
+        "CDQ-005": {
+          "result": "pass",
+          "evidence": "startActiveSpan callback pattern preserves async context."
+        },
+        "CDQ-006": {
+          "result": "pass",
+          "evidence": "Attribute computations are cheap: .toISOString(), .size, .length. No isRecording() guard needed."
+        },
+        "CDQ-007": {
+          "result": "pass",
+          "evidence": "All attributes are bounded (counts, timestamps, enum). No PII or unbounded strings."
+        }
+      }
+    },
+    {
+      "file": "src/collectors/git-collector.js",
+      "status": "committed",
+      "spans": 3,
+      "span_names": [
+        "commit_story.context.collect_chat_messages",
+        "commit_story.context.collect_chat_messages",
+        "commit_story.context.collect_chat_messages"
+      ],
+      "schema_coverage": "uncovered",
+      "instrumented_functions": ["getCommitDiff", "getMergeInfo", "getPreviousCommitTime"],
+      "rules": {
+        "NDS-004": {
+          "result": "pass",
+          "evidence": "Exported functions: getCommitData (unchanged), getPreviousCommitTime (signature preserved). Internal functions getCommitDiff and getMergeInfo are not exported."
+        },
+        "NDS-005": {
+          "result": "pass",
+          "evidence": "No pre-existing try/catch in any instrumented function. Agent-added catch re-throws after recording. Error propagation preserved."
+        },
+        "COV-001": { "result": "n/a", "evidence": "Not an entry point." },
+        "COV-002": {
+          "result": "pass",
+          "evidence": "All three functions perform git subprocess calls via runGit. Each has a span. Note: getCommitData (exported, orchestrating) does NOT have a span — its operations are covered by child spans on internal functions."
+        },
+        "COV-003": {
+          "result": "pass",
+          "evidence": "All three functions have try/catch with recordException + setStatus(ERROR) + re-throw."
+        },
+        "COV-004": {
+          "result": "pass",
+          "evidence": "All three are async functions with spans."
+        },
+        "COV-005": {
+          "result": "pass",
+          "evidence": "vcs.ref.head.revision attribute on all spans — standard OTel VCS attribute, referenced in registry. Semantically appropriate for git operations."
+        },
+        "COV-006": { "result": "n/a", "evidence": "No auto-instrumentable operations." },
+        "RST-001": {
+          "result": "pass",
+          "evidence": "runGit (utility helper) and getCommitMetadata (internal) correctly have no spans."
+        },
+        "RST-002": { "result": "pass", "evidence": "No trivial accessors instrumented." },
+        "RST-003": { "result": "pass", "evidence": "No thin wrapper duplication." },
+        "RST-004": {
+          "result": "fail",
+          "evidence": "getCommitDiff (line 78) and getMergeInfo (line 103) are UNEXPORTED internal functions — explicitly listed in rubric-codebase mapping as RST-004 violations. They are internal to getCommitData. The agent should have instrumented getCommitData (exported) instead.",
+          "file_path": "src/collectors/git-collector.js",
+          "lines": [79, 115]
+        },
+        "RST-005": { "result": "n/a", "evidence": "No pre-existing OTel code." },
+        "SCH-001": {
+          "result": "fail",
+          "evidence": "All 3 spans named 'commit_story.context.collect_chat_messages'. These are git operations (diff-tree, rev-list, log), not chat message collection. Names do not map to the operations they represent. Expected names: commit_story.collect_git, commit_story.git_diff, commit_story.git_merge_info. Per rubric-codebase mapping, SCH-001 is a soft quality guideline — naming quality fails criteria #3 (meaningful and maps to operation).",
+          "file_path": "src/collectors/git-collector.js"
+        },
+        "SCH-002": {
+          "result": "pass",
+          "evidence": "vcs.ref.head.revision is a standard OTel VCS attribute, referenced in the registry."
+        },
+        "SCH-003": {
+          "result": "pass",
+          "evidence": "vcs.ref.head.revision = commitRef (string). Correct type."
+        },
+        "SCH-004": { "result": "pass", "evidence": "No redundant schema entries." },
+        "CDQ-001": {
+          "result": "pass",
+          "evidence": "All three functions use startActiveSpan + finally { span.end() }."
+        },
+        "CDQ-002": { "result": "pass", "evidence": "trace.getTracer('commit-story')." },
+        "CDQ-003": {
+          "result": "pass",
+          "evidence": "Standard pattern in all three: recordException + setStatus(ERROR) + throw."
+        },
+        "CDQ-005": { "result": "pass", "evidence": "startActiveSpan callback pattern." },
+        "CDQ-006": {
+          "result": "pass",
+          "evidence": ".trim() and .split() are cheap. No expensive computation."
+        },
+        "CDQ-007": {
+          "result": "pass",
+          "evidence": "vcs.ref.head.revision is bounded (commit ref string). No PII."
+        }
+      }
+    },
+    {
+      "file": "src/integrators/context-integrator.js",
+      "status": "committed",
+      "spans": 1,
+      "span_names": ["commit_story.context.collect_chat_messages"],
+      "schema_coverage": "mixed",
+      "instrumented_functions": ["gatherContextForCommit"],
+      "rules": {
+        "NDS-004": {
+          "result": "pass",
+          "evidence": "gatherContextForCommit(commitRef, options) signature unchanged."
+        },
+        "NDS-005": {
+          "result": "pass",
+          "evidence": "No pre-existing try/catch. Agent-added catch re-throws. Error propagation preserved."
+        },
+        "COV-001": { "result": "n/a", "evidence": "Not the main CLI entry point, but is a primary orchestrating function." },
+        "COV-002": {
+          "result": "pass",
+          "evidence": "Calls getCommitData, getPreviousCommitTime, collectChatMessages, filterMessages, applyTokenBudget, applySensitiveFilter. Span wraps all outbound calls."
+        },
+        "COV-003": {
+          "result": "pass",
+          "evidence": "try/catch with recordException + setStatus(ERROR) + throw."
+        },
+        "COV-004": {
+          "result": "pass",
+          "evidence": "Async function with span."
+        },
+        "COV-005": {
+          "result": "pass",
+          "evidence": "8 domain-specific attributes: vcs.ref.head.revision, commit_story.commit.author, commit_story.filter.messages_before, commit_story.filter.messages_after, commit_story.context.messages_count, commit_story.context.sessions_count, commit_story.context.time_window_start, commit_story.context.time_window_end. Excellent attribute coverage."
+        },
+        "COV-006": { "result": "n/a", "evidence": "No auto-instrumentable operations." },
+        "RST-001": {
+          "result": "pass",
+          "evidence": "Only gatherContextForCommit (main orchestrator) has span. Internal filter/budget helpers not instrumented."
+        },
+        "RST-002": { "result": "pass", "evidence": "No trivial accessors instrumented." },
+        "RST-003": { "result": "pass", "evidence": "No thin wrapper duplication." },
+        "RST-004": {
+          "result": "pass",
+          "evidence": "gatherContextForCommit is exported."
+        },
+        "RST-005": { "result": "n/a", "evidence": "No pre-existing OTel code." },
+        "SCH-001": {
+          "result": "fail",
+          "evidence": "Span name 'commit_story.context.collect_chat_messages' for a context integration function. The function gathers AND integrates context from multiple sources (git, chat, filters), not just chat collection. Expected name: commit_story.gather_context or commit_story.integrate_context. Partially semantically relevant ('context' prefix correct, 'collect_chat_messages' too narrow). Fails quality criteria #3.",
+          "file_path": "src/integrators/context-integrator.js"
+        },
+        "SCH-002": {
+          "result": "pass",
+          "evidence": "All 8 attribute keys match registry definitions."
+        },
+        "SCH-003": {
+          "result": "pass",
+          "evidence": "All attribute values conform to types: strings for timestamps (ISO 8601), integers for counts, string for author."
+        },
+        "SCH-004": { "result": "pass", "evidence": "No redundant schema entries." },
+        "CDQ-001": {
+          "result": "pass",
+          "evidence": "startActiveSpan + finally { span.end() }."
+        },
+        "CDQ-002": { "result": "pass", "evidence": "trace.getTracer('commit-story')." },
+        "CDQ-003": {
+          "result": "pass",
+          "evidence": "Standard error recording pattern."
+        },
+        "CDQ-005": { "result": "pass", "evidence": "startActiveSpan callback." },
+        "CDQ-006": {
+          "result": "pass",
+          "evidence": "toISOString() and property access are cheap. No isRecording guard needed."
+        },
+        "CDQ-007": {
+          "result": "pass",
+          "evidence": "All attributes bounded. commit_story.commit.author is public git metadata, not PII in this context."
+        }
+      }
+    },
+    {
+      "file": "src/managers/summary-manager.js",
+      "status": "committed",
+      "spans": 3,
+      "span_names": [
+        "commit_story.context.collect_chat_messages",
+        "commit_story.context.collect_chat_messages",
+        "commit_story.context.collect_chat_messages"
+      ],
+      "schema_coverage": "uncovered",
+      "instrumented_functions": [
+        "generateAndSaveDailySummary",
+        "generateAndSaveWeeklySummary",
+        "generateAndSaveMonthlySummary"
+      ],
+      "superficial_resolution_check": {
+        "NDS-005": "PASS — genuinely resolved. Inner catch{} blocks for file-existence checks (expected-condition) correctly have NO recordException. Outer catch records genuine errors only.",
+        "CDQ-003": "PASS — genuinely resolved. recordException used only for genuine errors in outer catch. Expected-condition catches in file-existence checks correctly excluded.",
+        "RST-001": "PASS — genuinely resolved. Only 3 high-level generate-and-save orchestrators instrumented. Helpers (readDayEntries, formatDailySummary, saveDailySummary, etc.) correctly have no spans."
+      },
+      "rules": {
+        "NDS-004": {
+          "result": "pass",
+          "evidence": "generateAndSaveDailySummary, generateAndSaveWeeklySummary, generateAndSaveMonthlySummary signatures unchanged. Other exports (readDayEntries, formatDailySummary, saveDailySummary, etc.) untouched."
+        },
+        "NDS-005": {
+          "result": "pass",
+          "evidence": "No pre-existing try/catch in generate-and-save functions. Inner expected-condition catches (try { await access(summaryPath); } catch { /* Doesn't exist, proceed */ }) preserved without error recording. Agent-added outer catch re-throws genuine errors."
+        },
+        "COV-001": { "result": "n/a", "evidence": "Not an entry point." },
+        "COV-002": {
+          "result": "pass",
+          "evidence": "Each function calls LLM (generateDailySummary/generateWeeklySummary/generateMonthlySummary), file I/O (read entries, save summary). Spans wrap all outbound calls."
+        },
+        "COV-003": {
+          "result": "pass",
+          "evidence": "Outer try/catch with recordException + setStatus(ERROR). Inner expected-condition catches correctly excluded."
+        },
+        "COV-004": { "result": "pass", "evidence": "All three are async with spans." },
+        "COV-005": {
+          "result": "pass",
+          "evidence": "commit_story.journal.entry_date and commit_story.journal.file_path attributes. Both from registry."
+        },
+        "COV-006": { "result": "n/a", "evidence": "No auto-instrumentable operations." },
+        "RST-001": {
+          "result": "pass",
+          "evidence": "Only generate-and-save orchestrators instrumented. Helpers (readDayEntries, formatDailySummary, saveDailySummary, readWeekDailySummaries, etc.) correctly have no spans."
+        },
+        "RST-002": { "result": "pass", "evidence": "No trivial accessors instrumented." },
+        "RST-003": { "result": "pass", "evidence": "No thin wrapper duplication." },
+        "RST-004": { "result": "pass", "evidence": "All three functions are exported." },
+        "RST-005": { "result": "n/a", "evidence": "No pre-existing OTel code." },
+        "SCH-001": {
+          "result": "fail",
+          "evidence": "All 3 spans named 'commit_story.context.collect_chat_messages'. These are summary generation + file I/O operations. Expected names: commit_story.generate_daily_summary, commit_story.generate_weekly_summary, commit_story.generate_monthly_summary. Names do not map to operations. Fails quality criteria #3.",
+          "file_path": "src/managers/summary-manager.js"
+        },
+        "SCH-002": {
+          "result": "pass",
+          "evidence": "commit_story.journal.entry_date and commit_story.journal.file_path both match registry."
+        },
+        "SCH-003": {
+          "result": "pass",
+          "evidence": "entry_date is YYYY-MM-DD string, file_path is string. Correct types."
+        },
+        "SCH-004": { "result": "pass", "evidence": "No redundant schema entries." },
+        "CDQ-001": {
+          "result": "pass",
+          "evidence": "All three use startActiveSpan + finally { span.end() }. Early returns (summary already exists) are inside try block."
+        },
+        "CDQ-002": { "result": "pass", "evidence": "trace.getTracer('commit-story')." },
+        "CDQ-003": {
+          "result": "pass",
+          "evidence": "Standard error recording on outer catch. Expected-condition catches (file existence checks) correctly excluded from error recording."
+        },
+        "CDQ-005": { "result": "pass", "evidence": "startActiveSpan callback." },
+        "CDQ-006": {
+          "result": "pass",
+          "evidence": "getDateString() and property access are cheap. No guard needed."
+        },
+        "CDQ-007": {
+          "result": "pass",
+          "evidence": "entry_date and file_path are bounded strings. No PII."
+        }
+      }
+    },
+    {
+      "file": "src/mcp/server.js",
+      "status": "committed",
+      "spans": 1,
+      "span_names": ["commit_story.context.collect_chat_messages"],
+      "schema_coverage": "uncovered",
+      "instrumented_functions": ["main"],
+      "rules": {
+        "NDS-004": {
+          "result": "pass",
+          "evidence": "main() is not exported (called at module level). createServer() unchanged."
+        },
+        "NDS-005": {
+          "result": "pass",
+          "evidence": "No pre-existing try/catch. Agent-added catch re-throws. Error propagation preserved."
+        },
+        "COV-001": {
+          "result": "pass",
+          "evidence": "server.js IS an MCP server entry point. main() has a span."
+        },
+        "COV-002": {
+          "result": "pass",
+          "evidence": "Calls createServer() and server.connect(transport). Span wraps both."
+        },
+        "COV-003": {
+          "result": "pass",
+          "evidence": "try/catch with recordException + setStatus(ERROR) + throw."
+        },
+        "COV-004": { "result": "pass", "evidence": "main is async with span." },
+        "COV-005": {
+          "result": "fail",
+          "evidence": "ZERO attributes on span. Server startup could have service.name, transport type, version. No setAttribute calls at all.",
+          "file_path": "src/mcp/server.js"
+        },
+        "COV-006": { "result": "n/a", "evidence": "No auto-instrumentable operations." },
+        "RST-001": {
+          "result": "pass",
+          "evidence": "Only main() has span. createServer() helper correctly has no span."
+        },
+        "RST-002": { "result": "pass", "evidence": "No trivial accessors instrumented." },
+        "RST-003": { "result": "pass", "evidence": "No thin wrapper duplication." },
+        "RST-004": {
+          "result": "pass",
+          "evidence": "main() is the module-level entry point, appropriate for instrumentation despite being unexported."
+        },
+        "RST-005": { "result": "n/a", "evidence": "No pre-existing OTel code." },
+        "SCH-001": {
+          "result": "fail",
+          "evidence": "Span name 'commit_story.context.collect_chat_messages' for MCP server startup. Most semantically incorrect usage — server startup is not chat message collection. Expected name: commit_story.mcp_server or commit_story.mcp.main. Fails all three quality criteria.",
+          "file_path": "src/mcp/server.js"
+        },
+        "SCH-002": { "result": "n/a", "evidence": "No attributes to evaluate (COV-005 captures this)." },
+        "SCH-003": { "result": "n/a", "evidence": "No attributes." },
+        "SCH-004": { "result": "n/a", "evidence": "No attributes." },
+        "CDQ-001": {
+          "result": "pass",
+          "evidence": "startActiveSpan + finally { span.end() }."
+        },
+        "CDQ-002": { "result": "pass", "evidence": "trace.getTracer('commit-story')." },
+        "CDQ-003": { "result": "pass", "evidence": "Standard error recording pattern." },
+        "CDQ-005": { "result": "pass", "evidence": "startActiveSpan callback." },
+        "CDQ-006": { "result": "pass", "evidence": "No attribute computation." },
+        "CDQ-007": { "result": "pass", "evidence": "No attributes to check." }
+      }
+    }
+  ],
+  "entry_point_evaluation": {
+    "COV-001_index_js": {
+      "result": "fail",
+      "file": "src/index.js",
+      "status": "zero_span",
+      "evidence": "Main CLI entry point has 0 spans. Agent attempted instrumentation (3 attempts, 70K output tokens) but validation rejected it. Blocking rules: COV-003 (swallow-and-continue catch pattern not exempted by DEEP-1), SCH-001 (invented span names not in registry). 3rd consecutive COV-001 failure (runs 4, 5, 6).",
+      "persistent_since": "run-4"
+    }
+  },
+  "zero_span_evaluations": {
+    "correct_skips": [
+      {
+        "file": "src/generators/prompts/guidelines/accessibility.js",
+        "reason": "Pure data export — no async I/O, no significant operations"
+      },
+      {
+        "file": "src/generators/prompts/guidelines/anti-hallucination.js",
+        "reason": "Pure data export"
+      },
+      {
+        "file": "src/generators/prompts/guidelines/index.js",
+        "reason": "Re-export module"
+      },
+      {
+        "file": "src/generators/prompts/sections/daily-summary-prompt.js",
+        "reason": "Pure data export"
+      },
+      {
+        "file": "src/generators/prompts/sections/dialogue-prompt.js",
+        "reason": "Pure data export"
+      },
+      {
+        "file": "src/generators/prompts/sections/monthly-summary-prompt.js",
+        "reason": "Pure data export"
+      },
+      {
+        "file": "src/generators/prompts/sections/summary-prompt.js",
+        "reason": "Pure data export"
+      },
+      {
+        "file": "src/generators/prompts/sections/technical-decisions-prompt.js",
+        "reason": "Pure data export"
+      },
+      {
+        "file": "src/generators/prompts/sections/weekly-summary-prompt.js",
+        "reason": "Pure data export"
+      },
+      {
+        "file": "src/utils/config.js",
+        "reason": "Synchronous config getter"
+      },
+      {
+        "file": "src/integrators/filters/message-filter.js",
+        "reason": "Synchronous filtering — pure functions with no I/O"
+      },
+      {
+        "file": "src/integrators/filters/token-filter.js",
+        "reason": "Synchronous filtering — pure functions with no I/O"
+      },
+      {
+        "file": "src/integrators/filters/sensitive-filter.js",
+        "reason": "Synchronous filtering — pure functions with no I/O. Run-5 was partial but validation correctly identified as sync-only via pre-screening (#212)"
+      },
+      {
+        "file": "src/utils/commit-analyzer.js",
+        "reason": "All exported functions are synchronous. Run-5 committed with spans, but run-6 agent correctly identified as sync-only. NOT a regression."
+      }
+    ],
+    "debatable_skips": [
+      {
+        "file": "src/mcp/tools/context-capture-tool.js",
+        "reason": "Exported registerContextCaptureTool() is synchronous. Unexported saveContext() is async with file I/O. RST-004 vs COV-004 tension. Run-5 instrumented saveContext; run-6 applied RST-004 and skipped.",
+        "run5_status": "committed (1 span)",
+        "assessment": "Agent may be more correct (RST-004 takes precedence for unexported functions)"
+      },
+      {
+        "file": "src/mcp/tools/reflection-tool.js",
+        "reason": "Same pattern as context-capture-tool. Exported registerReflectionTool() is sync. Unexported saveReflection() is async with file I/O.",
+        "run5_status": "committed (1 span)",
+        "assessment": "Same RST-004 vs COV-004 tension"
+      },
+      {
+        "file": "src/utils/journal-paths.js",
+        "reason": "Agent tried to instrument ensureDirectory (async, file I/O) but SCH-001 rejected the invented span name. Agent correctly refused to misuse registered name for a directory creation utility. Removed all instrumentation on retry.",
+        "run5_status": "committed (spans)",
+        "assessment": "Correct decision by agent — SCH-001 forced removal. Needs registry expansion."
+      }
+    ],
+    "soft_failures": [
+      {
+        "file": "src/index.js",
+        "reason": "Entry point — agent attempted instrumentation (3 attempts, 70K output tokens) but COV-003 + SCH-001 blocked. NOT a correct skip. COV-001 FAIL.",
+        "run5_status": "failed (oscillation)",
+        "assessment": "Improved (no oscillation thanks to RUN-1) but still fails"
+      }
+    ]
+  },
+  "partial_file_evaluations": [
+    {
+      "file": "src/commands/summarize.js",
+      "status": "partial",
+      "functions_passed": "7/8",
+      "blocked_by": ["COV-003 (per-item catch pattern)", "SCH-001"],
+      "nds_assessment": "PASS — no changes committed to branch"
+    },
+    {
+      "file": "src/generators/journal-graph.js",
+      "status": "partial",
+      "functions_passed": "10/12",
+      "blocked_by": ["SCH-001", "NDS-003 (return statement modified)"],
+      "nds_assessment": "PASS — no changes committed to branch"
+    },
+    {
+      "file": "src/generators/summary-graph.js",
+      "status": "partial",
+      "functions_passed": "13/15",
+      "blocked_by": ["SCH-001 (oscillation detected on dailySummaryNode)", "COV-003 (try/finally pattern)"],
+      "nds_assessment": "PASS — no changes committed to branch"
+    },
+    {
+      "file": "src/managers/auto-summarize.js",
+      "status": "partial",
+      "functions_passed": "1/3",
+      "blocked_by": ["NDS-003", "COV-003", "SCH-001", "SCH-002"],
+      "regression_from_run5": true,
+      "nds_assessment": "PASS — no changes committed to branch"
+    },
+    {
+      "file": "src/managers/journal-manager.js",
+      "status": "partial",
+      "functions_passed": "9/10",
+      "blocked_by": ["SCH-001 (sole blocker for saveJournalEntry)"],
+      "nds_assessment": "PASS — no changes committed to branch"
+    },
+    {
+      "file": "src/utils/summary-detector.js",
+      "status": "partial",
+      "functions_passed": "5/11",
+      "blocked_by": ["COV-003", "SCH-001", "NDS-003", "SCH-002"],
+      "nds_assessment": "PASS — no changes committed to branch"
+    }
+  ],
+  "dimension_scores": {
+    "NDS": {
+      "rules": {
+        "NDS-004": { "result": "pass", "instances": "5/5 files pass" },
+        "NDS-005": { "result": "pass", "instances": "5/5 files pass" }
+      },
+      "score": "2/2",
+      "percentage": 100
+    },
+    "COV": {
+      "rules": {
+        "COV-001": { "result": "fail", "instances": "1/2 entry points pass (server.js pass, index.js fail — 3rd consecutive)", "persistent": true },
+        "COV-002": { "result": "pass", "instances": "5/5 files pass" },
+        "COV-003": { "result": "pass", "instances": "5/5 files pass" },
+        "COV-004": { "result": "pass", "instances": "5/5 files pass" },
+        "COV-005": { "result": "fail", "instances": "4/5 files pass (server.js has zero attributes)", "persistent": true },
+        "COV-006": { "result": "n/a" }
+      },
+      "score": "3/5",
+      "percentage": 60
+    },
+    "RST": {
+      "rules": {
+        "RST-001": { "result": "pass", "instances": "5/5 files pass" },
+        "RST-002": { "result": "pass", "instances": "5/5 files pass" },
+        "RST-003": { "result": "pass", "instances": "5/5 files pass" },
+        "RST-004": { "result": "fail", "instances": "4/5 files pass (git-collector.js: 2 unexported functions instrumented — getCommitDiff, getMergeInfo)", "new_in_run6": true },
+        "RST-005": { "result": "n/a" }
+      },
+      "score": "3/4",
+      "percentage": 75
+    },
+    "API": {
+      "rules": {
+        "API-002": { "result": "pass" },
+        "API-003": { "result": "pass" },
+        "API-004": { "result": "pass" }
+      },
+      "score": "3/3",
+      "percentage": 100
+    },
+    "SCH": {
+      "rules": {
+        "SCH-001": {
+          "result": "fail",
+          "instances": "1/5 files pass (only claude-collector has semantically correct span name; git-collector, context-integrator, summary-manager, server all misuse commit_story.context.collect_chat_messages)",
+          "new_in_run6": true,
+          "systemic": true,
+          "root_cause": "Single-span registry forces agent to choose between semantic accuracy (fails validator) and validation compliance (misleading names). Agent chose compliance for committed files."
+        },
+        "SCH-002": { "result": "pass", "instances": "4/4 applicable files pass" },
+        "SCH-003": { "result": "pass", "instances": "4/4 applicable files pass" },
+        "SCH-004": { "result": "pass", "instances": "5/5 files pass" }
+      },
+      "score": "3/4",
+      "percentage": 75
+    },
+    "CDQ": {
+      "rules": {
+        "CDQ-001": { "result": "pass", "instances": "5/5 files pass" },
+        "CDQ-002": { "result": "pass", "instances": "5/5 files pass" },
+        "CDQ-003": { "result": "pass", "instances": "5/5 files pass" },
+        "CDQ-005": { "result": "pass", "instances": "5/5 files pass" },
+        "CDQ-006": { "result": "pass", "instances": "5/5 files pass" },
+        "CDQ-007": { "result": "pass", "instances": "5/5 files pass" },
+        "CDQ-008": { "result": "pass", "instances": "All 5 files use 'commit-story'" }
+      },
+      "score": "7/7",
+      "percentage": 100
+    }
+  },
+  "canonical_score": {
+    "passed": 21,
+    "total": 25,
+    "percentage": 84,
+    "file_delivery_count": 5,
+    "comparison_run5": {
+      "passed": 23,
+      "total": 25,
+      "percentage": 92,
+      "file_delivery_count": 9
+    }
+  },
+  "new_failures": [
+    {
+      "rule": "RST-004",
+      "classification": "new_regression",
+      "files": ["git-collector.js"],
+      "root_cause": "Agent instrumented unexported internal functions instead of the exported getCommitData orchestrator"
+    },
+    {
+      "rule": "SCH-001",
+      "classification": "systemic_new",
+      "files": ["git-collector.js", "context-integrator.js", "summary-manager.js", "server.js"],
+      "root_cause": "Single-span registry (1 span definition) forced all files to misuse commit_story.context.collect_chat_messages. Validator enforces strict SCH-001 registry conformance, creating a conflict with evaluator's soft quality guideline interpretation."
+    }
+  ],
+  "persistent_failures": [
+    {
+      "rule": "COV-001",
+      "runs_open": 3,
+      "files": ["index.js"],
+      "root_cause": "COV-003 swallow-and-continue catch pattern + SCH-001 registry gap"
+    },
+    {
+      "rule": "COV-005",
+      "runs_open": 2,
+      "files": ["server.js"],
+      "root_cause": "Agent adds zero attributes on MCP server startup span"
+    }
+  ]
+}
