@@ -215,7 +215,7 @@ Four-phase approach (same structure as run-5, with coverage recovery as the prim
   8. Document in `evaluation/run-6/pr-evaluation.md`.
   9. Append to `evaluation/run-6/lessons-for-prd7.md` and `evaluation/run-6/spiny-orb-findings.md`.
 
-- [ ] **Rubric scoring** — Synthesize per-file findings into dimension-level scores:
+- [x] **Rubric scoring** — Synthesize per-file findings into dimension-level scores:
   1. Aggregate from `evaluation/run-6/per-file-evaluation.json`.
   2. Score each dimension with per-rule evidence AND per-file instance counts (files passing/failing each rule).
   3. Apply schema coverage split scoring as standard.
