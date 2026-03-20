@@ -181,7 +181,7 @@ Four-phase approach (same structure as run-5, with coverage recovery as the prim
   14. **Branch deliverable check**: Verify all files reported as instrumented have actual changes on the branch: `git diff main..spiny-orb-branch --stat`.
   15. Append any run observations to `evaluation/run-6/lessons-for-prd7.md` and `evaluation/run-6/spiny-orb-findings.md`.
 
-- [ ] **Failure deep-dives** — For each failed file AND each run-level failure:
+- [x] **Failure deep-dives** — For each failed file AND each run-level failure:
   1. **File-level failures**: For each failed/partial file: read spiny-orb output log, identify validation rules that blocked instrumentation, map to spiny-orb findings (run-5 and run-6), assess whether spiny-orb fixes helped.
   2. **Run-level failures**: Push failures, test suite failures, schema evolution issues, commit noise — all get deep-dive treatment.
   3. **Failure trajectory update**: For persistent failures (files that failed in runs 2-5): update the trajectory. Is the root cause the same or different each run? Track per-file failure history across all runs.

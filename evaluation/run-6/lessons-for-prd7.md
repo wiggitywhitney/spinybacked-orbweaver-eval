@@ -8,6 +8,11 @@ Observations, rubric gaps, process improvements, and methodology notes captured 
 
 *Rules that proved insufficient, ambiguous, or missing during evaluation.*
 
+- **COV-003 expected-condition exemption scope is too narrow.** DEEP-1 (#180) covers ENOENT-style catches but not three other common expected-condition patterns: (1) per-item-failure-collection catches, (2) swallow-and-continue catches, (3) try/finally without catch. These three patterns blocked 5 files. The exemption needs to cover any catch block where the code intentionally handles errors without rethrowing.
+- **SCH-001 with a single-span registry creates a perverse incentive.** The agent must choose between semantic accuracy (correct span name → fails validation) or validation compliance (wrong name → passes). 4/5 committed files chose compliance, resulting in semantically incorrect span names. SCH-001 should either accept schema extensions or the registry needs more spans.
+- **RST-004 vs COV-004 tension for unexported async functions.** RST-004 says skip unexported internals. COV-004 says cover async functions. context-capture-tool.js and reflection-tool.js have unexported async functions with file I/O. Run-5 instrumented them (COV-004); run-6 skipped them (RST-004). The rubric should clarify which rule takes precedence.
+- **No rule for "validation caused regression."** auto-summarize.js was committed in run-5 but partial in run-6 due to stricter SCH-001 enforcement. The rubric has no rule for tracking when validation improvements block previously-committed files. Consider RUN-2 (from run-5 findings).
+
 ---
 
 ## Process Improvements
@@ -55,4 +60,9 @@ Observations, rubric gaps, process improvements, and methodology notes captured 
 - **Laptop sleep was the dominant failure mode, not API overload.** "Anthropic API call failed: terminated" was caused by the laptop sleeping overnight during a Claude Code background task, killing active HTTP connections. Actual processing time was ~2 hours. Use `caffeinate -s` to prevent sleep, or run in the user's terminal where they can monitor. The one `overloaded_error` may have been a genuine transient API issue.
 - **NDS-003 validation failures persist.** Multiple partial files (summarize.js, journal-graph.js, summary-detector.js) had functions skipped due to NDS-003 (non-instrumentation line modifications). The agent is still making small changes to original code during instrumentation (e.g., capturing return values in variables for setAttribute).
 - **Cost was 10.1% of ceiling ($7.07/$70.20)** — below the 15% investigation threshold. Low cost is likely because many API calls were terminated early rather than completing. True cost of a successful full run would be higher.
+- **SCH-001 is the new dominant blocker.** The Weaver registry has only 1 span definition. Every partial/failed file has SCH-001 as a contributing factor. Fix: expand the registry with ~8 span definitions covering all commit-story domain operations. This is the highest-ROI fix for run-7 — journal-manager.js would commit immediately.
+- **DEEP-1 boundary gaps remain.** Three catch patterns not covered: per-item-failure-collection, swallow-and-continue, try/finally without catch. These block 5 files.
+- **Dominant blocker peeling pattern.** Run-5 fixed the dominant blocker (NDS/SCH/CDQ → COV-003). Run-6 fixed COV-003 → SCH-001 emerged. Run-7 should fix SCH-001 → expect next blocker to surface. Pre-run expectations should account for this: fixing one blocker reveals the next.
+- **5 files regressed from run-5.** auto-summarize, context-capture-tool, reflection-tool, commit-analyzer, journal-paths were committed in run-5 but not in run-6. Root causes: SCH-001 strictness (2 files), RST-004 vs COV-004 tension (2 files), correct reclassification (1 file). Run-7 should track regressions explicitly.
+- **Committed file semantic quality.** 4/5 committed files use the wrong span name to pass SCH-001. This is a quality issue that scoring alone won't capture — the files "pass" but the instrumentation is semantically misleading.
 

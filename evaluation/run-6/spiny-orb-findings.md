@@ -23,7 +23,7 @@ Paths in this document are relative to the eval repo root unless otherwise noted
 | Spiny-orb output log | `evaluation/run-6/spiny-orb-output.log` | Per-file results, schema evolution status, run-level issues |
 | Per-file evaluation | `evaluation/run-6/per-file-evaluation.json` | Canonical per-file rubric results |
 | Lessons for PRD #7 | `evaluation/run-6/lessons-for-prd7.md` | Process improvements, methodology observations |
-| Spiny-orb branch | TBD (will be `spiny-orb/instrument-<timestamp>`) | The actual instrumented code |
+| Spiny-orb branch | `spiny-orb/instrument-1773996478550` | The actual instrumented code |
 | Evaluation rubric | `spinybacked-orbweaver/research/evaluation-rubric.md` (spiny-orb repo) | 32-rule rubric |
 | Rubric-codebase mapping | `spinybacked-orbweaver/research/rubric-codebase-mapping.md` (spiny-orb repo) | Maps rubric rules to spiny-orb source code |
 
@@ -72,7 +72,17 @@ The run-5 actionable-fix-output served as the handoff to the spiny-orb team. All
 
 ## Resolved from Run-5
 
-*Updated during pre-run verification and throughout evaluation as findings are confirmed fixed.*
+All 22 run-5 findings were fixed by the spiny-orb team. See `evaluation/run-6/pre-run-expectations.md` for the full triage table.
+
+**Key fixes verified in run-6:**
+- **DEEP-1 (COV-003 exemption)**: Partially working — ENOENT-style catches exempted. Boundary gaps remain (see RUN6-10).
+- **RUN-1 (oscillation detection)**: Working — oscillation correctly detected and stopped on summary-detector.js and summary-graph.js (see RUN6-6).
+- **DEEP-4 (duplicate JSDoc)**: Working — no NDS-003 violations from JSDoc duplication. NDS-003 violations are now code modification issues.
+- **EVAL-1 (schema-uncovered attributes)**: Working — agent invents domain-relevant attributes on schema-uncovered files.
+- **Push auth (#183)**: NOT working in practice — 4th consecutive failure (see RUN6-2). Fix only works with GITHUB_TOKEN set.
+- **RUN-1/DEEP-6 (oscillation + entry point)**: Oscillation fixed. Entry point still fails for different reason (COV-003 boundary + SCH-001).
+- **PR-4 (function-level fallback)**: Working — partial files get per-function results.
+- **Sync-only pre-screening (#212)**: Working — sensitive-filter.js correctly pre-screened as sync-only.
 
 ---
 
@@ -147,6 +157,70 @@ summarize.js (runMonthlySummarize), journal-graph.js (summaryNode, generateJourn
 **Evidence**: PR summary, summary-detector.js function-level fallback details.
 
 **Acceptance criteria**: Root cause (SCH-001 on uncovered files) resolved so oscillation doesn't occur.
+
+### RUN6-9: SCH-001 single-span registry is the new dominant blocker
+
+**Priority**: Critical
+**Impact**: EVERY partial/failed file has SCH-001 as a contributing factor. Blocks 14+ functions across 7 files.
+
+The Weaver telemetry registry defines exactly ONE span: `commit_story.context.collect_chat_messages`. Any file needing a different span name fails SCH-001. The 5 committed files worked around this by misusing the registered name (semantically wrong but passes validation). The 6 partial files and index.js could not — their operations are too far from "collect chat messages" for even the agent to justify the mismatch.
+
+**Pattern across runs**: Run-5's dominant blocker was COV-003 (DEEP-1). DEEP-1 was fixed, and SCH-001 emerged from behind it. Each run fixes the previous dominant blocker, revealing the next one.
+
+**Files where SCH-001 is the SOLE blocker**: journal-manager.js (saveJournalEntry) — would commit immediately if the registry had more spans.
+
+**Evidence**: `evaluation/run-6/failure-deep-dives.md` "R3. SCH-001 emerged as the new dominant blocking rule"
+
+**Acceptance criteria**: Add span definitions to the Weaver registry for commit-story domain operations: journal save, summary generation, CLI entry point, summary detection, auto-summarization. Target: at least 8 span definitions covering all instrumented file operations.
+
+### RUN6-10: DEEP-1 boundary gaps — 3 catch patterns not covered by expected-condition exemption
+
+**Priority**: High
+**Impact**: 5 files blocked by COV-003 despite DEEP-1 fix
+
+DEEP-1 (#180) covers ENOENT-style catches (file-not-found). Three other expected-condition catch patterns are NOT covered:
+
+1. **Per-item-failure-collection**: `catch (err) { result.failed.push(err); continue; }` — collects failures and continues the loop. Found in: summarize.js (runMonthlySummarize), auto-summarize.js (triggerAutoSummaries, triggerAutoMonthlySummaries).
+2. **Swallow-and-continue**: `try { triggerAutoSummaries() } catch (e) { /* intentionally empty — don't block main */ }` — swallows errors to prevent non-critical operations from blocking the main flow. Found in: index.js (main).
+3. **Try/finally without catch**: `try { ... } finally { span.end() }` — no explicit catch but COV-003 flags the failable operation. Found in: summary-graph.js (monthlySummaryNode).
+
+**Evidence**: PR summary function-level fallback details for each file; `evaluation/run-6/failure-deep-dives.md` "Unmasked Bug Detection" section.
+
+**Acceptance criteria**: COV-003 expected-condition exemption covers all three patterns. Test against the specific functions listed above.
+
+### RUN6-11: 5 files regressed from run-5 committed to run-6 not committed
+
+**Priority**: High
+**Impact**: Net loss of 4 committed files from run-5
+
+| File | Run-5 | Run-6 | Cause |
+|------|-------|-------|-------|
+| auto-summarize.js | Committed (COV-005) | Partial (1/3) | SCH-001 stricter + NDS-003 + COV-003 |
+| context-capture-tool.js | Committed (1 span) | 0 spans | RST-004 vs COV-004 tension |
+| reflection-tool.js | Committed (1 span) | 0 spans | RST-004 vs COV-004 tension |
+| commit-analyzer.js | Committed | 0 spans | Agent correctly ID'd sync-only (not a regression) |
+| journal-paths.js | Committed (1 span) | 0 spans | SCH-001 forced span removal |
+
+auto-summarize.js is the most concerning — it was committed in run-5 and is now partial. SCH-001 validation strictness increased between runs.
+
+context-capture-tool.js and reflection-tool.js are debatable — the exported functions ARE sync, but they contain unexported async functions (saveContext, saveReflection) that had spans in run-5.
+
+**Evidence**: `evaluation/run-6/failure-deep-dives.md` "Regressions from Run-5" section; branch diffs for both runs.
+
+**Acceptance criteria**: At minimum, auto-summarize.js and journal-paths.js should recover when SCH-001 is addressed. For context-capture-tool/reflection-tool, clarify whether unexported async functions with file I/O should get spans (COV-004 says yes, RST-004 says no).
+
+### RUN6-12: 4/5 committed files use semantically incorrect span names
+
+**Priority**: Medium
+**Impact**: Semantic quality degradation in committed instrumentation
+
+The 5 committed files all use `commit_story.context.collect_chat_messages` as their span name. Only claude-collector.js is semantically correct (it actually collects chat messages). The other 4 (git-collector, context-integrator, summary-manager, server) have operations unrelated to chat message collection.
+
+This is a direct consequence of SCH-001 + single-span registry. The agent chose validation compliance over semantic accuracy.
+
+**Evidence**: `evaluation/run-6/failure-deep-dives.md` "Committed File Quality Notes" table; branch diffs for each file.
+
+**Acceptance criteria**: Same as RUN6-9 — expanding the registry fixes this. Once more span definitions exist, the agent can use semantically correct names that also pass validation.
 
 ---
 
