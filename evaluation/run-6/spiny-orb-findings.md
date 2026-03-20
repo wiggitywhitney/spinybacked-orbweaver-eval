@@ -8,7 +8,7 @@ Each finding includes priority classification (Critical/High/Medium/Low), eviden
 
 **Naming note**: The CLI tool was renamed from `orbweaver` to `spiny-orb` between run-5 and run-6 (spinybacked-orbweaver#177). Run-5 artifacts use the old name; run-6 artifacts use the new name.
 
-### Supporting Documentation
+## Supporting Documentation
 
 All evidence referenced below lives in the eval repo on branch `feature/prd-6-evaluation-run-6`.
 
@@ -310,7 +310,7 @@ The advisory engine still doesn't consume skip decisions (PR-3 from run-5). CDQ-
 
 ---
 
-## Persistent Findings
+## Cross-Run Persistent Issues
 
 - **Push authentication failure**: Now 4 consecutive runs. #183 closed but fix ineffective. See RUN6-2.
 - **NDS-003 validation failures**: Present since run-3. Agent still makes minor code modifications during instrumentation. See RUN6-5.
