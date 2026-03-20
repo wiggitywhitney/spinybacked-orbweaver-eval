@@ -226,7 +226,7 @@ Four-phase approach (same structure as run-5, with coverage recovery as the prim
   8. Emit as `evaluation/run-6/rubric-scores.json` (canonical) and render `evaluation/run-6/rubric-scores.md`.
   9. Append to `evaluation/run-6/lessons-for-prd7.md` and `evaluation/run-6/spiny-orb-findings.md`.
 
-- [ ] **Baseline comparison and synthesis** — Compare run-6 vs run-5 vs run-4 vs run-3 vs run-2:
+- [x] **Baseline comparison and synthesis** — Compare run-6 vs run-5 vs run-4 vs run-3 vs run-2:
   1. Dimension-level trend analysis (5-run).
   2. File outcome comparison: improved / regressed / same. Track per-file delivery history across all runs.
   3. Failure classification: resolved / persistent / new / unmasked.
