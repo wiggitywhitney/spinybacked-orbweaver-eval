@@ -164,7 +164,7 @@ Four-phase approach (same structure as run-5, with coverage recovery as the prim
   2. Create `evaluation/run-6/lessons-for-prd7.md`. Sections: Rubric Gaps, Process Improvements, Evaluation Methodology, Rubric-Codebase Mapping Corrections, Schema Decisions, Carry-Forward Items.
   3. Both documents are updated throughout all subsequent milestones. Every milestone has explicit "append to findings/lessons" steps.
 
-- [ ] **Evaluation run-6** — Execute `spiny-orb instrument` with coverage recovery focus:
+- [x] **Evaluation run-6** — Execute `spiny-orb instrument` with coverage recovery focus:
   1. Clean codebase state: start from main branch with evaluation config (spiny-orb.yaml, instrumentation.js, semconv/).
   2. Run in foreground: `spiny-orb instrument src/ --verbose -y`
   3. Record wall-clock start timestamp.

@@ -63,6 +63,7 @@ Entry format: `- (YYYY-MM-DD) Description of feature-level change (PRD #X, miles
 - (2026-03-19) Configured ANTHROPIC_API_KEY as GitHub repo secret for CI use (PRD #14, secret setup)
 
 - (2026-03-19) Completed pre-run verification for run-6: all 22 run-5 findings confirmed fixed (none rejected), handoff triage excellent (14 issues + PRD #179, 60 commits). DEEP-1/RUN-1/DEEP-4/EVAL-1 all verified at code level with acceptance test fixtures (8/8 pass). Push auth resolved. All 8 failed/partial files expected to recover. Renamed all forward-looking references from orbweaver to spiny-orb per #177 (PRD #6, pre-run verification + collect lessons)
+- (2026-03-20) Completed evaluation run-6: 29 files processed, 23 succeeded, 0 failed, 6 partial. 5 files committed with 16 spans (claude-collector, git-collector, context-integrator, summary-manager, server). Push failed 4th consecutive run. Cost $11.02 (16.2% of ceiling). Run-6a invalidated by laptop sleep killing API connections; run-6b with caffeinate succeeded. Filed 8 new findings (RUN6-1 through RUN6-8) including COV-001 entry point still failing (new root cause: COV-003 boundary) and push auth persistent failure (PRD #6, evaluation run-6)
 
 ### Changed
 - (2026-03-16) Fixed span count discrepancy: total_spans_on_branch corrected from 48 to 38 in per-file-evaluation.json and rubric-scores.json (48 included working-directory-only changes from partial files not committed to branch). Updated baseline-comparison.md table to match canonical per-file-evaluation.json (PRD #4, CodeRabbit finding fix)
