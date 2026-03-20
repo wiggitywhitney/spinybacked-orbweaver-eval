@@ -1,0 +1,115 @@
+{
+  "run": 7,
+  "date": "2026-03-20",
+  "spiny_orb_version": "0.1.0",
+  "branch": "spiny-orb/instrument-1774017389972",
+  "files_processed": 29,
+  "files_committed": 13,
+  "files_correct_skip": 16,
+  "files_partial": 0,
+  "files_failed": 0,
+  "cost_actual": 3.22,
+  "cost_ceiling": 67.86,
+  "cost_percent": 4.7,
+  "duration_seconds": 1973,
+  "dimensions": {
+    "NDS": {
+      "score": 2,
+      "max": 2,
+      "percent": 100,
+      "rules": {
+        "NDS-001": { "result": "pass", "evidence": "All 29 source files preserved" },
+        "NDS-002": { "result": "pass", "evidence": "No test files modified" },
+        "NDS-003": { "result": "pass", "evidence": "Only semconv/ modified outside src/" },
+        "NDS-004": { "result": "pass", "instance_count": "13/13", "evidence": "All function signatures preserved across all committed files" },
+        "NDS-005": { "result": "pass", "instance_count": "13/13", "evidence": "All expected-condition catches preserved without recordException/setStatus. NDS-005b correctly applied throughout." },
+        "NDS-006": { "result": "pass", "evidence": "package.json unchanged" }
+      }
+    },
+    "COV": {
+      "score": 4,
+      "max": 5,
+      "percent": 80,
+      "rules": {
+        "COV-001": { "result": "pass", "evidence": "index.js has commit_story.app.main span. server.js has commit_story.app.main span. Resolved after 3 consecutive failures." },
+        "COV-002": { "result": "pass", "instance_count": "13/13", "evidence": "All external calls wrapped in spans" },
+        "COV-003": { "result": "pass", "instance_count": "13/13", "evidence": "Expected-condition catches correctly exempt. Per-item-failure, swallow-and-continue, try/finally all handled correctly." },
+        "COV-004": { "result": "pass", "instance_count": "13/13", "evidence": "All async I/O functions have spans" },
+        "COV-005": { "result": "pass", "instance_count": "13/13", "evidence": "All spans have at least 1 attribute. server.js COV-005 resolved (commit_story.mcp.transport)." },
+        "COV-006": { "result": "fail", "evidence": "Span name collision: commit_story.journal.generate_summary used in both journal-graph.js and summary-graph.js for different operations", "finding": "RUN7-5" }
+      }
+    },
+    "RST": {
+      "score": 4,
+      "max": 4,
+      "percent": 100,
+      "rules": {
+        "RST-001": { "result": "pass", "instance_count": "13/13", "evidence": "All pure sync functions correctly uninstrumented" },
+        "RST-002": { "result": "pass", "instance_count": "13/13", "evidence": "All trivial accessors correctly uninstrumented" },
+        "RST-003": { "result": "pass", "instance_count": "13/13", "evidence": "Thin wrappers correctly uninstrumented (COV-001 override applied for entry points)" },
+        "RST-004": { "result": "pass", "instance_count": "13/13", "evidence": "All unexported internals correctly uninstrumented. RST-004 precedence over COV-004 correctly applied." },
+        "RST-005": { "result": "pass", "instance_count": "13/13", "evidence": "No redundant manual spans on auto-instrumented functions" }
+      }
+    },
+    "API": {
+      "score": 2,
+      "max": 3,
+      "percent": 67,
+      "rules": {
+        "API-001": { "result": "pass", "evidence": "@opentelemetry/api in peerDependencies, not dependencies" },
+        "API-002": { "result": "pass", "evidence": "@opentelemetry/api is peerDependency (correct for library)" },
+        "API-003": { "result": "pass", "evidence": "No auto-instrumentation packages in dependencies" },
+        "API-004": { "result": "fail", "evidence": "@opentelemetry/sdk-node in peerDependencies. Pre-existing on main, not introduced by run-7.", "classification": "pre-existing" }
+      }
+    },
+    "SCH": {
+      "score": 4,
+      "max": 4,
+      "percent": 100,
+      "rules": {
+        "SCH-001": { "result": "pass", "instance_count": "13/13", "evidence": "All span names semantically correct. Agent invented names following commit_story.* namespace. Advisory mode working as designed." },
+        "SCH-002": { "result": "pass", "instance_count": "13/13", "evidence": "All attributes use registered keys or properly declared extensions" },
+        "SCH-003": { "result": "pass", "instance_count": "13/13", "evidence": "All extensions follow commit_story.* namespace convention" },
+        "SCH-004": { "result": "pass", "evidence": "No schema removals or renames. Extend-only enforcement verified." }
+      }
+    },
+    "CDQ": {
+      "score": 6,
+      "max": 7,
+      "percent": 86,
+      "rules": {
+        "CDQ-001": { "result": "pass", "instance_count": "13/13", "evidence": "All spans use startActiveSpan + span.end() in finally" },
+        "CDQ-002": { "result": "pass", "instance_count": "13/13", "evidence": "All files use trace.getTracer('commit-story')" },
+        "CDQ-003": { "result": "pass", "instance_count": "13/13", "evidence": "Clean catch blocks: recordException + setStatus + rethrow for unexpected errors only" },
+        "CDQ-004": { "result": "pass", "instance_count": "13/13", "evidence": "Attribute types correct for most files" },
+        "CDQ-005": { "result": "fail", "evidence": "Count attributes in summary-detector.js and auto-summarize.js declared as type: string instead of type: int. String() wrapping loses numeric queryability.", "finding": "RUN7-6" },
+        "CDQ-006": { "result": "pass", "instance_count": "13/13", "evidence": "No expensive computation for attributes. All values are cheap derivations." },
+        "CDQ-007": { "result": "pass", "instance_count": "13/13", "evidence": "Span status set correctly: ERROR only for unexpected errors" },
+        "CDQ-008": { "result": "pass", "evidence": "All 13 files use trace.getTracer('commit-story')" }
+      }
+    }
+  },
+  "total": {
+    "score": 22,
+    "max": 25,
+    "percent": 88,
+    "gates": "5/5"
+  },
+  "failure_classification": [
+    {
+      "rule": "API-004",
+      "classification": "pre-existing",
+      "detail": "@opentelemetry/sdk-node in peerDependencies on main. Not introduced by instrumentation."
+    },
+    {
+      "rule": "COV-006",
+      "classification": "unmasked",
+      "detail": "Span name collision revealed by SCH-001 fix. Previously masked because partial files couldn't commit."
+    },
+    {
+      "rule": "CDQ-005",
+      "classification": "unmasked",
+      "detail": "Count type mismatch revealed by SCH-001 fix. Previously masked because agent-declared extensions couldn't pass validation."
+    }
+  ]
+}

@@ -188,7 +188,7 @@ Four-phase approach (same structure as runs 5-6, with registry expansion as the 
   16. **Dominant blocker peeling check (new)**: With SCH-001 fixed, what's the new top blocker for remaining partial files? Document this explicitly.
   17. Append any run observations to `evaluation/run-7/lessons-for-prd8.md` and `evaluation/run-7/spiny-orb-findings.md`.
 
-- [ ] **Failure deep-dives** — For each failed file AND each run-level failure:
+- [x] **Failure deep-dives** — For each failed file AND each run-level failure:
   1. **File-level failures**: For each failed/partial file: read spiny-orb output log, identify validation rules that blocked instrumentation, map to spiny-orb findings (run-6 and run-7), assess whether spiny-orb fixes helped.
   2. **Run-level failures**: Push failures, test suite failures, schema evolution issues, commit noise — all get deep-dive treatment.
   3. **Failure trajectory update**: For persistent failures (files that failed in runs 2-6): update the trajectory. Is the root cause the same or different each run? Track per-file failure history across all runs.
@@ -213,7 +213,7 @@ Four-phase approach (same structure as runs 5-6, with registry expansion as the 
   12. Emit as `evaluation/run-7/per-file-evaluation.json` (canonical) and render `evaluation/run-7/per-file-evaluation.md`.
   13. Append to `evaluation/run-7/lessons-for-prd8.md` and `evaluation/run-7/spiny-orb-findings.md`.
 
-- [ ] **PR artifact evaluation** — Evaluate the PR as a first-class deliverable:
+- [x] **PR artifact evaluation** — Evaluate the PR as a first-class deliverable:
   1. If PR exists: evaluate description quality, per-file table accuracy, span counts, agent decision notes.
   2. **Verify per-file table claims against branch state.** Runs 4-6 all found discrepancies.
   3. **PR summary post-validation check (new)**: Verify span names, statuses, and schema extensions match committed code. Run-6's summary was generated pre-validation and was severely misleading.
@@ -226,7 +226,7 @@ Four-phase approach (same structure as runs 5-6, with registry expansion as the 
   10. Document in `evaluation/run-7/pr-evaluation.md`.
   11. Append to `evaluation/run-7/lessons-for-prd8.md` and `evaluation/run-7/spiny-orb-findings.md`.
 
-- [ ] **Rubric scoring** — Synthesize per-file findings into dimension-level scores:
+- [x] **Rubric scoring** — Synthesize per-file findings into dimension-level scores:
   1. Aggregate from `evaluation/run-7/per-file-evaluation.json`.
   2. Score each dimension with per-rule evidence AND per-file instance counts (files passing/failing each rule).
   3. Apply schema coverage split scoring as standard. With registry expansion, the split should shift significantly toward "covered."
@@ -237,7 +237,7 @@ Four-phase approach (same structure as runs 5-6, with registry expansion as the 
   8. Emit as `evaluation/run-7/rubric-scores.json` (canonical) and render `evaluation/run-7/rubric-scores.md`.
   9. Append to `evaluation/run-7/lessons-for-prd8.md` and `evaluation/run-7/spiny-orb-findings.md`.
 
-- [ ] **Baseline comparison and synthesis** — Compare run-7 vs runs 2-6:
+- [x] **Baseline comparison and synthesis** — Compare run-7 vs runs 2-6:
   1. Dimension-level trend analysis (6-run).
   2. File outcome comparison: improved / regressed / same. Track per-file delivery history across all runs.
   3. Failure classification: resolved / persistent / new / unmasked.
@@ -250,7 +250,7 @@ Four-phase approach (same structure as runs 5-6, with registry expansion as the 
   10. Document in `evaluation/run-7/baseline-comparison.md`.
   11. Append to `evaluation/run-7/lessons-for-prd8.md`.
 
-- [ ] **Actionable fix output** — Produce fix instructions for remaining failures (this IS the handoff). **This is the primary deliverable of the entire evaluation run.** The document must be self-contained so the spiny-orb Weaver has everything at its fingertips — synthesize ALL findings from every run-7 artifact:
+- [x] **Actionable fix output** — Produce fix instructions for remaining failures (this IS the handoff). **This is the primary deliverable of the entire evaluation run.** The document must be self-contained so the spiny-orb Weaver has everything at its fingertips — synthesize ALL findings from every run-7 artifact:
   1. For each remaining quality rule failure: what's wrong, evidence, desired outcome, acceptance criteria.
   2. For each remaining failed file: root cause, desired outcome, finding cross-references.
   3. Assessment of run-6 findings: which were fixed, which remain, any new findings.

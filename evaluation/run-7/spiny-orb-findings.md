@@ -104,6 +104,30 @@ The combination means: no early failure, no warning, and the problem only surfac
 2. No `String()` wrapping on numeric values
 3. Consistency with base schema attribute types
 
+### RUN7-7: auto-summarize.js span count inflated in PR summary (6 claimed, 3 actual)
+
+**What's wrong**: The per-file table in the PR summary claims 6 spans for auto-summarize.js but the branch has 3 `startActiveSpan` calls. The Schema Extensions column lists only 3 span names, contradicting the Spans column. Likely a counting bug involving span names reused across files.
+
+**Acceptance criteria**: Per-file span count matches actual `startActiveSpan` calls on the branch for that file.
+
+### RUN7-8: Schema Changes section omits span extensions from PR summary
+
+**What's wrong**: The Schema Changes section shows only 9 added attributes but omits 22 span extensions written to `agent-extensions.yaml`. A reviewer can't assess schema evolution completeness.
+
+**Acceptance criteria**: Schema Changes section includes both added attributes AND added span definitions.
+
+### RUN7-9: Agent Notes section is a compliance dump (180 lines)
+
+**What's wrong**: Per-file notes contain rule-by-rule compliance checklists ("CDQ-001 satisfied", "CDQ-002 satisfied"). This is internal validation output, not reviewer content. A reviewer needs: what was instrumented, why, what was skipped.
+
+**Acceptance criteria**: Agent Notes focus on decisions and rationale, not rule-by-rule pass/fail status. Target: <5 lines per file.
+
+### RUN7-10: CDQ-006 advisories repeat identically 28 times
+
+**What's wrong**: 28 of 44 advisory findings are the same CDQ-006 "isRecording guard" warning. These should be grouped.
+
+**Acceptance criteria**: Duplicate advisory findings are grouped with a count, not listed individually.
+
 ## Low
 
 *(None identified)*
