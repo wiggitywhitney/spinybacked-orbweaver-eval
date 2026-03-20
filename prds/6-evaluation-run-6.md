@@ -204,7 +204,7 @@ Four-phase approach (same structure as run-5, with coverage recovery as the prim
   11. Emit as `evaluation/run-6/per-file-evaluation.json` (canonical) and render `evaluation/run-6/per-file-evaluation.md`.
   12. Append to `evaluation/run-6/lessons-for-prd7.md` and `evaluation/run-6/spiny-orb-findings.md`.
 
-- [ ] **PR artifact evaluation** — Evaluate the PR as a first-class deliverable:
+- [x] **PR artifact evaluation** — Evaluate the PR as a first-class deliverable:
   1. If PR exists: evaluate description quality, per-file table accuracy, span counts, agent decision notes.
   2. **Verify per-file table claims against branch state.** Run-4 and run-5 both found discrepancies.
   3. **PR summary length check**: Run-5 PR was ~430 lines. Check if improvements landed (key decisions summary, grouped zero-span notes).

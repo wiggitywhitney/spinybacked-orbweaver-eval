@@ -282,9 +282,39 @@ The server.js `main()` function has a span but zero `setAttribute` calls. No ser
 
 ---
 
+### RUN6-15: PR summary does not reflect final branch state
+
+**Priority**: High
+**Impact**: Reviewer misled — span names, file statuses, schema extensions, and library claims all diverge from committed code
+
+The PR summary describes the agent's INTENDED instrumentation from the initial processing pass, not the final committed state after validation retries. When validation rejects span names and forces retries, the summary is not regenerated. Key discrepancies:
+- 4/5 committed files have different span names than the summary claims
+- 5 files claimed as "success" are NOT on the branch
+- 14 schema extensions claimed; only 1 committed
+- @traceloop libraries listed as "installed" but not in committed code or package.json
+
+**Evidence**: `evaluation/run-6/pr-evaluation.md` §"PR Summary vs Branch State" tables; `git diff main...spiny-orb/instrument-1773996478550 --stat`
+
+**Acceptance criteria**: PR summary regenerated AFTER validation retries, reflecting final committed state. At minimum, the per-file table should show committed span names and statuses, not pre-validation intentions.
+
+### RUN6-16: Advisory contradiction rate still high (76%)
+
+**Priority**: Medium
+**Impact**: Advisory findings mislead reviewers — 26/34 COV-004 advisories contradict correct RST skip decisions
+
+The advisory engine still doesn't consume skip decisions (PR-3 from run-5). CDQ-006 advisories also incorrectly flag `.toISOString()` as expensive (rubric-codebase mapping explicitly classifies it as cheap).
+
+**Evidence**: `evaluation/run-6/pr-evaluation.md` §"Advisory Findings Analysis"
+
+**Acceptance criteria**: Advisory engine filters out functions that were explicitly skipped via RST rules. CDQ-006 should not flag method calls classified as cheap in the rubric-codebase mapping.
+
+---
+
 ## Persistent Findings
 
 - **Push authentication failure**: Now 4 consecutive runs. #183 closed but fix ineffective. See RUN6-2.
 - **NDS-003 validation failures**: Present since run-3. Agent still makes minor code modifications during instrumentation. See RUN6-5.
 - **COV-001 entry point failure**: 3rd consecutive run. index.js main() has no span. See RUN6-8.
 - **COV-005 zero attributes on server.js**: 2nd consecutive run. See RUN6-14.
+- **PR summary length**: 2nd consecutive run at ~430 lines. PR-1 from run-5 unaddressed.
+- **Advisory contradictions**: 2nd consecutive run at 76-82%. PR-3 from run-5 unaddressed.
