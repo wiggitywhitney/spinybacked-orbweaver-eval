@@ -2,7 +2,7 @@
 
 This document is the handoff from evaluation run-7 to the spiny-orb team. It is **self-contained** — everything the spiny-orb Weaver needs is here.
 
-**Run-7 result**: 22/25 (88%) canonical quality, 13 files committed, $3.22 cost in 33 minutes. **Best file coverage ever.** 29/29 files succeeded (0 failures, 0 partials).
+**Run-7 result**: 22/25 (88%) canonical quality, 13 files committed, $3.22 cost in 33 minutes. **Best file coverage ever.** 29/29 files processed (13 committed with spans, 16 correct skips, 0 failures, 0 partials).
 
 **Run-6 → Run-7 delta**: +4pp quality (84% → 88%), +160% files (5 → 13), -67% cost ($9.72 → $3.22), 3.6x faster.
 
