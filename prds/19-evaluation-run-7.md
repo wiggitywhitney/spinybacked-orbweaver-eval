@@ -1,6 +1,6 @@
 # PRD #7: Evaluation Run-7 — Registry Expansion and Coverage Recovery
 
-**Status:** Draft
+**Status:** Complete
 **Created:** 2026-03-20
 **GitHub Issue:** #19
 **Depends on:** PRD #6 (run-6 complete, 16 findings documented, actionable fix output delivered to spiny-orb team)
@@ -266,7 +266,7 @@ Four-phase approach (same structure as runs 5-6, with registry expansion as the 
   13. Document in `evaluation/run-7/actionable-fix-output.md`.
   14. Final review of `evaluation/run-7/lessons-for-prd8.md` and `evaluation/run-7/spiny-orb-findings.md`.
 
-- [ ] **Draft PRD #8 for next evaluation run** — Create PRD #8 on a separate branch from main:
+- [x] **Draft PRD #8 for next evaluation run** — Create PRD #8 on a separate branch from main:
   1. Run-7 scores as baselines (include file delivery counts).
   2. All items from `evaluation/run-7/lessons-for-prd8.md`.
   3. Carry forward unresolved findings from `evaluation/run-7/actionable-fix-output.md`.

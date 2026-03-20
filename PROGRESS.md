@@ -72,6 +72,7 @@ Entry format: `- (YYYY-MM-DD) Description of feature-level change (PRD #X, miles
 - (2026-03-20) Completed rubric scoring: 22/25 (88%) canonical, 5/5 gates, 13 files committed. Quality x files product tripled (4.2 → 11.4). 3 failures: API-004 pre-existing, COV-006 and CDQ-005 unmasked by SCH-001 fix (PRD #19, rubric scoring)
 - (2026-03-20) Completed baseline comparison: 6-run trend analysis. Run-7 reverses every negative trend simultaneously. 50% discount methodology validated (projections within range). Cost $0.25/file matching run-3 levels via 95% cache hit rate (PRD #19, baseline comparison)
 - (2026-03-20) Completed actionable fix output with cross-document audit: 10 findings (1 critical, 2 high, 7 medium), 3 remaining rule failures, P0/P1/P2 priority matrix, run-8 projections (minimum 92-96%). Audit caught 25 missing items; high-priority gaps addressed (PRD #19, actionable fix output)
+- (2026-03-20) Drafted PRD #8 (issue #21) for evaluation run-8: polish and push auth resolution. 10 milestones, targets 24/25+ quality with 13+ files. Created on main via direct commit (PRD #19, draft PRD #8)
 
 ### Changed
 - (2026-03-16) Fixed span count discrepancy: total_spans_on_branch corrected from 48 to 38 in per-file-evaluation.json and rubric-scores.json (48 included working-directory-only changes from partial files not committed to branch). Updated baseline-comparison.md table to match canonical per-file-evaluation.json (PRD #4, CodeRabbit finding fix)
