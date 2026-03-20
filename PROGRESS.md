@@ -62,6 +62,12 @@ Entry format: `- (YYYY-MM-DD) Description of feature-level change (PRD #X, miles
 - (2026-03-19) Renamed orbweaver.yaml → spiny-orb.yaml per npm package rename (PRD #14, config rename)
 - (2026-03-19) Configured ANTHROPIC_API_KEY as GitHub repo secret for CI use (PRD #14, secret setup)
 
+- (2026-03-20) Completed pre-run verification: all 16 run-6 findings triaged and merged by spiny-orb team (none rejected). Key discovery: SCH-001 fixed via validator tolerance (sparse-registry advisory mode) not registry expansion. COV-003 all 4 boundary patterns covered. Push auth 3-layer fix verified at code level. Built spiny-orb v0.1.0 fresh (PRD #19, pre-run verification)
+- (2026-03-20) Created run-7 evaluation documents: spiny-orb-findings.md, lessons-for-prd8.md, pre-run-expectations.md (PRD #19, collect lessons + pre-run verification)
+- (2026-03-20) Completed evaluation run-7: 29/29 success (100%), 13 committed, 16 correct skips, 0 failed, 0 partial. Cost $3.22 (4.7% of ceiling) in 33 minutes — 3.6x faster than run-6. Push failed 5th consecutive run (GITHUB_TOKEN not embedded). Branch: spiny-orb/instrument-1774017389972 (PRD #19, evaluation run-7)
+- (2026-03-20) Completed per-file evaluation: full 32-rule rubric on ALL 29 files (13 committed + 16 skips). 3 failures found: API-004 (pre-existing sdk-node in peerDeps), COV-006 (span name collision in summary-graph.js), CDQ-005 (count attributes as string type). Filed as RUN7-5 and RUN7-6. All 16 skip decisions verified correct (PRD #19, per-file evaluation)
+- (2026-03-20) Filed 6 spiny-orb findings: RUN7-1 (verbose truncation), RUN7-2 (opaque rule codes), RUN7-3 (missing user docs), RUN7-4 (push auth root cause), RUN7-5 (span name collision), RUN7-6 (count type mismatch) (PRD #19, findings)
+
 ### Changed
 - (2026-03-16) Fixed span count discrepancy: total_spans_on_branch corrected from 48 to 38 in per-file-evaluation.json and rubric-scores.json (48 included working-directory-only changes from partial files not committed to branch). Updated baseline-comparison.md table to match canonical per-file-evaluation.json (PRD #4, CodeRabbit finding fix)
 - (2026-03-15) Renamed all "orb" references to "orbweaver" in PRD #4 and evaluation docs to match CLI rename (spinybacked-orbweaver #123)

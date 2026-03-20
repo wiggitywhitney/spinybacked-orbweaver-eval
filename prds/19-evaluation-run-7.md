@@ -146,7 +146,7 @@ Four-phase approach (same structure as runs 5-6, with registry expansion as the 
 
 ## Milestones
 
-- [ ] **Pre-run verification** — Verify spiny-orb fixes and validate run prerequisites:
+- [x] **Pre-run verification** — Verify spiny-orb fixes and validate run prerequisites:
   1. **Handoff triage review**: Read the spiny-orb team's triage of `evaluation/run-6/actionable-fix-output.md`. Compare what they filed vs what the eval recommended. Note any findings the spiny-orb team rejected and why.
   2. **SCH-001 verification (critical)**: Verify Weaver registry has ≥8 span definitions covering commit-story domain operations (CLI, git, context, journal, summary, auto-summarize, MCP server, summary-detector). If <5 definitions, STOP — registry expansion is the blocking prerequisite.
   3. **COV-003 boundary verification (critical)**: Verify expected-condition exemption covers all 4 patterns: ENOENT-style (DEEP-1), per-item-failure-collection, swallow-and-continue, try/finally. Test against `src/index.js` (swallow-and-continue) and `src/commands/summarize.js` (per-item-collection). If boundary gaps remain, note expected impact on file recovery.
@@ -164,12 +164,12 @@ Four-phase approach (same structure as runs 5-6, with registry expansion as the 
   15. Record which run-6 findings are verified fixed vs still open — this determines the expected score ceiling.
   16. Append any pre-run observations to `evaluation/run-7/lessons-for-prd8.md`.
 
-- [ ] **Collect lessons for PRD #8** — Create BOTH output documents at the START and append throughout all subsequent milestones:
+- [x] **Collect lessons for PRD #8** — Create BOTH output documents at the START and append throughout all subsequent milestones:
   1. Create `evaluation/run-7/spiny-orb-findings.md`. Use findings vocabulary from the start.
   2. Create `evaluation/run-7/lessons-for-prd8.md`. Sections: Rubric Gaps, Process Improvements, Evaluation Methodology, Rubric-Codebase Mapping Corrections, Schema Decisions, Carry-Forward Items.
   3. Both documents are updated throughout all subsequent milestones. Every milestone has explicit "append to findings/lessons" steps.
 
-- [ ] **Evaluation run-7** — Execute `spiny-orb instrument` in the user's terminal (not through Claude Code):
+- [x] **Evaluation run-7** — Execute `spiny-orb instrument` in the user's terminal (not through Claude Code):
   1. Clean codebase state: start from main branch with evaluation config (spiny-orb.yaml, instrumentation.js, semconv/).
   2. **Provide the exact command** for the user to run in their own terminal: `caffeinate -s spiny-orb instrument src/ --verbose -y 2>&1 | tee evaluation/run-7/spiny-orb-output.log`. The user runs this — Claude does NOT execute it. (Run-6 lesson: 30+ minute command, buffered stdout, laptop sleep risk.)
   3. Record wall-clock start timestamp.
@@ -198,7 +198,7 @@ Four-phase approach (same structure as runs 5-6, with registry expansion as the 
   7. Document in `evaluation/run-7/failure-deep-dives.md`.
   8. Append to `evaluation/run-7/lessons-for-prd8.md` and `evaluation/run-7/spiny-orb-findings.md`.
 
-- [ ] **Per-file evaluation** — Full rubric applied to all files using canonical methodology:
+- [x] **Per-file evaluation** — Full rubric applied to all files using canonical methodology:
   1. **Gate checks + per-run rules (single agent)**: NDS-001, NDS-002, NDS-003, NDS-006, API-001, API-002, API-003, API-004, CDQ-008.
   2. **Per-file quality rules (per-file agents)**: Each agent gets rubric + one file's diff + Weaver schema + registry. Rules: NDS-004, NDS-005, COV-001 through COV-006, RST-001 through RST-005, SCH-001 through SCH-004, CDQ-001 through CDQ-007.
   3. **Apply rubric clarifications**: CDQ-002 semantic check, CDQ-006 cheap computation exemption, NDS-005 sub-classification (NDS-005a/NDS-005b).
