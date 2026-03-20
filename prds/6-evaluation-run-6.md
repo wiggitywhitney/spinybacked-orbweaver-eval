@@ -238,7 +238,7 @@ Four-phase approach (same structure as run-5, with coverage recovery as the prim
   9. Document in `evaluation/run-6/baseline-comparison.md`.
   10. Append to `evaluation/run-6/lessons-for-prd7.md`.
 
-- [ ] **Actionable fix output** — Produce fix instructions for remaining failures (this IS the handoff — run-5 decision):
+- [ ] **Actionable fix output** — Produce fix instructions for remaining failures (this IS the handoff — run-5 decision). **This is the primary deliverable of the entire evaluation run.** The document must be self-contained so the spiny-orb Weaver has everything at its fingertips — synthesize ALL findings from every run-6 artifact (per-file eval, failure deep-dives, lessons, spiny-orb-findings, PR eval, rubric scores, baseline comparison). Reference evaluation files by path so the spiny-orb team can drill down when needed, but the document itself should be sufficient without reading them:
   1. For each remaining quality rule failure: what's wrong, evidence, desired outcome, acceptance criteria.
   2. For each remaining failed file: root cause, desired outcome, finding cross-references.
   3. Assessment of run-5 findings: which were fixed, which remain, any new findings.
