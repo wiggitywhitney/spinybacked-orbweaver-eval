@@ -115,4 +115,4 @@ Since ALL findings are fixed (including EVAL-1), the stretch target is the most 
 ## Push Capability
 
 - Eval repo: Push via HTTPS verified (`git push --dry-run` succeeded)
-- Spiny-orb subprocess: Uses `gh pr create` (requires GITHUB_TOKEN in environment). Memory note: orbweaver needs GITHUB_TOKEN in environment for PR creation.
+- Spiny-orb subprocess: Uses `gh pr create` (requires GITHUB_TOKEN in environment). Memory note: spiny-orb needs GITHUB_TOKEN in environment for PR creation.
