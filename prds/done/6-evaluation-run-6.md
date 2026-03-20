@@ -1,6 +1,6 @@
 # PRD #6: Evaluation Run-6 — Coverage Recovery and Quality Retention
 
-**Status:** Draft
+**Status:** Complete (2026-03-20)
 **Created:** 2026-03-17
 **GitHub Issue:** #17
 **Depends on:** PRD #5 (run-5 complete, 22 findings documented, actionable fix output delivered to spiny-orb team)
