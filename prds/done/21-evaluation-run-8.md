@@ -1,6 +1,6 @@
 # PRD #8: Evaluation Run-8 — Polish and Push Auth Resolution
 
-**Status:** Draft
+**Status:** Complete (2026-03-21)
 **Created:** 2026-03-20
 **GitHub Issue:** #21
 **Depends on:** PRD #7 (run-7 complete, 10 findings documented, actionable fix output delivered to spiny-orb team)
@@ -132,7 +132,7 @@ Same four-phase structure as runs 5-7, with polish as the primary focus:
 
 ## Milestones
 
-- [ ] **Pre-run verification** — Verify spiny-orb fixes and validate run prerequisites:
+- [x] **Pre-run verification** — Verify spiny-orb fixes and validate run prerequisites:
   1. **Handoff triage review**: Read the spiny-orb team's triage of `evaluation/run-7/actionable-fix-output.md`. Compare what they filed vs what the eval recommended. Note any findings rejected.
   2. **Push auth verification (critical)**: Verify fail-fast before file processing when GITHUB_TOKEN is missing or write access unavailable. Test with `git push --dry-run`. Log must show GITHUB_TOKEN detection at startup. HTTPS-only is still broken — verify token-embedded URL or SSH.
   3. **COV-006 span name uniqueness**: Verify cross-file span name collision detection is in place (validator or post-run check).
@@ -145,12 +145,12 @@ Same four-phase structure as runs 5-7, with polish as the primary focus:
   10. Record which run-7 findings are verified fixed vs still open.
   11. Append observations to `evaluation/run-8/lessons-for-prd9.md`.
 
-- [ ] **Collect lessons for PRD #9** — Create BOTH output documents at the START:
+- [x] **Collect lessons for PRD #9** — Create BOTH output documents at the START:
   1. Create `evaluation/run-8/spiny-orb-findings.md`.
   2. Create `evaluation/run-8/lessons-for-prd9.md`.
   3. Both updated throughout all subsequent milestones.
 
-- [ ] **Evaluation run-8** — Execute `spiny-orb instrument` in the user's terminal:
+- [x] **Evaluation run-8** — Execute `spiny-orb instrument` in the user's terminal:
   1. Clean codebase state from main.
   2. **Provide the exact command** for the user to run with `caffeinate -s` and vals/env setup.
   3. Record wall-clock start timestamp.
@@ -162,14 +162,14 @@ Same four-phase structure as runs 5-7, with polish as the primary focus:
   9. **Dominant blocker peeling check**: With COV-006/CDQ-005 fixed, what's the new top issue?
   10. Append observations to findings and lessons documents.
 
-- [ ] **Failure deep-dives** — For each failed file AND run-level failure:
+- [x] **Failure deep-dives** — For each failed file AND run-level failure:
   1. File-level failures (if any).
   2. Run-level failures: push auth (verify fix or document continued failure).
   3. Unmasked bug detection for any changes.
   4. Regression root cause (if any).
   5. Document in `evaluation/run-8/failure-deep-dives.md`.
 
-- [ ] **Per-file evaluation** — Full rubric on ALL files (no spot-checking):
+- [x] **Per-file evaluation** — Full rubric on ALL files (no spot-checking):
   1. Gate checks + per-run rules.
   2. Per-file quality rules on ALL 29 files (13+ committed + 16 skips).
   3. Apply all rubric clarifications.
@@ -178,7 +178,7 @@ Same four-phase structure as runs 5-7, with polish as the primary focus:
   6. **SCH-001 semantic quality**: Verify agent-invented span names are semantically correct.
   7. Structured output → `per-file-evaluation.json` and `per-file-evaluation.md`.
 
-- [ ] **PR artifact evaluation** — Evaluate PR quality:
+- [x] **PR artifact evaluation** — Evaluate PR quality:
   1. If PR exists: evaluate per-file table accuracy, span counts vs branch state.
   2. **PR summary length**: Target <200 lines.
   3. **Advisory contradiction rate**: Target <15%.
@@ -186,13 +186,13 @@ Same four-phase structure as runs 5-7, with polish as the primary focus:
   5. **Schema changes completeness**: Must include both attributes and span extensions.
   6. Document in `evaluation/run-8/pr-evaluation.md`.
 
-- [ ] **Rubric scoring** — Synthesize dimension-level scores:
+- [x] **Rubric scoring** — Synthesize dimension-level scores:
   1. Aggregate from `per-file-evaluation.json`.
   2. Score with per-rule evidence and instance counts.
   3. Classify failures.
   4. Emit `rubric-scores.json` and `rubric-scores.md`.
 
-- [ ] **Baseline comparison** — Compare run-8 vs runs 2-7:
+- [x] **Baseline comparison** — Compare run-8 vs runs 2-7:
   1. 7-run dimension trend.
   2. File outcome comparison with per-file trajectories.
   3. Quality x files product trend (target: maintain or exceed 11.4).
@@ -201,7 +201,7 @@ Same four-phase structure as runs 5-7, with polish as the primary focus:
   6. Score projection validation.
   7. Document in `evaluation/run-8/baseline-comparison.md`.
 
-- [ ] **Actionable fix output** — Primary handoff deliverable:
+- [x] **Actionable fix output** — Primary handoff deliverable:
   1. Remaining quality rule failures with evidence and acceptance criteria.
   2. Run-7 findings assessment (which fixed, which remain).
   3. Run-9 verification checklist.
@@ -210,7 +210,7 @@ Same four-phase structure as runs 5-7, with polish as the primary focus:
   6. **Cross-document audit agent** (final step).
   7. Document in `evaluation/run-8/actionable-fix-output.md`.
 
-- [ ] **Draft PRD #9** — Create on a separate branch from main:
+- [x] **Draft PRD #9** — Create on a separate branch from main:
   1. Run-8 scores as baselines.
   2. All items from `evaluation/run-8/lessons-for-prd9.md`.
   3. Carry forward unresolved findings.
