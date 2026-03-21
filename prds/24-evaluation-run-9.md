@@ -168,7 +168,7 @@ Run-9 operates across two repos. Be explicit about which repo at every step.
   10. **Dominant blocker peeling check**: With SCH-003 fixed, what's the new top issue?
   11. Append observations to findings and lessons documents (eval repo).
 
-- [ ] **Live telemetry validation** — Verify real traces in Datadog:
+- [x] **Live telemetry validation** — Verify real traces in Datadog:
   1. Ensure Datadog Agent is running with OTLP enabled (PRD #51 setup scripts).
   2. Switch commit-story-v2 to the **instrument branch** (so the npm-linked CLI runs instrumented code).
   3. Ensure `instrumentation.js` is loaded at startup (via `--import` flag in the git hook).
