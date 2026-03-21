@@ -20,7 +20,15 @@ Separate from spiny-orb software findings (see `spiny-orb-findings.md`).
 
 ## Evaluation Run
 
-_Observations appended during milestone 3._
+1. **Push auth: pre-run verification was misleading.** `git ls-remote` with the token-embedded URL succeeded, but the actual `pushBranch()` flow didn't swap the URL. The error message shows the bare HTTPS URL — the `resolveAuthenticatedUrl()` path wasn't reached. Pre-run verification should test the actual push code path (e.g., `git push --dry-run` with the token-embedded URL), not just `git ls-remote`.
+
+2. **journal-graph.js root cause identified.** The diagnostic logging (PR #277) revealed the specific failure: SCH-001 reassembly validator rejects the extension span name `commit_story.journal.generate_sections` as "not found in registry span definitions." The validator checks the base registry but not the extensions declared during the same run. This is a concrete, fixable bug — not non-deterministic after all.
+
+3. **Cost guard working as designed.** journal-graph.js was limited to 2 attempts (91.4K tokens) vs 3 attempts (70.4K) in run-8. The guard prevented further waste, though 91.4K is still 50.7% of total output tokens for zero committed value.
+
+4. **SCH-003 fix confirmed in production.** All 6 count attributes in agent-extensions.yaml use `type: int`. The dual-layer protection (write-time correction + validation-time check) worked as verified in pre-run.
+
+5. **File parity with eval repo confirmed.** All 12 committed files are identical to run-8. 16 correct skips match. instrumentation.js was excluded from processing (29 files, not 30) — spiny-orb appears to recognize OTel bootstrap code automatically.
 
 ## Live Telemetry Validation
 

@@ -10,7 +10,11 @@ Findings from evaluation run-9 targeting **commit-story-v2 proper** (not the eva
 
 ## Findings
 
-_Updated throughout all milestones._
+| # | Title | Priority | Impact | Status |
+|---|-------|----------|--------|--------|
+| RUN9-1 | Push auth still fails — token-embedded URL swap not firing | Critical | No PR created (7th consecutive) |  New |
+| RUN9-2 | Reassembly validator rejects extension span names (journal-graph.js) | High | Partial file, 91.4K wasted tokens | New |
+| RUN9-3 | instrumentation.js excluded from processing (29 not 30 files) | Low | Correct behavior but undocumented | New |
 
 ## Carried from Run-8
 

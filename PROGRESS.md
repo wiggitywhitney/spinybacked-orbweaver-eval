@@ -85,6 +85,8 @@ Entry format: `- (YYYY-MM-DD) Description of feature-level change (PRD #X, miles
 
 - (2026-03-21) Completed pre-run verification for run-9 (targeting commit-story-v2 proper): all 10 run-8 findings triaged (5 fixed, 1 mitigated, 1 open — none rejected). Push auth verified via token-embedded URL approach (3 PRs: #261, #272, #277). SCH-003 dual-layer fix verified (write-time correction + validation-time check). API-004 expected to PASS for first time (sdk-node in devDeps on commit-story-v2). Advisory contradiction fixes verified (CDQ-006, COV-004, rule labels). Built spiny-orb v0.1.0 from main (e6f87f0). 30 .js files in target repo (identical to eval). Score projection: 24-25/25 after 50% discount (PRD #24, pre-run verification + collect lessons)
 
+- (2026-03-21) Completed evaluation run-9 on commit-story-v2 proper: 12 committed, 1 partial (journal-graph.js), 16 correct skips. Push failed 7th consecutive — token-embedded URL swap not firing. SCH-003 FIXED (all count attributes type: int). journal-graph.js root cause identified via diagnostics: reassembly validator rejects extension span names. 43.7 minutes, 180.2K output tokens. Branch: spiny-orb/instrument-1774115750647 (PRD #24, evaluation run-9)
+
 ### Changed
 - (2026-03-16) Fixed span count discrepancy: total_spans_on_branch corrected from 48 to 38 in per-file-evaluation.json and rubric-scores.json (48 included working-directory-only changes from partial files not committed to branch). Updated baseline-comparison.md table to match canonical per-file-evaluation.json (PRD #4, CodeRabbit finding fix)
 - (2026-03-15) Renamed all "orb" references to "orbweaver" in PRD #4 and evaluation docs to match CLI rename (spinybacked-orbweaver #123)
