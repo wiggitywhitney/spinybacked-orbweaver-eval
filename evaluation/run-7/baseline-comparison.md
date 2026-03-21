@@ -88,7 +88,7 @@ Run-6 projected for run-7 (from actionable-fix-output.md §7):
 | Tier | Projected Score | Projected Files | Actual Score | Actual Files | Accuracy |
 |------|----------------|-----------------|-------------|-------------|----------|
 | Minimum (after 50% discount) | 21-23/25 | 6-8 | 22/25 | 13 | Score within range, files exceeded |
-| Target (after 50% discount) | 22-24/25 | 8-12 | 22/25 | 13 | Score within range, files at upper bound |
+| Target (after 50% discount) | 22-24/25 | 8-12 | 22/25 | 13 | Score within range, files exceeded upper bound |
 | Stretch (after 50% discount) | 23-25/25 | 10-14 | 22/25 | 13 | Score just below range, files within |
 
 **The 50% discount methodology is well-calibrated.** Score fell in the minimum-target range (22/25). File count (13) exceeded the minimum discount but fell within target. The projections are now reliable within their uncertainty bands.

@@ -60,7 +60,7 @@ config.js, all prompt files (7), all filter files (3), commit-analyzer.js, instr
 - **COV-001**: PASS (index.js COV-003 boundary fixed)
 - **COV-005**: Likely PASS (prompt reinforcement for attributes)
 - **RST-004**: PASS (precedence rule clarified)
-- **Files**: 12-15 committed (7 partial recover + 5 stable + 2 debatable)
+- **Files**: 12-15 committed (7 partial recoveries + 5 stable + 2 debatable)
 - **Score**: 25/25 (100%)
 
 ### After 50% Discount (dominant blocker peeling)
@@ -72,9 +72,9 @@ config.js, all prompt files (7), all filter files (3), commit-analyzer.js, instr
 
 ## Verified Fixes vs Still Open
 
-### Verified Fixed (16/16 run-6 findings)
+### Merged and Expected Fixed (16/16 run-6 findings)
 
-All 16 run-6 findings have merged PRs. None rejected by spiny-orb team.
+All 16 run-6 findings have merged PRs and are expected to be fixed. None rejected by spiny-orb team.
 
 ### Still Open (from prior runs)
 

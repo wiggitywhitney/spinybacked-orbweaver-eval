@@ -36,7 +36,7 @@
 | COV-006 | Unmasked | Span name collision revealed by SCH-001 fix. Previously masked because partial files couldn't commit. |
 | CDQ-005 | Unmasked | Count type mismatch revealed by SCH-001 fix. Previously masked because agent-declared extensions couldn't pass validation. |
 
-**Both new failures are "unmasked" — revealed by fixing SCH-001.** This confirms the dominant blocker peeling pattern for the 3rd consecutive run: Run-5 COV-003 → Run-6 SCH-001 → Run-7 COV-006/CDQ-005. Each layer is less severe than the last.
+**Both newly revealed failures (COV-006 and CDQ-005) are "unmasked" — revealed by fixing SCH-001.** This confirms the dominant blocker peeling pattern for the 3rd consecutive run: Run-5 COV-003 → Run-6 SCH-001 → Run-7 COV-006/CDQ-005. Each layer is less severe than the last.
 
 ## Solved Dimensions (4+ consecutive runs at 100%)
 
