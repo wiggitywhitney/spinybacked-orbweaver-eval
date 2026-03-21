@@ -62,6 +62,20 @@ Entry format: `- (YYYY-MM-DD) Description of feature-level change (PRD #X, miles
 - (2026-03-19) Renamed orbweaver.yaml → spiny-orb.yaml per npm package rename (PRD #14, config rename)
 - (2026-03-19) Configured ANTHROPIC_API_KEY as GitHub repo secret for CI use (PRD #14, secret setup)
 
+- (2026-03-19) Completed pre-run verification for run-6: all 22 run-5 findings confirmed fixed (none rejected), handoff triage excellent (14 issues + PRD #179, 60 commits). DEEP-1/RUN-1/DEEP-4/EVAL-1 all verified at code level with acceptance test fixtures (8/8 pass). Push auth resolved. All 8 failed/partial files expected to recover. Renamed all forward-looking references from orbweaver to spiny-orb per #177 (PRD #6, pre-run verification + collect lessons)
+- (2026-03-20) Completed evaluation run-6: 29 files processed, 23 succeeded, 0 failed, 6 partial. 5 files committed with 16 spans. Push failed 4th consecutive run. Cost $11.02 (16.2% of ceiling). Filed 8 new findings (RUN6-1 through RUN6-8) (PRD #6, evaluation run-6)
+- (2026-03-20) Completed failure deep-dives: SCH-001 (single-span registry) emerged as dominant blocker. Filed RUN6-9 through RUN6-12. Dominant blocker peeling pattern confirmed. summary-manager.js recovered (PRD #6, failure deep-dives)
+- (2026-03-20) Completed per-file evaluation: 21/25 (84%) — 8pp regression from run-5. Two new failures: RST-004, SCH-001. Filed RUN6-13, RUN6-14 (PRD #6, per-file evaluation)
+- (2026-03-20) Completed PR artifact evaluation: push failed 4th run, no GitHub PR. Local summary 434 lines with critical discrepancies. Reviewer utility 2/5. Filed RUN6-15, RUN6-16 (PRD #6, PR artifact evaluation)
+- (2026-03-20) Completed rubric scoring, baseline comparison, actionable fix output: 16 findings total, 3-tier projections with 50% discount for dominant-blocker peeling. Cross-document audit caught 10 missing items (PRD #6, scoring + comparison + actionable fix)
+- (2026-03-20) Drafted PRD #7 for evaluation run-7: registry expansion as primary goal. Created as issue #19 (PRD #6, draft PRD #7)
+
+- (2026-03-20) Completed pre-run verification for run-7: all 16 run-6 findings triaged and merged (none rejected). SCH-001 fixed via validator tolerance not registry expansion. COV-003 all 4 boundary patterns covered. Built spiny-orb v0.1.0 fresh (PRD #19, pre-run verification)
+- (2026-03-20) Completed evaluation run-7: 29/29 processed (13 committed, 16 correct skips, 0 failed, 0 partial). Cost $3.22 (4.7% of ceiling) in 33 minutes. Push failed 5th consecutive run. Best file coverage ever (PRD #19, evaluation run-7)
+- (2026-03-20) Completed per-file evaluation: full 32-rule rubric on ALL 29 files. 3 failures: API-004 (pre-existing), COV-006 (span name collision), CDQ-005 (count type mismatch). All 16 skip decisions correct (PRD #19, per-file evaluation)
+- (2026-03-20) Completed failure deep-dives, PR eval, rubric scoring, baseline comparison, actionable fix output: 22/25 (88%), 10 findings filed (RUN7-1 through RUN7-10), cross-document audit caught 25 items. Quality x files product tripled (4.2 → 11.4). Every negative trend reversed (PRD #19, milestones 4-9)
+- (2026-03-20) Drafted PRD #8 for evaluation run-8: polish and push auth resolution. Created as issue #21 (PRD #19, draft PRD #8)
+
 ### Changed
 - (2026-03-16) Fixed span count discrepancy: total_spans_on_branch corrected from 48 to 38 in per-file-evaluation.json and rubric-scores.json (48 included working-directory-only changes from partial files not committed to branch). Updated baseline-comparison.md table to match canonical per-file-evaluation.json (PRD #4, CodeRabbit finding fix)
 - (2026-03-15) Renamed all "orb" references to "orbweaver" in PRD #4 and evaluation docs to match CLI rename (spinybacked-orbweaver #123)
