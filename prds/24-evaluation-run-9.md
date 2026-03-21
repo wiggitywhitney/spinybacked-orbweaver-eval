@@ -178,14 +178,14 @@ Run-9 operates across two repos. Be explicit about which repo at every step.
   7. **Switch commit-story-v2 back to main** when done to restore normal CLI behavior.
   8. Document results (screenshots or trace IDs) in eval repo `evaluation/run-9/live-telemetry-validation.md`.
 
-- [ ] **Failure deep-dives** — For each failed file AND run-level failure:
+- [x] **Failure deep-dives** — For each failed file AND run-level failure:
   1. File-level failures (if any).
   2. Run-level failures: push auth (verify fix or document continued failure).
   3. Unmasked bug detection for any changes.
   4. Regression root cause (if any).
   5. Document in `evaluation/run-9/failure-deep-dives.md`.
 
-- [ ] **Per-file evaluation** — Full rubric on ALL files (no spot-checking):
+- [x] **Per-file evaluation** — Full rubric on ALL files (no spot-checking):
   1. Gate checks + per-run rules. Run tests on **commit-story-v2** (the target repo).
   2. Per-file quality rules on ALL files discovered by spiny-orb (count from pre-run step 7 — may differ from eval repo's 29).
   3. Apply all rubric clarifications including SCH-003 methodology correction from run-8.

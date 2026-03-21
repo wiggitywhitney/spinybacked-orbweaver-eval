@@ -87,6 +87,9 @@ Entry format: `- (YYYY-MM-DD) Description of feature-level change (PRD #X, miles
 
 - (2026-03-21) Completed evaluation run-9 on commit-story-v2 proper: 12 committed, 1 partial (journal-graph.js), 16 correct skips. Push failed 7th consecutive — token-embedded URL swap not firing. SCH-003 FIXED (all count attributes type: int). journal-graph.js root cause identified via diagnostics: reassembly validator rejects extension span names. 43.7 minutes, 180.2K output tokens. Branch: spiny-orb/instrument-1774115750647 (PRD #24, evaluation run-9)
 
+- (2026-03-21) Completed failure deep-dives: push auth root cause — GITHUB_TOKEN likely not in spiny-orb process env (bare URL in error, no x-access-token prefix). journal-graph.js root cause confirmed — reassembly validator SCH-001 check rejects extension span names. No regressions detected. Dominant blocker peeling shows quality plateau at top (PRD #24, failure deep-dives)
+- (2026-03-21) Completed per-file evaluation: full 32-rule rubric on ALL 29 files. **25/25 quality (100%)** — first perfect score. 5/5 gates. All 12 committed files ALL PASS. API-004 passes for first time (sdk-node in devDeps on commit-story-v2). SCH-003 passes (count attributes type: int). 26 unique span names, all semantically correct. 16/16 correct skips. MCP callback pattern documented (PRD #24, per-file evaluation)
+
 ### Changed
 - (2026-03-16) Fixed span count discrepancy: total_spans_on_branch corrected from 48 to 38 in per-file-evaluation.json and rubric-scores.json (48 included working-directory-only changes from partial files not committed to branch). Updated baseline-comparison.md table to match canonical per-file-evaluation.json (PRD #4, CodeRabbit finding fix)
 - (2026-03-15) Renamed all "orb" references to "orbweaver" in PRD #4 and evaluation docs to match CLI rename (spinybacked-orbweaver #123)
