@@ -1,6 +1,6 @@
 # PRD #8: Evaluation Run-8 — Polish and Push Auth Resolution
 
-**Status:** Draft
+**Status:** Complete (2026-03-21)
 **Created:** 2026-03-20
 **GitHub Issue:** #21
 **Depends on:** PRD #7 (run-7 complete, 10 findings documented, actionable fix output delivered to spiny-orb team)
