@@ -226,7 +226,7 @@ Run-9 operates across two repos. Be explicit about which repo at every step.
   6. **Cross-document audit agent** (final step).
   7. Document in `evaluation/run-9/actionable-fix-output.md`.
 
-- [ ] **Draft PRD #10** — Create on a separate branch from main:
+- [x] **Draft PRD #10** — Create on a separate branch from main:
   1. Run-9 scores as baselines.
   2. All items from `evaluation/run-9/lessons-for-prd10.md`.
   3. Carry forward unresolved findings.

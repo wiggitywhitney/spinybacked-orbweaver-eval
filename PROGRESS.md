@@ -95,6 +95,7 @@ Entry format: `- (YYYY-MM-DD) Description of feature-level change (PRD #X, miles
 - (2026-03-21) Completed baseline comparison: 8-run trend shows quality blockers exhausted — dominant blocker peeling reached theoretical endpoint (High→Medium→Low→None over 5 runs). Score projections exceeded (50% discount was conservative). Remaining issues purely operational: push auth, reassembly validator, advisory contradictions (PRD #24, baseline comparison)
 
 - (2026-03-21) Completed actionable fix output: zero quality failures (first time), 5 findings (2 P0: push auth token propagation + reassembly validator extensions, 3 P1-P2). Run-8 findings: 3 fixed, 1 partial, 3 present. Score projection: 25/25 maintained, 13 files if P0 fixed, PR if push auth resolved. Dominant blocker peeling complete — remaining issues are operational, not quality (PRD #24, actionable fix output)
+- (2026-03-21) Drafted PRD #10 for evaluation run-10: operational reliability focus (push auth token propagation + reassembly validator extension fix). Created as issue #28, PR #29 on separate branch from main (PRD #24, draft PRD #10)
 
 ### Changed
 - (2026-03-16) Fixed span count discrepancy: total_spans_on_branch corrected from 48 to 38 in per-file-evaluation.json and rubric-scores.json (48 included working-directory-only changes from partial files not committed to branch). Updated baseline-comparison.md table to match canonical per-file-evaluation.json (PRD #4, CodeRabbit finding fix)
