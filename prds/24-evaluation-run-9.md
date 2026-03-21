@@ -194,7 +194,7 @@ Run-9 operates across two repos. Be explicit about which repo at every step.
   6. **SCH-001 semantic quality**: Verify agent-invented span names are semantically correct.
   7. Structured output → `per-file-evaluation.md`.
 
-- [ ] **PR artifact evaluation** — Evaluate PR quality:
+- [x] **PR artifact evaluation** — Evaluate PR quality:
   1. If PR exists: evaluate per-file table accuracy, span counts vs branch state.
   2. **PR summary length**: Target <200 lines.
   3. **Advisory contradiction rate**: Target <30%.
@@ -202,13 +202,13 @@ Run-9 operates across two repos. Be explicit about which repo at every step.
   5. **Schema changes completeness**: Must include both attributes and span extensions.
   6. Document in `evaluation/run-9/pr-evaluation.md`.
 
-- [ ] **Rubric scoring** — Synthesize dimension-level scores:
+- [x] **Rubric scoring** — Synthesize dimension-level scores:
   1. Aggregate from per-file evaluation.
   2. Score with per-rule evidence and instance counts.
   3. Classify failures using consistent SCH-003 methodology from run-8.
   4. Emit `rubric-scores.md`.
 
-- [ ] **Baseline comparison** — Compare run-9 vs runs 2-8:
+- [x] **Baseline comparison** — Compare run-9 vs runs 2-8:
   1. 8-run dimension trend.
   2. File outcome comparison with per-file trajectories.
   3. Quality x files product trend.
