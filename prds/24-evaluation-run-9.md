@@ -22,12 +22,20 @@ The **dominant blocker peeling pattern** has reached a plateau: Run-5 COV-003 �
 
 Reach 24/25 quality while maintaining 12+ files committed, with a **successfully created PR** (break the 6-run streak). The critical path is: push auth write validation → count attribute type enforcement.
 
+**Major change for run-9**: This evaluation runs against **commit-story-v2 proper** (the real upstream repo), not the eval copy. The real repo is `npm link`'d globally — `/opt/homebrew/bin/commit-story` symlinks to the local repo. Whatever branch is checked out runs live on every git commit across all repos. This means:
+1. Instrumentation is tested on the actual codebase (not an eval fork)
+2. Real telemetry can be validated in Datadog after instrumenting
+3. The PR created by spiny-orb is a real instrumentation PR that could be merged
+4. OTel SDK setup (devDependencies, Datadog exporter) must be configured on commit-story-v2 before the run — tracked in a separate PRD on that repo
+
 ### Secondary Goals
 
 - Resolve journal-graph.js non-deterministic oscillation (committed in run-7, partial in run-8)
 - Reduce advisory contradiction rate from ~91% to <30%
 - Validate that API-004 target project fix landed (if commit-story-v2#50 is resolved)
 - Track cost containment for partial files (journal-graph.js consumed 42% of output tokens)
+- **Validate live telemetry**: After instrumentation, make a real commit and verify traces appear in Datadog APM
+- **Demo readiness**: Run-9 doubles as demo preparation — CLI output, instrumented files, companion docs, and live traces should all be presentable
 
 ### Run-8 Scores (baseline for run-9 comparison)
 
