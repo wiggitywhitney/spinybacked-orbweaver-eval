@@ -210,7 +210,7 @@ Same four-phase structure as runs 5-7, with polish as the primary focus:
   6. **Cross-document audit agent** (final step).
   7. Document in `evaluation/run-8/actionable-fix-output.md`.
 
-- [ ] **Draft PRD #9** — Create on a separate branch from main:
+- [x] **Draft PRD #9** — Create on a separate branch from main:
   1. Run-8 scores as baselines.
   2. All items from `evaluation/run-8/lessons-for-prd9.md`.
   3. Carry forward unresolved findings.
