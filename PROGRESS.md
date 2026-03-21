@@ -76,6 +76,8 @@ Entry format: `- (YYYY-MM-DD) Description of feature-level change (PRD #X, miles
 - (2026-03-20) Completed failure deep-dives, PR eval, rubric scoring, baseline comparison, actionable fix output: 22/25 (88%), 10 findings filed (RUN7-1 through RUN7-10), cross-document audit caught 25 items. Quality x files product tripled (4.2 → 11.4). Every negative trend reversed (PRD #19, milestones 4-9)
 - (2026-03-20) Drafted PRD #8 for evaluation run-8: polish and push auth resolution. Created as issue #21 (PRD #19, draft PRD #8)
 
+- (2026-03-21) Completed pre-run verification for run-8: all 10 run-7 findings triaged (9 fixed, 1 partial — RUN7-7 span count still agent self-report). Push auth fail-fast verified (PR #251). COV-006 span collision prevention verified (PR #256). CDQ-005 count type guidance verified (PR #256). API-004 SDK detection added as advisory (PR #258). Built spiny-orb v0.1.0 from main (8dd2540). Stashed WIP fix/260 upstream tracking (PRD #21, pre-run verification + collect lessons)
+
 ### Changed
 - (2026-03-16) Fixed span count discrepancy: total_spans_on_branch corrected from 48 to 38 in per-file-evaluation.json and rubric-scores.json (48 included working-directory-only changes from partial files not committed to branch). Updated baseline-comparison.md table to match canonical per-file-evaluation.json (PRD #4, CodeRabbit finding fix)
 - (2026-03-15) Renamed all "orb" references to "orbweaver" in PRD #4 and evaluation docs to match CLI rename (spinybacked-orbweaver #123)

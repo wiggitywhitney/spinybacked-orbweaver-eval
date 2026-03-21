@@ -132,7 +132,7 @@ Same four-phase structure as runs 5-7, with polish as the primary focus:
 
 ## Milestones
 
-- [ ] **Pre-run verification** — Verify spiny-orb fixes and validate run prerequisites:
+- [x] **Pre-run verification** — Verify spiny-orb fixes and validate run prerequisites:
   1. **Handoff triage review**: Read the spiny-orb team's triage of `evaluation/run-7/actionable-fix-output.md`. Compare what they filed vs what the eval recommended. Note any findings rejected.
   2. **Push auth verification (critical)**: Verify fail-fast before file processing when GITHUB_TOKEN is missing or write access unavailable. Test with `git push --dry-run`. Log must show GITHUB_TOKEN detection at startup. HTTPS-only is still broken — verify token-embedded URL or SSH.
   3. **COV-006 span name uniqueness**: Verify cross-file span name collision detection is in place (validator or post-run check).
@@ -145,7 +145,7 @@ Same four-phase structure as runs 5-7, with polish as the primary focus:
   10. Record which run-7 findings are verified fixed vs still open.
   11. Append observations to `evaluation/run-8/lessons-for-prd9.md`.
 
-- [ ] **Collect lessons for PRD #9** — Create BOTH output documents at the START:
+- [x] **Collect lessons for PRD #9** — Create BOTH output documents at the START:
   1. Create `evaluation/run-8/spiny-orb-findings.md`.
   2. Create `evaluation/run-8/lessons-for-prd9.md`.
   3. Both updated throughout all subsequent milestones.
