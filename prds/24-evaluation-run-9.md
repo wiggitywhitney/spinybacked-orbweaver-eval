@@ -142,7 +142,7 @@ Run-9 operates across two repos. Be explicit about which repo at every step.
   3. **Push auth verification (critical)**: Verify write-access validation before file processing. Test with `git push --dry-run` **in the commit-story-v2 repo**. Must distinguish read-only tokens from write tokens. Check if fix/260 (upstream tracking) is merged.
   4. **SCH-003 count attribute types**: Verify post-generation validator rejects `*_count` with `type` != `int`. Verify `force` attribute uses `type: boolean`.
   5. **Advisory contradiction fixes**: Check CDQ-006 trivial exemption, COV-004 sync detection, agent notes rule labels.
-  6. **API-004 check**: On commit-story-v2, verify `@opentelemetry/sdk-node` is in devDependencies (not peerDependencies) per PRD #51. On eval repo, check if issue #23 is resolved.
+  6. **API-004 check**: On commit-story-v2, verify `@opentelemetry/sdk-node` is in devDependencies (not peerDependencies) per PRD #51. Note: API-004 evaluation changes for run-9 — sdk-node in devDependencies is correct (not a failure), unlike the eval repo where it was in peerDependencies. The API-004 rubric rule checks for SDK imports in source files and SDK packages in peerDependencies — devDependencies are not flagged. (Updated per Decision 6: API-004 is eval scaffolding)
   7. **File inventory**: Count .js files in commit-story-v2's `src/` directory. This may differ from the eval repo's 29 files. Record the actual count for per-file evaluation.
   8. Rebuild spiny-orb from **main branch** (verify branch before building).
   9. `spiny-orb --version` — record version.
@@ -309,6 +309,10 @@ Run-8 projections were well-calibrated: minimum predicted 23-24/25 → actual 23
 | 2026-03-21 | Track journal-graph.js oscillation with cost containment | Non-deterministic — can't guarantee fix, but can limit cost impact. |
 | 2026-03-21 | Maintain SCH-003 reclassification from run-8 | Correct rubric rule mapping. Document clearly to avoid confusion. |
 | 2026-03-21 | Advisory contradiction methodology needs standardization | Run-7 (23%) and run-8 (~91%) used different counting approaches. |
+| 2026-03-21 | Run-9 targets commit-story-v2 proper, not the eval copy | The real repo is npm-linked globally — instrumented code runs live on every commit. Enables Datadog trace validation and demo readiness. Requires PRD #51 (OTel SDK setup) as prerequisite. Two-repo workflow documented. |
+| 2026-03-21 | API-004 (sdk-node in peerDeps) is eval scaffolding, not agent-caused | We manually added sdk-node and instrumentation.js in PRD #3 as eval prerequisites. Spiny-orb never adds sdk-node. Issue commit-story-v2#50 closed as not-applicable. On commit-story-v2 proper, PRD #51 puts sdk-node in devDependencies (correct for local dev). API-004 evaluation for run-9 depends on which repo is targeted. |
+| 2026-03-21 | Package distribution hygiene required for commit-story-v2 | instrumentation.js and OTel SDK tooling must not ship in the npm package. No `"files"` field or `.npmignore` exists. Added as milestone to PRD #51. Verify with `npm pack --dry-run`. |
+| 2026-03-21 | journal-graph.js failure needs better diagnostics, not just tolerance | Run-8 log says "Reassembly validation failed" with no detail on which check tripped. Run-6 documented NDS-003 return-value capture as a concrete trigger. Spiny-orb team should add logging to capture the specific validation rule that fails during reassembly — this converts guesses into evidence. |
 
 ---
 
