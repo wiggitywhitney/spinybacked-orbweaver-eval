@@ -11,7 +11,7 @@
 
 Run-8 scored 92% canonical (23/25) with 12 files committed — tying run-5 for the highest quality score. COV and CDQ both reached 100% for the first time. Two quality failures remain:
 
-1. **API-004**: `@opentelemetry/sdk-node` in peerDependencies (pre-existing on main since run-2 — target project fix, issues filed: commit-story-v2#50, commit-story-v2-eval#23)
+1. **API-004**: `@opentelemetry/sdk-node` in peerDependencies (pre-existing in eval repo since run-2. On commit-story-v2 proper, depends on PRD #51 outcome — sdk-node goes in devDependencies, not peerDependencies. Issues filed: commit-story-v2#50, commit-story-v2-eval#23)
 2. **SCH-003**: Count attributes declared as `type: string` instead of `type: int` in agent-extensions.yaml. The prompt-only fix (PR #256) was insufficient — the agent prioritizes schema accumulator conformance over prompt guidance.
 
 Push authentication has failed **6 consecutive runs**. Run-8 refined the root cause: the fail-fast fix (PR #251) correctly detects missing GITHUB_TOKEN, but when the token is present, validation uses `git ls-remote` (read access) which passes even without write permissions. The actual push then fails. Additionally, fix/260 (upstream tracking for `pushBranch`) is WIP and may compound the issue.
@@ -93,13 +93,25 @@ Same four-phase structure as runs 5-8:
 3. **Structured evaluation** — Per-file evaluation with canonical methodology
 4. **Process refinements** — Encode methodology changes, draft PRD #10
 
+### Two-Repo Workflow
+
+Run-9 operates across two repos. Be explicit about which repo at every step.
+
+| Repo | Path | Role |
+|------|------|------|
+| **commit-story-v2** (target) | `~/Documents/Repositories/commit-story-v2` | spiny-orb instruments this repo. The run command, instrument branch, PR, and spiny-orb.yaml live here. |
+| **commit-story-v2-eval** (evaluation) | `~/Documents/Repositories/commit-story-v2-eval` | Evaluation artifacts (per-file-evaluation.md, rubric-scores.md, etc.) live here. CLI output is copied here via `tee` or paste. |
+| **spinybacked-orbweaver** (agent) | `~/Documents/Repositories/spinybacked-orbweaver` | The spiny-orb agent. Built from main before each run. |
+
 ### Key Inputs
 
-- **Run-8 results**: `evaluation/run-8/` on branch `feature/prd-21-evaluation-run-8`
-- **Evaluation rubric**: `spinybacked-orbweaver/research/evaluation-rubric.md` (32 rules)
-- **Run-8 actionable fix output**: `evaluation/run-8/actionable-fix-output.md` (the handoff)
-- **Run-8 findings**: `evaluation/run-8/spiny-orb-findings.md` (7 findings)
-- **Run-8 lessons**: `evaluation/run-8/lessons-for-prd9.md`
+- **Run-8 results** (eval repo): `evaluation/run-8/` on branch `feature/prd-21-evaluation-run-8`
+- **Evaluation rubric** (spiny-orb repo): `spinybacked-orbweaver/research/evaluation-rubric.md` (32 rules)
+- **Run-8 actionable fix output** (eval repo): `evaluation/run-8/actionable-fix-output.md` (the handoff)
+- **Run-8 findings** (eval repo): `evaluation/run-8/spiny-orb-findings.md` (7 findings)
+- **Run-8 lessons** (eval repo): `evaluation/run-8/lessons-for-prd9.md`
+- **spiny-orb.yaml** (target repo): Must exist in commit-story-v2 before the run — verify during pre-run or copy from eval repo
+- **semconv/** (target repo): Weaver schema must exist in commit-story-v2 — verify during pre-run or copy from eval repo
 
 ---
 
@@ -117,40 +129,54 @@ Same four-phase structure as runs 5-8:
 10. Dominant blocker peeling tracked — document what emerges behind SCH-003
 11. Cost within expected range (run-8 was $4.00; similar or lower expected)
 12. Cross-document audit agent run at end of actionable-fix-output milestone
+13. **Live telemetry validated** — real commit produces traces visible in Datadog APM with correct service name and span hierarchy
+14. **PRD #51 complete** (prerequisite) — OTel SDK setup on commit-story-v2 proper verified before run starts
 
 ---
 
 ## Milestones
 
 - [ ] **Pre-run verification** — Verify spiny-orb fixes and validate run prerequisites:
-  1. **Handoff triage review**: Read the spiny-orb team's triage of `evaluation/run-8/actionable-fix-output.md`. Compare what they filed vs what the eval recommended. Note any findings rejected.
-  2. **Push auth verification (critical)**: Verify write-access validation before file processing. Test with `git push --dry-run`. Must distinguish read-only tokens from write tokens. Check if fix/260 (upstream tracking) is merged.
-  3. **SCH-003 count attribute types**: Verify post-generation validator rejects `*_count` with `type` != `int`. Verify `force` attribute uses `type: boolean`.
-  4. **Advisory contradiction fixes**: Check CDQ-006 trivial exemption, COV-004 sync detection, agent notes rule labels.
-  5. **API-004 check**: Verify if `@opentelemetry/sdk-node` was removed from target project peerDependencies (commit-story-v2#50).
-  6. Rebuild spiny-orb from **main branch** (verify branch before building).
-  7. `spiny-orb --version` — record version.
-  8. **File recovery expectations**: Predict run-9 outcomes with 50% discount. journal-graph.js non-deterministic — uncertain.
-  9. Record which run-8 findings are verified fixed vs still open.
-  10. Append observations to `evaluation/run-9/lessons-for-prd10.md`.
+  1. **Handoff triage review**: Read the spiny-orb team's triage of `evaluation/run-8/actionable-fix-output.md` (eval repo). Compare what they filed vs what the eval recommended. Note any findings rejected.
+  2. **Target repo readiness** (commit-story-v2): Verify PRD #51 is complete — `@opentelemetry/sdk-node` in devDependencies (not peerDependencies), `instrumentation.js` exists, Datadog exporter configured. Verify `spiny-orb.yaml` and `semconv/` exist (copy from eval repo if needed). Verify commit-story-v2 is on `main` branch.
+  3. **Push auth verification (critical)**: Verify write-access validation before file processing. Test with `git push --dry-run` **in the commit-story-v2 repo**. Must distinguish read-only tokens from write tokens. Check if fix/260 (upstream tracking) is merged.
+  4. **SCH-003 count attribute types**: Verify post-generation validator rejects `*_count` with `type` != `int`. Verify `force` attribute uses `type: boolean`.
+  5. **Advisory contradiction fixes**: Check CDQ-006 trivial exemption, COV-004 sync detection, agent notes rule labels.
+  6. **API-004 check**: On commit-story-v2, verify `@opentelemetry/sdk-node` is in devDependencies (not peerDependencies) per PRD #51. On eval repo, check if issue #23 is resolved.
+  7. **File inventory**: Count .js files in commit-story-v2's `src/` directory. This may differ from the eval repo's 29 files. Record the actual count for per-file evaluation.
+  8. Rebuild spiny-orb from **main branch** (verify branch before building).
+  9. `spiny-orb --version` — record version.
+  10. **File recovery expectations**: Predict run-9 outcomes with 50% discount. Note that file names and counts may differ from run-8 (different repo). journal-graph.js non-deterministic — uncertain.
+  11. Record which run-8 findings are verified fixed vs still open.
+  12. Append observations to `evaluation/run-9/lessons-for-prd10.md` (eval repo).
 
 - [ ] **Collect lessons for PRD #10** — Create BOTH output documents at the START:
   1. Create `evaluation/run-9/spiny-orb-findings.md`.
   2. Create `evaluation/run-9/lessons-for-prd10.md`.
   3. Both updated throughout all subsequent milestones.
 
-- [ ] **Evaluation run-9** — Execute `spiny-orb instrument` in the user's terminal:
-  1. Clean codebase state from main.
-  2. **Provide the exact command** for the user to run with `caffeinate -s` and vals/env setup.
+- [ ] **Evaluation run-9** — Execute `spiny-orb instrument` on **commit-story-v2** (not the eval repo):
+  1. Ensure commit-story-v2 is on **main** with clean working tree: `cd ~/Documents/Repositories/commit-story-v2 && git checkout main && git status`.
+  2. **Provide the exact command** for the user to run. The command must: (a) `cd` to commit-story-v2, (b) use `caffeinate -s`, (c) strip Datadog gateway headers, (d) inject secrets via vals using commit-story-v2's `.vals.yaml`, (e) point to spiny-orb binary, (f) `tee` output to the **eval repo's** `evaluation/run-9/spiny-orb-output.log`.
   3. Record wall-clock start timestamp.
-  4. Resume after run completes.
-  5. **Push auth verification (critical)**: Did the PR get created? If push failed again (7th consecutive), escalate as fundamental blocker.
+  4. Resume after run completes. **Copy the user's pasted output** into the eval repo if `tee` wasn't used.
+  5. **Push auth verification (critical)**: Did the PR get created **on commit-story-v2's GitHub repo**? If push failed again (7th consecutive), escalate as fundamental blocker.
   6. **Cost sanity check**: Compare against run-8's $4.00. Check if partial file cost is contained.
-  7. Record final tally using branch state.
-  8. **Regression check**: Verify all 12 run-8 committed files still committed.
+  7. Record final tally using branch state **on commit-story-v2**: `git diff --name-only main...<instrument-branch>`.
+  8. **File comparison**: Compare instrumented file list against run-8's eval repo list. Note any files that are new, renamed, or missing vs the eval copy.
   9. **journal-graph.js check**: Did it commit this time? If partial again, document token consumption.
   10. **Dominant blocker peeling check**: With SCH-003 fixed, what's the new top issue?
-  11. Append observations to findings and lessons documents.
+  11. Append observations to findings and lessons documents (eval repo).
+
+- [ ] **Live telemetry validation** — Verify real traces in Datadog:
+  1. Ensure Datadog Agent is running with OTLP enabled (PRD #51 setup scripts).
+  2. Switch commit-story-v2 to the **instrument branch** (so the npm-linked CLI runs instrumented code).
+  3. Ensure `instrumentation.js` is loaded at startup (via `--import` flag in the git hook).
+  4. Make a real commit in any repo that has the commit-story post-commit hook installed.
+  5. Check Datadog APM for traces with `service:commit-story` within 60 seconds.
+  6. Verify span hierarchy: root span → manual spans → LangChain auto-instrumentation child spans.
+  7. **Switch commit-story-v2 back to main** when done to restore normal CLI behavior.
+  8. Document results (screenshots or trace IDs) in eval repo `evaluation/run-9/live-telemetry-validation.md`.
 
 - [ ] **Failure deep-dives** — For each failed file AND run-level failure:
   1. File-level failures (if any).
@@ -160,8 +186,8 @@ Same four-phase structure as runs 5-8:
   5. Document in `evaluation/run-9/failure-deep-dives.md`.
 
 - [ ] **Per-file evaluation** — Full rubric on ALL files (no spot-checking):
-  1. Gate checks + per-run rules.
-  2. Per-file quality rules on ALL 29 files (12+ committed + 16-17 skips).
+  1. Gate checks + per-run rules. Run tests on **commit-story-v2** (the target repo).
+  2. Per-file quality rules on ALL files discovered by spiny-orb (count from pre-run step 7 — may differ from eval repo's 29).
   3. Apply all rubric clarifications including SCH-003 methodology correction from run-8.
   4. **MCP tool callback pattern**: Document evaluation outcome for context-capture-tool.js and reflection-tool.js (debatable skips).
   5. Branch state verification.
@@ -268,6 +294,10 @@ Run-8 projections were well-calibrated: minimum predicted 23-24/25 → actual 23
 | SCH-003 fix not landed | Pre-run verification step 3. If not fixed, score stays at 92%. |
 | API-004 remains unfixed (target project responsibility) | Score ceiling is 24/25 until target project removes sdk-node. Issues filed. |
 | Advisory contradiction rate still high | Pre-run verification step 4 checks CDQ-006 exemption. |
+| commit-story-v2 has different files than eval repo | Pre-run step 7 counts actual files. Per-file evaluation uses actual count, not hardcoded 29. File trajectories from runs 2-8 may not map 1:1. |
+| spiny-orb.yaml or semconv/ missing from commit-story-v2 | Pre-run step 2 verifies or copies from eval repo. |
+| Live telemetry fails (DD Agent, exporter, or hook misconfigured) | PRD #51 must complete first. Live telemetry milestone has explicit verification steps. |
+| Forgetting to switch commit-story-v2 back to main after demo | Live telemetry step 7 explicitly reminds. All repos running commit-story would use instrumented code while on the instrument branch. |
 
 ---
 
