@@ -41,11 +41,11 @@
     "zod": "^4.3.6"
   },
   "devDependencies": {
+    "@opentelemetry/sdk-node": "^0.213.0",
     "@vitest/coverage-v8": "^4.0.18",
     "vitest": "^4.0.18"
   },
   "peerDependencies": {
-    "@opentelemetry/api": "^1.9.0",
-    "@opentelemetry/sdk-node": "^0.213.0"
+    "@opentelemetry/api": "^1.9.0"
   }
 }
