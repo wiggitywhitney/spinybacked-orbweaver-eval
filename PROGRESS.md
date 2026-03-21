@@ -83,6 +83,8 @@ Entry format: `- (YYYY-MM-DD) Description of feature-level change (PRD #X, miles
 - (2026-03-21) Completed baseline comparison, PR evaluation, actionable fix output with cross-document audit (27 gaps found, 9 important fixed). 7-run trend analysis. Score projection validation (run-7 predicted 23-24/25 → actual 23/25). Created GitHub issues #50 (commit-story-v2) and #23 (eval) for API-004 sdk-node fix (PRD #21, milestones 6-9)
 - (2026-03-21) Drafted PRD #9 for evaluation run-9: push auth write validation and schema type enforcement. Created as issue #24, PR #25 (PRD #21, draft PRD #9)
 
+- (2026-03-21) Completed pre-run verification for run-9 (targeting commit-story-v2 proper): all 10 run-8 findings triaged (5 fixed, 1 mitigated, 1 open — none rejected). Push auth verified via token-embedded URL approach (3 PRs: #261, #272, #277). SCH-003 dual-layer fix verified (write-time correction + validation-time check). API-004 expected to PASS for first time (sdk-node in devDeps on commit-story-v2). Advisory contradiction fixes verified (CDQ-006, COV-004, rule labels). Built spiny-orb v0.1.0 from main (e6f87f0). 30 .js files in target repo (identical to eval). Score projection: 24-25/25 after 50% discount (PRD #24, pre-run verification + collect lessons)
+
 ### Changed
 - (2026-03-16) Fixed span count discrepancy: total_spans_on_branch corrected from 48 to 38 in per-file-evaluation.json and rubric-scores.json (48 included working-directory-only changes from partial files not committed to branch). Updated baseline-comparison.md table to match canonical per-file-evaluation.json (PRD #4, CodeRabbit finding fix)
 - (2026-03-15) Renamed all "orb" references to "orbweaver" in PRD #4 and evaluation docs to match CLI rename (spinybacked-orbweaver #123)
