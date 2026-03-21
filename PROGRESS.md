@@ -94,6 +94,8 @@ Entry format: `- (YYYY-MM-DD) Description of feature-level change (PRD #X, miles
 - (2026-03-21) Completed rubric scoring: **25/25 quality (100%)** — first perfect score. All 6 dimensions at 100%. API-004 passes first time (target repo). SCH-003 passes (dual-layer fix). Zero quality failures. Q×F = 12.0 (new high) (PRD #24, rubric scoring)
 - (2026-03-21) Completed baseline comparison: 8-run trend shows quality blockers exhausted — dominant blocker peeling reached theoretical endpoint (High→Medium→Low→None over 5 runs). Score projections exceeded (50% discount was conservative). Remaining issues purely operational: push auth, reassembly validator, advisory contradictions (PRD #24, baseline comparison)
 
+- (2026-03-21) Completed actionable fix output: zero quality failures (first time), 5 findings (2 P0: push auth token propagation + reassembly validator extensions, 3 P1-P2). Run-8 findings: 3 fixed, 1 partial, 3 present. Score projection: 25/25 maintained, 13 files if P0 fixed, PR if push auth resolved. Dominant blocker peeling complete — remaining issues are operational, not quality (PRD #24, actionable fix output)
+
 ### Changed
 - (2026-03-16) Fixed span count discrepancy: total_spans_on_branch corrected from 48 to 38 in per-file-evaluation.json and rubric-scores.json (48 included working-directory-only changes from partial files not committed to branch). Updated baseline-comparison.md table to match canonical per-file-evaluation.json (PRD #4, CodeRabbit finding fix)
 - (2026-03-15) Renamed all "orb" references to "orbweaver" in PRD #4 and evaluation docs to match CLI rename (spinybacked-orbweaver #123)

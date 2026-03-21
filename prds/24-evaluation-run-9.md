@@ -217,7 +217,7 @@ Run-9 operates across two repos. Be explicit about which repo at every step.
   6. Score projection validation.
   7. Document in `evaluation/run-9/baseline-comparison.md`.
 
-- [ ] **Actionable fix output** — Primary handoff deliverable:
+- [x] **Actionable fix output** — Primary handoff deliverable:
   1. Remaining quality rule failures with evidence and acceptance criteria.
   2. Run-8 findings assessment (which fixed, which remain).
   3. Run-10 verification checklist.
