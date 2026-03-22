@@ -232,6 +232,14 @@ This needs to be more specific:
 4. Traces from commit-story appear in Datadog APM (verified: 18 spans)
 5. Documentation covers the dual `import-in-the-middle` gotcha for future debugging
 
+### RUN9-7: PR Summary Should Be Committed on the Instrument Branch
+
+**Evidence**: `spiny-orb-pr-summary.md` is written to the target repo's working directory as an untracked file. When push fails (7 consecutive times now), the summary is stranded — it's not on the instrument branch with the rest of the work, and could be accidentally deleted by `git clean` or a repo reset.
+
+**Fix**: After generating the PR summary, commit it on the instrument branch before attempting push. This way the summary is preserved with the code changes regardless of whether push succeeds. When push eventually works, the summary is available for `gh pr create --body-file`.
+
+**Acceptance criteria**: `spiny-orb-pr-summary.md` appears in `git log` on the instrument branch, not just as an untracked file in the working directory.
+
 ---
 
 ## §5. Priority Action Matrix
