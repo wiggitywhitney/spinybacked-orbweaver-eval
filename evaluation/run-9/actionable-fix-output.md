@@ -99,6 +99,139 @@ The span IS declared in agent-extensions.yaml (`span.commit_story.journal.genera
 
 **Acceptance criteria**: Schema Changes lists both attributes and spans.
 
+### RUN9-6: CLI Telemetry Setup — Lessons from Live Validation
+
+Live telemetry validation uncovered three interconnected issues with the instrumentation.js bootstrap pattern. Extensive troubleshooting documented below for future reference.
+
+#### Issue 1: process.exit() prevents trace export
+
+**Symptom**: Spans created (confirmed via `OTEL_LOG_LEVEL=debug` showing 15 `SpanImpl` objects) but zero traces in Datadog.
+
+**Root cause**: commit-story's `index.js` calls `process.exit()` at the end of `main()`, which terminates the Node.js event loop immediately. The OTLP HTTP exporter's async export never completes.
+
+**Troubleshooting steps taken**:
+1. Confirmed OTel SDK loads (`OTEL_LOG_LEVEL=debug` shows diag/context/propagation registered)
+2. Added `ConsoleSpanExporter` — showed all spans with correct names and attributes
+3. Wrapped `exporter.export()` — confirmed it's called and returns `code=0` (success)
+4. Checked Datadog Agent status — OTLP receiver enabled, port 4318 responding
+5. Compared with `commit_story` (v1) which explicitly calls `await shutdownTelemetry()` before every `process.exit()` — that's why v1 works
+
+**How commit_story v1 solves it** (file: `src/index.js` lines 470-528):
+
+```javascript
+// v1 pattern: explicit shutdown before exit
+await telemetryInitialized;          // line 459 — wait for SDK to be ready
+const exitCode = await main();       // line 462 — run the app
+await shutdownTelemetry({ timeoutMs: 2000 }); // line 481 — flush spans
+process.exit(exitCode);              // line 528 — safe to exit now
+```
+
+**Fix for --import bootstrap** (can't modify app code):
+
+```javascript
+// Intercept process.exit() in instrumentation.js
+const originalExit = process.exit;
+process.exit = (code) => {
+  if (isShuttingDown) return originalExit.call(process, code);
+  isShuttingDown = true;
+  process.exitCode = code ?? 0;
+  sdk.shutdown()
+    .catch((err) => console.error('OTel SDK shutdown error:', err))
+    .then(() => new Promise(resolve => setTimeout(resolve, 1000)))
+    .finally(() => originalExit.call(process, process.exitCode));
+};
+```
+
+The 1-second delay after `sdk.shutdown()` ensures the final HTTP response is fully received before the process terminates.
+
+#### Issue 2: BatchSpanProcessor delays export in short-lived processes
+
+**Symptom**: Even with the `process.exit` interception, `BatchSpanProcessor` (the default) delays export by up to 5 seconds (`scheduledDelayMillis` default). For a CLI that runs in <5 seconds, spans accumulate in the batch but the timer never fires.
+
+**Fix**: Use `SimpleSpanProcessor` for CLI targets. It exports each span immediately on `span.end()` (fire-and-forget with promise tracking). Performance overhead is negligible for the handful of spans a CLI invocation produces.
+
+**SDK 2.x note**: A 4-year bug where `SimpleSpanProcessor.forceFlush()` didn't wait for pending exports was fixed in SDK 2.0.0 ([OTel JS #1841](https://github.com/open-telemetry/opentelemetry-js/issues/1841)). Since commit-story-v2 uses `@opentelemetry/sdk-node@^0.213.0` (SDK 2.x), this fix is available.
+
+**cluster-whisperer uses the same pattern**: `disableBatch: true` in its traceloop initialization.
+
+#### Issue 3: @traceloop auto-instrumentation breaks OTLP export via --import
+
+**Symptom**: With `@traceloop/node-server-sdk` or individual `@traceloop/instrumentation-*` packages in the `--import` bootstrap, the OTLP exporter returns `code=0` for all spans but they never appear in Datadog. Without traceloop, 18 spans appear correctly.
+
+**Extensive troubleshooting**:
+
+1. **Tested individual instrumentations** (`@traceloop/instrumentation-langchain` + `@traceloop/instrumentation-mcp` via `NodeSDK.instrumentations`): export returns code=0, zero spans in Datadog.
+
+2. **Tested `@traceloop/node-server-sdk`** (`traceloop.initialize()` pattern from cluster-whisperer): same result — code=0, zero spans in Datadog.
+
+3. **Tested traceloop inline** (NOT via `--import`, same process): **works** — `test.traceloop` span appeared in Datadog. This proves the issue is specifically `--import` + traceloop, not traceloop itself.
+
+4. **Tested NodeSDK without traceloop via `--import`**: **works** — 18 spans in Datadog.
+
+5. **Checked for dual OTel API instances**: only one `@opentelemetry/api@1.9.0` — not the classic "no-op tracer" problem.
+
+6. **Checked span content**: `ConsoleSpanExporter` shows identical spans with and without traceloop. No oversized `gen_ai.*` attributes (`traceContent: false`).
+
+7. **Wrapped `exporter.export()`** in both configurations: both return `code=0` with identical span counts. The HTTP request succeeds in both cases.
+
+**Root cause**: Dual `import-in-the-middle` versions. The traceloop packages declare `@opentelemetry/instrumentation@^0.203.0` while the SDK provides `0.213.0`. In pre-1.0 semver, `^0.203.0` does NOT satisfy `0.213.0`, so npm installs a separate copy. Each copy brings its own `import-in-the-middle` (v1.15.0 vs v3.0.0), each maintaining separate module-local ESM hook registries. This corrupts the ESM module loading pipeline when loaded via `--import`.
+
+**How cluster-whisperer avoids this**: It initializes traceloop **inside the app code** (not via `--import`), which doesn't trigger the competing ESM hook registries.
+
+**Fix (two-part)**:
+
+1. **`--import` bootstrap**: Use `NodeSDK` + `SimpleSpanProcessor` + `OTLPTraceExporter` only. No traceloop packages. This handles manual spans and process.exit interception.
+
+2. **In-app initialization** (separate PR, tracked as [commit-story-v2#53](https://github.com/wiggitywhitney/commit-story-v2/issues/53)): Initialize traceloop inside `index.js` (like commit_story v1's `initializeTelemetry()`) for LangChain/MCP auto-instrumentation. Gate behind a config flag.
+
+**Verified working instrumentation.js** (committed on commit-story-v2):
+
+```javascript
+import { NodeSDK } from '@opentelemetry/sdk-node';
+import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-http';
+import { SimpleSpanProcessor } from '@opentelemetry/sdk-trace-base';
+import { resourceFromAttributes } from '@opentelemetry/resources';
+
+const sdk = new NodeSDK({
+  resource: resourceFromAttributes({
+    'service.name': 'commit-story',
+    'service.version': pkg.version,
+    'deployment.environment': process.env.NODE_ENV || 'development',
+  }),
+  spanProcessors: [new SimpleSpanProcessor(new OTLPTraceExporter({
+    url: 'http://localhost:4318/v1/traces',
+  }))],
+  // NOTE: @traceloop auto-instrumentation must be initialized in index.js,
+  // not here. See commit-story-v2#53.
+});
+sdk.start();
+
+// process.exit interception (see full code above)
+```
+
+#### Impact on spiny-orb setup documentation
+
+spiny-orb's PR summary currently says:
+
+> **Recommended Companion Packages**: `@traceloop/instrumentation-langchain`, `@traceloop/instrumentation-mcp` — add to your application's telemetry setup.
+
+This needs to be more specific:
+
+1. **CLI targets**: The `instrumentation.js` template should use `NodeSDK` + `SimpleSpanProcessor` + `process.exit` interception. Auto-instrumentation packages must be initialized **in the app code**, not in the `--import` bootstrap.
+
+2. **Long-running services**: Can use `BatchSpanProcessor` (better network efficiency) and initialize traceloop in the `--import` bootstrap OR in-app — both work because there's no `process.exit` race.
+
+3. **The PR summary should distinguish CLI vs service setup** and warn about the `--import` + traceloop ESM hook conflict.
+
+4. **The `spiny-orb.yaml` config** should include a `targetType: cli | service` field so the instrumentation template can be generated correctly.
+
+**Acceptance criteria**:
+1. instrumentation.js template for CLI targets uses `SimpleSpanProcessor` + `process.exit` interception
+2. instrumentation.js template warns that traceloop must be initialized in-app, not via `--import`
+3. PR summary companion packages section includes setup guidance distinguishing CLI vs service
+4. Traces from commit-story appear in Datadog APM (verified: 18 spans)
+5. Documentation covers the dual `import-in-the-middle` gotcha for future debugging
+
 ---
 
 ## §5. Priority Action Matrix
@@ -109,6 +242,12 @@ The span IS declared in agent-extensions.yaml (`span.commit_story.journal.genera
 |--------|---------|-------------------|
 | Debug and fix GITHUB_TOKEN propagation to pushBranch() | RUN9-1 | Push succeeds, PR created on GitHub |
 | Fix reassembly validator to check extensions | RUN9-2 | journal-graph.js commits with extension span names |
+
+### P0 — Must fix for run-10 (continued)
+
+| Action | Finding | Acceptance Criteria |
+|--------|---------|-------------------|
+| CLI instrumentation template: SimpleSpanProcessor + process.exit interception | RUN9-6 | Traces reach Datadog from CLI apps |
 
 ### P1 — Should fix for run-10
 
