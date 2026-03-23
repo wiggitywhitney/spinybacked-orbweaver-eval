@@ -134,7 +134,7 @@ Run-10 operates across two repos (same as run-9).
 
 ## Milestones
 
-- [ ] **Pre-run verification** — Verify spiny-orb fixes and validate run prerequisites:
+- [x] **Pre-run verification** — Verify spiny-orb fixes and validate run prerequisites:
   1. **Handoff triage review**: Read the spiny-orb team's triage of `evaluation/run-9/actionable-fix-output.md` (eval repo). Compare what they filed vs what the eval recommended. Note any findings rejected.
   2. **Target repo readiness** (commit-story-v2): Verify commit-story-v2 is on `main` with clean working tree. Verify `spiny-orb.yaml` and `semconv/` exist. Verify `@opentelemetry/sdk-node` still in devDependencies (not peerDependencies).
   3. **Push auth verification (critical)**: Verify GITHUB_TOKEN propagation to `pushBranch()`. Check for diagnostic logging (recommended in RUN9-1). Test with `git push --dry-run` using token-embedded URL **in the commit-story-v2 repo**. Must confirm token is in process environment AND URL swap fires.
@@ -148,7 +148,7 @@ Run-10 operates across two repos (same as run-9).
   11. Record which run-9 findings are verified fixed vs still open.
   12. Append observations to `evaluation/run-10/lessons-for-prd11.md` (eval repo).
 
-- [ ] **Collect lessons for PRD #11** — Create BOTH output documents at the START:
+- [x] **Collect lessons for PRD #11** — Create BOTH output documents at the START:
   1. Create `evaluation/run-10/spiny-orb-findings.md`.
   2. Create `evaluation/run-10/lessons-for-prd11.md`.
   3. Both updated throughout all subsequent milestones.
