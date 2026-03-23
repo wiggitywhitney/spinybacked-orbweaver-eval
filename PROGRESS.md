@@ -101,6 +101,8 @@ Entry format: `- (YYYY-MM-DD) Description of feature-level change (PRD #X, miles
 
 - (2026-03-23) Completed evaluation run-10 on commit-story-v2 proper: 12 committed, 1 failed (summary-manager.js — Weaver CLI), 0 partial, 17 correct skips. Push failed 8th consecutive — URL swap now works but token rejected by GitHub ("Password authentication not supported"). journal-graph.js COMMITTED (reassembly validator fix confirmed). 45.9 minutes, 175.8K output tokens. Branch: spiny-orb/instrument-1774247624091 (PRD #28, evaluation run-10)
 
+- (2026-03-23) Completed per-file evaluation, rubric scoring, baseline comparison, PR evaluation, actionable fix output: 23/25 (92%) quality — regressed 8pp from run-9's 100%. Two new failures: SCH-003 (boolean attrs declared as string, 2 files) and CDQ-007 (optional chaining without guard, 1 file). 28 unique spans, all semantically correct. 4 findings filed (RUN10-1 through RUN10-4). Score projection: 24-25/25 for run-11 after 50% discount. journal-graph.js recovered. Push auth progressed (URL swap works, token rejected). Cost $4.36 (PRD #28, milestones 4-9)
+
 ### Changed
 - (2026-03-16) Fixed span count discrepancy: total_spans_on_branch corrected from 48 to 38 in per-file-evaluation.json and rubric-scores.json (48 included working-directory-only changes from partial files not committed to branch). Updated baseline-comparison.md table to match canonical per-file-evaluation.json (PRD #4, CodeRabbit finding fix)
 - (2026-03-15) Renamed all "orb" references to "orbweaver" in PRD #4 and evaluation docs to match CLI rename (spinybacked-orbweaver #123)
