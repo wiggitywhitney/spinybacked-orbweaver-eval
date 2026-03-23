@@ -99,6 +99,8 @@ Entry format: `- (YYYY-MM-DD) Description of feature-level change (PRD #X, miles
 
 - (2026-03-23) Completed pre-run verification for run-10: all 7 run-9 findings confirmed fixed (none rejected), plus 2 bonus items (CLI telemetry, output discoverability). Push auth verified — remote URL swap replaces direct URL push + diagnostic logging at both validation and push time. Reassembly validator verified — extensions passed to all 3 validation paths (main, reassembly, partial). Advisory fixes verified (NDS-005 fallback, COV-004 callback, SCH-004 domain-aware judge). Built spiny-orb v0.1.0 from main (75dcea6). 30 .js files in target repo (29 processed). Score projection: 25/25 maintained, 12-13 files after 50% discount (PRD #28, pre-run verification + collect lessons)
 
+- (2026-03-23) Completed evaluation run-10 on commit-story-v2 proper: 12 committed, 1 failed (summary-manager.js — Weaver CLI), 0 partial, 17 correct skips. Push failed 8th consecutive — URL swap now works but token rejected by GitHub ("Password authentication not supported"). journal-graph.js COMMITTED (reassembly validator fix confirmed). 45.9 minutes, 175.8K output tokens. Branch: spiny-orb/instrument-1774247624091 (PRD #28, evaluation run-10)
+
 ### Changed
 - (2026-03-16) Fixed span count discrepancy: total_spans_on_branch corrected from 48 to 38 in per-file-evaluation.json and rubric-scores.json (48 included working-directory-only changes from partial files not committed to branch). Updated baseline-comparison.md table to match canonical per-file-evaluation.json (PRD #4, CodeRabbit finding fix)
 - (2026-03-15) Renamed all "orb" references to "orbweaver" in PRD #4 and evaluation docs to match CLI rename (spinybacked-orbweaver #123)

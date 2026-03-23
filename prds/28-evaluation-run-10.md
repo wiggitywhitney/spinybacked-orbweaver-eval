@@ -153,7 +153,7 @@ Run-10 operates across two repos (same as run-9).
   2. Create `evaluation/run-10/lessons-for-prd11.md`.
   3. Both updated throughout all subsequent milestones.
 
-- [ ] **Evaluation run-10** — Execute `spiny-orb instrument` on **commit-story-v2** (not the eval repo):
+- [x] **Evaluation run-10** — Execute `spiny-orb instrument` on **commit-story-v2** (not the eval repo):
   1. Ensure commit-story-v2 is on **main** with clean working tree: `cd ~/Documents/Repositories/commit-story-v2 && git checkout main && git status`.
   2. **Provide the exact command** for the user to run. The command must: (a) `cd` to commit-story-v2, (b) use `caffeinate -s`, (c) strip Datadog gateway headers, (d) inject secrets via vals using commit-story-v2's `.vals.yaml`, (e) point to spiny-orb binary, (f) `tee` output to the **eval repo's** `evaluation/run-10/spiny-orb-output.log`.
   3. Record wall-clock start timestamp.
