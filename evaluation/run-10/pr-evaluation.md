@@ -13,7 +13,10 @@ PR was NOT created (push auth failed 8th time). Evaluating local summary committ
 ## Schema Changes Section
 
 - **Attributes**: 10 added attributes listed — all correct
-- **Span Extensions**: NOT LISTED — the Schema Changes section omits the 28 span extensions. Only attributes are shown. **RUN9-3 partially fixed** — the code was implemented (PR #319) but the output doesn't include span extensions. This may be related to the Weaver CLI failure corrupting the registry state mid-run.
+- **Span Extensions**: NOT LISTED — the Schema Changes section omits the 28 span extensions. Only attributes are shown. **RUN9-3 partially fixed** — the code was implemented (PR #319) but the output doesn't include span extensions.
+  - **Observed**: Schema Changes section lists 10 attributes, zero span extensions.
+  - **Hypothesis**: The Weaver CLI failure on file 22/30 may have left the registry in an inconsistent state, preventing the span extension comparison from completing. Alternatively, the PR summary generator may not be using the span extensions feature correctly.
+  - **Verification needed**: Check the span extension listing code path in spiny-orb's pr-summary.ts against the actual Weaver output during a run without CLI failures.
 
 ## Advisory Findings
 

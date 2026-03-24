@@ -167,8 +167,8 @@ context-capture-tool.js and reflection-tool.js both export `registerContextCaptu
 | auto_summarize | trigger_all, trigger_weekly, trigger_monthly | YES — distinct from summarize.run_* |
 | journal | save_entry, discover_reflections, ensure_directory, generate_sections | YES — clear file/generation ops |
 | ai | generate_section | YES — LLM node operation |
-| cli | main | YES — entry point |
-| mcp | main | YES — MCP entry point |
+| cli | main (`commit_story.cli.main`) | YES — CLI entry point |
+| mcp | main (`commit_story.mcp.main`) | YES — MCP entry point (fully qualified names are unique despite short-name overlap) |
 | summary_detector | 5 detection operations | YES — filesystem scan operations |
 
 ---

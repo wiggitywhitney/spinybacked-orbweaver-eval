@@ -40,8 +40,8 @@ Self-contained handoff from evaluation run-10 to the spiny-orb team.
 **Root cause**: The schema accumulator defaults non-count attributes to `type: string`. The dual-layer count-type fix (PRs #267, #270, #286) specifically targets `*_count` patterns → `int`. Boolean attributes are not detected or corrected.
 
 **Fix**: Extend the type correction logic to detect boolean values:
-1. **Write-time**: When the agent declares an attribute and the value is `true`/`false` or the attribute name contains `is_`, `has_`, `should_`, `force`, declare as `type: boolean`
-2. **Validation-time**: Post-generation validator rejects attributes where the set value is boolean but the declared type is not `boolean`
+1. **Write-time**: Inspect the actual attribute value in the generated code (AST-based: `TrueLiteral`/`FalseLiteral` nodes) to infer `type: boolean`. Use name patterns (`is_*`, `has_*`, `force`) only as fallback when the value is a variable rather than a literal.
+2. **Validation-time**: Post-generation validator (SCH-003) already detects boolean literals via AST — ensure it rejects attributes where the set value is boolean but the declared type is not `boolean`
 
 **Acceptance criteria**:
 1. `commit_story.summarize.force` declared as `type: boolean` in agent-extensions.yaml
@@ -98,7 +98,7 @@ Self-contained handoff from evaluation run-10 to the spiny-orb team.
 But GitHub responds: "Invalid username or token. Password authentication is not supported for Git operations."
 
 **Diagnosis**: The token IS being sent, but GitHub rejects it. Check:
-1. Token scopes via `curl -H "Authorization: token $GITHUB_TOKEN" https://api.github.com` — look for `X-OAuth-Scopes` header
+1. Token scopes via `curl -sI -H "Authorization: token $GITHUB_TOKEN" https://api.github.com` — look for `X-OAuth-Scopes` header
 2. Token type: classic PAT vs fine-grained
 3. Direct push test: `git push --dry-run https://x-access-token:$GITHUB_TOKEN@github.com/wiggitywhitney/commit-story-v2.git`
 

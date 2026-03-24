@@ -119,13 +119,13 @@ Run-9 projected for run-10 (from actionable-fix-output.md §7):
 
 The 50% discount was **not conservative enough** this run. Quality regressed from 100% to 92% — new failure types (boolean schema types, undefined attributes) weren't predicted because they're LLM-generated-code-dependent, not fix-dependent. The discount methodology works well for predicting whether fixes will land but doesn't account for new code patterns introducing new failures.
 
-**Calibration note**: The projection methodology has been well-calibrated for 4 prior runs. This is the first run where quality regressed from a higher baseline. The regression is caused by evaluation thoroughness (checking boolean types, checking optional chaining patterns) rather than actual code degradation.
+**Calibration note**: The projection methodology has been well-calibrated for 4 prior runs. This is the first run where quality regressed from a higher baseline. The regression may reflect more thorough evaluation (checking boolean types, optional chaining patterns) rather than actual code degradation — but without re-evaluating run-9's committed files for the same patterns, this remains a hypothesis.
 
 ---
 
 ## Summary
 
-Run-10 scored 92% quality (23/25) with 12 files committed. Quality regressed 8pp from run-9's perfect 100%, but this may reflect more thorough evaluation rather than actual instrumentation degradation.
+Run-10 scored 92% quality (23/25) with 12 files committed. Quality regressed 8pp from run-9's perfect 100%. Whether this reflects more thorough evaluation or actual code variation from LLM non-determinism is an open question.
 
 Key outcomes:
 1. **journal-graph.js recovered** — reassembly validator fix confirmed (3 attempts, $1.62)
