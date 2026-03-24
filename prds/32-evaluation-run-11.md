@@ -124,7 +124,7 @@ Same as runs 9-10.
 - [ ] **Pre-run verification** — Verify spiny-orb fixes and validate run prerequisites:
   1. **Handoff triage review**: Read the spiny-orb team's triage of `evaluation/run-10/actionable-fix-output.md`.
   2. **Target repo readiness** (commit-story-v2): Verify on `main`, clean working tree, spiny-orb.yaml and semconv/ exist.
-  3. **Push auth token verification (critical)**: Before anything else, verify GITHUB_TOKEN scopes. Run `curl -sH "Authorization: token $GITHUB_TOKEN" https://api.github.com` and check `X-OAuth-Scopes` header. Must include `repo` scope. Test direct push: `git push --dry-run https://x-access-token:$GITHUB_TOKEN@github.com/wiggitywhitney/commit-story-v2.git`.
+  3. **Push auth token verification (critical)**: Before anything else, verify GITHUB_TOKEN scopes. Run `curl -sI -H "Authorization: token $GITHUB_TOKEN" https://api.github.com` and check `X-OAuth-Scopes` header (the `-I` flag is required to see response headers). Must include `repo` scope. Test direct push: `git push --dry-run https://x-access-token:$GITHUB_TOKEN@github.com/wiggitywhitney/commit-story-v2.git`.
   4. **SCH-003 boolean type fix**: Verify schema accumulator detects boolean values and declares `type: boolean`.
   5. **CDQ-007 guard fix**: Verify post-generation check flags `?.` in setAttribute value arguments.
   6. **Weaver CLI reliability**: Check if retry logic was added for Weaver commands.
