@@ -214,7 +214,7 @@ Run-10 operates across two repos (same as run-9).
   6. **Cross-document audit agent** (final step).
   7. Document in `evaluation/run-10/actionable-fix-output.md`.
 
-- [ ] **Draft PRD #11** — Create on a separate branch from main:
+- [x] **Draft PRD #11** — Create on a separate branch from main:
   1. Run-10 scores as baselines.
   2. All items from `evaluation/run-10/lessons-for-prd11.md`.
   3. Carry forward unresolved findings.
