@@ -88,7 +88,7 @@ Full 32-rule rubric on ALL 30 files. Target repo: commit-story-v2 proper, branch
 | Rule | Result | Notes |
 |------|--------|-------|
 | Most rules | PASS | |
-| CDQ-006 | **Advisory** | `(commit.message || '').split('\n')[0]` — `.split()` to get first line. Practically trivial on short strings. Advisory per run-9 methodology. |
+| CDQ-006 | **Advisory** | `(commit.message \|\| '').split('\n')[0]` — `.split()` to get first line. Practically trivial on short strings. Advisory per run-9 methodology. |
 
 ### server.js (1 span)
 

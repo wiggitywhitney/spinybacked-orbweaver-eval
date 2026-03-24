@@ -98,9 +98,9 @@ Self-contained handoff from evaluation run-10 to the spiny-orb team.
 But GitHub responds: "Invalid username or token. Password authentication is not supported for Git operations."
 
 **Diagnosis**: The token IS being sent, but GitHub rejects it. Check:
-1. Token scopes via `curl -sI -H "Authorization: token $GITHUB_TOKEN" https://api.github.com` — look for `X-OAuth-Scopes` header
+1. Token scopes via `curl -sI -H "Authorization: token $GITHUB_TOKEN" https://api.github.com` — look for `X-OAuth-Scopes` header (must include `repo`)
 2. Token type: classic PAT vs fine-grained
-3. Direct push test: `git push --dry-run https://x-access-token:$GITHUB_TOKEN@github.com/wiggitywhitney/commit-story-v2.git`
+3. Write permission via API: `gh api repos/wiggitywhitney/commit-story-v2 --jq '.permissions.push'` (must return `true`)
 
 **Acceptance criteria**: Push succeeds, PR created on GitHub.
 
