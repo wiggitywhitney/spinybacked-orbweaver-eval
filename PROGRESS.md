@@ -106,6 +106,10 @@ Entry format: `- (YYYY-MM-DD) Description of feature-level change (PRD #X, miles
 
 - (2026-03-30) Completed pre-run verification for run-11: all 4 run-10 findings confirmed fixed and merged (none rejected). Push auth VERIFIED — fine-grained PAT with push/admin/maintain permissions, dry-run push succeeded (breaks 8-run streak). SCH-003 boolean fix verified (name-pattern detection: is_*, has_*, should_*, force). CDQ-007 dual fix verified (prompt guidance + validator regex). Weaver CLI retry verified (single retry, no delay). Built spiny-orb v0.1.0 from main (0395958). 30 .js files in target repo. Score projection: 25/25 target, 13 files, PR expected (PRD #32, pre-run verification + collect lessons)
 
+- (2026-03-30) Completed evaluation run-11 on commit-story-v2 proper: 13 committed, 0 failed, 0 partial, 17 correct skips. Push SUCCESS — PR #60 created (first in 9 runs). 39 total spans. journal-graph.js improved to 2 attempts (was 3). summary-manager.js recovered (9 spans). 41.2 minutes, 158.7K output tokens. Branch: spiny-orb/instrument-1774849971011 (PRD #32, evaluation run-11)
+
+- (2026-03-30) Completed per-file evaluation, rubric scoring, baseline comparison, PR evaluation, actionable fix output: **25/25 (100%) quality** — perfect score restored. Both run-10 failures fixed: SCH-003 (force=boolean) and CDQ-007 (ternary guards, no ?.  in setAttribute). Gates 5/5. PR #60 quality 4.25/5 (best ever). 5 findings filed (RUN11-1 through RUN11-5, all Low/Medium). Q x F = 13.0 (new all-time high). Advisory contradiction rate improved to 45% (was 67%). Cost $4.25. Dominant blocker peeling complete — zero quality failures remain (PRD #32, milestones 4-9)
+
 ### Changed
 - (2026-03-16) Fixed span count discrepancy: total_spans_on_branch corrected from 48 to 38 in per-file-evaluation.json and rubric-scores.json (48 included working-directory-only changes from partial files not committed to branch). Updated baseline-comparison.md table to match canonical per-file-evaluation.json (PRD #4, CodeRabbit finding fix)
 - (2026-03-15) Renamed all "orb" references to "orbweaver" in PRD #4 and evaluation docs to match CLI rename (spinybacked-orbweaver #123)

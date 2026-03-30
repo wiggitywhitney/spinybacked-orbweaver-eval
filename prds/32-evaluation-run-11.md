@@ -135,19 +135,19 @@ Same as runs 9-10.
 
 - [x] **Collect lessons for PRD #12** — Create skeleton documents at START.
 
-- [ ] **Evaluation run-11** — Execute `spiny-orb instrument` on commit-story-v2.
+- [x] **Evaluation run-11** — Execute `spiny-orb instrument` on commit-story-v2.
 
-- [ ] **Failure deep-dives** — For each failed file AND run-level failure.
+- [x] **Failure deep-dives** — For each failed file AND run-level failure.
 
-- [ ] **Per-file evaluation** — Full rubric on ALL files (no spot-checking).
+- [x] **Per-file evaluation** — Full rubric on ALL files (no spot-checking).
 
-- [ ] **PR artifact evaluation** — Evaluate PR quality.
+- [x] **PR artifact evaluation** — Evaluate PR quality.
 
-- [ ] **Rubric scoring** — Synthesize dimension-level scores.
+- [x] **Rubric scoring** — Synthesize dimension-level scores.
 
-- [ ] **Baseline comparison** — Compare run-11 vs runs 2-10.
+- [x] **Baseline comparison** — Compare run-11 vs runs 2-10.
 
-- [ ] **Actionable fix output** — Primary handoff deliverable.
+- [x] **Actionable fix output** — Primary handoff deliverable.
 
 - [ ] **Draft PRD #12** — Create on a separate branch from main.
 
