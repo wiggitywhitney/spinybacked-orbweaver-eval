@@ -1,6 +1,6 @@
 # PRD #11: Evaluation Run-11 — Boolean Type Fix and Push Auth Token Resolution
 
-**Status:** Draft
+**Status:** Complete (2026-03-30)
 **Created:** 2026-03-24
 **GitHub Issue:** #32
 **Depends on:** PRD #10 (run-10 complete, 4 findings documented, actionable fix output delivered to spiny-orb team)
@@ -121,7 +121,7 @@ Same as runs 9-10.
 
 ## Milestones
 
-- [ ] **Pre-run verification** — Verify spiny-orb fixes and validate run prerequisites:
+- [x] **Pre-run verification** — Verify spiny-orb fixes and validate run prerequisites:
   1. **Handoff triage review**: Read the spiny-orb team's triage of `evaluation/run-10/actionable-fix-output.md`.
   2. **Target repo readiness** (commit-story-v2): Verify on `main`, clean working tree, spiny-orb.yaml and semconv/ exist.
   3. **Push auth token verification (critical)**: Before anything else, verify GITHUB_TOKEN scopes. Run `curl -sI -H "Authorization: token $GITHUB_TOKEN" https://api.github.com` and check `X-OAuth-Scopes` header (the `-I` flag is required to see response headers). Must include `repo` scope. Test direct push: `git push --dry-run https://x-access-token:$GITHUB_TOKEN@github.com/wiggitywhitney/commit-story-v2.git`.
@@ -133,23 +133,23 @@ Same as runs 9-10.
   9. Record version and findings status.
   10. Append observations to `evaluation/run-11/lessons-for-prd12.md`.
 
-- [ ] **Collect lessons for PRD #12** — Create skeleton documents at START.
+- [x] **Collect lessons for PRD #12** — Create skeleton documents at START.
 
-- [ ] **Evaluation run-11** — Execute `spiny-orb instrument` on commit-story-v2.
+- [x] **Evaluation run-11** — Execute `spiny-orb instrument` on commit-story-v2.
 
-- [ ] **Failure deep-dives** — For each failed file AND run-level failure.
+- [x] **Failure deep-dives** — For each failed file AND run-level failure.
 
-- [ ] **Per-file evaluation** — Full rubric on ALL files (no spot-checking).
+- [x] **Per-file evaluation** — Full rubric on ALL files (no spot-checking).
 
-- [ ] **PR artifact evaluation** — Evaluate PR quality.
+- [x] **PR artifact evaluation** — Evaluate PR quality.
 
-- [ ] **Rubric scoring** — Synthesize dimension-level scores.
+- [x] **Rubric scoring** — Synthesize dimension-level scores.
 
-- [ ] **Baseline comparison** — Compare run-11 vs runs 2-10.
+- [x] **Baseline comparison** — Compare run-11 vs runs 2-10.
 
-- [ ] **Actionable fix output** — Primary handoff deliverable.
+- [x] **Actionable fix output** — Primary handoff deliverable.
 
-- [ ] **Draft PRD #12** — Create on a separate branch from main.
+- [x] **Draft PRD #12** — Create on a separate branch from main.
 
 ---
 
