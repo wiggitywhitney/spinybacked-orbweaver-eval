@@ -133,7 +133,7 @@ Same as runs 9-10.
   9. Record version and findings status.
   10. Append observations to `evaluation/run-11/lessons-for-prd12.md`.
 
-- [ ] **Collect lessons for PRD #12** — Create skeleton documents at START.
+- [x] **Collect lessons for PRD #12** — Create skeleton documents at START.
 
 - [ ] **Evaluation run-11** — Execute `spiny-orb instrument` on commit-story-v2.
 
