@@ -149,7 +149,7 @@ Same as runs 9-10.
 
 - [x] **Actionable fix output** — Primary handoff deliverable.
 
-- [ ] **Draft PRD #12** — Create on a separate branch from main.
+- [x] **Draft PRD #12** — Create on a separate branch from main.
 
 ---
 
