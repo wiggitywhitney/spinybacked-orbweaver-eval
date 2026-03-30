@@ -1,6 +1,6 @@
 # PRD #11: Evaluation Run-11 — Boolean Type Fix and Push Auth Token Resolution
 
-**Status:** Draft
+**Status:** Complete (2026-03-30)
 **Created:** 2026-03-24
 **GitHub Issue:** #32
 **Depends on:** PRD #10 (run-10 complete, 4 findings documented, actionable fix output delivered to spiny-orb team)
