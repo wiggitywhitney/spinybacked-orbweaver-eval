@@ -15,7 +15,7 @@ After 8 consecutive failures (runs 3-10), push auth succeeded:
 - `urlChanged=true, path=token-swap` (URL swap mechanism fired)
 - PR #60 created at https://github.com/wiggitywhitney/commit-story-v2/pull/60
 
-**Root cause of prior failures**: Token type/scope issues. The fix was a fine-grained PAT with explicit `push`, `admin`, `maintain` permissions on the commit-story-v2 repo. The URL swap mechanism (introduced in run-9, refined in run-10) was working correctly — the blocker was always the token itself.
+**Root cause of prior failures**: Token type/scope issues. The fix was a fine-grained PAT with Contents: read & write and Pull requests: read & write permissions on the commit-story-v2 repo. The URL swap mechanism (introduced in run-9, refined in run-10) was working correctly — the blocker was always the token itself.
 
 ### Retry Files (6 files needed 2 attempts)
 
