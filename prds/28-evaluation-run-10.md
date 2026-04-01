@@ -1,6 +1,6 @@
 # PRD #10: Evaluation Run-10 — Push Auth Resolution and Operational Reliability
 
-**Status:** Draft
+**Status:** Complete
 **Created:** 2026-03-23
 **GitHub Issue:** #28
 **Depends on:** PRD #9 (run-9 complete, 25/25 quality, 5 findings documented, actionable fix output delivered to spiny-orb team)
@@ -134,7 +134,7 @@ Run-10 operates across two repos (same as run-9).
 
 ## Milestones
 
-- [ ] **Pre-run verification** — Verify spiny-orb fixes and validate run prerequisites:
+- [x] **Pre-run verification** — Verify spiny-orb fixes and validate run prerequisites:
   1. **Handoff triage review**: Read the spiny-orb team's triage of `evaluation/run-9/actionable-fix-output.md` (eval repo). Compare what they filed vs what the eval recommended. Note any findings rejected.
   2. **Target repo readiness** (commit-story-v2): Verify commit-story-v2 is on `main` with clean working tree. Verify `spiny-orb.yaml` and `semconv/` exist. Verify `@opentelemetry/sdk-node` still in devDependencies (not peerDependencies).
   3. **Push auth verification (critical)**: Verify GITHUB_TOKEN propagation to `pushBranch()`. Check for diagnostic logging (recommended in RUN9-1). Test with `git push --dry-run` using token-embedded URL **in the commit-story-v2 repo**. Must confirm token is in process environment AND URL swap fires.
@@ -148,12 +148,12 @@ Run-10 operates across two repos (same as run-9).
   11. Record which run-9 findings are verified fixed vs still open.
   12. Append observations to `evaluation/run-10/lessons-for-prd11.md` (eval repo).
 
-- [ ] **Collect lessons for PRD #11** — Create BOTH output documents at the START:
+- [x] **Collect lessons for PRD #11** — Create BOTH output documents at the START:
   1. Create `evaluation/run-10/spiny-orb-findings.md`.
   2. Create `evaluation/run-10/lessons-for-prd11.md`.
   3. Both updated throughout all subsequent milestones.
 
-- [ ] **Evaluation run-10** — Execute `spiny-orb instrument` on **commit-story-v2** (not the eval repo):
+- [x] **Evaluation run-10** — Execute `spiny-orb instrument` on **commit-story-v2** (not the eval repo):
   1. Ensure commit-story-v2 is on **main** with clean working tree: `cd ~/Documents/Repositories/commit-story-v2 && git checkout main && git status`.
   2. **Provide the exact command** for the user to run. The command must: (a) `cd` to commit-story-v2, (b) use `caffeinate -s`, (c) strip Datadog gateway headers, (d) inject secrets via vals using commit-story-v2's `.vals.yaml`, (e) point to spiny-orb binary, (f) `tee` output to the **eval repo's** `evaluation/run-10/spiny-orb-output.log`.
   3. Record wall-clock start timestamp.
@@ -165,14 +165,14 @@ Run-10 operates across two repos (same as run-9).
   9. **Dominant blocker peeling check**: With quality at 100% and operational fixes applied, what's the new top issue?
   10. Append observations to findings and lessons documents (eval repo).
 
-- [ ] **Failure deep-dives** — For each failed file AND run-level failure:
+- [x] **Failure deep-dives** — For each failed file AND run-level failure:
   1. File-level failures (if any).
   2. Run-level failures: push auth (verify fix or document continued failure).
   3. Unmasked bug detection for any changes.
   4. Regression root cause (if any).
   5. Document in `evaluation/run-10/failure-deep-dives.md`.
 
-- [ ] **Per-file evaluation** — Full rubric on ALL files (no spot-checking):
+- [x] **Per-file evaluation** — Full rubric on ALL files (no spot-checking):
   1. Gate checks + per-run rules. Run tests on **commit-story-v2** (the target repo).
   2. Per-file quality rules on ALL files discovered by spiny-orb (count from pre-run step 7).
   3. Apply all rubric clarifications from prior runs.
@@ -181,7 +181,7 @@ Run-10 operates across two repos (same as run-9).
   6. **SCH-001 semantic quality**: Verify agent-invented span names are semantically correct.
   7. Structured output → `per-file-evaluation.md`.
 
-- [ ] **PR artifact evaluation** — Evaluate PR quality:
+- [x] **PR artifact evaluation** — Evaluate PR quality:
   1. If PR exists: evaluate per-file table accuracy, span counts vs branch state.
   2. If PR not created: evaluate local summary against branch state.
   3. **PR summary length**: Target <200 lines.
@@ -190,13 +190,13 @@ Run-10 operates across two repos (same as run-9).
   6. **Schema changes completeness**: Must include both attributes and span extensions.
   7. Document in `evaluation/run-10/pr-evaluation.md`.
 
-- [ ] **Rubric scoring** — Synthesize dimension-level scores:
+- [x] **Rubric scoring** — Synthesize dimension-level scores:
   1. Aggregate from per-file evaluation.
   2. Score with per-rule evidence and instance counts.
   3. Classify failures (if any) using consistent methodology from runs 8-9.
   4. Emit `rubric-scores.md`.
 
-- [ ] **Baseline comparison** — Compare run-10 vs runs 2-9:
+- [x] **Baseline comparison** — Compare run-10 vs runs 2-9:
   1. 9-run dimension trend.
   2. File outcome comparison with per-file trajectories.
   3. Quality x files product trend.
@@ -205,7 +205,7 @@ Run-10 operates across two repos (same as run-9).
   6. Score projection validation.
   7. Document in `evaluation/run-10/baseline-comparison.md`.
 
-- [ ] **Actionable fix output** — Primary handoff deliverable:
+- [x] **Actionable fix output** — Primary handoff deliverable:
   1. Remaining quality rule failures with evidence and acceptance criteria.
   2. Run-9 findings assessment (which fixed, which remain).
   3. Run-11 verification checklist.
@@ -214,7 +214,7 @@ Run-10 operates across two repos (same as run-9).
   6. **Cross-document audit agent** (final step).
   7. Document in `evaluation/run-10/actionable-fix-output.md`.
 
-- [ ] **Draft PRD #11** — Create on a separate branch from main:
+- [x] **Draft PRD #11** — Create on a separate branch from main:
   1. Run-10 scores as baselines.
   2. All items from `evaluation/run-10/lessons-for-prd11.md`.
   3. Carry forward unresolved findings.
