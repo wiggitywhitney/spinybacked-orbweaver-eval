@@ -20,8 +20,8 @@ PR #61 is the second consecutive successfully created PR (PR #60 was run-11's fi
 
 | Element | Accurate | Notes |
 |---------|----------|-------|
-| File counts (30/12/17/1 partial) | YES | Matches run output |
-| Per-file span counts | YES | All 13 files (12 committed + 1 partial) match |
+| File counts (30 total / 12 committed / 17 skipped / 1 partial) | YES | Matches run output |
+| Per-file span counts | YES | All 13 instrumented files (12 committed + 1 partial) match |
 | Per-file attempt counts | YES | Correct |
 | Per-file cost | YES | Sum = $5.19 |
 | Correct skip list | YES | All 17 files listed |
