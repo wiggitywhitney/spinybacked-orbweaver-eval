@@ -122,7 +122,7 @@ Same as runs 9-11.
   8. Record version and findings status.
   9. Append observations to `evaluation/run-12/lessons-for-prd13.md` (created in milestone 2; if running milestones in order, create the file first).
 
-- [ ] **Collect lessons for PRD #13** — Create skeleton documents at START. Must run before pre-run verification step 9 (which appends to the lessons file).
+- [x] **Collect lessons for PRD #13** — Create skeleton documents at START. Must run before pre-run verification step 9 (which appends to the lessons file).
 
 - [ ] **Evaluation run-12** — Execute `spiny-orb instrument` on commit-story-v2.
 
