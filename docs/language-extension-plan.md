@@ -53,6 +53,13 @@ The first PRD for any new language/target combination. Covers:
 
 This PRD type exists exactly once per target. It is the "onboarding" for that language/target combination.
 
+**Language-specific prerequisites reference**: Use the commit-story-v2 JavaScript setup as the canonical reference for what each prerequisite looks like, then adapt for the target language. For JavaScript/TypeScript, `traceloop-init.js` handles OTel auto-instrumentation registration; for Python/Go, use the language-appropriate SDK initialization equivalent. The initial `semconv/` schema should mirror the structure in `commit-story-v2/semconv/` adapted to the target's domain.
+
+**Operational details for Type C PRDs**:
+- Whitney runs `spiny-orb instrument` herself in her own terminal — the AI does not run this command
+- `GITHUB_TOKEN` must be in the environment for spiny-orb to create a PR
+- The Run-1 evaluation follows the full Type D milestone structure, including both user-facing checkpoints (Findings Discussion and handoff pause)
+
 ### Type D: Run-N PRD (recurring, indefinitely)
 Identical in structure to the existing PRDs #3–13. Triggered by findings from the previous run. Follows the established milestone sequence:
 1. Collect skeleton documents
