@@ -108,7 +108,7 @@ Same as runs 9-12.
 
 ### Eval Branch Convention
 
-The feature branch for this PRD (`feature/prd-33-evaluation-run-13`) **never merges to main**. The PR exists for CodeRabbit review only. When `/prd-done` runs at completion, close issue #37 without merging the eval branch.
+The feature branch for this PRD (`feature/prd-37-evaluation-run-13`) **never merges to main**. The PR exists for CodeRabbit review only. When `/prd-done` runs at completion, close issue #37 without merging the eval branch.
 
 ---
 
@@ -169,7 +169,7 @@ The feature branch for this PRD (`feature/prd-33-evaluation-run-13`) **never mer
 - [ ] **Actionable fix output** — Primary handoff deliverable. At milestone completion:
   1. Run the cross-document audit agent to verify consistency across all run-13 evaluation artifacts.
   2. *(User-facing checkpoint 2)* Give Whitney an interpreted summary of key findings — failures, root causes, notable patterns, what to watch for in run-14.
-  3. Print the absolute file path: `/Users/whitney.lee/Documents/Repositories/commit-story-v2-eval/evaluation/run-13/actionable-fix-output.md`
+  3. Print the absolute file path of `evaluation/run-13/actionable-fix-output.md` (derive from current working directory).
   4. **Pause.** Do not proceed to Draft PRD #14 until Whitney confirms she has handed the document off to the spiny-orb team.
 
 - [ ] **Draft PRD #14** — Create on a separate branch from main. Merge the PRD PR to main so `/prd-start` can pick it up. Carry forward both user-facing checkpoints (Findings Discussion + handoff pause) into PRD #14's milestone structure.
