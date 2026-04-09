@@ -104,6 +104,12 @@ Same as runs 9-12.
 - **Run-12 findings** (eval repo): `evaluation/run-12/spiny-orb-findings.md` (6 findings)
 - **Run-12 lessons** (eval repo): `evaluation/run-12/lessons-for-prd13.md`
 
+> **Note**: Run-12 artifacts live on branch `feature/prd-33-evaluation-run-12`, not on main. Access with: `git show feature/prd-33-evaluation-run-12:evaluation/run-12/<filename>`
+
+### Eval Branch Convention
+
+The feature branch for this PRD (`feature/prd-33-evaluation-run-13`) **never merges to main**. The PR exists for CodeRabbit review only. When `/prd-done` runs at completion, close issue #37 without merging the eval branch.
+
 ---
 
 ## Success Criteria
@@ -136,19 +142,29 @@ Same as runs 9-12.
   8. Record version and findings status.
   9. Append observations to `evaluation/run-13/lessons-for-prd14.md`.
 
-- [ ] **Evaluation run-13** — Execute `spiny-orb instrument` on commit-story-v2. Whitney runs this in her own terminal. Record output to `evaluation/run-13/spiny-orb-output.log`. Write `evaluation/run-13/run-summary.md`.
+- [ ] **Evaluation run-13** — Whitney runs `spiny-orb instrument` in her own terminal. **Do NOT run the command yourself.** AI role in this milestone: (1) create `evaluation/run-13/` directory, (2) confirm readiness with Whitney, (3) once Whitney provides the log output, save it to `evaluation/run-13/spiny-orb-output.log` and write `evaluation/run-13/run-summary.md`.
 
-- [ ] **Findings Discussion** *(user-facing checkpoint 1)* — Right after the run completes and `run-summary.md` is written, before any analysis begins: give Whitney a quick raw overview of how things look — files committed, quality score (if known), cost, anything immediately alarming or surprising. Wait for her acknowledgment before proceeding to write evaluation documents.
+- [ ] **Findings Discussion** *(user-facing checkpoint 1)* — After `run-summary.md` is written, before any evaluation documents are started: report to Whitney: (1) files committed / failed / partial, (2) quality score if visible in log, (3) cost, (4) push/PR status, (5) top 1-2 surprises or regressions. Keep it conversational, under 10 lines. Wait for her acknowledgment before proceeding.
 
 - [ ] **Failure deep-dives** — For each failed file AND run-level failure. Includes the partial file if any.
+  Produces: `evaluation/run-13/failure-deep-dives.md`
+  Style reference: `git show feature/prd-33-evaluation-run-12:evaluation/run-12/failure-deep-dives.md`
 
 - [ ] **Per-file evaluation** — Full rubric on ALL files (no spot-checking). Evaluate all 32 rules across all committed and partial files.
+  Produces: `evaluation/run-13/per-file-evaluation.md`
+  Style reference: `git show feature/prd-33-evaluation-run-12:evaluation/run-12/per-file-evaluation.md`
 
 - [ ] **PR artifact evaluation** — Evaluate PR quality.
+  Produces: `evaluation/run-13/pr-evaluation.md`
+  Style reference: `git show feature/prd-33-evaluation-run-12:evaluation/run-12/pr-evaluation.md`
 
 - [ ] **Rubric scoring** — Synthesize dimension-level scores.
+  Produces: `evaluation/run-13/rubric-scores.md`
+  Style reference: `git show feature/prd-33-evaluation-run-12:evaluation/run-12/rubric-scores.md`
 
 - [ ] **Baseline comparison** — Compare run-13 vs runs 2-12.
+  Produces: `evaluation/run-13/baseline-comparison.md`
+  Style reference: `git show feature/prd-33-evaluation-run-12:evaluation/run-12/baseline-comparison.md`
 
 - [ ] **Actionable fix output** — Primary handoff deliverable. At milestone completion:
   1. Run the cross-document audit agent to verify consistency across all run-13 evaluation artifacts.
@@ -161,6 +177,8 @@ Same as runs 9-12.
 ---
 
 ## Score Projections (from Run-12 Actionable Fix Output §7)
+
+**50% discount**: Projections account for LLM variation by discounting 50% toward the worst case. "After 50% discount" = midpoint between ideal and minimum expected outcome.
 
 ### Minimum (no fixes — P1/P2 not landed)
 
