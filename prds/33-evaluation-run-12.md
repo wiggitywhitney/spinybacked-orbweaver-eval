@@ -138,7 +138,9 @@ Same as runs 9-11.
 
 - [x] **Actionable fix output** — Primary handoff deliverable. At milestone completion, run the cross-document audit agent to verify consistency across all run-12 evaluation artifacts before finalizing.
 
-- [ ] **Draft PRD #13** — Create on a separate branch from main. Merge the PRD PR to main so `/prd-start` can pick it up. The PRD must include a **Findings Discussion** milestone: after the evaluation run and run-summary are written, before proceeding to write failure-deep-dives/per-file-evaluation/etc., Claude surfaces key findings to Whitney conversationally (what regressed, what passed, what was interesting, notable patterns). Whitney discusses and confirms before evaluation document writing begins. This step appears in all future evaluation PRDs. (Decision 2026-04-09)
+- [ ] **Draft PRD #13** — Create on a separate branch from main. Merge the PRD PR to main so `/prd-start` can pick it up. The PRD must include:
+  1. A **Findings Discussion** milestone (between "Evaluation run" and "Failure deep-dives"): surface key findings to Whitney conversationally, wait for her confirmation before writing evaluation documents. (Decision 2026-04-09)
+  2. A **handoff pause** at the end of the Actionable fix output milestone: print the absolute file path of actionable-fix-output.md and do not proceed to the next milestone until Whitney confirms she has handed off the document to the spiny-orb team. (Decision 2026-04-09)
 
 ---
 
@@ -187,6 +189,7 @@ Same as runs 9-11.
 | 2026-03-30 | Advisory judge fixes as P2 | Low priority — advisories are informational only. |
 | 2026-03-30 | Cost target maintained at $4.00 | Run-11 was $4.25 — close but achievable with fewer retry attempts. |
 | 2026-04-09 | Add findings discussion step before writing evaluation documents | Whitney cannot see evaluation documents as they're written and wants a conversational high-level summary of key findings (regressions, passes, notable patterns) before Claude proceeds to write up the detailed artifacts. Applies to all future evaluation PRDs, not just the next one. Encode in PRD #13 and the evaluation PRD template. |
+| 2026-04-09 | Print full handoff file path and pause when actionable-fix-output is ready | When the actionable-fix-output.md milestone completes, print the absolute file path and pause. Do not proceed to the next milestone until Whitney confirms she has handed off the document to the spiny-orb team. Applies to all future evaluation PRDs. |
 
 ---
 
