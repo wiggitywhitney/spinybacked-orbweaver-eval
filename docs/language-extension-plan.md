@@ -37,7 +37,9 @@ Investigation work that produces criteria, decisions, or findings used by other 
 - Evaluating candidate target repos for a specific language
 - Determining whether commit-story-v2 is actually a good JavaScript eval target
 
-Research spikes produce artifacts (scorecards, findings docs) and decisions that unblock downstream PRDs. They are created when a decision needs to be made before implementation can proceed. A Type B PRD is complete when a written findings document exists and any downstream PRD decision logs are updated with the spike's conclusions.
+Research spikes produce artifacts (scorecards, findings docs) and decisions that unblock downstream PRDs. They are created when a decision needs to be made before implementation can proceed. A Type B PRD is complete when a written findings document exists **at its predefined output path** (defined in this plan doc before the PRD is created) and any downstream PRD decision logs are updated with the spike's conclusions.
+
+**The output path is defined in the plan document, not the PRD itself.** This ensures downstream PRDs can reference a stable, known path without searching for the research PRD.
 
 ### Type C: Setup + Run-1 PRD (one per language/target, never repeated)
 The first PRD for any new language/target combination. Covers:
@@ -52,6 +54,8 @@ The first PRD for any new language/target combination. Covers:
 5. Produce Run-1 findings, which triggers a Type D PRD
 
 This PRD type exists exactly once per target. It is the "onboarding" for that language/target combination.
+
+**Research spike dependency**: Before any Type C PRD can proceed, read `docs/research/eval-target-criteria.md`. If this file does not exist, the research spike (Step 2) has not completed — stop and complete it first. This file contains the validated target for each language; use it to confirm the target before forking anything.
 
 **When drafting a Type C PRD**: Use the most recent JavaScript eval run PRD (currently `prds/37-evaluation-run-13.md`) as a **model** — understand its milestone structure and adapt it for the new language, making language-specific adjustments where needed. Do not copy it verbatim. Before committing the draft, launch a verification agent with: "Compare this [language] Type C PRD milestone by milestone against `prds/37-evaluation-run-13.md`. Flag any step present in the JS PRD that is absent or weaker in the new PRD, and explain whether each omission is justified (e.g., JS-specific detail that doesn't apply) or a gap that needs to be filled."
 
@@ -147,6 +151,8 @@ PRD numbering stays sequential (GitHub issue numbers). PRD titles include the ta
 
 commit-story-v2 was chosen as the JavaScript eval target by circumstance, not by research. It may or may not be a good target. The research spike must evaluate it alongside other candidates — it does not get assumed to be correct.
 
+**Output path**: `docs/research/eval-target-criteria.md` — this file is written by the research spike and read by all downstream Type C PRDs. It must exist before any Type C PRD can proceed.
+
 The spike produces a language-agnostic scorecard. All candidates — including commit-story-v2 — are evaluated against it. The spike may conclude:
 - commit-story-v2 is a good target → continue the existing JS chain on it
 - commit-story-v2 has weaknesses → start a new "official" JS baseline on a better target; treat existing runs as prototype/development history (still valid for tracking spiny-orb improvement on that specific target)
@@ -178,7 +184,7 @@ Do NOT ask it to "confirm" the hypotheses. Frame it as: "here are factors we thi
 
 **Do NOT use the hypothesis table as acceptance criteria.** A research spike that confirms all hypotheses without surfacing new factors has not done its job.
 
-The spike's findings document should include: (1) the final criteria scorecard with evidence, (2) a verdict for each known candidate (pass/fail/conditional with rationale), and (3) a recommended target for any language where the primary candidate failed.
+The spike's findings document at `docs/research/eval-target-criteria.md` must include: (1) the final criteria scorecard with evidence, (2) a verdict for each known candidate (pass/fail/conditional with rationale), and (3) a recommended target for any language where the primary candidate failed.
 
 ---
 
@@ -249,6 +255,7 @@ Prerequisites: none.
 
 **Step 2 — Research spike: eval target criteria** *(Type B)*
 Prerequisites: none — can run in parallel with or after Step 1. Produces a language-agnostic criteria scorecard. Evaluates commit-story-v2, Cluster Whisperer, and k8s-vectordb-sync against it. Identifies a Python candidate. Unblocks Steps 4–6. May also produce a recommendation for a new JS target (Type C for JS) if commit-story-v2 fails the criteria — conditional on findings, not a scheduled step.
+**Output**: writes findings to `docs/research/eval-target-criteria.md`. Steps 4–6 cannot proceed until this file exists.
 *Accomplishes: the system has an evidence-based scorecard for choosing targets. No longer guessing what "good" looks like.*
 
 **Step 3 — JS evaluation run-13** *(Type D — PRD #37, already created)*
@@ -256,13 +263,13 @@ Gate: NDS-003 truthy-check fix merges in spiny-orb. Spawns an indefinite run cha
 *Accomplishes: first run on the new repo structure, confirming migration didn't break the JS chain. Verifies the NDS-003 fix resolved run-12's regression.*
 
 **Step 4 — TypeScript eval setup + Run-1** *(Type C)*
-Gates: TypeScript language provider lands in spiny-orb AND Step 2 validates a target. Spawns an indefinite TypeScript run chain (same pattern as Step 3).
+Gates: TypeScript language provider lands in spiny-orb AND `docs/research/eval-target-criteria.md` exists with a TypeScript verdict. Read that file first to confirm the validated target before forking anything. Spawns an indefinite TypeScript run chain (same pattern as Step 3).
 *Accomplishes: TypeScript evaluation chain exists. The system can now measure spiny-orb quality on a second language.*
 
 **Step 5 — Python eval setup + Run-1** *(Type C)*
-Gates: Python language provider lands in spiny-orb AND Step 2 identifies a validated target. Spawns an indefinite Python run chain.
+Gates: Python language provider lands in spiny-orb AND `docs/research/eval-target-criteria.md` exists with a Python verdict and recommended target. Read that file first. Spawns an indefinite Python run chain.
 *Accomplishes: Python evaluation chain exists.*
 
 **Step 6 — Go eval setup + Run-1** *(Type C)*
-Gates: Go language provider lands in spiny-orb AND Step 2 validates k8s-vectordb-sync (or alternative). Spawns an indefinite Go run chain.
+Gates: Go language provider lands in spiny-orb AND `docs/research/eval-target-criteria.md` exists with a Go verdict. Read that file first to confirm k8s-vectordb-sync or the recommended alternative. Spawns an indefinite Go run chain.
 *Accomplishes: Go evaluation chain exists.*
