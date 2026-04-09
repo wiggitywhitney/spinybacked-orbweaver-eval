@@ -189,7 +189,7 @@ Same as runs 9-11.
 | 2026-03-30 | Advisory judge fixes as P2 | Low priority — advisories are informational only. |
 | 2026-03-30 | Cost target maintained at $4.00 | Run-11 was $4.25 — close but achievable with fewer retry attempts. |
 | 2026-04-09 | Add findings discussion step before writing evaluation documents | Whitney cannot see evaluation documents as they're written and wants a conversational high-level summary of key findings (regressions, passes, notable patterns) before Claude proceeds to write up the detailed artifacts. Applies to all future evaluation PRDs, not just the next one. Encode in PRD #13 and the evaluation PRD template. |
-| 2026-04-09 | Print full handoff file path and pause when actionable-fix-output is ready | When the actionable-fix-output.md milestone completes, print the absolute file path and pause. Do not proceed to the next milestone until Whitney confirms she has handed off the document to the spiny-orb team. Applies to all future evaluation PRDs. |
+| 2026-04-09 | Two moments to surface findings: Moment 1 after run (raw signal), Moment 2 after analysis with handoff | Moment 1 (Findings Discussion milestone): right after the run completes, give a quick overview before any analysis — files, quality, cost, surprises. Moment 2 (end of Actionable fix output milestone): after full analysis, give an interpreted summary of key failures and root causes, then print the absolute path of actionable-fix-output.md and pause until Whitney confirms handoff to spiny-orb team. Applies to all future evaluation PRDs. |
 
 ---
 
