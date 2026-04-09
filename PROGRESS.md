@@ -105,6 +105,7 @@ Entry format: `- (YYYY-MM-DD) Description of feature-level change (PRD #X, miles
 - (2026-03-24) Drafted PRD #11 for evaluation run-11: boolean type fix and push auth token resolution. Created as issue #32 (PRD #28, draft PRD #11)
 
 - (2026-04-09) Created run-12 evaluation directory and lessons-for-prd13.md skeleton to unblock pre-run verification step 9 (PRD #12, collect lessons)
+- (2026-04-09) Completed pre-run verification for run-12: RUN11-5 (NDS-003 defined-value guards) fixed via PR #352, RUN11-1 (SCH-004/CDQ-006 false positives) fixed via PR #355. Both merged 2026-03-30. Push auth stable (dry-run clean). 30 .js files in target repo. Rebuilt spiny-orb from feature/prd-371-javascript-provider-extraction (302e6b2, v1.0.0) — first run using PRD #371 LanguageProvider/JavaScriptProvider architecture. Target repo needs `git checkout main` before running instrument (PRD #33, pre-run verification)
 
 ### Changed
 - (2026-03-16) Fixed span count discrepancy: total_spans_on_branch corrected from 48 to 38 in per-file-evaluation.json and rubric-scores.json (48 included working-directory-only changes from partial files not committed to branch). Updated baseline-comparison.md table to match canonical per-file-evaluation.json (PRD #4, CodeRabbit finding fix)
