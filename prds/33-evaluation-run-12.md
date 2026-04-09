@@ -126,17 +126,17 @@ Same as runs 9-11.
 
 - [x] **Evaluation run-12** — Execute `spiny-orb instrument` on commit-story-v2.
 
-- [ ] **Failure deep-dives** — For each failed file AND run-level failure.
+- [x] **Failure deep-dives** — For each failed file AND run-level failure.
 
-- [ ] **Per-file evaluation** — Full rubric on ALL files (no spot-checking).
+- [x] **Per-file evaluation** — Full rubric on ALL files (no spot-checking).
 
-- [ ] **PR artifact evaluation** — Evaluate PR quality.
+- [x] **PR artifact evaluation** — Evaluate PR quality.
 
-- [ ] **Rubric scoring** — Synthesize dimension-level scores.
+- [x] **Rubric scoring** — Synthesize dimension-level scores.
 
-- [ ] **Baseline comparison** — Compare run-12 vs runs 2-11.
+- [x] **Baseline comparison** — Compare run-12 vs runs 2-11.
 
-- [ ] **Actionable fix output** — Primary handoff deliverable. At milestone completion, run the cross-document audit agent to verify consistency across all run-12 evaluation artifacts before finalizing.
+- [x] **Actionable fix output** — Primary handoff deliverable. At milestone completion, run the cross-document audit agent to verify consistency across all run-12 evaluation artifacts before finalizing.
 
 - [ ] **Draft PRD #13** — Create on a separate branch from main. Merge the PRD PR to main so `/prd-start` can pick it up.
 
