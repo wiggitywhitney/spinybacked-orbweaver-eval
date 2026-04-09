@@ -124,7 +124,7 @@ Same as runs 9-11.
 
 - [x] **Collect lessons for PRD #13** — Create skeleton documents at START. Must run before pre-run verification step 9 (which appends to the lessons file).
 
-- [ ] **Evaluation run-12** — Execute `spiny-orb instrument` on commit-story-v2.
+- [x] **Evaluation run-12** — Execute `spiny-orb instrument` on commit-story-v2.
 
 - [ ] **Failure deep-dives** — For each failed file AND run-level failure.
 
