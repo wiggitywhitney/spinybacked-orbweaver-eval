@@ -168,9 +168,9 @@ Do NOT ask it to "confirm" the hypotheses. Frame it as: "here are factors we thi
 | Language | spiny-orb provider status | Primary candidate | Notes |
 |----------|--------------------------|-------------------|-------|
 | JavaScript | Supported | commit-story-v2 | Validate against criteria — not assumed good |
-| TypeScript | PRD B (in progress) | Cluster Whisperer | Whitney's existing repo; validate against criteria. **Do NOT use Spinybacked Orbweaver itself** — instrumenting the agent on itself creates confounding noise (failures could be TypeScript provider issues or self-referential edge cases; can't distinguish) |
-| Python | PRD D (future) | TBD | No personal repo Whitney is excited about; research spike finds candidate |
-| Go | PRD E (future) | k8s-vectordb-sync | Whitney's existing repo; validate against criteria |
+| TypeScript | spinybacked-orbweaver PRD B (in progress) | Cluster Whisperer | Whitney's existing repo; validate against criteria. **Do NOT use Spinybacked Orbweaver itself** — instrumenting the agent on itself creates confounding noise (failures could be TypeScript provider issues or self-referential edge cases; can't distinguish) |
+| Python | spinybacked-orbweaver PRD D (future) | TBD | No personal repo Whitney is excited about; research spike finds candidate |
+| Go | spinybacked-orbweaver PRD E (future) | k8s-vectordb-sync | Whitney's existing repo; validate against criteria |
 
 For languages without a good personal repo candidate (Python, future languages), the research spike finds a small, popular, permissively-licensed open-source project that hits the target criteria. Fork once, freeze it, never pull upstream.
 
@@ -202,13 +202,16 @@ After full analysis, give Whitney an interpreted summary of key findings: failur
 
 ---
 
-## Immediate Next Steps
+## Execution Roadmap
 
-1. **Finish PRD #33**: merge PR #38 (docs/draft-prd-13), run `/prd-done` on `feature/prd-33-evaluation-run-12` (no merge — eval branch)
-2. **Type A: Repo generalization PRD** — rename, restructure, templates, ROADMAP.md
-3. **Type B: Research spike PRD** — derive target criteria, evaluate commit-story-v2 and Cluster Whisperer, find Python candidate
-4. **JS run chain continues independently**: PRD #13 (run-13) picks up when NDS-003 truthy fix lands
-5. **TypeScript Type C PRD**: created when TypeScript provider merges to spiny-orb main and target is validated
+The steps below are PRDs to create, in order. See [Execution Roadmap section](#execution-roadmap-1) at the bottom for the full structured version (appended once approved).
+
+1. **Type A: Repo generalization** — rename, restructure, templates, ROADMAP.md
+2. **Type B: Research spike** — derive target criteria, evaluate all known candidates, find Python candidate
+3. **JS run-13** (PRD #37, already created) — picks up when NDS-003 truthy fix lands; spawns indefinite run chain
+4. **TypeScript eval setup + Run-1** — created when TypeScript provider lands AND research spike complete; spawns indefinite run chain
+5. **Python eval setup + Run-1** — created when Python provider lands AND research spike complete; spawns indefinite run chain
+6. **Go eval setup + Run-1** — created when Go provider lands AND research spike complete; spawns indefinite run chain
 
 ---
 
