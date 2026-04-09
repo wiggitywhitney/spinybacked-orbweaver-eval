@@ -30,4 +30,18 @@ Observations collected during run-12 evaluation that should inform the next eval
 
 ## Evaluation Process Observations
 
-<!-- Populated during Per-File Evaluation and Rubric Scoring milestones -->
+1. **COV-004 now requires explicit justification when skipping exported async I/O functions**: The run-12 COV-004 failure (summary-manager.js) was caused by the agent applying "context propagation" reasoning to skip 6 exported async I/O functions. Future evaluations should flag any file where exported async functions were skipped without a rubric-grounded justification (RST-001 sync-only or RST-004 unexported).
+
+2. **CDQ-007 and NDS-003 now produce quality failures, not just attribute dropping**: Run-11's CDQ-007/NDS-003 conflict produced attribute dropping (advisory quality concern). Run-12's conflict produced an actual CDQ-007 canonical failure (unconditional setAttribute from nullable fields). The root cause (truthy-check gap in NDS-003) is more urgent than previously assessed.
+
+3. **summary-manager.js is an instrumentation oscillator**: Run-10 failed (Weaver CLI), run-11 succeeded with 9 spans, run-12 regressed to 3 spans. Watch this file carefully in future runs — it has the widest variation in span count.
+
+4. **Two consecutive PR successes confirm token-swap mechanism stability**: PRs #60 (run-11) and #61 (run-12) both succeeded with the fine-grained PAT. Push auth is no longer a per-run checklist concern beyond the standard verification step.
+
+5. **PRD #371 (LanguageProvider/JavaScriptProvider architecture) held through first evaluation**: Zero failures across 30 files in first run with the new architecture. The refactor did not introduce new failure modes. Consider removing the "new architecture risk" warning from future pre-run verification checklists.
+
+6. **Cross-document audit agent caught 10 items**: Most were informational (score consistency verified) with a few real gaps (missing RUN12-4/5/6 narrative, undefined "50% discount" concept, advisory count evidence). The audit remains valuable at the actionable-fix-output milestone.
+
+7. **Oscillation pattern is now a named concept**: Quality has oscillated 25→23→25→23 since run-9. Each fix introduces behavioral constraints that produce new failure modes. Documenting this in baseline-comparison.md helps set expectations for run-13.
+
+8. **NDS-003 truthy-check gap is now P1 (was P1 in run-11 too but only partially fixed)**: PR #352 fixed strict-equality guards. Truthy guards remain unfixed. The gap has now produced CDQ-007 failures in 2 consecutive runs with different manifestations. It must be fully resolved before run-13.
