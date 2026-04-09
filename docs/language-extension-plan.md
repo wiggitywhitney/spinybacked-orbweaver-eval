@@ -9,7 +9,7 @@ This document captures the plan for extending the spinybacked-orbweaver evaluati
 
 Consult this document when deciding which PRD type fits a new piece of work, understanding trigger conditions for new language evaluation chains, or recalling research spike constraints before running a target-selection spike.
 
-**Do NOT treat this as an immediate work queue.** See [Immediate Next Steps](#immediate-next-steps) for current actions.
+**Do NOT treat this as an immediate work queue.** See [Execution Roadmap](#execution-roadmap-1) for current actions.
 
 ---
 
@@ -53,6 +53,8 @@ The first PRD for any new language/target combination. Covers:
 
 This PRD type exists exactly once per target. It is the "onboarding" for that language/target combination.
 
+**When drafting a Type C PRD**: Use the most recent JavaScript eval run PRD (currently `prds/37-evaluation-run-13.md`) as a **model** — understand its milestone structure and adapt it for the new language, making language-specific adjustments where needed. Do not copy it verbatim. Before committing the draft, launch a verification agent with: "Compare this [language] Type C PRD milestone by milestone against `prds/37-evaluation-run-13.md`. Flag any step present in the JS PRD that is absent or weaker in the new PRD, and explain whether each omission is justified (e.g., JS-specific detail that doesn't apply) or a gap that needs to be filled."
+
 **Language-specific prerequisites reference**: Use the commit-story-v2 JavaScript setup as the canonical reference for what each prerequisite looks like, then adapt for the target language. For JavaScript/TypeScript, `traceloop-init.js` handles OTel auto-instrumentation registration; for Python/Go, use the language-appropriate SDK initialization equivalent. The initial `semconv/` schema should mirror the structure in `commit-story-v2/semconv/` adapted to the target's domain.
 
 **Operational details for Type C PRDs**:
@@ -60,11 +62,19 @@ This PRD type exists exactly once per target. It is the "onboarding" for that la
 - `GITHUB_TOKEN` must be in the environment for spiny-orb to create a PR
 - The Run-1 evaluation follows the full Type D milestone structure, including both user-facing checkpoints (Findings Discussion and handoff pause)
 
+**Exact instrument command** (run from the target repo directory, update `run-N` to current run number):
+
+```bash
+caffeinate -s env -u ANTHROPIC_CUSTOM_HEADERS -u ANTHROPIC_BASE_URL vals exec -i -f .vals.yaml -- node ~/Documents/Repositories/spinybacked-orbweaver/bin/spiny-orb.js instrument src --verbose 2>&1 | tee ~/Documents/Repositories/commit-story-v2-eval/evaluation/run-N/spiny-orb-output.log
+```
+
+Note: two parts of this command need updating for each run: (1) `run-N` → current run number, (2) `commit-story-v2-eval` → new repo name after Step 1 (repo generalization). Everything else stays the same.
+
 ### Type D: Run-N PRD (recurring, indefinitely)
 Identical in structure to the existing PRDs #3–13. Triggered by findings from the previous run. Follows the established milestone sequence:
 1. Collect skeleton documents
 2. Pre-run verification (verify prior findings fixed, check prerequisites)
-3. Evaluation run (Whitney runs `spiny-orb instrument` in her terminal)
+3. Evaluation run (Whitney runs `spiny-orb instrument` in her terminal — see exact command in Type C section above)
 4. Findings Discussion *(user-facing checkpoint 1: raw signal before analysis)*
 5. Failure deep-dives
 6. Per-file evaluation
@@ -127,7 +137,7 @@ PRD numbering stays sequential (GitHub issue numbers). PRD titles include the ta
 - Update PRD titles and prior art references to include target names
 - Create `docs/ROADMAP.md`
 - Document "how to add a new language eval" as a rules/CLAUDE.md entry
-- Establish PRD template files for Type C and Type D in `docs/templates/` so future agents have a canonical starting point
+- Establish PRD template files for Type C and Type D in `docs/templates/` so future agents have a canonical starting point. Until `docs/templates/` exists, use the most recent JS eval run PRD (currently `prds/37-evaluation-run-13.md`) as the style reference for Type D, and this document's Type C description as the structure reference for Type C.
 
 ---
 
@@ -206,19 +216,6 @@ After `run-summary.md` is written, before any analysis begins, give Whitney a ra
 
 **Moment 2 — Handoff pause** (at the end of Actionable fix output):
 After full analysis, give Whitney an interpreted summary of key findings: failures, root causes, notable patterns, what to watch for in the next run. Then print the absolute file path of `actionable-fix-output.md` and pause until Whitney confirms she has handed the document off to the spiny-orb team. Do not proceed to the next PRD until confirmed.
-
----
-
-## Execution Roadmap
-
-The steps below are PRDs to create, in order. See [Execution Roadmap section](#execution-roadmap-1) at the bottom for the full structured version (appended once approved).
-
-1. **Type A: Repo generalization** — rename, restructure, templates, ROADMAP.md
-2. **Type B: Research spike** — derive target criteria, evaluate all known candidates, find Python candidate
-3. **JS run-13** (PRD #37, already created) — picks up when NDS-003 truthy fix lands; spawns indefinite run chain
-4. **TypeScript eval setup + Run-1** — created when TypeScript provider lands AND research spike complete; spawns indefinite run chain
-5. **Python eval setup + Run-1** — created when Python provider lands AND research spike complete; spawns indefinite run chain
-6. **Go eval setup + Run-1** — created when Go provider lands AND research spike complete; spawns indefinite run chain
 
 ---
 
