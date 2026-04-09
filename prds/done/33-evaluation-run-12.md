@@ -1,6 +1,6 @@
 # PRD #12: Evaluation Run-12 — Attribute Completeness and Cost Optimization
 
-**Status:** Draft
+**Status:** Complete — 2026-04-09
 **Created:** 2026-03-30
 **GitHub Issue:** #34
 **Depends on:** PRD #11 (run-11 complete, 5 findings documented, actionable fix output delivered to spiny-orb team)
@@ -111,7 +111,7 @@ Same as runs 9-11.
 
 ## Milestones
 
-- [ ] **Pre-run verification** — Verify spiny-orb fixes and validate run prerequisites:
+- [x] **Pre-run verification** — Verify spiny-orb fixes and validate run prerequisites:
   1. **Handoff triage review**: Read the spiny-orb team's triage of `evaluation/run-11/actionable-fix-output.md`.
   2. **Target repo readiness** (commit-story-v2): Verify on `main`, clean working tree, spiny-orb.yaml and semconv/ exist.
   3. **Push auth stability check**: Verify token still works (dry-run push).
@@ -122,23 +122,25 @@ Same as runs 9-11.
   8. Record version and findings status.
   9. Append observations to `evaluation/run-12/lessons-for-prd13.md` (created in milestone 2; if running milestones in order, create the file first).
 
-- [ ] **Collect lessons for PRD #13** — Create skeleton documents at START. Must run before pre-run verification step 9 (which appends to the lessons file).
+- [x] **Collect lessons for PRD #13** — Create skeleton documents at START. Must run before pre-run verification step 9 (which appends to the lessons file).
 
-- [ ] **Evaluation run-12** — Execute `spiny-orb instrument` on commit-story-v2.
+- [x] **Evaluation run-12** — Execute `spiny-orb instrument` on commit-story-v2.
 
-- [ ] **Failure deep-dives** — For each failed file AND run-level failure.
+- [x] **Failure deep-dives** — For each failed file AND run-level failure.
 
-- [ ] **Per-file evaluation** — Full rubric on ALL files (no spot-checking).
+- [x] **Per-file evaluation** — Full rubric on ALL files (no spot-checking).
 
-- [ ] **PR artifact evaluation** — Evaluate PR quality.
+- [x] **PR artifact evaluation** — Evaluate PR quality.
 
-- [ ] **Rubric scoring** — Synthesize dimension-level scores.
+- [x] **Rubric scoring** — Synthesize dimension-level scores.
 
-- [ ] **Baseline comparison** — Compare run-12 vs runs 2-11.
+- [x] **Baseline comparison** — Compare run-12 vs runs 2-11.
 
-- [ ] **Actionable fix output** — Primary handoff deliverable. At milestone completion, run the cross-document audit agent to verify consistency across all run-12 evaluation artifacts before finalizing.
+- [x] **Actionable fix output** — Primary handoff deliverable. At milestone completion, run the cross-document audit agent to verify consistency across all run-12 evaluation artifacts before finalizing.
 
-- [ ] **Draft PRD #13** — Create on a separate branch from main. Merge the PRD PR to main so `/prd-start` can pick it up.
+- [x] **Draft PRD #13** — Create on a separate branch from main. Merge the PRD PR to main so `/prd-start` can pick it up. The PRD must include two named user-facing checkpoints (Decision 2026-04-09):
+  1. **Findings Discussion** milestone (between "Evaluation run" and "Failure deep-dives"): Right after the run completes, before any analysis begins, give Whitney a quick raw overview — files committed, quality score, cost, anything immediately alarming. Wait for her acknowledgment before proceeding to write evaluation documents.
+  2. **Handoff step** at the end of the Actionable fix output milestone: After full analysis is done, give Whitney an interpreted summary of the key findings (failures, root causes, notable patterns, what to watch for in the next run). Then print the absolute file path of actionable-fix-output.md and pause until she confirms she has handed it off to the spiny-orb team. Do not proceed to Draft PRD #N+1 until confirmed.
 
 ---
 
@@ -186,6 +188,8 @@ Same as runs 9-11.
 | 2026-03-30 | CDQ-007/NDS-003 conflict as P1 | Medium priority — affects completeness, not correctness. Score is 25/25 either way. |
 | 2026-03-30 | Advisory judge fixes as P2 | Low priority — advisories are informational only. |
 | 2026-03-30 | Cost target maintained at $4.00 | Run-11 was $4.25 — close but achievable with fewer retry attempts. |
+| 2026-04-09 | Add findings discussion step before writing evaluation documents | Whitney cannot see evaluation documents as they're written and wants a conversational high-level summary of key findings (regressions, passes, notable patterns) before Claude proceeds to write up the detailed artifacts. Applies to all future evaluation PRDs, not just the next one. Encode in PRD #13 and the evaluation PRD template. |
+| 2026-04-09 | Two moments to surface findings: Moment 1 after run (raw signal), Moment 2 after analysis with handoff | Moment 1 (Findings Discussion milestone): right after the run completes, give a quick overview before any analysis — files, quality, cost, surprises. Moment 2 (end of Actionable fix output milestone): after full analysis, give an interpreted summary of key failures and root causes, then print the absolute path of actionable-fix-output.md and pause until Whitney confirms handoff to spiny-orb team. Applies to all future evaluation PRDs. |
 
 ---
 
