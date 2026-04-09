@@ -241,7 +241,7 @@ After full analysis, give Whitney an interpreted summary of key findings: failur
 
 ## Execution Roadmap
 
-Each step below becomes its own PRD. Steps 3–6 each spawn an indefinite run chain — see the example under Step 3.
+Each step below becomes its own PRD. Use `/prd-create` to create each one — the skill handles GitHub issue creation, PRD file naming, and milestone structure interactively. Steps 3–6 each spawn an indefinite run chain — see the example under Step 3.
 
 **Step 1 — Repo generalization** *(Type A)*
 Prerequisites: none.
