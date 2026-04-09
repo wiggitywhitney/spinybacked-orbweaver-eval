@@ -230,3 +230,33 @@ The steps below are PRDs to create, in order. See [Execution Roadmap section](#e
 - Python eval setup + Run-1 (PRD #TBD)
 - Go eval setup + Run-1: k8s-vectordb-sync (PRD #TBD)
 ```
+
+---
+
+## Execution Roadmap
+
+Each step below becomes its own PRD. Steps 3–6 each spawn an indefinite run chain — see the example under Step 3.
+
+**Step 1 — Repo generalization** *(Type A)*
+Prerequisites: none.
+*Accomplishes: the system can support multiple languages and targets. Everything else lands somewhere sensible.*
+
+**Step 2 — Research spike: eval target criteria** *(Type B)*
+Prerequisites: none — can run in parallel with or after Step 1. Produces a language-agnostic criteria scorecard. Evaluates commit-story-v2, Cluster Whisperer, and k8s-vectordb-sync against it. Identifies a Python candidate. Unblocks Steps 4–6. May also produce a recommendation for a new JS target (Type C for JS) if commit-story-v2 fails the criteria — conditional on findings, not a scheduled step.
+*Accomplishes: the system has an evidence-based scorecard for choosing targets. No longer guessing what "good" looks like.*
+
+**Step 3 — JS evaluation run-13** *(Type D — PRD #37, already created)*
+Gate: NDS-003 truthy-check fix merges in spiny-orb. Spawns an indefinite run chain: run-13 findings → run-14 PRD drafted at completion → run-14 picks up when fixes land → run-14 drafts run-15 → and so on.
+*Accomplishes: first run on the new repo structure, confirming migration didn't break the JS chain. Verifies the NDS-003 fix resolved run-12's regression.*
+
+**Step 4 — TypeScript eval setup + Run-1** *(Type C)*
+Gates: TypeScript language provider lands in spiny-orb AND Step 2 validates a target. Spawns an indefinite TypeScript run chain (same pattern as Step 3).
+*Accomplishes: TypeScript evaluation chain exists. The system can now measure spiny-orb quality on a second language.*
+
+**Step 5 — Python eval setup + Run-1** *(Type C)*
+Gates: Python language provider lands in spiny-orb AND Step 2 identifies a validated target. Spawns an indefinite Python run chain.
+*Accomplishes: Python evaluation chain exists.*
+
+**Step 6 — Go eval setup + Run-1** *(Type C)*
+Gates: Go language provider lands in spiny-orb AND Step 2 validates k8s-vectordb-sync (or alternative). Spawns an indefinite Go run chain.
+*Accomplishes: Go evaluation chain exists.*
