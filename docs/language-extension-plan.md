@@ -37,7 +37,7 @@ Investigation work that produces criteria, decisions, or findings used by other 
 - Evaluating candidate target repos for a specific language
 - Determining whether commit-story-v2 is actually a good JavaScript eval target
 
-Research spikes produce artifacts (scorecards, findings docs) and decisions that unblock downstream PRDs. They are created when a decision needs to be made before implementation can proceed. A Type B PRD is complete when a written findings document exists **at its predefined output path** (defined in this plan doc before the PRD is created) and any downstream PRD decision logs are updated with the spike's conclusions.
+Research spikes produce artifacts (scorecards, findings docs) and decisions that unblock downstream PRDs. They are created when a decision needs to be made before implementation can proceed. A Type B PRD is complete when a written findings document exists **at its predefined output path** (defined in this plan doc before the PRD is created) and any existing downstream PRDs have their Decision Log sections updated with the spike's conclusions. (Decision Log is the table at the bottom of each PRD file, e.g. `prds/37-evaluation-run-13.md`.)
 
 **The output path is defined in the plan document, not the PRD itself.** This ensures downstream PRDs can reference a stable, known path without searching for the research PRD.
 
@@ -184,7 +184,7 @@ Do NOT ask it to "confirm" the hypotheses. Frame it as: "here are factors we thi
 
 **Do NOT use the hypothesis table as acceptance criteria.** A research spike that confirms all hypotheses without surfacing new factors has not done its job.
 
-The spike's findings document at `docs/research/eval-target-criteria.md` must include: (1) the final criteria scorecard with evidence, (2) a verdict for each known candidate (pass/fail/conditional with rationale), and (3) a recommended target for any language where the primary candidate failed.
+The spike's findings document at `docs/research/eval-target-criteria.md` must include: (1) the final criteria scorecard with evidence, (2) a verdict for each known candidate (pass/fail/conditional with rationale), and (3) a recommended alternative target for any language where the primary candidate failed, or an explanation if no suitable alternative exists.
 
 ---
 
@@ -267,7 +267,7 @@ Gates: TypeScript language provider lands in spiny-orb AND `docs/research/eval-t
 *Accomplishes: TypeScript evaluation chain exists. The system can now measure spiny-orb quality on a second language.*
 
 **Step 5 — Python eval setup + Run-1** *(Type C)*
-Gates: Python language provider lands in spiny-orb AND `docs/research/eval-target-criteria.md` exists with a Python verdict and recommended target. Read that file first. Spawns an indefinite Python run chain.
+Gates: Python language provider lands in spiny-orb AND `docs/research/eval-target-criteria.md` exists with a Python verdict and recommended target (Python has no predefined candidate — see Language Candidates table). Read that file first. Spawns an indefinite Python run chain.
 *Accomplishes: Python evaluation chain exists.*
 
 **Step 6 — Go eval setup + Run-1** *(Type C)*
