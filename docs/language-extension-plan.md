@@ -169,7 +169,7 @@ These are informed guesses from 12 runs on one repo. The research spike should v
 
 ### Research agent framing
 
-Give the agent these hypotheses as **things to investigate**, not as settled criteria. Ask it to:
+Use the `/research` skill to conduct the spike. Give the agent these hypotheses as **things to investigate**, not as settled criteria. Ask it to:
 - Find evidence for or against each hypothesis
 - Identify factors we haven't thought of
 - Evaluate actual candidate repos against whatever criteria emerge
@@ -177,6 +177,8 @@ Give the agent these hypotheses as **things to investigate**, not as settled cri
 Do NOT ask it to "confirm" the hypotheses. Frame it as: "here are factors we think may matter; research whether they actually do and find what we're missing."
 
 **Do NOT use the hypothesis table as acceptance criteria.** A research spike that confirms all hypotheses without surfacing new factors has not done its job.
+
+The spike's findings document should include: (1) the final criteria scorecard with evidence, (2) a verdict for each known candidate (pass/fail/conditional with rationale), and (3) a recommended target for any language where the primary candidate failed.
 
 ---
 
