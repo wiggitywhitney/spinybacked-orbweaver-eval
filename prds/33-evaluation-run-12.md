@@ -138,7 +138,7 @@ Same as runs 9-11.
 
 - [x] **Actionable fix output** — Primary handoff deliverable. At milestone completion, run the cross-document audit agent to verify consistency across all run-12 evaluation artifacts before finalizing.
 
-- [ ] **Draft PRD #13** — Create on a separate branch from main. Merge the PRD PR to main so `/prd-start` can pick it up. The PRD must include two named user-facing checkpoints (Decision 2026-04-09):
+- [x] **Draft PRD #13** — Create on a separate branch from main. Merge the PRD PR to main so `/prd-start` can pick it up. The PRD must include two named user-facing checkpoints (Decision 2026-04-09):
   1. **Findings Discussion** milestone (between "Evaluation run" and "Failure deep-dives"): Right after the run completes, before any analysis begins, give Whitney a quick raw overview — files committed, quality score, cost, anything immediately alarming. Wait for her acknowledgment before proceeding to write evaluation documents.
   2. **Handoff step** at the end of the Actionable fix output milestone: After full analysis is done, give Whitney an interpreted summary of the key findings (failures, root causes, notable patterns, what to watch for in the next run). Then print the absolute file path of actionable-fix-output.md and pause until she confirms she has handed it off to the spiny-orb team. Do not proceed to Draft PRD #N+1 until confirmed.
 
