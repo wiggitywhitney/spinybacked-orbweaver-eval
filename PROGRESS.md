@@ -33,6 +33,7 @@ Entry format: `- (YYYY-MM-DD) Description of feature-level change (PRD #X, miles
 - (2026-04-09) Completed PR artifact evaluation, rubric scoring, and baseline comparison: 23/25 (92%) quality, Q×F=11.0, second consecutive PR success. First COV failure since rubric stabilized. Oscillation pattern documented (PRD #33, scoring and comparison)
 - (2026-04-09) Completed actionable fix output and spiny-orb findings: 6 new findings (RUN12-1 through RUN12-6), 3 prioritized fixes (P1: NDS-003 truthy-check allowlist, P2: COV-004 exported async guidance, P3: model fallback). Cross-document audit run and 10 items addressed (PRD #33, actionable fix output)
 - (2026-04-09) Drafted PRD #13 for evaluation run-13 (issue #37, PR #38, merged to main). Added language extension plan at docs/language-extension-plan.md covering 4 PRD types, 6-step execution roadmap, research spike constraints, and process requirements for multi-language eval framework (PRD #33, draft PRD #13)
+- (2026-04-09) Completed PRD #33 — archived to prds/done/; all 9 milestones done (PRD #33, completion)
 
 - (2026-03-16) Created lessons-for-prd5.md with rubric gaps, process improvements, methodology observations, and carry-forward items (PRD #4, collect lessons)
 - (2026-03-16) Completed failure deep-dives: 3 partial files analyzed (summary-graph.js, sensitive-filter.js, journal-manager.js), 2 rescued files documented, 4 run-level failures analyzed (push auth, schema evolution, test suite, commit noise). Added orb issue #9 (PRD #4, failure deep-dives)
