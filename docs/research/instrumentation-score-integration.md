@@ -4,9 +4,11 @@
 **Last Updated:** 2026-04-10
 
 ## Update Log
+
 | Date | Summary |
 |------|---------|
 | 2026-04-10 | Initial research |
+
 
 ## Findings
 
@@ -28,7 +30,7 @@ No standalone tool exists to score OTLP data against the IS spec — it must be 
 
 **Source says:** "each line in the file is a JSON object" (file exporter README) 🟢 high
 
-**CLI apps must intercept process.exit() or use defer — BatchSpanProcessor silently loses spans otherwise.** `examples/instrumentation.js` already does this correctly for Node.js. Python SDK registers an atexit hook by default but SIGTERM bypasses it. Go's `defer shutdown(ctx)` is the most reliable pattern across all three — Go's defer is deterministic even on abnormal exit paths.
+**CLI apps must flush spans explicitly before exit — BatchSpanProcessor silently loses spans otherwise.** `examples/instrumentation.js` already does this correctly for Node.js (intercepts `process.exit()`, handles SIGTERM/SIGINT). Python SDK registers an atexit hook by default but SIGTERM bypasses it — explicit signal handlers are required. Go's `defer shutdown(ctx)` handles normal returns and panic unwinds, but does **not** run for `os.Exit()`, `log.Fatal*`, SIGKILL, or unhandled signals — Go requires the same explicit signal handling (via `os/signal.Notify`) as Python and Node.js for containerized deployments.
 
 **Source says:** "The Python SDK registers an atexit hook by default, but this does not cover all scenarios, especially SIGTERM in containerized deployments." (Python shutdown article) 🟢 high
 
@@ -88,7 +90,7 @@ no code change, just swap the process listening on it.
 |---|---|---|---|
 | Node.js/TS | `--import ./examples/instrumentation.js` | Intercept `process.exit()`, SIGTERM/SIGINT handlers (already done) | `@opentelemetry/sdk-node`, `@opentelemetry/exporter-trace-otlp-http` |
 | Python | `opentelemetry-instrument` wrapper OR manual bootstrap module | atexit hook (auto) + explicit SIGTERM handler | `opentelemetry-sdk`, `opentelemetry-exporter-otlp-proto-http` |
-| Go | `setupOTelSDK()` in `main()` | `defer shutdown(ctx)` — deterministic | `go.opentelemetry.io/otel/sdk/trace`, OTLP exporter |
+| Go | `setupOTelSDK()` in `main()` | `defer shutdown(ctx)` + explicit `os/signal.Notify` handlers (defer alone doesn't cover `os.Exit`, `log.Fatal*`, or unhandled signals) | `go.opentelemetry.io/otel/sdk/trace`, OTLP exporter |
 | TypeScript | Same as Node.js (compiles to JS) | Same as Node.js | Same as Node.js |
 
 **What makes a target repo produce meaningful IS scores** 🟡 medium

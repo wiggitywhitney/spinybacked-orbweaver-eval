@@ -4,9 +4,9 @@
 - JS evaluation run-13: NDS-003 truthy fix verification (PRD #37)
 
 ## Medium-term
-- Bootstrap evaluation roadmap: ROADMAP.md and planned PRDs (PRD #41)
-
-## Medium-term
+- Repo generalization (PRD #TBD)
+- IS integration: scoring script, OTel Collector config, Type D template update (PRD #TBD)
+- Research spike: eval target criteria (PRD #TBD)
 - TypeScript eval setup + Run-1: Cluster Whisperer (PRD #TBD)
 
 ## Long-term

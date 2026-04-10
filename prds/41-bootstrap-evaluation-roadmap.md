@@ -67,7 +67,7 @@ The evaluation framework has a detailed execution plan in `docs/language-extensi
   1. Step 2 PRD milestones include "Step 0: Read `docs/research/instrumentation-score-integration.md`" before implementation work begins
   2. Step 3 PRD names `docs/research/eval-target-criteria.md` as its output path, matching the gate condition in Steps 5–7 of `docs/language-extension-plan.md`
   3. Step 3 PRD's final milestone explicitly creates PRDs for Steps 5–7 using the validated targets from the research output
-  4. ROADMAP.md now has real issue numbers for all three PRDs (no remaining #TBD entries for Steps 1–3)
+  4. ROADMAP.md now has real issue numbers for all three PRDs. Remove the corresponding `#TBD` placeholder entries that were initialized in this PR — `prd-create` appends new entries rather than replacing them, so duplicates will exist until removed.
   5. No PRD depends on another PRD being merged first — each starts from main independently
   6. The dependencies section of each PRD accurately states what it depends on and what it unblocks
 
@@ -81,8 +81,8 @@ The evaluation framework has a detailed execution plan in `docs/language-extensi
 
 ## Risks and Mitigations
 
-- **Risk**: `/prd-create` commits to main by default, but the PRD it creates must go through `/write-prompt` first
-  - **Mitigation**: Draft the PRD file locally, run `/write-prompt`, apply improvements, then commit manually with `[skip ci]`
+- **Risk**: `/prd-create` commits before `/write-prompt` review if the timing is wrong
+  - **Mitigation**: Run `/write-prompt` on the milestones when `/prd-create` presents its draft for review — before it prompts to commit. Then choose Option 2; the skill handles the commit and push with `[skip ci]` automatically.
 - **Risk**: Coherence gaps between PRDs discovered late
   - **Mitigation**: Coherence verification milestone is explicit and runs last; gaps are fixed before this PRD closes
 
@@ -91,7 +91,7 @@ The evaluation framework has a detailed execution plan in `docs/language-extensi
 | Date | Decision | Rationale | Impact |
 |------|----------|-----------|--------|
 | 2026-04-10 | Create PRDs for Steps 1–3 only, not Steps 5–7 | Steps 5–7 targets are not yet validated; Step 3 research will create those PRDs as its output | Steps 5–7 PRDs are higher quality when written post-research |
-| 2026-04-10 | Initialize ROADMAP.md in this PR with #TBD for Steps 1–3 | prd-create will replace #TBD entries with real issue numbers as each PRD is created | Clean separation between roadmap initialization and PRD creation |
+| 2026-04-10 | Initialize ROADMAP.md with #TBD entries for Steps 1–3 and TypeScript | Shows full planned work before PRDs exist; prd-create appends real entries alongside them; coherence check cleans up #TBD entries at the end | ROADMAP.md reflects planned work from day one |
 | 2026-04-10 | Each PRD committed separately with [skip ci] | Allows ROADMAP.md to be updated with each real issue number; preserves audit trail | Three commits to main instead of one |
 
 ## Progress Log
