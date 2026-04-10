@@ -6,7 +6,9 @@
 ## Medium-term
 - Bootstrap evaluation roadmap: ROADMAP.md and planned PRDs (PRD #41)
 
-## Long-term
+## Medium-term
 - TypeScript eval setup + Run-1: Cluster Whisperer (PRD #TBD)
+
+## Long-term
 - Python eval setup + Run-1 (PRD #TBD)
 - Go eval setup + Run-1: k8s-vectordb-sync (PRD #TBD)
