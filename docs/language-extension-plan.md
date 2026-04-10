@@ -84,9 +84,10 @@ Identical in structure to the existing PRDs #3–13. Triggered by findings from 
 6. Per-file evaluation
 7. PR artifact evaluation
 8. Rubric scoring
-9. Baseline comparison
-10. Actionable fix output *(user-facing checkpoint 2: interpreted summary + handoff pause)*
-11. Draft next PRD
+9. IS scoring run *(active once Step 2 IS integration PRD completes — run instrumented code with OTel Collector, score OTLP output against IS spec, add IS score to rubric scoring document)*
+10. Baseline comparison
+11. Actionable fix output *(user-facing checkpoint 2: interpreted summary + handoff pause)*
+12. Draft next PRD
 
 Type D PRDs form the recurring evaluation chain for each language/target.
 
@@ -152,6 +153,8 @@ PRD numbering stays sequential (GitHub issue numbers). PRD titles include the ta
 commit-story-v2 was chosen as the JavaScript eval target by circumstance, not by research. It may or may not be a good target. The research spike must evaluate it alongside other candidates — it does not get assumed to be correct.
 
 **Output path**: `docs/research/eval-target-criteria.md` — this file is written by the research spike and read by all downstream Type C PRDs. It must exist before any Type C PRD can proceed.
+
+**Related prior research**: `docs/research/instrumentation-score-integration.md` covers IS rule applicability by app type and what makes a repo produce meaningful IS scores. The criteria scorecard should incorporate IS scorability as one dimension — specifically whether the repo can be exercised locally or requires infrastructure (k8s repos need a running cluster for IS scoring runs, which is feasible but adds complexity).
 
 The spike produces a language-agnostic scorecard. All candidates — including commit-story-v2 — are evaluated against it. The spike may conclude:
 - commit-story-v2 is a good target → continue the existing JS chain on it
@@ -235,6 +238,7 @@ After full analysis, give Whitney an interpreted summary of key findings: failur
 
 ## Medium-term
 - Repo generalization (PRD #TBD)
+- IS integration: scoring script, OTel Collector config, Type D template update (PRD #TBD)
 - Research spike: eval target criteria (PRD #TBD)
 - TypeScript eval setup + Run-1: Cluster Whisperer (PRD #TBD)
 
@@ -247,29 +251,46 @@ After full analysis, give Whitney an interpreted summary of key findings: failur
 
 ## Execution Roadmap
 
-Each step below becomes its own PRD. Use `/prd-create` to create each one — the skill handles GitHub issue creation, PRD file naming, and milestone structure interactively. Steps 3–6 each spawn an indefinite run chain — see the example under Step 3.
+Each step below becomes its own PRD. Use `/prd-create` to create each one — the skill handles GitHub issue creation, PRD file naming, and milestone structure interactively. Steps 4–7 each spawn an indefinite run chain — see the example under Step 4.
 
-**Step 1 — Repo generalization** *(Type A)*
+**Step 1 — Repo generalization**
 Prerequisites: none.
 *Accomplishes: the system can support multiple languages and targets. Everything else lands somewhere sensible.*
 
-**Step 2 — Research spike: eval target criteria** *(Type B)*
-Prerequisites: none — can run in parallel with or after Step 1. Produces a language-agnostic criteria scorecard. Evaluates commit-story-v2, Cluster Whisperer, and k8s-vectordb-sync against it. Identifies a Python candidate. Unblocks Steps 4–6. May also produce a recommendation for a new JS target (Type C for JS) if commit-story-v2 fails the criteria — conditional on findings, not a scheduled step.
-**Output**: writes findings to `docs/research/eval-target-criteria.md`. Steps 4–6 cannot proceed until this file exists.
+**Step 2 — IS integration**
+Prerequisites: Step 1 (repo generalization) complete — IS infrastructure lands in the finalized repo structure.
+Research complete: see `docs/research/instrumentation-score-integration.md`.
+*Accomplishes: the eval framework can score OTLP telemetry against the Instrumentation Score spec. Every subsequent language eval chain has IS scoring available from day one.*
+
+Key decisions from research:
+- No scoring tool exists — build a lightweight script (~200–300 lines) that reads line-delimited JSON from the OTel Collector file exporter and evaluates applicable rules using the IS weighted formula
+- **OTLP receiver**: OTel Collector with file exporter (not Datadog Agent). Same port 4318; switch target via `OTEL_EXPORTER_OTLP_TRACES_ENDPOINT` env var — no code changes in the target repo
+- **Metrics**: Enable metrics in SDK bootstrap for IS scoring runs (remove `OTEL_METRICS_EXPORTER=none`). MET rules will fail because spiny-orb produces no OTel metrics — it uses span attributes for counts. This is honest signal about spiny-orb's scope, not a reason to exclude the rules.
+- **~9 of 20 IS rules apply** to a CLI app: RES-001, RES-004, RES-005 (Critical), SPA-001–SPA-005, SDK-001. Inapplicable: RES-002 (multi-instance), RES-003 (k8s), MET-001–006, LOG rules (marginal).
+- **k8s-dependent repos** require a running cluster for IS scoring runs. Infrastructure is available; this adds a step but is not a blocker.
+
+PRD deliverables:
+- `eval/otelcol-config.yaml` — minimal Collector config (OTLP HTTP receiver → file exporter)
+- IS scoring script in `eval/` — reads captured JSON, evaluates applicable rules, outputs weighted IS score
+- Updates Type D template with IS scoring as step 9 (after rubric scoring, before baseline comparison)
+
+**Step 3 — Research spike: eval target criteria**
+Prerequisites: none — can run in parallel with or after Steps 1–2. Produces a language-agnostic criteria scorecard. Evaluates commit-story-v2, Cluster Whisperer, and k8s-vectordb-sync against it. Identifies a Python candidate. Unblocks Steps 5–7. May also produce a recommendation for a new JS target if commit-story-v2 fails the criteria — conditional on findings, not a scheduled step.
+**Output**: writes findings to `docs/research/eval-target-criteria.md`. Steps 5–7 cannot proceed until this file exists.
 *Accomplishes: the system has an evidence-based scorecard for choosing targets. No longer guessing what "good" looks like.*
 
-**Step 3 — JS evaluation run-13** *(Type D — PRD #37, already created)*
+**Step 4 — JS evaluation run-13** *(PRD #37, already created)*
 Gate: NDS-003 truthy-check fix merges in spiny-orb. Spawns an indefinite run chain: run-13 findings → run-14 PRD drafted at completion → run-14 picks up when fixes land → run-14 drafts run-15 → and so on.
-*Accomplishes: first run on the new repo structure, confirming migration didn't break the JS chain. Verifies the NDS-003 fix resolved run-12's regression.*
+*Accomplishes: verifies the NDS-003 fix resolved run-12's regression. First run on the new repo structure after Step 1.*
 
-**Step 4 — TypeScript eval setup + Run-1** *(Type C)*
-Gates: TypeScript language provider lands in spiny-orb AND `docs/research/eval-target-criteria.md` exists with a TypeScript verdict. Read that file first to confirm the validated target before forking anything. Spawns an indefinite TypeScript run chain (same pattern as Step 3).
+**Step 5 — TypeScript eval setup + Run-1**
+Gates: TypeScript language provider lands in spiny-orb AND `docs/research/eval-target-criteria.md` exists with a TypeScript verdict. Read that file first to confirm the validated target before forking anything. Spawns an indefinite TypeScript run chain (same pattern as Step 4).
 *Accomplishes: TypeScript evaluation chain exists. The system can now measure spiny-orb quality on a second language.*
 
-**Step 5 — Python eval setup + Run-1** *(Type C)*
+**Step 6 — Python eval setup + Run-1**
 Gates: Python language provider lands in spiny-orb AND `docs/research/eval-target-criteria.md` exists with a Python verdict and recommended target (Python has no predefined candidate — see Language Candidates table). Read that file first. Spawns an indefinite Python run chain.
 *Accomplishes: Python evaluation chain exists.*
 
-**Step 6 — Go eval setup + Run-1** *(Type C)*
+**Step 7 — Go eval setup + Run-1**
 Gates: Go language provider lands in spiny-orb AND `docs/research/eval-target-criteria.md` exists with a Go verdict. Read that file first to confirm k8s-vectordb-sync or the recommended alternative. Spawns an indefinite Go run chain.
 *Accomplishes: Go evaluation chain exists.*
