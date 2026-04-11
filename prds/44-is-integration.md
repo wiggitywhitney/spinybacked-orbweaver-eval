@@ -137,7 +137,6 @@ Full research findings live in `docs/research/instrumentation-score-integration.
 
 - **Depends on**: PRD #43 (repo generalization) — IS infrastructure must land in `evaluation/commit-story-v2/` not the old flat structure. Do NOT start this PRD until #43 is merged.
 - **Depends on**: `docs/research/instrumentation-score-integration.md` — all implementation decisions come from this document
-- **Depends on (soft)**: PRD #43 merged — final milestone updates `docs/language-extension-plan.md`, which should be in its final state before adding IS scoring details to it
 - **Blocks**: Every future Type D run PRD — IS scoring becomes step 9 in all subsequent runs
 
 ## Risks and Mitigations
@@ -148,8 +147,8 @@ Full research findings live in `docs/research/instrumentation-score-integration.
   - **Mitigation**: Pin to commit `52c14ba`; note pin in scoring script header comment
 - **Risk**: SPA-003 cardinality threshold is undefined in spec
   - **Mitigation**: Use >50 unique span names as threshold with a comment noting the spec says "TODO" — revisit when spec defines it
-- **Risk**: `docs/language-extension-plan.md` is still being modified when this PRD's final milestone runs
-  - **Mitigation**: Final milestone depends on PRD #43 being merged; do not start the final milestone until #43 is on main
+- **Risk**: `docs/language-extension-plan.md` modified by concurrent work when final milestone runs
+  - **Mitigation**: Hard dependency on PRD #43 ensures the file is stable before this PRD starts; all milestones are completable from main
 
 ## Decision Log
 
