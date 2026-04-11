@@ -79,6 +79,8 @@ Full context — hypotheses table, research agent framing, candidate list, and t
      - **Python**: Include commitizen (already identified). Find 2 more.
      - **Go**: Find 3 open-source Go CLI tools. k8s-vectordb-sync may be included if it competes on merit.
 
+     **Candidate diversity rule**: Prefer candidates from different GitHub authors/organizations within each language. Same-author candidates share coding style and dependency choices, reducing rubric rule diversity. Not a hard rule, but a tiebreaker when candidates are otherwise equal.
+
   3. **IS scorability notes** for each candidate.
 
   Write the revised document, then commit with `[skip ci]`.

@@ -40,6 +40,7 @@ Criteria function as **filters** (pass/fail), not weighted scores. A candidate m
 | **Deterministic reproducibility** | Flaky tests undermine eval reliability. | High | Run test suite 3 times. Any non-deterministic failure is a fail. |
 | **Community adoption (>500 stars)** | Correlates with maintenance quality. | Medium | >500 preferred. |
 | **Not already instrumented** | Existing OTel instrumentation must be stripped for a clean baseline. | Medium | Check for existing `@opentelemetry` imports or tracing setup. If present, stripping adds setup work to the Type C PRD. |
+| **Different GitHub handles across candidates** | If all 3 candidates for a language come from the same author/org, they share coding style and dependency choices — reducing rubric rule diversity. | Medium | Prefer candidates from different GitHub authors/organizations. Not a hard rule, but a tiebreaker when candidates are otherwise equal. |
 
 ### Eval Design: Deliberately Incomplete Weaver Schemas
 

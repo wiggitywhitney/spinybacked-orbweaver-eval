@@ -329,6 +329,7 @@ Use the criteria scorecard as a **filter** (pass/fail each criterion) rather tha
 | Mainstream language patterns | Recommended | H6 refined |
 | Deterministic reproducibility | Recommended | New factor |
 | Community adoption (>500 stars) | Recommended | SWE-bench++ evidence |
+| Different GitHub handles across candidates | Recommended | Post-review: same author/org means shared style, reducing rubric diversity. Tiebreaker. |
 
 ---
 
