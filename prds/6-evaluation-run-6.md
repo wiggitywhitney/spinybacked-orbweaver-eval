@@ -115,14 +115,14 @@ Four-phase approach (same structure as run-5, with coverage recovery as the prim
 
 ### Key Inputs
 
-- **Run-5 results**: `evaluation/run-5/` on branch `feature/prd-5-evaluation-run-5` (14 artifacts)
+- **Run-5 results**: `evaluation/commit-story-v2/run-5/` on branch `feature/prd-5-evaluation-run-5` (14 artifacts)
 - **Evaluation rubric**: `spinybacked-orbweaver/research/evaluation-rubric.md` (32 rules, run-5 clarifications applied)
 - **Rubric-codebase mapping**: `spinybacked-orbweaver/research/rubric-codebase-mapping.md`
 - **Run-5 orbweaver branch**: `orbweaver/instrument-1773706515431` (local — push auth failed)
-- **Run-5 actionable fix output**: `evaluation/run-5/actionable-fix-output.md` (this IS the handoff — run-5 decision)
-- **Run-5 findings**: `evaluation/run-5/orbweaver-findings.md` (22 new findings)
-- **Run-5 lessons**: `evaluation/run-5/lessons-for-prd6.md`
-- **Run-5 score projections**: `evaluation/run-5/actionable-fix-output.md` §7
+- **Run-5 actionable fix output**: `evaluation/commit-story-v2/run-5/actionable-fix-output.md` (this IS the handoff — run-5 decision)
+- **Run-5 findings**: `evaluation/commit-story-v2/run-5/orbweaver-findings.md` (22 new findings)
+- **Run-5 lessons**: `evaluation/commit-story-v2/run-5/lessons-for-prd6.md`
+- **Run-5 score projections**: `evaluation/commit-story-v2/run-5/actionable-fix-output.md` §7
 
 ---
 
@@ -146,7 +146,7 @@ Four-phase approach (same structure as run-5, with coverage recovery as the prim
 ## Milestones
 
 - [ ] **Pre-run verification** — Verify orbweaver fixes and validate run prerequisites:
-  1. **Handoff triage review**: Read orbweaver's triage of `evaluation/run-5/actionable-fix-output.md` (the handoff). Compare what they filed vs what the eval recommended. Note any findings the orbweaver team rejected and why.
+  1. **Handoff triage review**: Read orbweaver's triage of `evaluation/commit-story-v2/run-5/actionable-fix-output.md` (the handoff). Compare what they filed vs what the eval recommended. Note any findings the orbweaver team rejected and why.
   2. **DEEP-1 verification (critical)**: Verify COV-003 validator has expected-condition catch exemption. Test against `src/commands/summarize.js` — the simplest reproduction of DEEP-1. If this fails, STOP — DEEP-1 is the blocking prerequisite.
   3. **RUN-1 verification (critical)**: Verify fix/retry loop has oscillation detection. Test against `src/index.js` — the file that oscillated in run-5. If this fails, note expected impact on file recovery.
   4. **DEEP-4 verification**: Verify duplicate JSDoc prevention. Check that agent preserves existing JSDoc without generating a duplicate.
@@ -157,11 +157,11 @@ Four-phase approach (same structure as run-5, with coverage recovery as the prim
   9. **Superficial resolution tracking setup**: For NDS-005, CDQ-003, RST-001 — document what "genuine resolution" looks like for each rule. These must be evaluated in any recovered files.
   10. Verify codebase is clean: `git status` on main, no leftover orbweaver branches.
   11. Record which run-5 findings are verified fixed vs still open — this determines the expected score ceiling.
-  12. Append any pre-run observations to `evaluation/run-6/lessons-for-prd7.md`.
+  12. Append any pre-run observations to `evaluation/commit-story-v2/run-6/lessons-for-prd7.md`.
 
 - [ ] **Collect lessons for PRD #7** — Create BOTH output documents at the START and append throughout all subsequent milestones:
-  1. Create `evaluation/run-6/orbweaver-findings.md`. Use findings vocabulary from the start.
-  2. Create `evaluation/run-6/lessons-for-prd7.md`. Sections: Rubric Gaps, Process Improvements, Evaluation Methodology, Rubric-Codebase Mapping Corrections, Schema Decisions, Carry-Forward Items.
+  1. Create `evaluation/commit-story-v2/run-6/orbweaver-findings.md`. Use findings vocabulary from the start.
+  2. Create `evaluation/commit-story-v2/run-6/lessons-for-prd7.md`. Sections: Rubric Gaps, Process Improvements, Evaluation Methodology, Rubric-Codebase Mapping Corrections, Schema Decisions, Carry-Forward Items.
   3. Both documents are updated throughout all subsequent milestones. Every milestone has explicit "append to findings/lessons" steps.
 
 - [ ] **Evaluation run-6** — Execute `orbweaver instrument` with coverage recovery focus:
@@ -175,20 +175,20 @@ Four-phase approach (same structure as run-5, with coverage recovery as the prim
   8. Record wall-clock end timestamp.
   9. If any files failed due to token budget, run supplemental passes with `maxTokensPerFile: 150000`.
   10. Verify PR was created successfully. If tests failed, verify draft PR was created. If push failed (4th consecutive), escalate — this is no longer acceptable.
-  11. Capture all output to `evaluation/run-6/orbweaver-output.log`.
+  11. Capture all output to `evaluation/commit-story-v2/run-6/orbweaver-output.log`.
   12. Record final tally: files instrumented / correctly skipped / failed / partial.
   13. **Coverage recovery check**: Compare file tally against pre-run expectation table. Which files recovered? Which didn't? Any surprises?
   14. **Branch deliverable check**: Verify all files reported as instrumented have actual changes on the branch: `git diff main..orbweaver-branch --stat`.
-  15. Append any run observations to `evaluation/run-6/lessons-for-prd7.md` and `evaluation/run-6/orbweaver-findings.md`.
+  15. Append any run observations to `evaluation/commit-story-v2/run-6/lessons-for-prd7.md` and `evaluation/commit-story-v2/run-6/orbweaver-findings.md`.
 
 - [ ] **Failure deep-dives** — For each failed file AND each run-level failure:
   1. **File-level failures**: For each failed/partial file: read orbweaver output log, identify validation rules that blocked instrumentation, map to orbweaver findings (run-5 and run-6), assess whether orbweaver fixes helped.
   2. **Run-level failures**: Push failures, test suite failures, schema evolution issues, commit noise — all get deep-dive treatment.
   3. **Failure trajectory update**: For persistent failures (files that failed in runs 2-5): update the trajectory. Is the root cause the same or different each run? Track per-file failure history across all runs.
   4. **Unmasked bug detection**: For files recovered by DEEP-1/RUN-1/DEEP-4 fixes — check for NEW failure modes that were previously masked. Run-5 warned about this risk.
-  5. For new failures: file findings in `evaluation/run-6/orbweaver-findings.md`.
-  6. Document in `evaluation/run-6/failure-deep-dives.md`.
-  7. Append to `evaluation/run-6/lessons-for-prd7.md` and `evaluation/run-6/orbweaver-findings.md`.
+  5. For new failures: file findings in `evaluation/commit-story-v2/run-6/orbweaver-findings.md`.
+  6. Document in `evaluation/commit-story-v2/run-6/failure-deep-dives.md`.
+  7. Append to `evaluation/commit-story-v2/run-6/lessons-for-prd7.md` and `evaluation/commit-story-v2/run-6/orbweaver-findings.md`.
 
 - [ ] **Per-file evaluation** — Full rubric applied to all files using canonical methodology:
   1. **Gate checks + per-run rules (single agent)**: NDS-001, NDS-002, NDS-003, NDS-006, API-001, API-002, API-003, API-004, CDQ-008.
@@ -201,8 +201,8 @@ Four-phase approach (same structure as run-5, with coverage recovery as the prim
   8. Failed files: evaluate against NDS rules only.
   9. **NDS-005b boundary cases**: Apply the run-5 boundary refinement — LLM failure fallbacks use `span.addEvent('llm.fallback')` instead of `recordException`. NDS-005b applies to normal control flow catches, NOT genuine-failure-with-graceful-recovery catches.
   10. Structured output format: `{rule_id} | {pass|fail} | {file_path}:{line_number} | {actionable_message}`
-  11. Emit as `evaluation/run-6/per-file-evaluation.json` (canonical) and render `evaluation/run-6/per-file-evaluation.md`.
-  12. Append to `evaluation/run-6/lessons-for-prd7.md` and `evaluation/run-6/orbweaver-findings.md`.
+  11. Emit as `evaluation/commit-story-v2/run-6/per-file-evaluation.json` (canonical) and render `evaluation/commit-story-v2/run-6/per-file-evaluation.md`.
+  12. Append to `evaluation/commit-story-v2/run-6/lessons-for-prd7.md` and `evaluation/commit-story-v2/run-6/orbweaver-findings.md`.
 
 - [ ] **PR artifact evaluation** — Evaluate the PR as a first-class deliverable:
   1. If PR exists: evaluate description quality, per-file table accuracy, span counts, agent decision notes.
@@ -212,19 +212,19 @@ Four-phase approach (same structure as run-5, with coverage recovery as the prim
   5. Assess: Does the PR help a reviewer understand what the agent did and make informed merge decisions?
   6. If draft PR (test failures): evaluate the "Test Failures" section.
   7. If PR was lost (push failure): document and escalate — 4th consecutive failure is unacceptable.
-  8. Document in `evaluation/run-6/pr-evaluation.md`.
-  9. Append to `evaluation/run-6/lessons-for-prd7.md` and `evaluation/run-6/orbweaver-findings.md`.
+  8. Document in `evaluation/commit-story-v2/run-6/pr-evaluation.md`.
+  9. Append to `evaluation/commit-story-v2/run-6/lessons-for-prd7.md` and `evaluation/commit-story-v2/run-6/orbweaver-findings.md`.
 
 - [ ] **Rubric scoring** — Synthesize per-file findings into dimension-level scores:
-  1. Aggregate from `evaluation/run-6/per-file-evaluation.json`.
+  1. Aggregate from `evaluation/commit-story-v2/run-6/per-file-evaluation.json`.
   2. Score each dimension with per-rule evidence AND per-file instance counts (files passing/failing each rule).
   3. Apply schema coverage split scoring as standard.
   4. Classify each failure as persistent, new regression, genuine new finding, superficial resolution regression, or methodology-driven.
   5. Apply systemic bug classification where applicable.
   6. **Single canonical score** using per-file evaluation + schema coverage split. Provide methodology-adjusted comparison ONLY for backward compatibility with runs 2-5.
   7. **Include file delivery count alongside percentage score** (run-5 lesson: "92% with 9 files" vs "92% with 16 files" are very different outcomes).
-  8. Emit as `evaluation/run-6/rubric-scores.json` (canonical) and render `evaluation/run-6/rubric-scores.md`.
-  9. Append to `evaluation/run-6/lessons-for-prd7.md` and `evaluation/run-6/orbweaver-findings.md`.
+  8. Emit as `evaluation/commit-story-v2/run-6/rubric-scores.json` (canonical) and render `evaluation/commit-story-v2/run-6/rubric-scores.md`.
+  9. Append to `evaluation/commit-story-v2/run-6/lessons-for-prd7.md` and `evaluation/commit-story-v2/run-6/orbweaver-findings.md`.
 
 - [ ] **Baseline comparison and synthesis** — Compare run-6 vs run-5 vs run-4 vs run-3 vs run-2:
   1. Dimension-level trend analysis (5-run).
@@ -235,8 +235,8 @@ Four-phase approach (same structure as run-5, with coverage recovery as the prim
   6. **Quality vs coverage trend**: Plot quality score vs file delivery count across all runs. Run-5 traded coverage for quality; run-6 should recover coverage without sacrificing quality.
   7. Assessment of run-5 score projections (§7 of actionable-fix-output.md): did the 3-tier prediction hold?
   8. **Cost comparison**: 5-run trend. Validate cost-to-file-count ratio.
-  9. Document in `evaluation/run-6/baseline-comparison.md`.
-  10. Append to `evaluation/run-6/lessons-for-prd7.md`.
+  9. Document in `evaluation/commit-story-v2/run-6/baseline-comparison.md`.
+  10. Append to `evaluation/commit-story-v2/run-6/lessons-for-prd7.md`.
 
 - [ ] **Actionable fix output** — Produce fix instructions for remaining failures (this IS the handoff — run-5 decision):
   1. For each remaining quality rule failure: what's wrong, evidence, desired outcome, acceptance criteria.
@@ -251,13 +251,13 @@ Four-phase approach (same structure as run-5, with coverage recovery as the prim
   10. Port failing files as test cases (update from run-5 list — remove recovered files, add any new failures).
   11. **Cross-document audit agent** (final step): Read ALL evaluation documents (findings, lessons, per-file eval, rubric scores, baseline comparison, failure deep-dives, PR eval) and cross-reference against the actionable fix output. Flag any items that appear in source documents but are missing from the actionable fix output. Run-5 audit agent caught 22 missing items.
   12. Generate from canonical JSON artifacts to prevent drift.
-  13. Document in `evaluation/run-6/actionable-fix-output.md`.
-  14. Final review of `evaluation/run-6/lessons-for-prd7.md` and `evaluation/run-6/orbweaver-findings.md`.
+  13. Document in `evaluation/commit-story-v2/run-6/actionable-fix-output.md`.
+  14. Final review of `evaluation/commit-story-v2/run-6/lessons-for-prd7.md` and `evaluation/commit-story-v2/run-6/orbweaver-findings.md`.
 
 - [ ] **Draft PRD #7 for next evaluation run** — Create PRD #7 on a separate branch from main:
   1. Run-6 scores as baselines (include file delivery counts).
-  2. All items from `evaluation/run-6/lessons-for-prd7.md`.
-  3. Carry forward unresolved findings from `evaluation/run-6/actionable-fix-output.md`.
+  2. All items from `evaluation/commit-story-v2/run-6/lessons-for-prd7.md`.
+  3. Carry forward unresolved findings from `evaluation/commit-story-v2/run-6/actionable-fix-output.md`.
   4. Encode process lessons.
   5. Validate run-6 score projections against actual results and update projection methodology.
   6. Create on a separate branch from main and PR to main — evaluation branches are never merged.
@@ -394,8 +394,8 @@ Risk: If fixing SYS-3 reveals new failure modes in recovered files ("unmasked bu
 
 Run-6 uses the same handoff process as run-5:
 
-1. **Evaluation produces findings** — `evaluation/run-6/orbweaver-findings.md` with evidence links, priority, and acceptance criteria
-2. **Actionable fix output IS the handoff** — `evaluation/run-6/actionable-fix-output.md` includes acceptance criteria, priority matrix, carry-forwards, and is written directly to the orbweaver maintainer (run-5 decision: no separate handoff document needed)
+1. **Evaluation produces findings** — `evaluation/commit-story-v2/run-6/orbweaver-findings.md` with evidence links, priority, and acceptance criteria
+2. **Actionable fix output IS the handoff** — `evaluation/commit-story-v2/run-6/actionable-fix-output.md` includes acceptance criteria, priority matrix, carry-forwards, and is written directly to the orbweaver maintainer (run-5 decision: no separate handoff document needed)
 3. **Target repo team triages** — The orbweaver team reads the actionable fix output, verifies claims against their codebase, and right-sizes work (PRD vs Issue — their decision, not eval's)
 4. **Triage report** — The orbweaver team produces a triage report documenting which findings were confirmed, rejected, or reclassified
 5. **Run-7 validates** — The next evaluation run checks whether the triage and fixes were effective
@@ -437,7 +437,7 @@ These gaps were identified during run-5 evaluation and should be considered for 
 - **PRD #4**: Run-4 evaluation (this repo, branch `feature/prd-4-evaluation-run-4`)
 - **PRD #3**: Run-3 evaluation (this repo)
 - **PRD #2**: Run-2 evaluation (this repo)
-- **evaluation/run-5/**: Full run-5 documentation (on branch `feature/prd-5-evaluation-run-5`)
+- **evaluation/commit-story-v2/run-5/**: Full run-5 documentation (on branch `feature/prd-5-evaluation-run-5`)
   - `per-file-evaluation.json`: Canonical per-file evaluation data
   - `rubric-scores.json`: Canonical rubric scoring data
   - `orbweaver-findings.md`: 22 findings with acceptance criteria
@@ -446,8 +446,8 @@ These gaps were identified during run-5 evaluation and should be considered for 
   - `baseline-comparison.md`: Run-5 vs run-4 vs run-3 vs run-2
   - `failure-deep-dives.md`: Root cause analysis
   - `pr-evaluation.md`: PR artifact quality assessment
-- **evaluation/run-4/**: Full run-4 documentation (on branch `feature/prd-4-evaluation-run-4`)
-- **evaluation/run-3/**: Full run-3 documentation
-- **evaluation/run-2/**: Full run-2 documentation
+- **evaluation/commit-story-v2/run-4/**: Full run-4 documentation (on branch `feature/prd-4-evaluation-run-4`)
+- **evaluation/commit-story-v2/run-3/**: Full run-3 documentation
+- **evaluation/commit-story-v2/run-2/**: Full run-2 documentation
 - **spinybacked-orbweaver/research/evaluation-rubric.md**: 32-rule rubric
 - **spinybacked-orbweaver/research/rubric-codebase-mapping.md**: Rule-to-code mapping

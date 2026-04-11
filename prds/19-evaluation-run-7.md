@@ -113,14 +113,14 @@ Four-phase approach (same structure as runs 5-6, with registry expansion as the 
 
 ### Key Inputs
 
-- **Run-6 results**: `evaluation/run-6/` on branch `feature/prd-6-evaluation-run-6` (12 artifacts)
+- **Run-6 results**: `evaluation/commit-story-v2/run-6/` on branch `feature/prd-6-evaluation-run-6` (12 artifacts)
 - **Evaluation rubric**: `spinybacked-orbweaver/research/evaluation-rubric.md` (32 rules, run-5/6 clarifications applied)
 - **Rubric-codebase mapping**: `spinybacked-orbweaver/research/rubric-codebase-mapping.md`
 - **Run-6 spiny-orb branch**: `spiny-orb/instrument-1773996478550` (local — push auth failed)
-- **Run-6 actionable fix output**: `evaluation/run-6/actionable-fix-output.md` (this IS the handoff)
-- **Run-6 findings**: `evaluation/run-6/spiny-orb-findings.md` (16 findings)
-- **Run-6 lessons**: `evaluation/run-6/lessons-for-prd7.md`
-- **Run-6 score projections**: `evaluation/run-6/actionable-fix-output.md` §7
+- **Run-6 actionable fix output**: `evaluation/commit-story-v2/run-6/actionable-fix-output.md` (this IS the handoff)
+- **Run-6 findings**: `evaluation/commit-story-v2/run-6/spiny-orb-findings.md` (16 findings)
+- **Run-6 lessons**: `evaluation/commit-story-v2/run-6/lessons-for-prd7.md`
+- **Run-6 score projections**: `evaluation/commit-story-v2/run-6/actionable-fix-output.md` §7
 
 ---
 
@@ -147,7 +147,7 @@ Four-phase approach (same structure as runs 5-6, with registry expansion as the 
 ## Milestones
 
 - [ ] **Pre-run verification** — Verify spiny-orb fixes and validate run prerequisites:
-  1. **Handoff triage review**: Read the spiny-orb team's triage of `evaluation/run-6/actionable-fix-output.md`. Compare what they filed vs what the eval recommended. Note any findings the spiny-orb team rejected and why.
+  1. **Handoff triage review**: Read the spiny-orb team's triage of `evaluation/commit-story-v2/run-6/actionable-fix-output.md`. Compare what they filed vs what the eval recommended. Note any findings the spiny-orb team rejected and why.
   2. **SCH-001 verification (critical)**: Verify Weaver registry has ≥8 span definitions covering commit-story domain operations (CLI, git, context, journal, summary, auto-summarize, MCP server, summary-detector). If <5 definitions, STOP — registry expansion is the blocking prerequisite.
   3. **COV-003 boundary verification (critical)**: Verify expected-condition exemption covers all 4 patterns: ENOENT-style (DEEP-1), per-item-failure-collection, swallow-and-continue, try/finally. Test against `src/index.js` (swallow-and-continue) and `src/commands/summarize.js` (per-item-collection). If boundary gaps remain, note expected impact on file recovery.
   4. **Push capability test**: Verify push auth uses SSH, credential helper, or `--push-command`. Test with `git push --dry-run`. HTTPS password auth is confirmed broken — do NOT accept HTTPS-only fix.
@@ -162,16 +162,16 @@ Four-phase approach (same structure as runs 5-6, with registry expansion as the 
   13. **Validator-evaluator alignment check**: Verify SCH-001 definition is consistent between validator and evaluator. Run-6 found they diverge (validator: strict registry conformance; evaluator: quality guideline). One must change.
   14. Verify codebase is clean: `git status` on main, no leftover spiny-orb branches.
   15. Record which run-6 findings are verified fixed vs still open — this determines the expected score ceiling.
-  16. Append any pre-run observations to `evaluation/run-7/lessons-for-prd8.md`.
+  16. Append any pre-run observations to `evaluation/commit-story-v2/run-7/lessons-for-prd8.md`.
 
 - [ ] **Collect lessons for PRD #8** — Create BOTH output documents at the START and append throughout all subsequent milestones:
-  1. Create `evaluation/run-7/spiny-orb-findings.md`. Use findings vocabulary from the start.
-  2. Create `evaluation/run-7/lessons-for-prd8.md`. Sections: Rubric Gaps, Process Improvements, Evaluation Methodology, Rubric-Codebase Mapping Corrections, Schema Decisions, Carry-Forward Items.
+  1. Create `evaluation/commit-story-v2/run-7/spiny-orb-findings.md`. Use findings vocabulary from the start.
+  2. Create `evaluation/commit-story-v2/run-7/lessons-for-prd8.md`. Sections: Rubric Gaps, Process Improvements, Evaluation Methodology, Rubric-Codebase Mapping Corrections, Schema Decisions, Carry-Forward Items.
   3. Both documents are updated throughout all subsequent milestones. Every milestone has explicit "append to findings/lessons" steps.
 
 - [ ] **Evaluation run-7** — Execute `spiny-orb instrument` in the user's terminal (not through Claude Code):
   1. Clean codebase state: start from main branch with evaluation config (spiny-orb.yaml, instrumentation.js, semconv/).
-  2. **Provide the exact command** for the user to run in their own terminal: `caffeinate -s spiny-orb instrument src/ --verbose -y 2>&1 | tee evaluation/run-7/spiny-orb-output.log`. The user runs this — Claude does NOT execute it. (Run-6 lesson: 30+ minute command, buffered stdout, laptop sleep risk.)
+  2. **Provide the exact command** for the user to run in their own terminal: `caffeinate -s spiny-orb instrument src/ --verbose -y 2>&1 | tee evaluation/commit-story-v2/run-7/spiny-orb-output.log`. The user runs this — Claude does NOT execute it. (Run-6 lesson: 30+ minute command, buffered stdout, laptop sleep risk.)
   3. Record wall-clock start timestamp.
   4. **Resume after run completes**: User notifies Claude when the run finishes. Claude reads the output log and resumes evaluation.
   5. **Schema evolution health check**: Compare schemaHashBefore vs schemaHashAfter. With registry expansion, should show significant evolution.
@@ -186,7 +186,7 @@ Four-phase approach (same structure as runs 5-6, with registry expansion as the 
   14. **Regression check**: Verify all 5 run-6 committed files are still committed. Track the 4 run-6 regressions (auto-summarize, context-capture-tool, reflection-tool, journal-paths).
   15. **Branch deliverable check**: Verify all files reported as instrumented have actual changes on the branch: `git diff main..spiny-orb-branch --stat`.
   16. **Dominant blocker peeling check (new)**: With SCH-001 fixed, what's the new top blocker for remaining partial files? Document this explicitly.
-  17. Append any run observations to `evaluation/run-7/lessons-for-prd8.md` and `evaluation/run-7/spiny-orb-findings.md`.
+  17. Append any run observations to `evaluation/commit-story-v2/run-7/lessons-for-prd8.md` and `evaluation/commit-story-v2/run-7/spiny-orb-findings.md`.
 
 - [ ] **Failure deep-dives** — For each failed file AND each run-level failure:
   1. **File-level failures**: For each failed/partial file: read spiny-orb output log, identify validation rules that blocked instrumentation, map to spiny-orb findings (run-6 and run-7), assess whether spiny-orb fixes helped.
@@ -194,9 +194,9 @@ Four-phase approach (same structure as runs 5-6, with registry expansion as the 
   3. **Failure trajectory update**: For persistent failures (files that failed in runs 2-6): update the trajectory. Is the root cause the same or different each run? Track per-file failure history across all runs.
   4. **Unmasked bug detection**: For files recovered by registry expansion / COV-003 fixes — check for NEW failure modes that were previously masked by SCH-001. Run-6 confirmed this pattern (SCH-001 was unmasked by DEEP-1 fix). Expect it again.
   5. **Regression root cause**: For any files that regressed from run-6 to run-7 — full root cause analysis. Is the regression caused by spiny-orb changes or evaluation methodology changes?
-  6. For new failures: file findings in `evaluation/run-7/spiny-orb-findings.md`.
-  7. Document in `evaluation/run-7/failure-deep-dives.md`.
-  8. Append to `evaluation/run-7/lessons-for-prd8.md` and `evaluation/run-7/spiny-orb-findings.md`.
+  6. For new failures: file findings in `evaluation/commit-story-v2/run-7/spiny-orb-findings.md`.
+  7. Document in `evaluation/commit-story-v2/run-7/failure-deep-dives.md`.
+  8. Append to `evaluation/commit-story-v2/run-7/lessons-for-prd8.md` and `evaluation/commit-story-v2/run-7/spiny-orb-findings.md`.
 
 - [ ] **Per-file evaluation** — Full rubric applied to all files using canonical methodology:
   1. **Gate checks + per-run rules (single agent)**: NDS-001, NDS-002, NDS-003, NDS-006, API-001, API-002, API-003, API-004, CDQ-008.
@@ -210,8 +210,8 @@ Four-phase approach (same structure as runs 5-6, with registry expansion as the 
   9. **SCH-001 semantic quality check (new)**: For all committed files, verify span names are semantically correct (not just registry-compliant). Run-6's compliance-over-accuracy problem should be resolved by registry expansion.
   10. **NDS-005b boundary cases**: Apply the run-5 boundary refinement — LLM failure fallbacks use `span.addEvent('llm.fallback')` instead of `recordException`.
   11. Structured output format: `{rule_id} | {pass|fail} | {file_path}:{line_number} | {actionable_message}`
-  12. Emit as `evaluation/run-7/per-file-evaluation.json` (canonical) and render `evaluation/run-7/per-file-evaluation.md`.
-  13. Append to `evaluation/run-7/lessons-for-prd8.md` and `evaluation/run-7/spiny-orb-findings.md`.
+  12. Emit as `evaluation/commit-story-v2/run-7/per-file-evaluation.json` (canonical) and render `evaluation/commit-story-v2/run-7/per-file-evaluation.md`.
+  13. Append to `evaluation/commit-story-v2/run-7/lessons-for-prd8.md` and `evaluation/commit-story-v2/run-7/spiny-orb-findings.md`.
 
 - [ ] **PR artifact evaluation** — Evaluate the PR as a first-class deliverable:
   1. If PR exists: evaluate description quality, per-file table accuracy, span counts, agent decision notes.
@@ -223,19 +223,19 @@ Four-phase approach (same structure as runs 5-6, with registry expansion as the 
   7. Assess: Does the PR help a reviewer understand what the agent did and make informed merge decisions? (Run-6 was 2/5; target 3/5+.)
   8. If draft PR (test failures): evaluate the "Test Failures" section.
   9. If PR was lost (push failure): document and escalate — 5th consecutive failure demands fundamental workflow change.
-  10. Document in `evaluation/run-7/pr-evaluation.md`.
-  11. Append to `evaluation/run-7/lessons-for-prd8.md` and `evaluation/run-7/spiny-orb-findings.md`.
+  10. Document in `evaluation/commit-story-v2/run-7/pr-evaluation.md`.
+  11. Append to `evaluation/commit-story-v2/run-7/lessons-for-prd8.md` and `evaluation/commit-story-v2/run-7/spiny-orb-findings.md`.
 
 - [ ] **Rubric scoring** — Synthesize per-file findings into dimension-level scores:
-  1. Aggregate from `evaluation/run-7/per-file-evaluation.json`.
+  1. Aggregate from `evaluation/commit-story-v2/run-7/per-file-evaluation.json`.
   2. Score each dimension with per-rule evidence AND per-file instance counts (files passing/failing each rule).
   3. Apply schema coverage split scoring as standard. With registry expansion, the split should shift significantly toward "covered."
   4. Classify each failure as persistent, new regression, genuine new finding, superficial resolution regression, unmasked (revealed by SCH-001 fix), or methodology-driven.
   5. Apply systemic bug classification where applicable.
   6. **Single canonical score** using per-file evaluation + schema coverage split. Provide methodology-adjusted comparison ONLY for backward compatibility with runs 2-6.
   7. **Include file delivery count alongside percentage score** (established in run-5).
-  8. Emit as `evaluation/run-7/rubric-scores.json` (canonical) and render `evaluation/run-7/rubric-scores.md`.
-  9. Append to `evaluation/run-7/lessons-for-prd8.md` and `evaluation/run-7/spiny-orb-findings.md`.
+  8. Emit as `evaluation/commit-story-v2/run-7/rubric-scores.json` (canonical) and render `evaluation/commit-story-v2/run-7/rubric-scores.md`.
+  9. Append to `evaluation/commit-story-v2/run-7/lessons-for-prd8.md` and `evaluation/commit-story-v2/run-7/spiny-orb-findings.md`.
 
 - [ ] **Baseline comparison and synthesis** — Compare run-7 vs runs 2-6:
   1. Dimension-level trend analysis (6-run).
@@ -247,8 +247,8 @@ Four-phase approach (same structure as runs 5-6, with registry expansion as the 
   7. **Quality vs coverage trend**: Plot quality score vs file delivery count across all runs. Run-7 should show both metrics improving (reversing the run-6 decline).
   8. Assessment of run-6 score projections: did the 3-tier prediction hold? Validate the 50% discount methodology.
   9. **Cost comparison**: 6-run trend. Validate cost-to-file-count ratio. With more files, cost/file should decrease.
-  10. Document in `evaluation/run-7/baseline-comparison.md`.
-  11. Append to `evaluation/run-7/lessons-for-prd8.md`.
+  10. Document in `evaluation/commit-story-v2/run-7/baseline-comparison.md`.
+  11. Append to `evaluation/commit-story-v2/run-7/lessons-for-prd8.md`.
 
 - [ ] **Actionable fix output** — Produce fix instructions for remaining failures (this IS the handoff). **This is the primary deliverable of the entire evaluation run.** The document must be self-contained so the spiny-orb Weaver has everything at its fingertips — synthesize ALL findings from every run-7 artifact:
   1. For each remaining quality rule failure: what's wrong, evidence, desired outcome, acceptance criteria.
@@ -263,13 +263,13 @@ Four-phase approach (same structure as runs 5-6, with registry expansion as the 
   10. Port failing files as test cases (update from run-6 list — remove recovered files, add any new failures).
   11. **Cross-document audit agent** (final step): Read ALL evaluation documents and cross-reference against the actionable fix output. Flag any items that appear in source documents but are missing. Run-5 audit caught 22 missing items.
   12. Generate from canonical JSON artifacts to prevent drift.
-  13. Document in `evaluation/run-7/actionable-fix-output.md`.
-  14. Final review of `evaluation/run-7/lessons-for-prd8.md` and `evaluation/run-7/spiny-orb-findings.md`.
+  13. Document in `evaluation/commit-story-v2/run-7/actionable-fix-output.md`.
+  14. Final review of `evaluation/commit-story-v2/run-7/lessons-for-prd8.md` and `evaluation/commit-story-v2/run-7/spiny-orb-findings.md`.
 
 - [ ] **Draft PRD #8 for next evaluation run** — Create PRD #8 on a separate branch from main:
   1. Run-7 scores as baselines (include file delivery counts).
-  2. All items from `evaluation/run-7/lessons-for-prd8.md`.
-  3. Carry forward unresolved findings from `evaluation/run-7/actionable-fix-output.md`.
+  2. All items from `evaluation/commit-story-v2/run-7/lessons-for-prd8.md`.
+  3. Carry forward unresolved findings from `evaluation/commit-story-v2/run-7/actionable-fix-output.md`.
   4. Encode process lessons.
   5. Validate run-7 score projections against actual results and update projection methodology.
   6. Create on a separate branch from main and PR to main — evaluation branches are never merged.
@@ -445,8 +445,8 @@ The 50% discount is applied to account for the dominant-blocker peeling pattern.
 
 Run-7 uses the same handoff process as runs 5-6:
 
-1. **Evaluation produces findings** — `evaluation/run-7/spiny-orb-findings.md` with evidence links, priority, and acceptance criteria
-2. **Actionable fix output IS the handoff** — `evaluation/run-7/actionable-fix-output.md` includes acceptance criteria, priority matrix, carry-forwards, and is written directly to the spiny-orb maintainer
+1. **Evaluation produces findings** — `evaluation/commit-story-v2/run-7/spiny-orb-findings.md` with evidence links, priority, and acceptance criteria
+2. **Actionable fix output IS the handoff** — `evaluation/commit-story-v2/run-7/actionable-fix-output.md` includes acceptance criteria, priority matrix, carry-forwards, and is written directly to the spiny-orb maintainer
 3. **Target repo team triages** — The spiny-orb team reads the actionable fix output, verifies claims against their codebase, and right-sizes work (PRD vs Issue — their decision, not eval's)
 4. **Triage report** — The spiny-orb team produces a triage report documenting which findings were confirmed, rejected, or reclassified
 5. **Run-8 validates** — The next evaluation run checks whether the triage and fixes were effective
@@ -473,7 +473,7 @@ Run-7 uses the same handoff process as runs 5-6:
 - **PRD #4**: Run-4 evaluation (this repo, branch `feature/prd-4-evaluation-run-4`)
 - **PRD #3**: Run-3 evaluation (this repo)
 - **PRD #2**: Run-2 evaluation (this repo)
-- **evaluation/run-6/**: Full run-6 documentation (on branch `feature/prd-6-evaluation-run-6`)
+- **evaluation/commit-story-v2/run-6/**: Full run-6 documentation (on branch `feature/prd-6-evaluation-run-6`)
   - `per-file-evaluation.json`: Canonical per-file evaluation data
   - `rubric-scores.json`: Canonical rubric scoring data
   - `spiny-orb-findings.md`: 16 findings with acceptance criteria
@@ -482,9 +482,9 @@ Run-7 uses the same handoff process as runs 5-6:
   - `baseline-comparison.md`: Run-6 vs runs 2-5
   - `failure-deep-dives.md`: Root cause analysis
   - `pr-evaluation.md`: PR artifact quality assessment
-- **evaluation/run-5/**: Full run-5 documentation (on branch `feature/prd-5-evaluation-run-5`)
-- **evaluation/run-4/**: Full run-4 documentation (on branch `feature/prd-4-evaluation-run-4`)
-- **evaluation/run-3/**: Full run-3 documentation
-- **evaluation/run-2/**: Full run-2 documentation
+- **evaluation/commit-story-v2/run-5/**: Full run-5 documentation (on branch `feature/prd-5-evaluation-run-5`)
+- **evaluation/commit-story-v2/run-4/**: Full run-4 documentation (on branch `feature/prd-4-evaluation-run-4`)
+- **evaluation/commit-story-v2/run-3/**: Full run-3 documentation
+- **evaluation/commit-story-v2/run-2/**: Full run-2 documentation
 - **spinybacked-orbweaver/research/evaluation-rubric.md**: 32-rule rubric
 - **spinybacked-orbweaver/research/rubric-codebase-mapping.md**: Rule-to-code mapping

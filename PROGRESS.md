@@ -109,6 +109,7 @@ Entry format: `- (YYYY-MM-DD) Description of feature-level change (PRD #X, miles
 - (2026-04-11) Created PRD #45 (eval target criteria research spike) with 4 milestones; output path docs/research/eval-target-criteria.md predefined; final milestone creates PRDs for Steps 5-7; /write-prompt review applied (PRD #41, milestone 3)
 - (2026-04-11) Coherence verification passed all 6 criteria: IS PRD has Step 0 read instruction, research spike PRD names correct output path and creates Steps 5-7 PRDs, ROADMAP.md has real issue numbers (#43, #44, #45) with no duplicates, all PRDs independently mergeable to main, dependencies sections accurate (PRD #41, coherence verification)
 - (2026-04-11) Moved all evaluation run directories (run-2, run-6 through run-12) from evaluation/run-N/ to evaluation/commit-story-v2/run-N/ to scope existing JS runs under target-specific path (PRD #43, milestone 1)
+- (2026-04-11) Updated all internal evaluation path references from evaluation/run-N/ to evaluation/commit-story-v2/run-N/ across all PRDs, docs, and .claude/settings.local.json; zero stale paths remain (PRD #43, milestone 2)
 
 ### Changed
 - (2026-03-16) Fixed span count discrepancy: total_spans_on_branch corrected from 48 to 38 in per-file-evaluation.json and rubric-scores.json (48 included working-directory-only changes from partial files not committed to branch). Updated baseline-comparison.md table to match canonical per-file-evaluation.json (PRD #4, CodeRabbit finding fix)

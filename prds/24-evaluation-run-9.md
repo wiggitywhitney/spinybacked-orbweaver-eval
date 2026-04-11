@@ -105,11 +105,11 @@ Run-9 operates across two repos. Be explicit about which repo at every step.
 
 ### Key Inputs
 
-- **Run-8 results** (eval repo): `evaluation/run-8/` on branch `feature/prd-21-evaluation-run-8`
+- **Run-8 results** (eval repo): `evaluation/commit-story-v2/run-8/` on branch `feature/prd-21-evaluation-run-8`
 - **Evaluation rubric** (spiny-orb repo): `spinybacked-orbweaver/research/evaluation-rubric.md` (32 rules)
-- **Run-8 actionable fix output** (eval repo): `evaluation/run-8/actionable-fix-output.md` (the handoff)
-- **Run-8 findings** (eval repo): `evaluation/run-8/spiny-orb-findings.md` (7 findings)
-- **Run-8 lessons** (eval repo): `evaluation/run-8/lessons-for-prd9.md`
+- **Run-8 actionable fix output** (eval repo): `evaluation/commit-story-v2/run-8/actionable-fix-output.md` (the handoff)
+- **Run-8 findings** (eval repo): `evaluation/commit-story-v2/run-8/spiny-orb-findings.md` (7 findings)
+- **Run-8 lessons** (eval repo): `evaluation/commit-story-v2/run-8/lessons-for-prd9.md`
 - **spiny-orb.yaml** (target repo): Must exist in commit-story-v2 before the run — verify during pre-run or copy from eval repo
 - **semconv/** (target repo): Weaver schema must exist in commit-story-v2 — verify during pre-run or copy from eval repo
 
@@ -137,7 +137,7 @@ Run-9 operates across two repos. Be explicit about which repo at every step.
 ## Milestones
 
 - [ ] **Pre-run verification** — Verify spiny-orb fixes and validate run prerequisites:
-  1. **Handoff triage review**: Read the spiny-orb team's triage of `evaluation/run-8/actionable-fix-output.md` (eval repo). Compare what they filed vs what the eval recommended. Note any findings rejected.
+  1. **Handoff triage review**: Read the spiny-orb team's triage of `evaluation/commit-story-v2/run-8/actionable-fix-output.md` (eval repo). Compare what they filed vs what the eval recommended. Note any findings rejected.
   2. **Target repo readiness** (commit-story-v2): Verify PRD #51 is complete — `@opentelemetry/sdk-node` in devDependencies (not peerDependencies), `instrumentation.js` exists, Datadog exporter configured. Verify `spiny-orb.yaml` and `semconv/` exist (copy from eval repo if needed). Verify commit-story-v2 is on `main` branch.
   3. **Push auth verification (critical)**: Verify write-access validation before file processing. Test with `git push --dry-run` **in the commit-story-v2 repo**. Must distinguish read-only tokens from write tokens. Check if fix/260 (upstream tracking) is merged.
   4. **SCH-003 count attribute types**: Verify post-generation validator rejects `*_count` with `type` != `int`. Verify `force` attribute uses `type: boolean`.
@@ -148,16 +148,16 @@ Run-9 operates across two repos. Be explicit about which repo at every step.
   9. `spiny-orb --version` — record version.
   10. **File recovery expectations**: Predict run-9 outcomes with 50% discount. Note that file names and counts may differ from run-8 (different repo). journal-graph.js non-deterministic — uncertain.
   11. Record which run-8 findings are verified fixed vs still open.
-  12. Append observations to `evaluation/run-9/lessons-for-prd10.md` (eval repo).
+  12. Append observations to `evaluation/commit-story-v2/run-9/lessons-for-prd10.md` (eval repo).
 
 - [ ] **Collect lessons for PRD #10** — Create BOTH output documents at the START:
-  1. Create `evaluation/run-9/spiny-orb-findings.md`.
-  2. Create `evaluation/run-9/lessons-for-prd10.md`.
+  1. Create `evaluation/commit-story-v2/run-9/spiny-orb-findings.md`.
+  2. Create `evaluation/commit-story-v2/run-9/lessons-for-prd10.md`.
   3. Both updated throughout all subsequent milestones.
 
 - [ ] **Evaluation run-9** — Execute `spiny-orb instrument` on **commit-story-v2** (not the eval repo):
   1. Ensure commit-story-v2 is on **main** with clean working tree: `cd ~/Documents/Repositories/commit-story-v2 && git checkout main && git status`.
-  2. **Provide the exact command** for the user to run. The command must: (a) `cd` to commit-story-v2, (b) use `caffeinate -s`, (c) strip Datadog gateway headers, (d) inject secrets via vals using commit-story-v2's `.vals.yaml`, (e) point to spiny-orb binary, (f) `tee` output to the **eval repo's** `evaluation/run-9/spiny-orb-output.log`.
+  2. **Provide the exact command** for the user to run. The command must: (a) `cd` to commit-story-v2, (b) use `caffeinate -s`, (c) strip Datadog gateway headers, (d) inject secrets via vals using commit-story-v2's `.vals.yaml`, (e) point to spiny-orb binary, (f) `tee` output to the **eval repo's** `evaluation/commit-story-v2/run-9/spiny-orb-output.log`.
   3. Record wall-clock start timestamp.
   4. Resume after run completes. **Copy the user's pasted output** into the eval repo if `tee` wasn't used.
   5. **Push auth verification (critical)**: Did the PR get created **on commit-story-v2's GitHub repo**? If push failed again (7th consecutive), escalate as fundamental blocker.
@@ -176,14 +176,14 @@ Run-9 operates across two repos. Be explicit about which repo at every step.
   5. Check Datadog APM for traces with `service:commit-story` within 60 seconds.
   6. Verify span hierarchy: root span → manual spans → LangChain auto-instrumentation child spans.
   7. **Switch commit-story-v2 back to main** when done to restore normal CLI behavior.
-  8. Document results (screenshots or trace IDs) in eval repo `evaluation/run-9/live-telemetry-validation.md`.
+  8. Document results (screenshots or trace IDs) in eval repo `evaluation/commit-story-v2/run-9/live-telemetry-validation.md`.
 
 - [ ] **Failure deep-dives** — For each failed file AND run-level failure:
   1. File-level failures (if any).
   2. Run-level failures: push auth (verify fix or document continued failure).
   3. Unmasked bug detection for any changes.
   4. Regression root cause (if any).
-  5. Document in `evaluation/run-9/failure-deep-dives.md`.
+  5. Document in `evaluation/commit-story-v2/run-9/failure-deep-dives.md`.
 
 - [ ] **Per-file evaluation** — Full rubric on ALL files (no spot-checking):
   1. Gate checks + per-run rules. Run tests on **commit-story-v2** (the target repo).
@@ -200,7 +200,7 @@ Run-9 operates across two repos. Be explicit about which repo at every step.
   3. **Advisory contradiction rate**: Target <30%.
   4. **Rule code labels**: Verify in both validation output and agent notes.
   5. **Schema changes completeness**: Must include both attributes and span extensions.
-  6. Document in `evaluation/run-9/pr-evaluation.md`.
+  6. Document in `evaluation/commit-story-v2/run-9/pr-evaluation.md`.
 
 - [ ] **Rubric scoring** — Synthesize dimension-level scores:
   1. Aggregate from per-file evaluation.
@@ -215,7 +215,7 @@ Run-9 operates across two repos. Be explicit about which repo at every step.
   4. Cost comparison (8-run trend).
   5. Dominant blocker peeling assessment.
   6. Score projection validation.
-  7. Document in `evaluation/run-9/baseline-comparison.md`.
+  7. Document in `evaluation/commit-story-v2/run-9/baseline-comparison.md`.
 
 - [ ] **Actionable fix output** — Primary handoff deliverable:
   1. Remaining quality rule failures with evidence and acceptance criteria.
@@ -224,11 +224,11 @@ Run-9 operates across two repos. Be explicit about which repo at every step.
   4. Score projection for run-10 with 50% discount.
   5. Priority action matrix.
   6. **Cross-document audit agent** (final step).
-  7. Document in `evaluation/run-9/actionable-fix-output.md`.
+  7. Document in `evaluation/commit-story-v2/run-9/actionable-fix-output.md`.
 
 - [ ] **Draft PRD #10** — Create on a separate branch from main:
   1. Run-9 scores as baselines.
-  2. All items from `evaluation/run-9/lessons-for-prd10.md`.
+  2. All items from `evaluation/commit-story-v2/run-9/lessons-for-prd10.md`.
   3. Carry forward unresolved findings.
   4. Priority recommendations only (no PRD/Issue classification).
 
@@ -322,7 +322,7 @@ Run-8 projections were well-calibrated: minimum predicted 23-24/25 → actual 23
 - **PRD #7**: Run-7 evaluation (branch `feature/prd-19-evaluation-run-7`)
 - **PRD #6**: Run-6 evaluation (branch `feature/prd-6-evaluation-run-6`)
 - **PRD #5**: Run-5 evaluation (branch `feature/prd-5-evaluation-run-5`)
-- **evaluation/run-8/**: Full run-8 documentation (on branch `feature/prd-21-evaluation-run-8`)
+- **evaluation/commit-story-v2/run-8/**: Full run-8 documentation (on branch `feature/prd-21-evaluation-run-8`)
   - `rubric-scores.md`: Canonical scoring data
   - `spiny-orb-findings.md`: 7 findings with acceptance criteria
   - `actionable-fix-output.md`: Fix instructions and score projections (the handoff)

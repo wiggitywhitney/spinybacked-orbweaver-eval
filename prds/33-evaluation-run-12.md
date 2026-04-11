@@ -87,11 +87,11 @@ Same as runs 9-11.
 
 ### Key Inputs
 
-- **Run-11 results** (eval repo): `evaluation/run-11/` on branch `feature/prd-32-evaluation-run-11`
+- **Run-11 results** (eval repo): `evaluation/commit-story-v2/run-11/` on branch `feature/prd-32-evaluation-run-11`
 - **Evaluation rubric** (spiny-orb repo): `spinybacked-orbweaver/research/evaluation-rubric.md` (32 rules)
-- **Run-11 actionable fix output** (eval repo): `evaluation/run-11/actionable-fix-output.md`
-- **Run-11 findings** (eval repo): `evaluation/run-11/spiny-orb-findings.md` (5 findings)
-- **Run-11 lessons** (eval repo): `evaluation/run-11/lessons-for-prd12.md`
+- **Run-11 actionable fix output** (eval repo): `evaluation/commit-story-v2/run-11/actionable-fix-output.md`
+- **Run-11 findings** (eval repo): `evaluation/commit-story-v2/run-11/spiny-orb-findings.md` (5 findings)
+- **Run-11 lessons** (eval repo): `evaluation/commit-story-v2/run-11/lessons-for-prd12.md`
 
 ---
 
@@ -112,7 +112,7 @@ Same as runs 9-11.
 ## Milestones
 
 - [ ] **Pre-run verification** — Verify spiny-orb fixes and validate run prerequisites:
-  1. **Handoff triage review**: Read the spiny-orb team's triage of `evaluation/run-11/actionable-fix-output.md`.
+  1. **Handoff triage review**: Read the spiny-orb team's triage of `evaluation/commit-story-v2/run-11/actionable-fix-output.md`.
   2. **Target repo readiness** (commit-story-v2): Verify on `main`, clean working tree, spiny-orb.yaml and semconv/ exist.
   3. **Push auth stability check**: Verify token still works (dry-run push).
   4. **RUN11-5 NDS-003 validator fix**: Check if defined-value guards are now recognized as instrumentation patterns.
@@ -120,7 +120,7 @@ Same as runs 9-11.
   6. **File inventory**: Count .js files in commit-story-v2's `src/` directory.
   7. Rebuild spiny-orb from **main branch**.
   8. Record version and findings status.
-  9. Append observations to `evaluation/run-12/lessons-for-prd13.md` (created in milestone 2; if running milestones in order, create the file first).
+  9. Append observations to `evaluation/commit-story-v2/run-12/lessons-for-prd13.md` (created in milestone 2; if running milestones in order, create the file first).
 
 - [ ] **Collect lessons for PRD #13** — Create skeleton documents at START. Must run before pre-run verification step 9 (which appends to the lessons file).
 
@@ -192,5 +192,5 @@ Same as runs 9-11.
 ## Prior Art
 
 - **PRD #11**: Run-11 evaluation (this repo, branch `feature/prd-32-evaluation-run-11`)
-- **evaluation/run-11/**: Full run-11 documentation
+- **evaluation/commit-story-v2/run-11/**: Full run-11 documentation
 - **spinybacked-orbweaver/research/evaluation-rubric.md**: 32-rule rubric
