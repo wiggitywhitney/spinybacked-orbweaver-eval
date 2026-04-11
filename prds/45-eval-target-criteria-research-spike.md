@@ -52,7 +52,7 @@ Full context — hypotheses table, research agent framing, candidate list, and t
 
   Success criteria: No research run yet. Milestone complete when the answers to those three questions are clear.
 
-- [ ] **Run the research spike**
+- [x] **Run the research spike**
 
   Use the `/research` skill to investigate eval target criteria. Frame the research as: "Here are factors we think may matter for evaluating spiny-orb against a target repo — research whether they actually do and find what we're missing." Hand the agent the 9 hypotheses from `docs/language-extension-plan.md` as things to investigate, not as settled criteria.
 
@@ -130,3 +130,4 @@ Full context — hypotheses table, research agent framing, candidate list, and t
 |------|--------|--------|------------|
 | 2026-04-11 | PRD created | Draft | Await start |
 | 2026-04-11 | Step 0 complete — framing docs read, 9 hypotheses identified, Python candidate gap confirmed, IS scorability requirements documented | In Progress | Run research spike (milestone 2) |
+| 2026-04-11 | Research spike complete — 5/9 hypotheses supported, 4 refined (async→I/O density, file count range expanded, skip-rate balanced, idiom split). 4 new factors: contamination risk, reproducibility, entry point clarity, file size variance. Python candidate: commitizen (MIT, 3.4k stars, ~45-55 files). Raw research in docs/research/eval-target-selection-research.md | In Progress | Write findings doc (milestone 3) |

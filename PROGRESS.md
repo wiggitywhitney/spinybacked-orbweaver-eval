@@ -116,6 +116,7 @@ Entry format: `- (YYYY-MM-DD) Description of feature-level change (PRD #X, miles
 - (2026-04-11) Updated 10 evaluation-run PRD titles to include target name: "Evaluation Run-N" → "JS Evaluation Run-N: commit-story-v2" (PRD #43, milestone 3)
 
 - (2026-04-11) Completed Step 0 of eval target criteria research spike: read framing documents, identified 9 hypotheses to investigate, confirmed no Python candidate exists, documented IS scorability requirements (PRD #45, milestone 1)
+- (2026-04-11) Completed research spike for eval target criteria: validated 9 hypotheses against benchmark literature (SWE-bench, OTelBench, Qodo), identified 4 new factors, recommended commitizen as Python candidate, assessed all 4 language candidates. Raw research saved to docs/research/eval-target-selection-research.md (PRD #45, milestone 2)
 
 ### Changed
 - (2026-03-16) Fixed span count discrepancy: total_spans_on_branch corrected from 48 to 38 in per-file-evaluation.json and rubric-scores.json (48 included working-directory-only changes from partial files not committed to branch). Updated baseline-comparison.md table to match canonical per-file-evaluation.json (PRD #4, CodeRabbit finding fix)
