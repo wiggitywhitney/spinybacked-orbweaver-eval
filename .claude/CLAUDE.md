@@ -70,3 +70,28 @@ vi.mock('@langchain/anthropic', () => ({
 
 This project uses vals for secrets. See `.vals.yaml` for available secrets.
 Vals commands: @~/Documents/Repositories/claude-config/guides/vals-usage.md
+
+## Adding a New Language Evaluation Chain
+
+Before starting any work on a new language or target evaluation chain, read `docs/language-extension-plan.md` completely. It is the canonical reference for PRD types, milestone structure, user-facing checkpoints, prerequisites, and the exact instrument command. Do not skip this step.
+
+### Prerequisites (both must be met before any Type C PRD proceeds)
+
+1. The language provider is merged to spiny-orb main
+2. `docs/research/eval-target-criteria.md` exists with a verdict for the target language — if this file is missing, the research spike (Step 3 in the plan) has not completed; stop and complete it first
+
+### Creating a Type C PRD (Setup + Run-1, one per language/target)
+
+Use the "Type C: Setup + Run-1 PRD" section of `docs/language-extension-plan.md` as the structure reference, and the most recent JS eval run PRD as the milestone style reference. The **first milestone** of the new PRD must be:
+
+> Read `docs/language-extension-plan.md` completely before proceeding with any other milestone.
+
+### Creating a Type D PRD (recurring eval runs)
+
+Use the immediately preceding eval run PRD as the structural model. The **first milestone** of the new PRD must be:
+
+> Read `docs/language-extension-plan.md` completely before proceeding.
+
+Include both user-facing checkpoints (Findings Discussion and Handoff pause) in the milestone structure — exact wording is in the plan document under "Two User-Facing Checkpoints."
+
+See `docs/language-extension-plan.md` for full context: PRD taxonomy, language candidate table, score projection methodology, and process requirements.

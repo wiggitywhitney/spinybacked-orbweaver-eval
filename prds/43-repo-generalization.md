@@ -64,7 +64,7 @@ Full context for this work lives in `docs/language-extension-plan.md`. Read the 
 
   Success criteria: Every evaluation-run PRD title includes `commit-story-v2`. Verify with: `grep -n "^# " prds/*evaluation-run-*.md`
 
-- [ ] **Document "how to add a new language eval" in .claude/CLAUDE.md**
+- [x] **Document "how to add a new language eval" in .claude/CLAUDE.md**
 
   Add a new section to `.claude/CLAUDE.md` titled "Adding a New Language Evaluation Chain". Add it at the end of `.claude/CLAUDE.md`, after all existing sections. The section must cover:
 
