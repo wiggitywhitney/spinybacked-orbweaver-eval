@@ -5,6 +5,7 @@
 
 ## Medium-term
 - Repo generalization (PRD #43)
+- Source cleanup: remove commit-story source code from eval repo (PRD #47)
 - IS integration: scoring script, OTel Collector config, Type D template update (PRD #44)
 - Research spike: eval target criteria (PRD #45)
 - TypeScript eval setup + Run-1: Cluster Whisperer (PRD #TBD)
