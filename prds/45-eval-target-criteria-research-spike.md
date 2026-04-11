@@ -89,7 +89,9 @@ Full context — hypotheses table, research agent framing, candidate list, and t
   - **Step 6**: Python eval setup + Run-1 for the validated Python candidate from the research findings
   - **Step 7**: Go eval setup + Run-1 for the validated Go target (k8s-vectordb-sync unless the research spike recommends otherwise)
 
-  Each of these is a Type C PRD. Before creating each PRD, read `docs/language-extension-plan.md` "Type C: Setup + Run-1 PRD" section for the required milestone structure. Use `docs/templates/type-c-prd-template.md` as the starting point for each PRD (created by PRD #43 — if it doesn't exist, use the Type C description in the language-extension-plan as the structure reference instead). Each PRD must include the research spike dependency check: "Before forking anything, read `docs/research/eval-target-criteria.md` to confirm the validated target for this language."
+  Each of these is a Type C PRD. Before creating each PRD, read `docs/language-extension-plan.md` "Type C: Setup + Run-1 PRD" section for the required milestone structure. Use `docs/templates/type-c-prd-template.md` as the starting point for each PRD (created by PRD #43 — if it doesn't exist, use the Type C description in the language-extension-plan as the structure reference instead). Each PRD must include both gate conditions in its Prerequisites or Dependencies section:
+  - Gate 1 (provider): The TypeScript/Python/Go language provider must be merged to spiny-orb main before this PRD can start. Check `docs/language-extension-plan.md` "Language Candidates" table for the current provider status.
+  - Gate 2 (research): `docs/research/eval-target-criteria.md` must exist with a verdict for this language. "Before forking anything, read `docs/research/eval-target-criteria.md` to confirm the validated target for this language."
 
   Run `/write-prompt` on each PRD's milestones section before committing. Choose "commit for later" in `/prd-create` — do NOT start any of these PRDs.
 
