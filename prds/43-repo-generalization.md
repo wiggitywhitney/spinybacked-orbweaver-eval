@@ -22,13 +22,13 @@ Full context for this work lives in `docs/language-extension-plan.md`. Read the 
 
 - **Primary**: All existing evaluation runs are accessible at `evaluation/commit-story-v2/run-*/`; no broken path references remain
 - **Secondary**: `.claude/CLAUDE.md` has an "Adding a New Language Evaluation Chain" section that references `docs/language-extension-plan.md` as the canonical source and instructs future agents to include it as the first milestone of any new Type C or Type D PRD
-- **Validation**: A grep for old paths (`evaluation/commit-story-v2/run-`) returns no hits in any PRD file, CLAUDE.md, or script
+- **Validation**: A grep for old paths (`evaluation/run-`) returns no hits in any PRD file, CLAUDE.md, or script
 
 ## Requirements
 
 ### Functional Requirements
 
-- **Must Have**: Move all `evaluation/commit-story-v2/run-*/` directories to `evaluation/commit-story-v2/run-*/`
+- **Must Have**: Move all `evaluation/run-*/` directories to `evaluation/commit-story-v2/run-*/`
 - **Must Have**: Update all internal references to old evaluation paths in PRD files, CLAUDE.md, scripts, and docs
 - **Must Have**: Update PRD titles and prior art references to include target name (`commit-story-v2`)
 - **Must Have**: Document "how to add a new language eval" in `.claude/CLAUDE.md`, pointing to `docs/language-extension-plan.md` as the canonical reference and instructing that each new Type C/D PRD must include an explicit "read the plan doc" first milestone
@@ -97,7 +97,7 @@ Full context for this work lives in `docs/language-extension-plan.md`. Read the 
 ## Risks and Mitigations
 
 - **Risk**: Path reference updates miss some files
-  - **Mitigation**: Explicit grep validation step in the path-update milestone; grep for `evaluation/commit-story-v2/run-[0-9]` across the full repo
+  - **Mitigation**: Explicit grep validation step in the path-update milestone; grep for `evaluation/run-[0-9]` across the full repo
 - **Risk**: Repo rename breaks git remote, making pushes fail
   - **Mitigation**: Rename milestone is last and explicitly includes the `git remote set-url` step as part of the milestone
 

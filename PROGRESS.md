@@ -6,6 +6,9 @@ Entry format: `- (YYYY-MM-DD) Description of feature-level change (PRD #X, miles
 
 ## [Unreleased]
 
+### Fixed
+- (2026-04-11) Fixed stale repo name references missed during PRD #43 generalization: updated Two-Repo Workflow tables in prd-32 and prd-33 to spinybacked-orbweaver-eval, removed commit-story-v2-eval/ prefix from prd-3 run-2 path, corrected self-contradictory grep patterns in prd-43 validation section (PRD #43, CodeRabbit review)
+
 ### Added
 - (2026-03-13) Moved Weaver schema to canonical `semconv/` location on main (PRD #3, pre-run preparation)
 - (2026-03-13) Added `orb.yaml`, `src/instrumentation.js`, and OTel peerDependencies as permanent eval config on main (PRD #3, pre-run preparation)
