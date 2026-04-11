@@ -1,6 +1,6 @@
 # Research: Instrumentation Score Integration for Multi-Language Eval Framework
 
-**Project:** commit-story-v2-eval
+**Project:** spinybacked-orbweaver-eval
 **Last Updated:** 2026-04-10
 
 ## Update Log

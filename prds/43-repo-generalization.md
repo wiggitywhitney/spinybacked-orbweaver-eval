@@ -1,6 +1,6 @@
 # Repo Generalization — PRD
 
-**Issue**: [#43](https://github.com/wiggitywhitney/commit-story-v2-eval/issues/43)
+**Issue**: [#43](https://github.com/wiggitywhitney/spinybacked-orbweaver-eval/issues/43)
 **Status**: Draft
 **Owner**: Whitney Lee
 **Created**: 2026-04-11

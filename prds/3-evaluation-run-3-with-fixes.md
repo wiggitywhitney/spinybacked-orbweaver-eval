@@ -2,7 +2,7 @@
 
 **Status:** Draft
 **Created:** 2026-03-12
-**GitHub Issue:** [#3](https://github.com/wiggitywhitney/commit-story-v2-eval/issues/3)
+**GitHub Issue:** [#3](https://github.com/wiggitywhitney/spinybacked-orbweaver-eval/issues/3)
 **Depends on:** PRD #2 (run-2 complete, findings documented)
 
 ---

@@ -1,6 +1,6 @@
 # Eval Target Criteria Research Spike — PRD
 
-**Issue**: [#45](https://github.com/wiggitywhitney/commit-story-v2-eval/issues/45)
+**Issue**: [#45](https://github.com/wiggitywhitney/spinybacked-orbweaver-eval/issues/45)
 **Status**: Draft
 **Owner**: Whitney Lee
 **Created**: 2026-04-11

@@ -1,6 +1,6 @@
 # Source Cleanup — PRD
 
-**Issue**: [#47](https://github.com/wiggitywhitney/commit-story-v2-eval/issues/47)
+**Issue**: [#47](https://github.com/wiggitywhitney/spinybacked-orbweaver-eval/issues/47)
 **Status**: Draft
 **Owner**: Whitney Lee
 **Created**: 2026-04-11

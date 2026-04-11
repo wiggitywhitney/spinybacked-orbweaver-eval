@@ -1,6 +1,6 @@
 # IS Integration — PRD
 
-**Issue**: [#44](https://github.com/wiggitywhitney/commit-story-v2-eval/issues/44)
+**Issue**: [#44](https://github.com/wiggitywhitney/spinybacked-orbweaver-eval/issues/44)
 **Status**: Draft
 **Owner**: Whitney Lee
 **Created**: 2026-04-11
