@@ -43,7 +43,7 @@ Full context for this work lives in `docs/language-extension-plan.md`. Read the 
 
 ## Implementation Milestones
 
-- [ ] **Move evaluation run directories to target-scoped path**
+- [x] **Move evaluation run directories to target-scoped path**
 
   Move all directories matching `evaluation/run-*/` into `evaluation/commit-story-v2/`. Use `git mv` (not `mv`) so git history is preserved. After moving, verify: (1) `ls evaluation/commit-story-v2/` shows all run directories, (2) `ls evaluation/` shows only `commit-story-v2/` and any non-run directories (e.g., `is/`), (3) `git status` shows the moves as renames not deletes+adds. Commit with `[skip ci]`.
 
