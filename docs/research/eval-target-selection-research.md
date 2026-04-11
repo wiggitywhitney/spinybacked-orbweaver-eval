@@ -8,6 +8,7 @@
 | Date | Summary |
 |------|---------|
 | 2026-04-11 | Initial research — hypothesis validation, benchmark methodology survey, Python candidate identification |
+| 2026-04-11 | Post-review update: added rubric coverage as primary framing, auto-instrumentation library testing criterion, deliberately incomplete Weaver schema strategy, TypeScript candidate search (taze recommended), corrected objectivity issues in criteria thresholds |
 
 
 ## Findings
@@ -154,6 +155,28 @@ Having files of different sizes tests agent adaptability. All-same-size repos do
 
 **How to evaluate:** Check if files range from <50 LOC to >200 LOC. Not a hard criterion.
 
+#### Rubric coverage maximization 🟢 high (added post-review)
+
+**This is the primary framing the initial research missed.** A good target repo is one that *maximally exercises the 32-rule rubric* — not one that fits arbitrary file count or I/O diversity thresholds. File count, I/O diversity, skip rate, and error handling diversity are all proxies for rubric coverage. A 20-file repo that exercises 28 of 32 rules is better than a 40-file repo that exercises 20. When evaluating a candidate, assess how many rubric dimensions it can exercise: RST (skip judgment), COV (coverage surface), SCH (schema compliance and extension), CDQ (code quality and error handling), NDS (non-destructiveness via test suite), API (OTel API correctness).
+
+**How to evaluate:** Map the target's code patterns to the rubric rule list. Count which rules are exercisable. Prefer candidates that exercise more rules, even if they score worse on proxy metrics like file count.
+
+#### Auto-instrumentation library overlap 🟢 high (added post-review)
+
+The target repo should use at least one library that has a corresponding OTel auto-instrumentation package. This tests whether spiny-orb correctly identifies auto-instrumentation opportunities (COV-006 rule) — recommending the library instead of manually wrapping those calls. This has nothing to do with LLM frameworks specifically; it's about the target's dependency tree overlapping with the OTel auto-instrumentation ecosystem.
+
+The known auto-instrumentation library list lives in `spinybacked-orbweaver/src/languages/javascript/ast.ts` (`KNOWN_FRAMEWORK_PACKAGES`). Currently covers JS/TS only: database drivers (pg, mysql, mongodb, redis, ioredis), HTTP frameworks (express, fastify, koa), HTTP clients (axios, got, node-fetch, undici), gRPC, message queues, GraphQL, and ORMs. The TypeScript provider reuses this list. Python and Go providers will need language-specific equivalents (e.g., Python: `requests`, `flask`, `django`, `sqlalchemy`, `psycopg2`; Go: `net/http`, `database/sql`, `google.golang.org/grpc`).
+
+**How to evaluate:** Check if the target's `package.json` / `requirements.txt` / `go.mod` imports any package in the KNOWN_FRAMEWORK_PACKAGES list (or future language equivalents). At least one overlap is needed to exercise COV-006.
+
+#### Deliberately incomplete Weaver schema strategy 🟢 high (added post-review)
+
+When creating the initial `semconv/` schema for a target repo, deliberately omit some spans and attributes that a human would include. This tests whether spiny-orb can identify attributes that should exist but aren't in the schema, propose them, and add them to the extensions file. A complete schema only tests SCH compliance; an incomplete schema tests SCH *extension capability*, which is a harder and more valuable signal.
+
+The Type C PRD for each target should document exactly which spans/attributes were omitted and why, so the eval can check whether spiny-orb surfaces them. This is an eval design choice, not a target selection criterion — but the target must have enough semantic richness to support meaningful omissions.
+
+**How to apply:** During the "Add spiny-orb prerequisites" milestone of each Type C PRD, create the semconv/ schema with deliberate gaps. Document the gaps in the PRD milestone description.
+
 ---
 
 ### Python Candidate Assessment
@@ -211,6 +234,59 @@ Having files of different sizes tests agent adaptability. All-same-size repos do
 
 ---
 
+### TypeScript Candidate Assessment (added post-review)
+
+The initial research only assessed Cluster Whisperer for TypeScript. A follow-up search for open-source TypeScript CLI tools identified **taze** as a stronger candidate.
+
+#### Candidate 1: taze (antfu-collective/taze) — RECOMMENDED
+
+| Attribute | Value |
+|-----------|-------|
+| License | MIT |
+| Stars | 4,120 |
+| Source files | 32 TypeScript files |
+| I/O diversity | HTTP (npm registry via ofetch, JSR API), file R/W (package.json, yaml, cache), subprocess (package managers via tinyexec) |
+| Test suite | 17 test files (vitest) |
+| Entry point | CLI via `taze` command |
+| Local runnability | Yes — only needs npm registry access |
+| Skip-rate estimate | ~40% utility/type files |
+| Auto-instrumentation overlap | Uses `ofetch` — check if covered by OTel `undici` instrumentation (ofetch uses undici under the hood in Node.js) |
+
+**Why taze:** 32 files (mid-range), 3 distinct I/O types including HTTP, MIT license, active maintenance, vitest suite, clear CLI entry point. The ~40% skip rate is in the 30-60% sweet spot. Locally runnable with no infrastructure dependencies.
+
+#### Candidate 2: ni (antfu-collective/ni) — STRONG RUNNER-UP
+
+| Attribute | Value |
+|-----------|-------|
+| License | MIT |
+| Stars | 8,156 |
+| Source files | 28 TypeScript files |
+| I/O diversity | HTTP (npm registry), file R/W (package.json, lockfiles), subprocess (package manager commands) |
+| Test suite | 51 test files (vitest) |
+
+**Why runner-up:** Nearly as good as taze with better test coverage. 8.2k stars is higher (minor contamination risk). Slightly less I/O diversity.
+
+#### Candidate 3: wireit (google/wireit) — VIABLE ALTERNATIVE
+
+| Attribute | Value |
+|-----------|-------|
+| License | Apache-2.0 |
+| Stars | 6,404 |
+| Source files | 47 TypeScript files |
+| I/O diversity | File R/W (caching, lockfiles), subprocess (npm scripts), file watching (chokidar) |
+
+**Why alternative:** Largest file count (47, near top of range), Google-backed. No HTTP calls — I/O diversity is file + subprocess + watch only.
+
+#### Scoping assessment: Cluster Whisperer (59 files → ~33 scoped)
+
+Cluster Whisperer has 59 .ts source files. Natural scoping to `pipeline/` + `tools/` + `utils/` + type files yields ~33 files with 5 I/O types. However: (1) already instrumented — frozen copy would need instrumentation stripped, (2) k8s dependency for exercising core paths, (3) missing LICENSE file in repo. Workable but adds setup overhead compared to taze.
+
+#### Scoping assessment: Spiny-Orb frozen copy (109 files → 17 in coordinator/)
+
+Spiny-orb has 109 .ts source files. The `coordinator/` directory (17 files, 65% I/O rate, 4 I/O types) is the most promising scope, but cross-directory imports mean the full codebase must be present for TypeScript compilation. At 109 files for the full repo, it fails the file count criterion. Scoping to a subdirectory for instrumentation is technically possible (spiny-orb can filter by glob) but artificial.
+
+---
+
 ### Existing Candidate Assessments
 
 #### commit-story-v2 (JavaScript) — CONDITIONAL PASS
@@ -221,9 +297,13 @@ Reasonable target chosen by circumstance. 30 JS files, ~57% skip rate, good I/O 
 
 Whitney's k8s management tool. TypeScript is appropriate for TypeScript eval. **The k8s dependency is a significant concern for IS scoring** — requires a Kind cluster to produce traces, adding infrastructure setup to every IS scoring run. Not a blocker (infrastructure is available), but adds complexity. Evaluate against criteria when TypeScript provider is ready.
 
+#### Cluster Whisperer additional note (added post-review)
+
+Cluster Whisperer is already instrumented with OTel. A frozen copy for eval would need existing instrumentation stripped to create a clean baseline. This is doable but adds setup work to the Type C PRD. Missing LICENSE file in repo root (package.json declares MIT).
+
 #### k8s-vectordb-sync (Go) — CONDITIONAL PASS (k8s dependency)
 
-Same k8s dependency concern as Cluster Whisperer. Go is appropriate for Go eval. Evaluate against criteria when Go provider is ready.
+Same k8s dependency concern as Cluster Whisperer. Go is appropriate for Go eval. Evaluate against criteria when Go provider is ready. **Note (added post-review):** k8s-vectordb-sync may also already be instrumented — verify before selecting as target. If so, same stripping concern as Cluster Whisperer applies.
 
 ---
 
@@ -231,14 +311,18 @@ Same k8s dependency concern as Cluster Whisperer. Go is appropriate for Go eval.
 
 Use the criteria scorecard as a **filter** (pass/fail each criterion) rather than a weighted score. A target must pass all mandatory criteria and should pass most recommended criteria.
 
+**Objectivity caveat (added post-review):** Some thresholds in the initial research were influenced by the existing target (commit-story-v2). The 15-50 file range was partly anchored on commit-story-v2's 30 files. "Locally runnable" was elevated to mandatory partly because it validates the existing targets. The criteria below have been revised with this self-awareness, but the thresholds remain judgment calls, not externally validated standards. The primary framing should be **rubric coverage maximization** — proxy metrics like file count and I/O diversity are useful filters but not the ultimate measure of target quality.
+
 | Criterion | Type | Evidence Basis |
 |-----------|------|----------------|
 | Permissive license (MIT/Apache-2.0/BSD-3) | Mandatory | H9, universal benchmark practice |
 | Test suite passes | Mandatory | H5, NDS-002 hard gate, all benchmarks |
-| 15-50 total source files | Mandatory | H1 refined, OTelBench/SWE-bench evidence |
-| Locally runnable | Mandatory | IS scorability research, H7 |
+| 15-50 total source files | Mandatory (soft) | H1 refined; anchored on one data point, treat as guideline not hard cutoff |
+| Locally runnable | Recommended (demoted) | IS scorability research; elevating to mandatory was partly circular |
 | Fork-and-freeze compatible | Mandatory | H8, universal benchmark practice |
 | I/O operation diversity (≥2 types) | Mandatory | H3 refined, H7, rubric coverage |
+| Rubric coverage maximization | Primary | Post-review: the real measure — how many of 32 rules can this target exercise? |
+| Auto-instrumentation library overlap | Recommended | Post-review: tests COV-006 rule; requires overlap with KNOWN_FRAMEWORK_PACKAGES or language equivalent |
 | Clear entry point (CLI/server) | Recommended | IS scoring, entry point clarity |
 | Skip-rate balance (30-60% non-instrumentable) | Recommended | H2 refined |
 | Error handling pattern diversity | Recommended | H4, CDQ-003 rubric rule |
@@ -268,6 +352,11 @@ Use the criteria scorecard as a **filter** (pass/fail each criterion) rather tha
 - [commitizen (GitHub)](https://github.com/commitizen-tools/commitizen) — Python candidate: MIT, 3.4k stars, CLI tool
 - [sqlite-utils (GitHub)](https://github.com/simonw/sqlite-utils) — Python candidate considered: Apache-2.0, 2k stars, too few files
 - [howdoi (GitHub)](https://github.com/gleitz/howdoi) — Python candidate considered: MIT, 10.8k stars, too few files
+- [litecli (GitHub)](https://github.com/dbcli/litecli) — Python candidate considered: BSD-3, 3.2k stars, viable alternative
+- [taze (GitHub)](https://github.com/antfu-collective/taze) — TypeScript candidate: MIT, 4.1k stars, recommended
+- [ni (GitHub)](https://github.com/antfu-collective/ni) — TypeScript candidate: MIT, 8.2k stars, strong runner-up
+- [wireit (GitHub)](https://github.com/google/wireit) — TypeScript candidate: Apache-2.0, 6.4k stars, viable alternative
+- spiny-orb `KNOWN_FRAMEWORK_PACKAGES` — auto-instrumentation library list at `spinybacked-orbweaver/src/languages/javascript/ast.ts:124-139`, shared by JS+TS providers
 - [litecli (GitHub)](https://github.com/dbcli/litecli) — Python candidate considered: BSD-3, 3.2k stars, viable alternative
 - [FEA-Bench (ACL)](https://aclanthology.org/2025.acl-long.839.pdf) — feature addition benchmark, repo scope determination
 - [instrumentation-score-integration.md](instrumentation-score-integration.md) — prior research on IS rule applicability and target requirements

@@ -2,7 +2,7 @@
 
 **Created:** 2026-04-11
 **Research basis:** [eval-target-selection-research.md](eval-target-selection-research.md)
-**Status:** Final — downstream Type C PRDs may proceed
+**Status:** Revised 2026-04-11 — added rubric coverage framing, auto-instrumentation criterion, TypeScript candidates, objectivity corrections
 
 This document is the canonical reference for selecting target repositories for spiny-orb evaluation. All Type C PRDs (Setup + Run-1) must read this file before forking any target repo. The criteria are language-agnostic; the candidate verdicts are language-specific.
 
@@ -10,29 +10,40 @@ This document is the canonical reference for selecting target repositories for s
 
 ## 1. Final Criteria Scorecard
 
-Criteria function as **filters** (pass/fail), not weighted scores. A candidate must pass all mandatory criteria and should pass most recommended criteria. This design follows SWE-bench++ methodology: basic signal filters yield natural diversity without manual curation overhead.
+**Primary framing: rubric coverage maximization.** A good target repo is one that maximally exercises spiny-orb's 32-rule rubric. File count, I/O diversity, and skip rate are proxy filters — useful but not the ultimate measure. When evaluating a candidate, the question is: how many rubric rules can this target exercise?
+
+**Objectivity note:** Some thresholds below were initially anchored on the existing target (commit-story-v2). The 15-50 file range was partly derived from commit-story-v2's 30 files. "Locally runnable" was initially elevated to mandatory partly because it validates existing targets. These have been revised with this awareness, but thresholds remain judgment calls.
+
+Criteria function as **filters** (pass/fail), not weighted scores. A candidate must pass all mandatory criteria and should pass most recommended criteria.
 
 ### Mandatory Criteria
 
 | Criterion | Evidence | Confidence | How to Evaluate |
 |-----------|----------|------------|-----------------|
-| **Permissive license** | Fork-and-freeze is internal evaluation, not redistribution. MIT, Apache-2.0, and BSD-3-Clause are all acceptable. SWE-bench Pro uses GPL for contamination resistance, but that is not a requirement for spiny-orb eval. | High | Check the repo's LICENSE file. Must be MIT, Apache-2.0, or BSD-3-Clause. |
-| **Test suite passes** | Universal across all benchmarks (SWE-bench, SWE-bench++, SWE-bench Pro, OTelBench). NDS-002 is a hard gate in spiny-orb's rubric — a failing test suite blocks the entire evaluation run. | High | Clone the repo, install dependencies, run the test suite. All tests must pass. Flaky tests are a fail. |
-| **15–50 total source files** | OTelBench uses ~300 LOC services (too small for per-file eval). SWE-bench uses repos with >10k LOC (sized for issue resolution, not instrumentation). For spiny-orb's per-file architecture, 15–50 files provides enough variety to exercise all rubric rules without prohibitive run cost. | Medium | Count source files in the language's primary extension (`.js`, `.ts`, `.py`, `.go`). Exclude tests, configs, and generated files. |
-| **Locally runnable** | IS scoring requires the target to emit OTel spans, which requires exercising the code. k8s-dependent repos need a Kind cluster; locally-runnable repos can be IS-scored out of the box. IS scorability research confirms this is a significant complexity differentiator. | High | Can the repo's primary functionality be invoked locally without external infrastructure (clusters, cloud services, running databases)? CLI tools and libraries that operate on local files/data pass. |
-| **Fork-and-freeze compatible** | Universal standard across all benchmarks examined. Qodo's AI code review benchmark and every SWE-bench variant use snapshot-based evaluation. | High | Does the repo have self-contained dependencies (no git submodules pointing to private repos, no build steps requiring authenticated registries)? Can it be forked and built without upstream access? |
-| **I/O operation diversity (≥2 types)** | "Async density" is a JavaScript-centric framing; the real criterion is I/O density. Python OTel instrumentation covers sync I/O equally well (requests, sqlite3, subprocess). Repos with diverse I/O types exercise more rubric rules than single-domain repos. | High | Identify I/O operation types present: HTTP calls, database queries, file read/write, subprocess execution, template rendering, network requests. Must have at least 2 distinct types. |
+| **Permissive license** | Fork-and-freeze is internal evaluation, not redistribution. MIT, Apache-2.0, and BSD-3-Clause are all acceptable. | High | Check the repo's LICENSE file. Must be MIT, Apache-2.0, or BSD-3-Clause. |
+| **Test suite passes** | Universal across all benchmarks. NDS-002 is a hard gate in spiny-orb's rubric. | High | Clone the repo, install dependencies, run the test suite. All tests must pass. Flaky tests are a fail. |
+| **15–50 total source files** | Guideline, not hard cutoff. Anchored on limited data (commit-story-v2's 30 files + OTelBench's 300 LOC). Candidates slightly outside this range (e.g., 59 files) should be evaluated on rubric coverage merit, not rejected mechanically. | Medium | Count source files in the language's primary extension. Exclude tests, configs, and generated files. |
+| **Fork-and-freeze compatible** | Universal standard across all benchmarks examined. | High | Self-contained dependencies, buildable without upstream access. |
+| **I/O operation diversity (≥2 types)** | Diverse I/O types exercise more rubric rules than single-domain repos. | High | Must have at least 2 distinct I/O types: HTTP, DB, file R/W, subprocess, template rendering, etc. |
 
 ### Recommended Criteria
 
 | Criterion | Evidence | Confidence | How to Evaluate |
 |-----------|----------|------------|-----------------|
-| **Clear entry point (CLI/server)** | IS scoring requires a root span from a clear entry point. Libraries without a CLI require a custom exercise harness, adding setup overhead. | Medium | Does the repo have a `__main__.py`, `bin/` script, or CLI command? CLI tools and servers pass. Pure libraries need extra work. |
-| **Skip-rate balance (30–60% non-instrumentable)** | 12 runs on commit-story-v2 confirm ~50–60% skip rate provides good RST exercise. Below 30% means almost everything needs instrumentation (no skip judgment tested). Above 70% means very few files get instrumented (insufficient coverage testing). | Medium | Estimate the percentage of source files that contain no I/O operations, are pure type definitions, or are trivial utilities. Target 30–60%. |
-| **Error handling pattern diversity** | CDQ-003 rubric rule evaluates error handling instrumentation quality. Repos with only one error pattern (e.g., bare try/except) test only one scenario. Diverse patterns (try/except with specific exceptions, retry logic, error callbacks, custom exception hierarchies) exercise the agent's quality judgment. | High | Scan source files for error handling patterns. Look for try/except (or language equivalent), custom exception classes, retry logic, error propagation patterns. Multiple distinct patterns is better. |
-| **Mainstream language patterns** | SWE-bench Pro spans 41 repos to "mitigate overfitting to specific project coding styles." Exotic patterns test model knowledge, not instrumentation quality. | Medium | Does the code use standard library imports and common frameworks? Avoid repos that use obscure metaprogramming, code generation, or domain-specific languages that the AI model is unlikely to have seen. |
-| **Deterministic reproducibility** | Flaky tests or non-deterministic builds undermine eval reliability. The same spiny-orb version should produce comparable results across runs. | High | Run the test suite 3 times. If any test fails non-deterministically, the repo fails this criterion. |
-| **Community adoption (>500 stars)** | SWE-bench++ requires >100 stars. Higher star count correlates with better maintenance, documentation, and testing practices. | Medium | Check GitHub star count. >500 preferred. |
+| **Rubric coverage maximization** | The real measure of target quality. Proxy metrics are useful filters but this is the goal. | High | Map the target's code patterns to the 32-rule rubric. Count which rules are exercisable. Prefer candidates that exercise more rules. |
+| **Auto-instrumentation library overlap** | Tests COV-006: does the target use libraries with OTel auto-instrumentation packages? The known list is in `spinybacked-orbweaver/src/languages/javascript/ast.ts` (`KNOWN_FRAMEWORK_PACKAGES`). Python and Go providers will need language-specific equivalents. | High | Check if the target's dependencies overlap with known auto-instrumentation packages. At least one overlap exercises COV-006. |
+| **Locally runnable** | IS scoring is simpler for locally-runnable targets. k8s-dependent repos require Kind cluster setup per scoring run. Not a blocker, but adds complexity. | Medium | Can the repo be exercised locally? CLI tools pass easily. k8s-dependent repos are viable but need infrastructure milestones. |
+| **Clear entry point (CLI/server)** | IS scoring needs a root span from a clear entry point. | Medium | CLI command or server entry point. Pure libraries need a custom exercise harness. |
+| **Skip-rate balance (30–60% non-instrumentable)** | A mix of instrumentable and skippable files tests RST judgment. | Medium | Estimate percentage of files without I/O operations. Target 30–60%. |
+| **Error handling pattern diversity** | Multiple error patterns exercise CDQ-003. | High | Look for diverse error handling: try/catch variants, retry logic, custom exceptions, error propagation. |
+| **Mainstream language patterns** | Exotic patterns test model knowledge, not instrumentation quality. | Medium | Standard library imports and common frameworks preferred. |
+| **Deterministic reproducibility** | Flaky tests undermine eval reliability. | High | Run test suite 3 times. Any non-deterministic failure is a fail. |
+| **Community adoption (>500 stars)** | Correlates with maintenance quality. | Medium | >500 preferred. |
+| **Not already instrumented** | Existing OTel instrumentation must be stripped for a clean baseline. | Medium | Check for existing `@opentelemetry` imports or tracing setup. If present, stripping adds setup work to the Type C PRD. |
+
+### Eval Design: Deliberately Incomplete Weaver Schemas
+
+When creating the initial `semconv/` schema for a target repo, deliberately omit some spans and attributes that a human would include. This tests whether spiny-orb can identify missing attributes, propose them, and add them to the schema extensions file. A complete schema tests SCH compliance; an incomplete schema tests SCH *extension capability*. The Type C PRD for each target should document exactly which spans/attributes were omitted so the eval can verify whether spiny-orb surfaces them.
 
 ---
 
@@ -48,22 +59,19 @@ The "conditional" qualifier reflects that commit-story-v2 was chosen by circumst
 
 Existing evaluation runs (run-2 through run-12) remain valid as the JavaScript eval chain history regardless of this assessment.
 
-### Cluster Whisperer (TypeScript)
+### taze (TypeScript) — RECOMMENDED
 
-**Verdict: Conditional Pass — k8s dependency adds IS scoring complexity**
+**Verdict: Pass**
 
-Cluster Whisperer is Whitney's Kubernetes cluster management tool. It uses TypeScript (appropriate for the TypeScript eval chain) and is expected to have sufficient file count and I/O diversity (k8s API calls, file operations, subprocess management). The mandatory criteria assessment:
+taze (antfu-collective/taze) is a CLI tool that checks npm dependencies for newer versions. MIT license, 4.1k stars, 32 TypeScript source files. Three I/O types: HTTP (npm registry queries via ofetch), file R/W (package.json, lockfiles, yaml), subprocess (package manager commands via tinyexec). 17 vitest test files, clear CLI entry point, ~40% skip rate (utility/type files). Locally runnable — only needs npm registry access. Auto-instrumentation overlap: ofetch uses undici under the hood in Node.js, which is in the `KNOWN_FRAMEWORK_PACKAGES` list — exercises COV-006.
 
-- Permissive license: needs verification at implementation time
-- Test suite: needs verification at implementation time
-- File count: needs verification (expected to be in range)
-- **Locally runnable: CONDITIONAL** — requires a running Kubernetes cluster to exercise core functionality. A Kind cluster satisfies this locally, but adds infrastructure setup to every evaluation and IS scoring run.
-- Fork-and-freeze: compatible (public repo, standard npm dependencies)
-- I/O diversity: expected high (k8s API, file, subprocess)
+### Cluster Whisperer (TypeScript) — CONDITIONAL PASS
 
-The k8s dependency is not a blocker — Kind clusters are available and the infrastructure is routine — but it adds meaningful complexity compared to locally-runnable CLI tools. The TypeScript eval chain should account for this in its setup milestones.
+**Verdict: Conditional Pass — k8s dependency, already instrumented, 59 files**
 
-**Caveat:** The TypeScript language provider must merge to spiny-orb main before this can be fully evaluated. Detailed criteria verification deferred to the Type C PRD.
+Cluster Whisperer is Whitney's Kubernetes cluster management tool. 59 .ts source files (above 50-file guideline but close). MIT license declared in package.json but LICENSE file missing from repo root. Already instrumented with OTel — a frozen eval copy would need existing instrumentation stripped. 58 vitest test files. 5+ I/O types (k8s API, file, subprocess, HTTP to vector DBs, LLM API). Requires running k8s cluster for core paths. Scoping to ~33 files (pipeline + tools + utils) is feasible.
+
+**Caveats:** Already instrumented (stripping needed). Missing LICENSE file. k8s dependency for IS scoring. TypeScript provider must merge to spiny-orb main first.
 
 ### k8s-vectordb-sync (Go)
 
@@ -78,7 +86,7 @@ k8s-vectordb-sync is Whitney's Kubernetes vector database synchronization tool. 
 - Fork-and-freeze: compatible (public repo, standard Go modules)
 - I/O diversity: expected high (k8s API, vector DB operations, file I/O)
 
-**Caveat:** The Go language provider must merge to spiny-orb main before this can be fully evaluated. Detailed criteria verification deferred to the Type C PRD.
+**Caveats:** May already be instrumented (verify before selecting). Go language provider must merge to spiny-orb main first. Detailed criteria verification deferred to the Type C PRD.
 
 ### commitizen (Python) — RECOMMENDED
 
@@ -112,6 +120,7 @@ IS (Instrumentation Score) scoring requires the target repo to emit OpenTelemetr
 | Candidate | Locally Runnable | IS Scoring Complexity | Notes |
 |-----------|-----------------|----------------------|-------|
 | **commit-story-v2** (JS) | Yes — CLI tool, runs locally | Straightforward | Execute via CLI, capture spans with OTel Collector file exporter. Clear entry point produces INTERNAL root span. |
+| **taze** (TS) | Yes — CLI tool, runs locally | Straightforward | Execute `taze` against a test project. Capture spans with OTel Collector. Clear CLI entry point. |
 | **Cluster Whisperer** (TS) | Conditional — requires k8s cluster | Elevated | Requires Kind cluster provisioning before each IS scoring run. OTel Collector config same as other targets, but exercise script must interact with cluster resources. |
 | **k8s-vectordb-sync** (Go) | Conditional — requires k8s cluster + vector DB | Elevated | Requires Kind cluster AND vector database setup. Most complex IS scoring workflow of all candidates. |
 | **commitizen** (Python) | Yes — CLI tool, needs only a git repo | Straightforward | Execute `cz bump` or `cz changelog` against a test git repo. Capture spans with OTel Collector. Clear CLI entry point. |
