@@ -120,25 +120,24 @@ Full research findings live in `docs/research/instrumentation-score-integration.
 
   Success criteria: The SDK bootstrap file has a clear comment explaining the `OTEL_METRICS_EXPORTER=none` behavior and when to change it for IS scoring; the change is committed.
 
-- [ ] **Add IS scoring as step 9 to the Type D run template**
+- [ ] **Add IS scoring as step 9 to the Type D milestone sequence in docs/language-extension-plan.md**
 
-  Read `docs/templates/type-d-prd-template.md` (created by PRD #43). If it does not exist yet, PRD #43 is not complete — stop and wait for it to merge before proceeding with this milestone.
+  Open `docs/language-extension-plan.md` and find the Type D section. Step 9 currently reads: "(IS scoring run) *(active once Step 2 IS integration PRD completes — run instrumented code with OTel Collector, score OTLP output against IS spec, add IS score to rubric scoring document)*". Replace that placeholder with full step details:
 
-  Add IS scoring as step 9 in the milestone sequence, between rubric scoring (step 8) and baseline comparison (step 10). The IS scoring milestone in the template must specify:
-  1. Prerequisites: OTel Collector running with `evaluation/is/otelcol-config.yaml`; `OTEL_METRICS_EXPORTER` removed or overridden for this run
+  1. Prerequisites: OTel Collector running with `evaluation/is/otelcol-config.yaml`; `OTEL_METRICS_EXPORTER` removed or overridden for this run (see `evaluation/is/README.md`)
   2. Action: Run the target app with the Collector as OTLP receiver; collect `eval-traces.json`; run `node evaluation/is/score-is.js evaluation/is/eval-traces.json`
   3. Output: Record the IS score and per-rule breakdown in `evaluation/[TARGET]/run-[N]/is-score.md`
   4. Note for k8s repos: IS scoring requires a running cluster; see `evaluation/is/README.md` for the Kind-based workflow
 
-  Commit the updated template with `[skip ci]`.
+  Commit with `[skip ci]`.
 
-  Success criteria: `docs/templates/type-d-prd-template.md` contains an IS scoring milestone at step 9 with all four items above; the milestone references `evaluation/is/score-is.js` and `evaluation/is/otelcol-config.yaml` by exact path.
+  Success criteria: `docs/language-extension-plan.md` Type D step 9 contains all four items above and references `evaluation/is/score-is.js` and `evaluation/is/otelcol-config.yaml` by exact path; the placeholder note is removed.
 
 ## Dependencies and Constraints
 
 - **Depends on**: PRD #43 (repo generalization) — IS infrastructure must land in `evaluation/commit-story-v2/` not the old flat structure. Do NOT start this PRD until #43 is merged.
 - **Depends on**: `docs/research/instrumentation-score-integration.md` — all implementation decisions come from this document
-- **Depends on (soft)**: `docs/templates/type-d-prd-template.md` from PRD #43 — needed for the final milestone; if #43 is merged first this resolves automatically
+- **Depends on (soft)**: PRD #43 merged — final milestone updates `docs/language-extension-plan.md`, which should be in its final state before adding IS scoring details to it
 - **Blocks**: Every future Type D run PRD — IS scoring becomes step 9 in all subsequent runs
 
 ## Risks and Mitigations
@@ -149,8 +148,8 @@ Full research findings live in `docs/research/instrumentation-score-integration.
   - **Mitigation**: Pin to commit `52c14ba`; note pin in scoring script header comment
 - **Risk**: SPA-003 cardinality threshold is undefined in spec
   - **Mitigation**: Use >50 unique span names as threshold with a comment noting the spec says "TODO" — revisit when spec defines it
-- **Risk**: Type D template (from PRD #43) doesn't exist when this PRD's final milestone runs
-  - **Mitigation**: Final milestone explicitly checks for template existence and halts with a clear message if PRD #43 hasn't merged
+- **Risk**: `docs/language-extension-plan.md` is still being modified when this PRD's final milestone runs
+  - **Mitigation**: Final milestone depends on PRD #43 being merged; do not start the final milestone until #43 is on main
 
 ## Decision Log
 
