@@ -8,20 +8,20 @@
 
 ## Overview
 
-The current repo (`commit-story-v2-eval`) is structured around a single JavaScript target. This PRD generalizes it into a multi-language, multi-target evaluation framework by restructuring the `evaluation/` directory, updating path references, creating PRD template files, and documenting the process for adding new language evaluation chains.
+The current repo (`commit-story-v2-eval`) is structured around a single JavaScript target. This PRD generalizes it into a multi-language, multi-target evaluation framework by restructuring the `evaluation/` directory, updating path references, and documenting the process for adding new language evaluation chains.
 
 Full context for this work lives in `docs/language-extension-plan.md`. Read the "Repo Generalization" section before starting any milestone.
 
 ## User Impact
 
 - **Who benefits**: Any agent or human setting up a new language/target evaluation chain (TypeScript, Python, Go)
-- **What changes**: `evaluation/run-*/` directories move under a target-scoped path; PRD titles gain target names; template files give future agents a canonical starting point
+- **What changes**: `evaluation/run-*/` directories move under a target-scoped path; PRD titles gain target names; `.claude/CLAUDE.md` gains a section that ensures future agents know to read `docs/language-extension-plan.md` before starting any new language eval chain
 - **Why now**: Steps 2 and 3 of the plan land infrastructure in this repo — those PRDs need the correct structure to be in place first
 
 ## Success Metrics
 
 - **Primary**: All existing evaluation runs are accessible at `evaluation/commit-story-v2/run-*/`; no broken path references remain
-- **Secondary**: `docs/templates/type-c-prd-template.md` and `docs/templates/type-d-prd-template.md` exist and are usable starting points
+- **Secondary**: `.claude/CLAUDE.md` has an "Adding a New Language Evaluation Chain" section that references `docs/language-extension-plan.md` as the canonical source and instructs future agents to include it as the first milestone of any new Type C or Type D PRD
 - **Validation**: A grep for old paths (`evaluation/run-`) returns no hits in any PRD file, CLAUDE.md, or script
 
 ## Requirements
@@ -31,8 +31,7 @@ Full context for this work lives in `docs/language-extension-plan.md`. Read the 
 - **Must Have**: Move all `evaluation/run-*/` directories to `evaluation/commit-story-v2/run-*/`
 - **Must Have**: Update all internal references to old evaluation paths in PRD files, CLAUDE.md, scripts, and docs
 - **Must Have**: Update PRD titles and prior art references to include target name (`commit-story-v2`)
-- **Must Have**: Create `docs/templates/` with Type C and Type D PRD template files
-- **Must Have**: Document "how to add a new language eval" in `.claude/CLAUDE.md`
+- **Must Have**: Document "how to add a new language eval" in `.claude/CLAUDE.md`, pointing to `docs/language-extension-plan.md` as the canonical reference and instructing that each new Type C/D PRD must include an explicit "read the plan doc" first milestone
 - **Should Have**: Rename GitHub repo to `spinybacked-orbweaver-eval` (do last — changes remote URL)
 
 ### Non-Functional Requirements
@@ -63,25 +62,23 @@ Full context for this work lives in `docs/language-extension-plan.md`. Read the 
 
   Success criteria: Every evaluation-run PRD title includes `commit-story-v2`. Zero hits from `grep -rn 'evaluation/run-[0-9]' prds/`.
 
-- [ ] **Create PRD template files for Type C and Type D**
-
-  Create `docs/templates/` directory. Create two template files:
-
-  1. `docs/templates/type-d-prd-template.md` — a reusable template for recurring evaluation run PRDs. Base this on the most recent JS eval run PRD (`prds/37-evaluation-run-13.md`): strip out all run-specific content (specific issue numbers, run numbers, findings, scores) and replace with `[PLACEHOLDER]` markers. Preserve the milestone structure, the two user-facing checkpoints (Findings Discussion and Handoff pause), and the `[skip ci]` instructions. Add a "How to use this template" header that explains: (a) copy the file, (b) replace `[PLACEHOLDER]` values, (c) run `/write-prompt` on the milestones section before committing.
-
-  2. `docs/templates/type-c-prd-template.md` — a reusable template for new language/target setup + Run-1 PRDs. Base this on the Type C PRD description in `docs/language-extension-plan.md` (the "Type C: Setup + Run-1 PRD" section). The template must include the "research spike dependency" note (check `docs/research/eval-target-criteria.md` before forking anything) and the exact instrument command from that section. Add a "How to use this template" header with the same instructions as above.
-
-  Commit both files with `[skip ci]`.
-
-  Both templates must include these standard PRD sections (with `[PLACEHOLDER]` where run-specific): Overview, User Impact, Success Metrics, Requirements, Implementation Milestones, Dependencies and Constraints, Risks and Mitigations, Decision Log, Progress Log.
-
-  Success criteria: `docs/templates/type-c-prd-template.md` and `docs/templates/type-d-prd-template.md` exist; each has a "How to use this template" section and all nine standard PRD sections; the Type C template includes the research spike dependency check.
-
 - [ ] **Document "how to add a new language eval" in .claude/CLAUDE.md**
 
-  Add a new section to `.claude/CLAUDE.md` titled "Adding a New Language Evaluation Chain". Add it at the end of `.claude/CLAUDE.md`, after all existing sections. The section must cover: (1) prerequisite — TypeScript/Python/Go language provider must be merged to spiny-orb main before starting; (2) prerequisite — `docs/research/eval-target-criteria.md` must exist with a verdict for the target language; (3) create a Type C PRD using `docs/templates/type-c-prd-template.md` as the starting point; (4) create a Type D PRD using `docs/templates/type-d-prd-template.md` after Run-1 produces findings; (5) reference `docs/language-extension-plan.md` for full context and PRD taxonomy. Keep the section concise — it should orient a new agent, not duplicate the full plan. Commit with `[skip ci]`.
+  Add a new section to `.claude/CLAUDE.md` titled "Adding a New Language Evaluation Chain". Add it at the end of `.claude/CLAUDE.md`, after all existing sections. The section must cover:
 
-  Success criteria: Section exists in `.claude/CLAUDE.md`; it references both template files and the language-extension-plan; it clearly states the two prerequisites.
+  (1) Read `docs/language-extension-plan.md` completely before starting any work — it is the canonical reference for PRD types, milestone structure, user-facing checkpoints, prerequisites, and the exact instrument command. (This reference must appear explicitly in the CLAUDE.md section, not just as context here.)
+
+  (2) Two prerequisites before starting: (a) the language provider must be merged to spiny-orb main; (b) `docs/research/eval-target-criteria.md` must exist with a verdict for the target language.
+
+  (3) When creating a Type C PRD: use the "Type C: Setup + Run-1 PRD" section of `docs/language-extension-plan.md` as the structure reference, and the most recent JS eval run PRD as the milestone style reference. The **first milestone** of the new PRD must be: "Read `docs/language-extension-plan.md` completely before proceeding with any other milestone."
+
+  (4) When creating a Type D PRD: use the immediately preceding eval run PRD as the structural model. The **first milestone** of the new PRD must be: "Read `docs/language-extension-plan.md` completely before proceeding." Include both user-facing checkpoints (Findings Discussion and Handoff pause) — exact wording is in the plan document.
+
+  (5) Reference `docs/language-extension-plan.md` for full context, PRD taxonomy, and language candidate table.
+
+  Keep the section concise — it should orient a new agent, not duplicate the full plan. Commit with `[skip ci]`.
+
+  Success criteria: Section exists in `.claude/CLAUDE.md`; it references `docs/language-extension-plan.md` as the canonical source; it states both prerequisites; it explicitly instructs that the first milestone of any new Type C or Type D PRD must be "Read `docs/language-extension-plan.md` completely before proceeding."
 
 - [ ] **Rename GitHub repo to spinybacked-orbweaver-eval**
 
@@ -109,6 +106,8 @@ Full context for this work lives in `docs/language-extension-plan.md`. Read the 
 | 2026-04-09 | Generalize one repo (not separate repos per language) | Methodology evolves from artifacts; cross-language comparisons stay natural | All language eval chains live in one place |
 | 2026-04-09 | Scope existing runs under `evaluation/commit-story-v2/` | Distinguishes JS runs from future TypeScript/Python/Go runs | File moves required; path refs must be updated |
 | 2026-04-11 | ROADMAP.md excluded from this PRD's scope | Already created in PRD #41 | No duplicate work |
+| 2026-04-11 | Drop PRD template files (Milestone 4) | `docs/language-extension-plan.md` already documents full Type C and Type D structure, the two user-facing checkpoints with exact wording, the instrument command, and prerequisites — templates would duplicate this and drift stale; the most recent eval run PRD is a better living reference | Milestone 4 removed; Milestone 5 updated to point to plan doc directly |
+| 2026-04-11 | Reference `docs/language-extension-plan.md` in multiple places | Single reference risks agents missing it at the wrong moment; CLAUDE.md is the session-level trigger, but each future Type C/D PRD also needs an explicit "Step 0: read the plan doc" first milestone so the reference propagates forward automatically | Milestone 5 expanded to instruct that the CLAUDE.md entry must tell future agents to include the plan doc reference as the first milestone of every Type C/D PRD they create |
 
 ## Progress Log
 
