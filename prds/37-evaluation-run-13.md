@@ -1,4 +1,4 @@
-# PRD #13: Evaluation Run-13 — NDS-003 Truthy-Check Fix Verification
+# PRD #13: JS Evaluation Run-13: commit-story-v2 — NDS-003 Truthy-Check Fix Verification
 
 **Status:** Draft
 **Created:** 2026-04-09

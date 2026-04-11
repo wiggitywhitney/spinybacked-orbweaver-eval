@@ -1,4 +1,4 @@
-# PRD #10: Evaluation Run-10 — Push Auth Resolution and Operational Reliability
+# PRD #10: JS Evaluation Run-10: commit-story-v2 — Push Auth Resolution and Operational Reliability
 
 **Status:** Draft
 **Created:** 2026-03-23

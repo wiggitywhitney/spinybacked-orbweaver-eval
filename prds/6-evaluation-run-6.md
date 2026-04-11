@@ -1,4 +1,4 @@
-# PRD #6: Evaluation Run-6 — Coverage Recovery and Quality Retention
+# PRD #6: JS Evaluation Run-6: commit-story-v2 — Coverage Recovery and Quality Retention
 
 **Status:** Draft
 **Created:** 2026-03-17

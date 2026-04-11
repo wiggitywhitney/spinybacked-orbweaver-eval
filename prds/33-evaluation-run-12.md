@@ -1,4 +1,4 @@
-# PRD #12: Evaluation Run-12 — Attribute Completeness and Cost Optimization
+# PRD #12: JS Evaluation Run-12: commit-story-v2 — Attribute Completeness and Cost Optimization
 
 **Status:** Draft
 **Created:** 2026-03-30

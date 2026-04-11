@@ -1,4 +1,4 @@
-# PRD #7: Evaluation Run-7 — Registry Expansion and Coverage Recovery
+# PRD #7: JS Evaluation Run-7: commit-story-v2 — Registry Expansion and Coverage Recovery
 
 **Status:** Draft
 **Created:** 2026-03-20

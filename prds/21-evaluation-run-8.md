@@ -1,4 +1,4 @@
-# PRD #8: Evaluation Run-8 — Polish and Push Auth Resolution
+# PRD #8: JS Evaluation Run-8: commit-story-v2 — Polish and Push Auth Resolution
 
 **Status:** Draft
 **Created:** 2026-03-20

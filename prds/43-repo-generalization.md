@@ -54,7 +54,7 @@ Full context for this work lives in `docs/language-extension-plan.md`. Read the 
 
   Success criteria: Zero grep hits for `evaluation/run-[0-9]` in any file outside of `evaluation/commit-story-v2/`.
 
-- [ ] **Update PRD titles to include target name**
+- [x] **Update PRD titles to include target name**
 
   For each PRD file in `prds/` that describes a JavaScript evaluation run, update its title (the `# ...` heading) to include the target name: e.g., "Evaluation Run 13" → "JS Evaluation Run 13: commit-story-v2". Commit with `[skip ci]`.
 

@@ -1,4 +1,4 @@
-# PRD #11: Evaluation Run-11 — Boolean Type Fix and Push Auth Token Resolution
+# PRD #11: JS Evaluation Run-11: commit-story-v2 — Boolean Type Fix and Push Auth Token Resolution
 
 **Status:** Draft
 **Created:** 2026-03-24
