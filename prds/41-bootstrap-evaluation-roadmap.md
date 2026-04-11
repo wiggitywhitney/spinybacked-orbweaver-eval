@@ -42,25 +42,25 @@ The evaluation framework has a detailed execution plan in `docs/language-extensi
 
 ## Implementation Milestones
 
-- [ ] **Create PRD for Step 1: Repo generalization**
+- [x] **Create PRD for Step 1: Repo generalization**
 
   Read the Step 1 entry in the Execution Roadmap section of `docs/language-extension-plan.md` and the Repo Generalization section for full scope. Then read the Planned Structure and Migration Work subsections — these define the specific deliverables. Use `/prd-create` to create the PRD interactively; answer its questions from the plan doc content. When `/prd-create` presents the draft milestones for review — before it prompts you to commit — run `/write-prompt` on the milestones section. Apply all High severity findings and any Medium severity findings that make instructions clearer or more actionable for an implementing agent. Then choose Option 2 in `/prd-create` — the skill commits and pushes to main with `[skip ci]` automatically. Do not start this PRD.
 
   Success criteria: PRD file exists at `prds/[issue-id]-repo-generalization.md`; milestones have passed `/write-prompt` review; `docs/ROADMAP.md` lists this PRD with its real issue number (verify — `/prd-create` updates this automatically).
 
-- [ ] **Create PRD for Step 2: IS integration**
+- [x] **Create PRD for Step 2: IS integration**
 
   Read the Step 2 entry in the Execution Roadmap section of `docs/language-extension-plan.md` for scope and key decisions. Then read `docs/research/instrumentation-score-integration.md` in full — this is completed prior research that defines the deliverables and key decisions for this PRD. Use `/prd-create` to create the PRD interactively. The PRD milestones must include: (1) build scoring script, (2) create `evaluation/is/otelcol-config.yaml`, (3) enable metrics in SDK bootstrap for IS scoring runs, (4) add IS scoring milestone to the Type D run template. When `/prd-create` presents the draft milestones for review — before it prompts you to commit — run `/write-prompt` on the milestones section. Apply all High severity findings and any Medium severity findings that make instructions clearer or more actionable. Then choose Option 2 in `/prd-create` — the skill commits and pushes to main with `[skip ci]` automatically. Do not start this PRD.
 
   Success criteria: PRD file exists; milestones include "Step 0: read `docs/research/instrumentation-score-integration.md`" before implementation begins; `docs/ROADMAP.md` lists this PRD with its real issue number (verify — `/prd-create` updates this automatically).
 
-- [ ] **Create PRD for Step 3: Eval target criteria research spike**
+- [x] **Create PRD for Step 3: Eval target criteria research spike**
 
   Read the Step 3 entry in the Execution Roadmap section of `docs/language-extension-plan.md` and the full "Research Spike: Ideal Eval Target Criteria" section, including the hypotheses table and research agent framing. Use `/prd-create` to create the PRD. The PRD must specify: (a) output path is `docs/research/eval-target-criteria.md`, (b) the research agent should use the `/research` skill, (c) the final milestone creates PRDs for Steps 5–7 (TypeScript, Python, Go eval setup) using the validated targets from the research output. When `/prd-create` presents the draft milestones for review — before it prompts you to commit — run `/write-prompt` on the milestones section. Apply all High severity findings and any Medium severity findings that make instructions clearer or more actionable. Then choose Option 2 in `/prd-create` — the skill commits and pushes to main with `[skip ci]` automatically. Do not start this PRD.
 
   Success criteria: PRD file exists; output path `docs/research/eval-target-criteria.md` is explicitly named; final milestone explicitly states it creates PRDs for Steps 5–7; `docs/ROADMAP.md` lists this PRD with its real issue number (verify — `/prd-create` updates this automatically).
 
-- [ ] **Coherence verification**
+- [x] **Coherence verification**
 
   Read all three newly created PRDs in full. Check the following and fix any gaps found:
 
@@ -99,3 +99,4 @@ The evaluation framework has a detailed execution plan in `docs/language-extensi
 | Date | Update | Status | Next Steps |
 |------|--------|--------|------------|
 | 2026-04-10 | PRD created, ROADMAP.md initialized, branch created | Draft | Await CodeRabbit review, merge, then start implementation |
+| 2026-04-11 | All 4 milestones complete: PRDs #43, #44, #45 created with /write-prompt review; coherence verification passed all 6 criteria | Complete | Run /prd-done |

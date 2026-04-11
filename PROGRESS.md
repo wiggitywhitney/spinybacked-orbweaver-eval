@@ -104,6 +104,11 @@ Entry format: `- (YYYY-MM-DD) Description of feature-level change (PRD #X, miles
 - (2026-03-23) Completed per-file evaluation, rubric scoring, baseline comparison, PR evaluation, actionable fix output: 23/25 (92%) quality — regressed 8pp from run-9's 100%. Two new failures: SCH-003 (boolean attrs declared as string, 2 files) and CDQ-007 (optional chaining without guard, 1 file). 28 unique spans, all semantically correct. 4 findings filed (RUN10-1 through RUN10-4). Score projection: 24-25/25 for run-11 after 50% discount. journal-graph.js recovered. Push auth progressed (URL swap works, token rejected). Cost $4.36 (PRD #28, milestones 4-9)
 - (2026-03-24) Drafted PRD #11 for evaluation run-11: boolean type fix and push auth token resolution. Created as issue #32 (PRD #28, draft PRD #11)
 
+- (2026-04-11) Created PRD #43 (repo generalization) with 6 milestones for restructuring to multi-language eval framework; /write-prompt review applied (PRD #41, milestone 1)
+- (2026-04-11) Created PRD #44 (IS integration) with 6 milestones for IS scoring script, OTel Collector config, and Type D template update; /write-prompt review applied (PRD #41, milestone 2)
+- (2026-04-11) Created PRD #45 (eval target criteria research spike) with 4 milestones; output path docs/research/eval-target-criteria.md predefined; final milestone creates PRDs for Steps 5-7; /write-prompt review applied (PRD #41, milestone 3)
+- (2026-04-11) Coherence verification passed all 6 criteria: IS PRD has Step 0 read instruction, research spike PRD names correct output path and creates Steps 5-7 PRDs, ROADMAP.md has real issue numbers (#43, #44, #45) with no duplicates, all PRDs independently mergeable to main, dependencies sections accurate (PRD #41, coherence verification)
+
 ### Changed
 - (2026-03-16) Fixed span count discrepancy: total_spans_on_branch corrected from 48 to 38 in per-file-evaluation.json and rubric-scores.json (48 included working-directory-only changes from partial files not committed to branch). Updated baseline-comparison.md table to match canonical per-file-evaluation.json (PRD #4, CodeRabbit finding fix)
 - (2026-03-15) Renamed all "orb" references to "orbweaver" in PRD #4 and evaluation docs to match CLI rename (spinybacked-orbweaver #123)
