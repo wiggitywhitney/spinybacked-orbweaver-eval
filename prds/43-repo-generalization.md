@@ -1,7 +1,7 @@
 # Repo Generalization — PRD
 
 **Issue**: [#43](https://github.com/wiggitywhitney/spinybacked-orbweaver-eval/issues/43)
-**Status**: Draft
+**Status**: Complete
 **Owner**: Whitney Lee
 **Created**: 2026-04-11
 **Last Updated**: 2026-04-11
@@ -82,7 +82,7 @@ Full context for this work lives in `docs/language-extension-plan.md`. Read the 
 
   Success criteria: Section exists in `.claude/CLAUDE.md`; it references `docs/language-extension-plan.md` as the canonical source; it states both prerequisites; it explicitly instructs that the first milestone of any new Type C or Type D PRD must be "Read `docs/language-extension-plan.md` completely before proceeding."
 
-- [ ] **Rename GitHub repo to spinybacked-orbweaver-eval**
+- [x] **Rename GitHub repo to spinybacked-orbweaver-eval**
 
   Do this milestone last — it changes the remote URL and requires updating git config. Steps: (1) run `gh repo rename spinybacked-orbweaver-eval` from the repo directory; (2) update the git remote: `git remote set-url origin https://github.com/wiggitywhitney/spinybacked-orbweaver-eval.git`; (3) verify with `git remote -v`; (4) update the repo URL in `.claude/CLAUDE.md` and `docs/ROADMAP.md` if they contain hardcoded references to the old repo name `commit-story-v2-eval`; (5) commit any reference updates with `[skip ci]` and push. Confirm the GitHub repo is accessible at the new URL before considering this done.
 
@@ -116,3 +116,4 @@ Full context for this work lives in `docs/language-extension-plan.md`. Read the 
 | Date | Update | Status | Next Steps |
 |------|--------|--------|------------|
 | 2026-04-11 | PRD created | Draft | Await start |
+| 2026-04-11 | All 5 milestones complete: directories moved, path refs updated, PRD titles updated, CLAUDE.md documented, GitHub repo renamed to spinybacked-orbweaver-eval | Complete | /prd-done |
