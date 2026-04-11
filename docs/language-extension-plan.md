@@ -15,7 +15,7 @@ Consult this document when deciding which PRD type fits a new piece of work, und
 
 ## Overview
 
-The current repo (`commit-story-v2-eval`) evaluates spiny-orb against one JavaScript target. The plan generalizes this into a multi-language, multi-target evaluation framework. Three kinds of work are needed, each represented by a different PRD type.
+The current repo (`spinybacked-orbweaver-eval`) evaluates spiny-orb against one JavaScript target. The plan generalizes this into a multi-language, multi-target evaluation framework. Three kinds of work are needed, each represented by a different PRD type.
 
 ---
 
@@ -69,10 +69,10 @@ This PRD type exists exactly once per target. It is the "onboarding" for that la
 **Exact instrument command** (run from the target repo directory, update `run-N` to current run number):
 
 ```bash
-caffeinate -s env -u ANTHROPIC_CUSTOM_HEADERS -u ANTHROPIC_BASE_URL vals exec -i -f .vals.yaml -- node ~/Documents/Repositories/spinybacked-orbweaver/bin/spiny-orb.js instrument src --verbose 2>&1 | tee ~/Documents/Repositories/commit-story-v2-eval/evaluation/run-N/spiny-orb-output.log
+caffeinate -s env -u ANTHROPIC_CUSTOM_HEADERS -u ANTHROPIC_BASE_URL vals exec -i -f .vals.yaml -- node ~/Documents/Repositories/spinybacked-orbweaver/bin/spiny-orb.js instrument src --verbose 2>&1 | tee ~/Documents/Repositories/spinybacked-orbweaver-eval/evaluation/commit-story-v2/run-N/spiny-orb-output.log
 ```
 
-Note: two parts of this command need updating for each run: (1) `run-N` → current run number, (2) `commit-story-v2-eval` → new repo name after Step 1 (repo generalization). Everything else stays the same.
+Note: update `run-N` to the current run number before each run. Everything else stays the same.
 
 ### Type D: Run-N PRD (recurring, indefinitely)
 Identical in structure to the existing PRDs #3–13. Triggered by findings from the previous run. Follows the established milestone sequence:

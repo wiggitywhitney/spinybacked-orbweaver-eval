@@ -1,4 +1,4 @@
-# PRD #11: Evaluation Run-11 — Boolean Type Fix and Push Auth Token Resolution
+# PRD #11: JS Evaluation Run-11: commit-story-v2 — Boolean Type Fix and Push Auth Token Resolution
 
 **Status:** Draft
 **Created:** 2026-03-24
@@ -91,16 +91,16 @@ Same as runs 9-10.
 | Repo | Path | Role |
 |------|------|------|
 | **commit-story-v2** (target) | `~/Documents/Repositories/commit-story-v2` | spiny-orb instruments this repo |
-| **commit-story-v2-eval** (evaluation) | `~/Documents/Repositories/commit-story-v2-eval` | Evaluation artifacts live here |
+| **spinybacked-orbweaver-eval** (evaluation) | `~/Documents/Repositories/spinybacked-orbweaver-eval` | Evaluation artifacts live here |
 | **spinybacked-orbweaver** (agent) | `~/Documents/Repositories/spinybacked-orbweaver` | The spiny-orb agent |
 
 ### Key Inputs
 
-- **Run-10 results** (eval repo): `evaluation/run-10/` on branch `feature/prd-28-evaluation-run-10`
+- **Run-10 results** (eval repo): `evaluation/commit-story-v2/run-10/` on branch `feature/prd-28-evaluation-run-10`
 - **Evaluation rubric** (spiny-orb repo): `spinybacked-orbweaver/research/evaluation-rubric.md` (32 rules)
-- **Run-10 actionable fix output** (eval repo): `evaluation/run-10/actionable-fix-output.md`
-- **Run-10 findings** (eval repo): `evaluation/run-10/spiny-orb-findings.md` (4 findings)
-- **Run-10 lessons** (eval repo): `evaluation/run-10/lessons-for-prd11.md`
+- **Run-10 actionable fix output** (eval repo): `evaluation/commit-story-v2/run-10/actionable-fix-output.md`
+- **Run-10 findings** (eval repo): `evaluation/commit-story-v2/run-10/spiny-orb-findings.md` (4 findings)
+- **Run-10 lessons** (eval repo): `evaluation/commit-story-v2/run-10/lessons-for-prd11.md`
 
 ---
 
@@ -122,7 +122,7 @@ Same as runs 9-10.
 ## Milestones
 
 - [ ] **Pre-run verification** — Verify spiny-orb fixes and validate run prerequisites:
-  1. **Handoff triage review**: Read the spiny-orb team's triage of `evaluation/run-10/actionable-fix-output.md`.
+  1. **Handoff triage review**: Read the spiny-orb team's triage of `evaluation/commit-story-v2/run-10/actionable-fix-output.md`.
   2. **Target repo readiness** (commit-story-v2): Verify on `main`, clean working tree, spiny-orb.yaml and semconv/ exist.
   3. **Push auth token verification (critical)**: Before anything else, verify GITHUB_TOKEN scopes. Run `curl -sI -H "Authorization: token $GITHUB_TOKEN" https://api.github.com` and check `X-OAuth-Scopes` header (the `-I` flag is required to see response headers). Must include `repo` scope. Test direct push: `git push --dry-run https://x-access-token:$GITHUB_TOKEN@github.com/wiggitywhitney/commit-story-v2.git`.
   4. **SCH-003 boolean type fix**: Verify schema accumulator detects boolean values and declares `type: boolean`.
@@ -131,7 +131,7 @@ Same as runs 9-10.
   7. **File inventory**: Count .js files in commit-story-v2's `src/` directory.
   8. Rebuild spiny-orb from **main branch**.
   9. Record version and findings status.
-  10. Append observations to `evaluation/run-11/lessons-for-prd12.md`.
+  10. Append observations to `evaluation/commit-story-v2/run-11/lessons-for-prd12.md`.
 
 - [ ] **Collect lessons for PRD #12** — Create skeleton documents at START.
 
@@ -199,5 +199,5 @@ Same as runs 9-10.
 ## Prior Art
 
 - **PRD #10**: Run-10 evaluation (this repo, branch `feature/prd-28-evaluation-run-10`)
-- **evaluation/run-10/**: Full run-10 documentation
+- **evaluation/commit-story-v2/run-10/**: Full run-10 documentation
 - **spinybacked-orbweaver/research/evaluation-rubric.md**: 32-rule rubric

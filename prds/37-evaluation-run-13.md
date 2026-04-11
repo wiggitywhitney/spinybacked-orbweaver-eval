@@ -1,4 +1,4 @@
-# PRD #13: Evaluation Run-13 — NDS-003 Truthy-Check Fix Verification
+# PRD #13: JS Evaluation Run-13: commit-story-v2 — NDS-003 Truthy-Check Fix Verification
 
 **Status:** Draft
 **Created:** 2026-04-09
@@ -98,13 +98,13 @@ Same as runs 9-12.
 
 ### Key Inputs
 
-- **Run-12 results** (eval repo): `evaluation/run-12/` on branch `feature/prd-33-evaluation-run-12`
+- **Run-12 results** (eval repo): `evaluation/commit-story-v2/run-12/` on branch `feature/prd-33-evaluation-run-12`
 - **Evaluation rubric** (spiny-orb repo): `spinybacked-orbweaver/research/evaluation-rubric.md` (32 rules)
-- **Run-12 actionable fix output** (eval repo): `evaluation/run-12/actionable-fix-output.md`
-- **Run-12 findings** (eval repo): `evaluation/run-12/spiny-orb-findings.md` (6 findings)
-- **Run-12 lessons** (eval repo): `evaluation/run-12/lessons-for-prd13.md`
+- **Run-12 actionable fix output** (eval repo): `evaluation/commit-story-v2/run-12/actionable-fix-output.md`
+- **Run-12 findings** (eval repo): `evaluation/commit-story-v2/run-12/spiny-orb-findings.md` (6 findings)
+- **Run-12 lessons** (eval repo): `evaluation/commit-story-v2/run-12/lessons-for-prd13.md`
 
-> **Note**: Run-12 artifacts live on branch `feature/prd-33-evaluation-run-12`, not on main. Access with: `git show feature/prd-33-evaluation-run-12:evaluation/run-12/<filename>`
+> **Note**: Run-12 artifacts live on branch `feature/prd-33-evaluation-run-12`, not on main. Access with: `git show feature/prd-33-evaluation-run-12:evaluation/commit-story-v2/run-12/<filename>`
 
 ### Eval Branch Convention
 
@@ -129,10 +129,10 @@ The feature branch for this PRD (`feature/prd-37-evaluation-run-13`) **never mer
 
 ## Milestones
 
-- [ ] **Collect skeleton documents** — Create `evaluation/run-13/` directory with `lessons-for-prd14.md` skeleton. Must run before pre-run verification step 9.
+- [ ] **Collect skeleton documents** — Create `evaluation/commit-story-v2/run-13/` directory with `lessons-for-prd14.md` skeleton. Must run before pre-run verification step 9.
 
 - [ ] **Pre-run verification** — Verify spiny-orb fixes and validate run prerequisites:
-  1. **Handoff triage review**: Read the spiny-orb team's triage of `evaluation/run-12/actionable-fix-output.md`. Check which findings were filed as issues.
+  1. **Handoff triage review**: Read the spiny-orb team's triage of `evaluation/commit-story-v2/run-12/actionable-fix-output.md`. Check which findings were filed as issues.
   2. **NDS-003 truthy-check fix** (P1 — critical): Verify orbweaver#388 is merged. Check that `if (value)` and `if (obj.property)` guard patterns are now in the NDS-003 allowlist when the guarded body contains only `span.*` calls.
   3. **COV-004 guidance** (P2): Check if any validator or guidance was added to prevent the "context propagation" span omission pattern for exported async I/O functions.
   4. **Target repo readiness** (commit-story-v2): Verify on `main`, clean working tree, spiny-orb.yaml and semconv/ exist.
@@ -140,36 +140,36 @@ The feature branch for this PRD (`feature/prd-37-evaluation-run-13`) **never mer
   6. **File inventory**: Count .js files in commit-story-v2's `src/` directory.
   7. Rebuild spiny-orb from **current branch** (not necessarily main — rebuild from whatever branch it's on).
   8. Record version and findings status.
-  9. Append observations to `evaluation/run-13/lessons-for-prd14.md`.
+  9. Append observations to `evaluation/commit-story-v2/run-13/lessons-for-prd14.md`.
 
-- [ ] **Evaluation run-13** — Whitney runs `spiny-orb instrument` in her own terminal. **Do NOT run the command yourself.** AI role in this milestone: (1) create `evaluation/run-13/` directory, (2) confirm readiness with Whitney, (3) once Whitney provides the log output, save it to `evaluation/run-13/spiny-orb-output.log` and write `evaluation/run-13/run-summary.md`.
+- [ ] **Evaluation run-13** — Whitney runs `spiny-orb instrument` in her own terminal. **Do NOT run the command yourself.** AI role in this milestone: (1) create `evaluation/commit-story-v2/run-13/` directory, (2) confirm readiness with Whitney, (3) once Whitney provides the log output, save it to `evaluation/commit-story-v2/run-13/spiny-orb-output.log` and write `evaluation/commit-story-v2/run-13/run-summary.md`.
 
 - [ ] **Findings Discussion** *(user-facing checkpoint 1)* — After `run-summary.md` is written, before any evaluation documents are started: report to Whitney: (1) files committed / failed / partial, (2) quality score if visible in log, (3) cost, (4) push/PR status, (5) top 1-2 surprises or regressions. Keep it conversational, under 10 lines. Wait for her acknowledgment before proceeding.
 
 - [ ] **Failure deep-dives** — For each failed file AND run-level failure. Includes the partial file if any.
-  Produces: `evaluation/run-13/failure-deep-dives.md`
-  Style reference: `git show feature/prd-33-evaluation-run-12:evaluation/run-12/failure-deep-dives.md`
+  Produces: `evaluation/commit-story-v2/run-13/failure-deep-dives.md`
+  Style reference: `git show feature/prd-33-evaluation-run-12:evaluation/commit-story-v2/run-12/failure-deep-dives.md`
 
 - [ ] **Per-file evaluation** — Full rubric on ALL files (no spot-checking). Evaluate all 32 rules across all committed and partial files.
-  Produces: `evaluation/run-13/per-file-evaluation.md`
-  Style reference: `git show feature/prd-33-evaluation-run-12:evaluation/run-12/per-file-evaluation.md`
+  Produces: `evaluation/commit-story-v2/run-13/per-file-evaluation.md`
+  Style reference: `git show feature/prd-33-evaluation-run-12:evaluation/commit-story-v2/run-12/per-file-evaluation.md`
 
 - [ ] **PR artifact evaluation** — Evaluate PR quality.
-  Produces: `evaluation/run-13/pr-evaluation.md`
-  Style reference: `git show feature/prd-33-evaluation-run-12:evaluation/run-12/pr-evaluation.md`
+  Produces: `evaluation/commit-story-v2/run-13/pr-evaluation.md`
+  Style reference: `git show feature/prd-33-evaluation-run-12:evaluation/commit-story-v2/run-12/pr-evaluation.md`
 
 - [ ] **Rubric scoring** — Synthesize dimension-level scores.
-  Produces: `evaluation/run-13/rubric-scores.md`
-  Style reference: `git show feature/prd-33-evaluation-run-12:evaluation/run-12/rubric-scores.md`
+  Produces: `evaluation/commit-story-v2/run-13/rubric-scores.md`
+  Style reference: `git show feature/prd-33-evaluation-run-12:evaluation/commit-story-v2/run-12/rubric-scores.md`
 
 - [ ] **Baseline comparison** — Compare run-13 vs runs 2-12.
-  Produces: `evaluation/run-13/baseline-comparison.md`
-  Style reference: `git show feature/prd-33-evaluation-run-12:evaluation/run-12/baseline-comparison.md`
+  Produces: `evaluation/commit-story-v2/run-13/baseline-comparison.md`
+  Style reference: `git show feature/prd-33-evaluation-run-12:evaluation/commit-story-v2/run-12/baseline-comparison.md`
 
 - [ ] **Actionable fix output** — Primary handoff deliverable. At milestone completion:
   1. Run the cross-document audit agent to verify consistency across all run-13 evaluation artifacts.
   2. *(User-facing checkpoint 2)* Give Whitney an interpreted summary of key findings — failures, root causes, notable patterns, what to watch for in run-14.
-  3. Print the absolute file path of `evaluation/run-13/actionable-fix-output.md` (derive from current working directory).
+  3. Print the absolute file path of `evaluation/commit-story-v2/run-13/actionable-fix-output.md` (derive from current working directory).
   4. **Pause.** Do not proceed to Draft PRD #14 until Whitney confirms she has handed the document off to the spiny-orb team.
 
 - [ ] **Draft PRD #14** — Create on a separate branch from main. Merge the PRD PR to main so `/prd-start` can pick it up. Carry forward both user-facing checkpoints (Findings Discussion + handoff pause) into PRD #14's milestone structure.
@@ -235,6 +235,6 @@ The feature branch for this PRD (`feature/prd-37-evaluation-run-13`) **never mer
 ## Prior Art
 
 - **PRD #12**: Run-12 evaluation (this repo, branch `feature/prd-33-evaluation-run-12`)
-- **evaluation/run-12/**: Full run-12 documentation
+- **evaluation/commit-story-v2/run-12/**: Full run-12 documentation
 - **spinybacked-orbweaver/research/evaluation-rubric.md**: 32-rule rubric
 - **spinybacked-orbweaver#388**: NDS-003 truthy-check allowlist fix (P1)

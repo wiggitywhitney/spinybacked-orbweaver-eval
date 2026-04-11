@@ -11,7 +11,7 @@
 
 Run-3 scored 73% quality (19/26 rules pass, 4/4 gates pass) but was compromised by a stale orb build — fixes #61 (mega-bundle), #64 (tracer naming), and #65 (span naming) existed in source but were never compiled to `dist/`. Three of seven quality rule failures (API-003, SCH-001, CDQ-008) are expected repeats from the stale build. Run-3 also discovered a new regression (API-002: agent marked `@opentelemetry/api` optional), two genuine new findings (SCH-002: ad-hoc attributes, CDQ-003: missing recordException), and one schema design issue (CDQ-007: PII in `commit_story.commit.author`).
 
-The same 4 files have failed across both run-2 and run-3: journal-graph.js (oscillation/token budget), sensitive-filter.js (null parsed output), context-integrator.js (NDS-003 blocks refactor), and journal-manager.js (NDS-003 x5). Run-3 produced 11 orb issues documented in `evaluation/run-3/orb-issues-to-file.md`.
+The same 4 files have failed across both run-2 and run-3: journal-graph.js (oscillation/token budget), sensitive-filter.js (null parsed output), context-integrator.js (NDS-003 blocks refactor), and journal-manager.js (NDS-003 x5). Run-3 produced 11 orb issues documented in `evaluation/commit-story-v2/run-3/orb-issues-to-file.md`.
 
 ### Primary Goal
 
@@ -52,7 +52,7 @@ Verify that orb fixes resolve all 7 quality rule failures from run-3, pushing th
 
 ### Orb Issues Filed from Run-3
 
-11 issues documented in `evaluation/run-3/orb-issues-to-file.md`:
+11 issues documented in `evaluation/commit-story-v2/run-3/orb-issues-to-file.md`:
 
 | Issue | Summary | Priority |
 |-------|---------|----------|
@@ -93,12 +93,12 @@ Three-phase approach:
 
 ### Key Inputs
 
-- **Run-3 results**: `evaluation/run-3/` in this repo
+- **Run-3 results**: `evaluation/commit-story-v2/run-3/` in this repo
 - **Evaluation rubric**: `spinybacked-orbweaver/research/evaluation-rubric.md` (31 rules)
 - **Rubric-codebase mapping**: `spinybacked-orbweaver/research/rubric-codebase-mapping.md`
 - **Run-3 orb branches**: `orb/instrument-1773434669510` (main), `orb/instrument-1773438620295` (supplemental)
-- **Orb issues**: `evaluation/run-3/orb-issues-to-file.md` (11 issues)
-- **Lessons for PRD #4**: `evaluation/run-3/lessons-for-prd4.md`
+- **Orb issues**: `evaluation/commit-story-v2/run-3/orb-issues-to-file.md` (11 issues)
+- **Lessons for PRD #4**: `evaluation/commit-story-v2/run-3/lessons-for-prd4.md`
 
 ---
 
@@ -145,10 +145,10 @@ Three-phase approach:
   5. Record wall-clock end timestamp
   6. If any files failed due to token budget, run supplemental passes with `maxTokensPerFile: 150000`
   7. Verify PR was created successfully — if push fails, the local PR summary file (orb issue #13) should be available
-  8. Capture all output to `evaluation/run-4/orb-output.log`
+  8. Capture all output to `evaluation/commit-story-v2/run-4/orb-output.log`
   9. Record final tally: files instrumented / correctly skipped / failed
 
-- [ ] **Collect lessons for PRD #5** — Create `evaluation/run-4/lessons-for-prd5.md` at the START of evaluation work and append to it throughout all subsequent milestones. Capture:
+- [ ] **Collect lessons for PRD #5** — Create `evaluation/commit-story-v2/run-4/lessons-for-prd5.md` at the START of evaluation work and append to it throughout all subsequent milestones. Capture:
   1. Rubric gaps discovered during evaluation (new rules needed, scoring ambiguities)
   2. Process improvements (things that worked well, things that didn't)
   3. Evaluation methodology changes (better ways to score, new agent patterns)
@@ -162,8 +162,8 @@ Three-phase approach:
   3. Determine if the failure is a known issue (mapped to an orb issue) or a new discovery
   4. For persistent failures (files that failed in run-2 and run-3): assess whether the orb fix was applied and whether it helped
   5. For new failures: file orb issues with acceptance criteria tied to specific target files
-  6. Document findings in `evaluation/run-4/failure-deep-dives.md`
-  7. Append any new rubric gaps or process observations to `evaluation/run-4/lessons-for-prd5.md`
+  6. Document findings in `evaluation/commit-story-v2/run-4/failure-deep-dives.md`
+  7. Append any new rubric gaps or process observations to `evaluation/commit-story-v2/run-4/lessons-for-prd5.md`
 
 - [ ] **Per-file evaluation** — Full 31-rule rubric applied to all files using structured evaluation:
   1. **Gate checks + per-run rules (single agent)**: NDS-001, NDS-002, NDS-003, API-001, API-002, API-003, API-004, CDQ-008 — needs cross-file context
@@ -171,29 +171,29 @@ Three-phase approach:
   3. **Zero-span files**: Verify correct skip decisions for files with 0 spans
   4. **Failed files**: Evaluate against NDS rules only (the agent produced output that was rejected)
   5. Use structured output format: `{rule_id} | {pass|fail} | {file_path}:{line_number} | {actionable_message}`
-  6. Emit per-file evaluation results as a canonical JSON artifact (`evaluation/run-4/per-file-evaluation.json`) — render the markdown report from it to prevent drift between evaluation docs
-  7. Document in `evaluation/run-4/per-file-evaluation.md` (generated from the JSON artifact)
-  8. Append any rubric scoring ambiguities or methodology observations to `evaluation/run-4/lessons-for-prd5.md`
+  6. Emit per-file evaluation results as a canonical JSON artifact (`evaluation/commit-story-v2/run-4/per-file-evaluation.json`) — render the markdown report from it to prevent drift between evaluation docs
+  7. Document in `evaluation/commit-story-v2/run-4/per-file-evaluation.md` (generated from the JSON artifact)
+  8. Append any rubric scoring ambiguities or methodology observations to `evaluation/commit-story-v2/run-4/lessons-for-prd5.md`
 
 - [ ] **PR artifact evaluation** — Evaluate the PR as a first-class deliverable:
   1. If PR exists: evaluate description quality, per-file table, span counts, agent decision notes
   2. Assess: Does the PR help a reviewer understand what the agent did and make informed merge decisions?
   3. If PR was lost: document why and assess whether orb issue #12 (credential validation) and #13 (local summary) were fixed
-  4. Document in `evaluation/run-4/pr-evaluation.md`
-  5. Append any PR quality observations to `evaluation/run-4/lessons-for-prd5.md`
+  4. Document in `evaluation/commit-story-v2/run-4/pr-evaluation.md`
+  5. Append any PR quality observations to `evaluation/commit-story-v2/run-4/lessons-for-prd5.md`
 
 - [ ] **Rubric scoring** — Synthesize per-file findings into dimension-level scores:
-  1. Aggregate per-file agent findings from `evaluation/run-4/per-file-evaluation.json`
+  1. Aggregate per-file agent findings from `evaluation/commit-story-v2/run-4/per-file-evaluation.json`
   2. Score each dimension (NDS, COV, RST, API, SCH, CDQ) with per-rule evidence
   3. Classify each failure: stale build repeat / new regression / genuine new finding / schema design issue
-  4. Emit as `evaluation/run-4/rubric-scores.json` (machine-readable) and render `evaluation/run-4/rubric-scores.md` from it (run-3-compatible format)
+  4. Emit as `evaluation/commit-story-v2/run-4/rubric-scores.json` (machine-readable) and render `evaluation/commit-story-v2/run-4/rubric-scores.md` from it (run-3-compatible format)
 
 - [ ] **Baseline comparison and synthesis** — Compare run-4 vs run-3 vs run-2:
   1. Dimension-level trend analysis (4-run where applicable)
   2. File outcome comparison (which files improved, regressed, or stayed the same)
   3. Failure classification: resolved / persistent / new
   4. Assessment of run-3 prediction: did fresh build push quality to ~85%?
-  5. Document in `evaluation/run-4/baseline-comparison.md`
+  5. Document in `evaluation/commit-story-v2/run-4/baseline-comparison.md`
 
 - [ ] **Actionable fix output** — Produce fix instructions for remaining failures:
   1. For each remaining quality rule failure: what's wrong, evidence, desired outcome
@@ -202,10 +202,10 @@ Three-phase approach:
   4. Run-4 rubric gap assessment: any new rubric gaps discovered
   5. Run-5 verification checklist
   6. Generate from the canonical JSON artifacts (`per-file-evaluation.json`, `rubric-scores.json`) to prevent drift between evaluation docs
-  7. Document in `evaluation/run-4/actionable-fix-output.md`
-  8. Final review of `evaluation/run-4/lessons-for-prd5.md` — ensure all forward-looking items are captured
+  7. Document in `evaluation/commit-story-v2/run-4/actionable-fix-output.md`
+  8. Final review of `evaluation/commit-story-v2/run-4/lessons-for-prd5.md` — ensure all forward-looking items are captured
 
-- [ ] **Draft PRD #5 for next evaluation run** — Create a PRD for evaluation run-5 following the structure of this PRD. Primary input: `evaluation/run-4/lessons-for-prd5.md` (rubric gaps, process improvements, evaluation methodology changes collected throughout run-4). Also incorporate run-4 scores as baselines, carry forward unresolved bugs/spec gaps/rubric gaps, and encode process lessons. The goal is a self-improving evaluation chain where each run's PRD encodes the lessons of previous runs.
+- [ ] **Draft PRD #5 for next evaluation run** — Create a PRD for evaluation run-5 following the structure of this PRD. Primary input: `evaluation/commit-story-v2/run-4/lessons-for-prd5.md` (rubric gaps, process improvements, evaluation methodology changes collected throughout run-4). Also incorporate run-4 scores as baselines, carry forward unresolved bugs/spec gaps/rubric gaps, and encode process lessons. The goal is a self-improving evaluation chain where each run's PRD encodes the lessons of previous runs.
 
 ---
 
@@ -287,7 +287,7 @@ Encoded in the milestones but listed explicitly for reference:
 
 - **PRD #3**: Run-3 evaluation (this repo)
 - **PRD #2**: Run-2 evaluation (this repo)
-- **evaluation/run-3/**: Full run-3 documentation
+- **evaluation/commit-story-v2/run-3/**: Full run-3 documentation
   - `orb-output.log`: Raw CLI output
   - `per-file-evaluation.md`: Full 31-rule rubric applied to all 21 files
   - `rubric-scores.md`: Dimension-level scoring with per-rule evidence
@@ -295,7 +295,7 @@ Encoded in the milestones but listed explicitly for reference:
   - `actionable-fix-output.md`: Fix instructions for orb maintainer
   - `orb-issues-to-file.md`: 11 issues with acceptance criteria
   - `lessons-for-prd4.md`: Forward-looking improvements (primary input for this PRD)
-- **evaluation/run-2/**: Full run-2 documentation
+- **evaluation/commit-story-v2/run-2/**: Full run-2 documentation
 - **spinybacked-orbweaver issues #61-#69**: Run-2 findings
 - **spinybacked-orbweaver/research/evaluation-rubric.md**: 31-rule rubric
 - **spinybacked-orbweaver/research/rubric-codebase-mapping.md**: Rule-to-code mapping

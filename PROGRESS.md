@@ -6,6 +6,9 @@ Entry format: `- (YYYY-MM-DD) Description of feature-level change (PRD #X, miles
 
 ## [Unreleased]
 
+### Fixed
+- (2026-04-11) Fixed stale repo name references missed during PRD #43 generalization: updated Two-Repo Workflow tables in prd-32 and prd-33 to spinybacked-orbweaver-eval, removed commit-story-v2-eval/ prefix from prd-3 run-2 path, corrected self-contradictory grep patterns in prd-43 validation section (PRD #43, CodeRabbit review)
+
 ### Added
 - (2026-03-13) Moved Weaver schema to canonical `semconv/` location on main (PRD #3, pre-run preparation)
 - (2026-03-13) Added `orb.yaml`, `src/instrumentation.js`, and OTel peerDependencies as permanent eval config on main (PRD #3, pre-run preparation)
@@ -108,6 +111,9 @@ Entry format: `- (YYYY-MM-DD) Description of feature-level change (PRD #X, miles
 - (2026-04-11) Created PRD #44 (IS integration) with 6 milestones for IS scoring script, OTel Collector config, and Type D template update; /write-prompt review applied (PRD #41, milestone 2)
 - (2026-04-11) Created PRD #45 (eval target criteria research spike) with 4 milestones; output path docs/research/eval-target-criteria.md predefined; final milestone creates PRDs for Steps 5-7; /write-prompt review applied (PRD #41, milestone 3)
 - (2026-04-11) Coherence verification passed all 6 criteria: IS PRD has Step 0 read instruction, research spike PRD names correct output path and creates Steps 5-7 PRDs, ROADMAP.md has real issue numbers (#43, #44, #45) with no duplicates, all PRDs independently mergeable to main, dependencies sections accurate (PRD #41, coherence verification)
+- (2026-04-11) Moved all evaluation run directories (run-2, run-6 through run-12) from evaluation/run-N/ to evaluation/commit-story-v2/run-N/ to scope existing JS runs under target-specific path (PRD #43, milestone 1)
+- (2026-04-11) Updated all internal evaluation path references from evaluation/run-N/ to evaluation/commit-story-v2/run-N/ across all PRDs, docs, and .claude/settings.local.json; zero stale paths remain (PRD #43, milestone 2)
+- (2026-04-11) Updated 10 evaluation-run PRD titles to include target name: "Evaluation Run-N" → "JS Evaluation Run-N: commit-story-v2" (PRD #43, milestone 3)
 
 ### Changed
 - (2026-03-16) Fixed span count discrepancy: total_spans_on_branch corrected from 48 to 38 in per-file-evaluation.json and rubric-scores.json (48 included working-directory-only changes from partial files not committed to branch). Updated baseline-comparison.md table to match canonical per-file-evaluation.json (PRD #4, CodeRabbit finding fix)
@@ -115,3 +121,7 @@ Entry format: `- (YYYY-MM-DD) Description of feature-level change (PRD #X, miles
 - (2026-03-15) Added PII acceptance annotation to `commit_story.commit.author` in Weaver registry — git author names are public, accepted with documentation (PRD #4, schema and rubric updates)
 - (2026-03-15) Added `commit_story.commit.parent_count` and `commit_story.git.subcommand` to Weaver registry — pre-registering ad-hoc attributes from run-3 SCH-002 findings (PRD #4, schema and rubric updates)
 - (2026-03-15) Updated rubric-codebase-mapping COV-006 with OpenLLMetry research — JS package covers LangChain chat models but NOT LangGraph orchestration; manual spans justified for graph nodes (PRD #4, schema and rubric updates)
+- (2026-04-11) Added "Adding a New Language Evaluation Chain" section to .claude/CLAUDE.md — orients future agents on prerequisites, PRD type selection, and mandatory first-milestone requirement for any new language/target evaluation chain (PRD #43, document language eval chain guidance)
+- (2026-04-11) Updated all non-historical repo name references from commit-story-v2-eval to spinybacked-orbweaver-eval across docs and active PRDs; instrument command path updated in language-extension-plan.md (PRD #43, rename prep)
+- (2026-04-11) Renamed GitHub repo from commit-story-v2-eval to spinybacked-orbweaver-eval; updated git remote URL; all 5 milestones of repo generalization complete (PRD #43, repo rename)
+- (2026-04-11) Created PRD #47 (source cleanup) with 5 milestones for removing stale commit-story source code from eval repo; research/discovery milestone first; added to ROADMAP.md (PRD #47 created)

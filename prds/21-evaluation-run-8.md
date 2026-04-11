@@ -1,4 +1,4 @@
-# PRD #8: Evaluation Run-8 — Polish and Push Auth Resolution
+# PRD #8: JS Evaluation Run-8: commit-story-v2 — Polish and Push Auth Resolution
 
 **Status:** Draft
 **Created:** 2026-03-20
@@ -103,12 +103,12 @@ Same four-phase structure as runs 5-7, with polish as the primary focus:
 
 ### Key Inputs
 
-- **Run-7 results**: `evaluation/run-7/` on branch `feature/prd-19-evaluation-run-7`
+- **Run-7 results**: `evaluation/commit-story-v2/run-7/` on branch `feature/prd-19-evaluation-run-7`
 - **Evaluation rubric**: `spinybacked-orbweaver/research/evaluation-rubric.md` (32 rules)
 - **Run-7 spiny-orb branch**: `spiny-orb/instrument-1774017389972` (local — push failed)
-- **Run-7 actionable fix output**: `evaluation/run-7/actionable-fix-output.md` (the handoff)
-- **Run-7 findings**: `evaluation/run-7/spiny-orb-findings.md` (10 findings)
-- **Run-7 lessons**: `evaluation/run-7/lessons-for-prd8.md`
+- **Run-7 actionable fix output**: `evaluation/commit-story-v2/run-7/actionable-fix-output.md` (the handoff)
+- **Run-7 findings**: `evaluation/commit-story-v2/run-7/spiny-orb-findings.md` (10 findings)
+- **Run-7 lessons**: `evaluation/commit-story-v2/run-7/lessons-for-prd8.md`
 
 ---
 
@@ -133,7 +133,7 @@ Same four-phase structure as runs 5-7, with polish as the primary focus:
 ## Milestones
 
 - [ ] **Pre-run verification** — Verify spiny-orb fixes and validate run prerequisites:
-  1. **Handoff triage review**: Read the spiny-orb team's triage of `evaluation/run-7/actionable-fix-output.md`. Compare what they filed vs what the eval recommended. Note any findings rejected.
+  1. **Handoff triage review**: Read the spiny-orb team's triage of `evaluation/commit-story-v2/run-7/actionable-fix-output.md`. Compare what they filed vs what the eval recommended. Note any findings rejected.
   2. **Push auth verification (critical)**: Verify fail-fast before file processing when GITHUB_TOKEN is missing or write access unavailable. Test with `git push --dry-run`. Log must show GITHUB_TOKEN detection at startup. HTTPS-only is still broken — verify token-embedded URL or SSH.
   3. **COV-006 span name uniqueness**: Verify cross-file span name collision detection is in place (validator or post-run check).
   4. **CDQ-005 count attribute types**: Verify agent declares count attributes as `type: int` and passes raw numbers (no `String()` wrapping).
@@ -143,11 +143,11 @@ Same four-phase structure as runs 5-7, with polish as the primary focus:
   8. `spiny-orb --version` — record version.
   9. **File recovery expectations**: Predict run-8 outcomes. With run-7 at 100% success, expect no regression. Apply 50% discount for unmasked bug risk.
   10. Record which run-7 findings are verified fixed vs still open.
-  11. Append observations to `evaluation/run-8/lessons-for-prd9.md`.
+  11. Append observations to `evaluation/commit-story-v2/run-8/lessons-for-prd9.md`.
 
 - [ ] **Collect lessons for PRD #9** — Create BOTH output documents at the START:
-  1. Create `evaluation/run-8/spiny-orb-findings.md`.
-  2. Create `evaluation/run-8/lessons-for-prd9.md`.
+  1. Create `evaluation/commit-story-v2/run-8/spiny-orb-findings.md`.
+  2. Create `evaluation/commit-story-v2/run-8/lessons-for-prd9.md`.
   3. Both updated throughout all subsequent milestones.
 
 - [ ] **Evaluation run-8** — Execute `spiny-orb instrument` in the user's terminal:
@@ -167,7 +167,7 @@ Same four-phase structure as runs 5-7, with polish as the primary focus:
   2. Run-level failures: push auth (verify fix or document continued failure).
   3. Unmasked bug detection for any changes.
   4. Regression root cause (if any).
-  5. Document in `evaluation/run-8/failure-deep-dives.md`.
+  5. Document in `evaluation/commit-story-v2/run-8/failure-deep-dives.md`.
 
 - [ ] **Per-file evaluation** — Full rubric on ALL files (no spot-checking):
   1. Gate checks + per-run rules.
@@ -184,7 +184,7 @@ Same four-phase structure as runs 5-7, with polish as the primary focus:
   3. **Advisory contradiction rate**: Target <15%.
   4. **Rule code labels**: Verify human-readable labels on all codes.
   5. **Schema changes completeness**: Must include both attributes and span extensions.
-  6. Document in `evaluation/run-8/pr-evaluation.md`.
+  6. Document in `evaluation/commit-story-v2/run-8/pr-evaluation.md`.
 
 - [ ] **Rubric scoring** — Synthesize dimension-level scores:
   1. Aggregate from `per-file-evaluation.json`.
@@ -199,7 +199,7 @@ Same four-phase structure as runs 5-7, with polish as the primary focus:
   4. Cost comparison (7-run trend).
   5. Dominant blocker peeling assessment.
   6. Score projection validation.
-  7. Document in `evaluation/run-8/baseline-comparison.md`.
+  7. Document in `evaluation/commit-story-v2/run-8/baseline-comparison.md`.
 
 - [ ] **Actionable fix output** — Primary handoff deliverable:
   1. Remaining quality rule failures with evidence and acceptance criteria.
@@ -208,11 +208,11 @@ Same four-phase structure as runs 5-7, with polish as the primary focus:
   4. Score projection for run-9 with 50% discount.
   5. Priority action matrix.
   6. **Cross-document audit agent** (final step).
-  7. Document in `evaluation/run-8/actionable-fix-output.md`.
+  7. Document in `evaluation/commit-story-v2/run-8/actionable-fix-output.md`.
 
 - [ ] **Draft PRD #9** — Create on a separate branch from main:
   1. Run-8 scores as baselines.
-  2. All items from `evaluation/run-8/lessons-for-prd9.md`.
+  2. All items from `evaluation/commit-story-v2/run-8/lessons-for-prd9.md`.
   3. Carry forward unresolved findings.
   4. Priority recommendations only (no PRD/Issue classification).
 
@@ -300,7 +300,7 @@ Run-7 projections were well-calibrated: minimum predicted 21-23/25 with 6-8 file
 - **PRD #6**: Run-6 evaluation (branch `feature/prd-6-evaluation-run-6`)
 - **PRD #5**: Run-5 evaluation (branch `feature/prd-5-evaluation-run-5`)
 - **PRD #4**: Run-4 evaluation (branch `feature/prd-4-evaluation-run-4`)
-- **evaluation/run-7/**: Full run-7 documentation (on branch `feature/prd-19-evaluation-run-7`)
+- **evaluation/commit-story-v2/run-7/**: Full run-7 documentation (on branch `feature/prd-19-evaluation-run-7`)
   - `rubric-scores.json`, `rubric-scores.md`: Canonical scoring data
   - `spiny-orb-findings.md`: 10 findings with acceptance criteria
   - `actionable-fix-output.md`: Fix instructions and score projections (the handoff)

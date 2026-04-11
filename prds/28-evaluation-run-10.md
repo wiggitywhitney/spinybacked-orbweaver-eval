@@ -1,4 +1,4 @@
-# PRD #10: Evaluation Run-10 — Push Auth Resolution and Operational Reliability
+# PRD #10: JS Evaluation Run-10: commit-story-v2 — Push Auth Resolution and Operational Reliability
 
 **Status:** Draft
 **Created:** 2026-03-23
@@ -106,11 +106,11 @@ Run-10 operates across two repos (same as run-9).
 
 ### Key Inputs
 
-- **Run-9 results** (eval repo): `evaluation/run-9/` on branch `feature/prd-24-evaluation-run-9`
+- **Run-9 results** (eval repo): `evaluation/commit-story-v2/run-9/` on branch `feature/prd-24-evaluation-run-9`
 - **Evaluation rubric** (spiny-orb repo): `spinybacked-orbweaver/research/evaluation-rubric.md` (32 rules)
-- **Run-9 actionable fix output** (eval repo): `evaluation/run-9/actionable-fix-output.md` (the handoff)
-- **Run-9 findings** (eval repo): `evaluation/run-9/spiny-orb-findings.md` (5 findings)
-- **Run-9 lessons** (eval repo): `evaluation/run-9/lessons-for-prd10.md`
+- **Run-9 actionable fix output** (eval repo): `evaluation/commit-story-v2/run-9/actionable-fix-output.md` (the handoff)
+- **Run-9 findings** (eval repo): `evaluation/commit-story-v2/run-9/spiny-orb-findings.md` (5 findings)
+- **Run-9 lessons** (eval repo): `evaluation/commit-story-v2/run-9/lessons-for-prd10.md`
 - **spiny-orb.yaml** (target repo): Must exist in commit-story-v2 — verify during pre-run
 - **semconv/** (target repo): Weaver schema must exist in commit-story-v2 — verify during pre-run
 
@@ -135,7 +135,7 @@ Run-10 operates across two repos (same as run-9).
 ## Milestones
 
 - [ ] **Pre-run verification** — Verify spiny-orb fixes and validate run prerequisites:
-  1. **Handoff triage review**: Read the spiny-orb team's triage of `evaluation/run-9/actionable-fix-output.md` (eval repo). Compare what they filed vs what the eval recommended. Note any findings rejected.
+  1. **Handoff triage review**: Read the spiny-orb team's triage of `evaluation/commit-story-v2/run-9/actionable-fix-output.md` (eval repo). Compare what they filed vs what the eval recommended. Note any findings rejected.
   2. **Target repo readiness** (commit-story-v2): Verify commit-story-v2 is on `main` with clean working tree. Verify `spiny-orb.yaml` and `semconv/` exist. Verify `@opentelemetry/sdk-node` still in devDependencies (not peerDependencies).
   3. **Push auth verification (critical)**: Verify GITHUB_TOKEN propagation to `pushBranch()`. Check for diagnostic logging (recommended in RUN9-1). Test with `git push --dry-run` using token-embedded URL **in the commit-story-v2 repo**. Must confirm token is in process environment AND URL swap fires.
   4. **Reassembly validator verification (critical)**: Verify the reassembly validator's SCH-001 check resolves span names against the combined registry (base + agent-extensions.yaml). The extensions must be loaded before reassembly validation runs.
@@ -146,16 +146,16 @@ Run-10 operates across two repos (same as run-9).
   9. `spiny-orb --version` — record version.
   10. **File recovery expectations**: Predict run-10 outcomes with 50% discount. journal-graph.js recovery should be deterministic (validator fix, not LLM-dependent).
   11. Record which run-9 findings are verified fixed vs still open.
-  12. Append observations to `evaluation/run-10/lessons-for-prd11.md` (eval repo).
+  12. Append observations to `evaluation/commit-story-v2/run-10/lessons-for-prd11.md` (eval repo).
 
 - [ ] **Collect lessons for PRD #11** — Create BOTH output documents at the START:
-  1. Create `evaluation/run-10/spiny-orb-findings.md`.
-  2. Create `evaluation/run-10/lessons-for-prd11.md`.
+  1. Create `evaluation/commit-story-v2/run-10/spiny-orb-findings.md`.
+  2. Create `evaluation/commit-story-v2/run-10/lessons-for-prd11.md`.
   3. Both updated throughout all subsequent milestones.
 
 - [ ] **Evaluation run-10** — Execute `spiny-orb instrument` on **commit-story-v2** (not the eval repo):
   1. Ensure commit-story-v2 is on **main** with clean working tree: `cd ~/Documents/Repositories/commit-story-v2 && git checkout main && git status`.
-  2. **Provide the exact command** for the user to run. The command must: (a) `cd` to commit-story-v2, (b) use `caffeinate -s`, (c) strip Datadog gateway headers, (d) inject secrets via vals using commit-story-v2's `.vals.yaml`, (e) point to spiny-orb binary, (f) `tee` output to the **eval repo's** `evaluation/run-10/spiny-orb-output.log`.
+  2. **Provide the exact command** for the user to run. The command must: (a) `cd` to commit-story-v2, (b) use `caffeinate -s`, (c) strip Datadog gateway headers, (d) inject secrets via vals using commit-story-v2's `.vals.yaml`, (e) point to spiny-orb binary, (f) `tee` output to the **eval repo's** `evaluation/commit-story-v2/run-10/spiny-orb-output.log`.
   3. Record wall-clock start timestamp.
   4. Resume after run completes. **Copy the user's pasted output** into the eval repo if `tee` wasn't used.
   5. **Push auth verification (critical)**: Did the PR get created **on commit-story-v2's GitHub repo**? Check GITHUB_TOKEN diagnostic log. If push failed again (8th consecutive), escalate as fundamental blocker — consider SSH key approach.
@@ -170,7 +170,7 @@ Run-10 operates across two repos (same as run-9).
   2. Run-level failures: push auth (verify fix or document continued failure).
   3. Unmasked bug detection for any changes.
   4. Regression root cause (if any).
-  5. Document in `evaluation/run-10/failure-deep-dives.md`.
+  5. Document in `evaluation/commit-story-v2/run-10/failure-deep-dives.md`.
 
 - [ ] **Per-file evaluation** — Full rubric on ALL files (no spot-checking):
   1. Gate checks + per-run rules. Run tests on **commit-story-v2** (the target repo).
@@ -188,7 +188,7 @@ Run-10 operates across two repos (same as run-9).
   4. **Advisory contradiction rate**: Target <30%.
   5. **Rule code labels**: Verify in both validation output and agent notes.
   6. **Schema changes completeness**: Must include both attributes and span extensions.
-  7. Document in `evaluation/run-10/pr-evaluation.md`.
+  7. Document in `evaluation/commit-story-v2/run-10/pr-evaluation.md`.
 
 - [ ] **Rubric scoring** — Synthesize dimension-level scores:
   1. Aggregate from per-file evaluation.
@@ -203,7 +203,7 @@ Run-10 operates across two repos (same as run-9).
   4. Cost comparison (9-run trend).
   5. Dominant blocker peeling assessment.
   6. Score projection validation.
-  7. Document in `evaluation/run-10/baseline-comparison.md`.
+  7. Document in `evaluation/commit-story-v2/run-10/baseline-comparison.md`.
 
 - [ ] **Actionable fix output** — Primary handoff deliverable:
   1. Remaining quality rule failures with evidence and acceptance criteria.
@@ -212,11 +212,11 @@ Run-10 operates across two repos (same as run-9).
   4. Score projection for run-11 with 50% discount.
   5. Priority action matrix.
   6. **Cross-document audit agent** (final step).
-  7. Document in `evaluation/run-10/actionable-fix-output.md`.
+  7. Document in `evaluation/commit-story-v2/run-10/actionable-fix-output.md`.
 
 - [ ] **Draft PRD #11** — Create on a separate branch from main:
   1. Run-10 scores as baselines.
-  2. All items from `evaluation/run-10/lessons-for-prd11.md`.
+  2. All items from `evaluation/commit-story-v2/run-10/lessons-for-prd11.md`.
   3. Carry forward unresolved findings.
   4. Priority recommendations only (no PRD/Issue classification).
 
@@ -306,7 +306,7 @@ Run-9 projections were conservative: minimum predicted 23-24/25 → actual 25/25
 - **PRD #7**: Run-7 evaluation (branch `feature/prd-19-evaluation-run-7`)
 - **PRD #6**: Run-6 evaluation (branch `feature/prd-6-evaluation-run-6`)
 - **PRD #5**: Run-5 evaluation (branch `feature/prd-5-evaluation-run-5`)
-- **evaluation/run-9/**: Full run-9 documentation (on branch `feature/prd-24-evaluation-run-9`)
+- **evaluation/commit-story-v2/run-9/**: Full run-9 documentation (on branch `feature/prd-24-evaluation-run-9`)
   - `rubric-scores.md`: Canonical scoring data (25/25, 100%)
   - `spiny-orb-findings.md`: 5 findings with acceptance criteria
   - `actionable-fix-output.md`: Fix instructions and score projections (the handoff)

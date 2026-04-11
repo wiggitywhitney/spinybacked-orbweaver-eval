@@ -1,6 +1,6 @@
 # Eval Target Criteria Research Spike — PRD
 
-**Issue**: [#45](https://github.com/wiggitywhitney/commit-story-v2-eval/issues/45)
+**Issue**: [#45](https://github.com/wiggitywhitney/spinybacked-orbweaver-eval/issues/45)
 **Status**: Draft
 **Owner**: Whitney Lee
 **Created**: 2026-04-11
@@ -89,7 +89,7 @@ Full context — hypotheses table, research agent framing, candidate list, and t
   - **Step 6**: Python eval setup + Run-1 for the validated Python candidate from the research findings
   - **Step 7**: Go eval setup + Run-1 for the validated Go target (k8s-vectordb-sync unless the research spike recommends otherwise)
 
-  Each of these is a Type C PRD. Before creating each PRD, read `docs/language-extension-plan.md` "Type C: Setup + Run-1 PRD" section for the required milestone structure. Use `docs/templates/type-c-prd-template.md` as the starting point for each PRD (created by PRD #43 — if it doesn't exist, use the Type C description in the language-extension-plan as the structure reference instead). Each PRD must document both gate conditions in its Prerequisites or Dependencies section so future implementors know when the PRD can be started — do NOT evaluate these gates now:
+  Each of these is a Type C PRD. Before creating each PRD, read `docs/language-extension-plan.md` "Type C: Setup + Run-1 PRD" section for the required milestone structure and use the most recent JS eval run PRD as the milestone style reference. The **first milestone** of each Type C PRD you create must be: "Step 0: Read `docs/language-extension-plan.md` completely before proceeding with any other milestone." Each PRD must document both gate conditions in its Prerequisites or Dependencies section so future implementors know when the PRD can be started — do NOT evaluate these gates now:
   - Gate 1 (provider): The TypeScript/Python/Go language provider must be merged to spiny-orb main before this PRD can start. Note where to check current status: `docs/language-extension-plan.md` "Language Candidates" table.
   - Gate 2 (research): `docs/research/eval-target-criteria.md` must exist with a verdict for this language before this PRD can start. "Before forking anything, read `docs/research/eval-target-criteria.md` to confirm the validated target for this language."
 

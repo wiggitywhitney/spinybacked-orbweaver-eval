@@ -2,7 +2,7 @@
 
 **Status:** Draft
 **Created:** 2026-03-07
-**GitHub Issue:** [#2](https://github.com/wiggitywhitney/commit-story-v2-eval/issues/2)
+**GitHub Issue:** [#2](https://github.com/wiggitywhitney/spinybacked-orbweaver-eval/issues/2)
 
 ---
 
@@ -14,14 +14,14 @@ SpinybackedOrbWeaver was built specifically to address those findings, but it ha
 
 ## Solution Overview
 
-Run SpinybackedOrbWeaver against this repo's JavaScript codebase using the existing 31-rule evaluation rubric (at `spinybacked-orbweaver/research/evaluation-rubric.md`), score the output, and compare against the previous evaluation/run-1 baseline.
+Run SpinybackedOrbWeaver against this repo's JavaScript codebase using the existing 31-rule evaluation rubric (at `spinybacked-orbweaver/research/evaluation-rubric.md`), score the output, and compare against the previous evaluation/commit-story-v2/run-1 baseline.
 
 ### Key Inputs (Already Exist)
 
 - **Evaluation rubric**: 4 gate checks (NDS-001, NDS-002, NDS-003, API-001) + 27 quality rules across 6 dimensions (Non-Destructiveness, Coverage, Restraint, API Dependency, Schema Fidelity, Code Quality) + 19 Instrumentation Score rules. 28 of 30 code rules are fully automatable.
 - **Codebase mapping**: `spinybacked-orbweaver/research/rubric-codebase-mapping.md` — maps every rubric rule to specific functions, call sites, and error-handling locations in commit-story-v2.
 - **Weaver schema**: `telemetry/registry/` with custom attributes for the commit-story domain.
-- **Baseline (evaluation/run-1)**: 4 files instrumented, 3 correctly skipped, 7 spans added. Previous report, patterns doc, and rubric scores at `telemetry-agent-research/evaluation/`.
+- **Baseline (evaluation/commit-story-v2/run-1)**: 4 files instrumented, 3 correctly skipped, 7 spans added. Previous report, patterns doc, and rubric scores at `telemetry-agent-research/evaluation/`.
 - **Target codebase**: JavaScript (not TypeScript) — a critical finding from the last evaluation.
 
 ### Evaluation Interface
@@ -39,9 +39,9 @@ SpinybackedOrbWeaver has three interfaces: CLI (`orb init` / `orb instrument`), 
 ## Milestones
 
 - [ ] **Pre-flight verification** — SpinybackedOrbWeaver builds and runs against this repo: Weaver schema validates, `orb init` succeeds, `orb instrument --dry-run` produces a cost ceiling without errors. Rubric codebase mapping verified against current source; any mapping drift documented.
-- [ ] **Evaluation run** — `orb instrument` executed against `src/` directory. All output captured (instrumented files, agent notes, token usage, cost). Results committed to `evaluation/run-2` branch. Any failures documented with failure mode; any patches documented with rationale.
+- [ ] **Evaluation run** — `orb instrument` executed against `src/` directory. All output captured (instrumented files, agent notes, token usage, cost). Results committed to `evaluation/commit-story-v2/run-2` branch. Any failures documented with failure mode; any patches documented with rationale.
 - [ ] **Rubric scoring** — Full rubric applied to instrumented output: 4 gate checks first (any gate failure = overall fail), then 27 quality rules. Per-rule pass/fail with evidence (specific code locations, span names, attribute usage). Overall pass rate and per-dimension scores calculated.
-- [ ] **Baseline comparison** — Run-2 results compared against evaluation/run-1 baseline. Key metrics: overall pass rate (was 79%), per-dimension scores (Non-Destructiveness was 100%, Schema Fidelity was 33%), files instrumented vs skipped, manual patches required (was 3), total cost (was ~$5.50–6.50 across 8 attempts), system-level reliability (first-try success?).
+- [ ] **Baseline comparison** — Run-2 results compared against evaluation/commit-story-v2/run-1 baseline. Key metrics: overall pass rate (was 79%), per-dimension scores (Non-Destructiveness was 100%, Schema Fidelity was 33%), files instrumented vs skipped, manual patches required (was 3), total cost (was ~$5.50–6.50 across 8 attempts), system-level reliability (first-try success?).
 - [ ] **Gap analysis and synthesis** — New rubric gaps documented (last time found 3: CDQ-008 tracer naming, RST-004 I/O boundary exception, CDQ-007 conditional attributes). Regressions documented. Findings filed as issues on spinybacked-orbweaver repo. Spec gaps documented for potential v3.10 update.
 
 ---
@@ -59,7 +59,7 @@ SpinybackedOrbWeaver has three interfaces: CLI (`orb init` / `orb instrument`), 
 ## Prior Art
 
 - **telemetry-agent-research PRDs #1–3**: Previous evaluation cycle against the old implementation
-- **evaluation/run-1 branch**: Previous instrumentation output preserved in this repo
+- **evaluation/commit-story-v2/run-1 branch**: Previous instrumentation output preserved in this repo
 - **telemetry-agent-research/evaluation/**: Report, patterns doc, and rubric scores from previous evaluation
 - **spinybacked-orbweaver/research/evaluation-rubric.md**: The 31-rule rubric
 - **spinybacked-orbweaver/research/rubric-codebase-mapping.md**: Rule-to-code mapping
