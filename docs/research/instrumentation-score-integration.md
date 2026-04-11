@@ -119,7 +119,7 @@ outputs a weighted IS score using the spec formula. The file exporter approach i
 the same Collector config works for Node.js, Python, and Go targets.
 
 IS scoring pipeline additions to each new language eval target (Type C setup):
-1. Add `eval/otelcol-config.yaml` to the eval repo
+1. Add `evaluation/is/otelcol-config.yaml` to the eval repo
 2. Document the `OTEL_EXPORTER_OTLP_TRACES_ENDPOINT` override used during IS scoring runs
 3. Add a script to exercise the target repo (target-specific — hard for k8s repos)
 4. Run the scorer against the collected JSON

@@ -270,8 +270,8 @@ Key decisions from research:
 - **k8s-dependent repos** require a running cluster for IS scoring runs. Infrastructure is available; this adds a step but is not a blocker.
 
 PRD deliverables:
-- `eval/otelcol-config.yaml` — minimal Collector config (OTLP HTTP receiver → file exporter)
-- IS scoring script in `eval/` — reads captured JSON, evaluates applicable rules, outputs weighted IS score
+- `evaluation/is/otelcol-config.yaml` — minimal Collector config (OTLP HTTP receiver → file exporter)
+- IS scoring script in `evaluation/is/` — reads captured JSON, evaluates applicable rules, outputs weighted IS score
 - Updates Type D template with IS scoring as step 9 (after rubric scoring, before baseline comparison)
 
 **Step 3 — Research spike: eval target criteria**
