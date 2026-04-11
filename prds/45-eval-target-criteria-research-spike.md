@@ -67,7 +67,7 @@ Full context — hypotheses table, research agent framing, candidate list, and t
 
   Success criteria: Research agent returns findings with evidence for/against each hypothesis, new factors identified, and per-candidate assessments for all four languages (including Python candidate recommendation).
 
-- [ ] **Write findings to `docs/research/eval-target-criteria.md`**
+- [x] **Write findings to `docs/research/eval-target-criteria.md`**
 
   Synthesize the research output into `docs/research/eval-target-criteria.md`. The document must include all three of these sections — a document missing any one of them is incomplete:
 
@@ -131,3 +131,4 @@ Full context — hypotheses table, research agent framing, candidate list, and t
 | 2026-04-11 | PRD created | Draft | Await start |
 | 2026-04-11 | Step 0 complete — framing docs read, 9 hypotheses identified, Python candidate gap confirmed, IS scorability requirements documented | In Progress | Run research spike (milestone 2) |
 | 2026-04-11 | Research spike complete — 5/9 hypotheses supported, 4 refined (async→I/O density, file count range expanded, skip-rate balanced, idiom split). 4 new factors: contamination risk, reproducibility, entry point clarity, file size variance. Python candidate: commitizen (MIT, 3.4k stars, ~45-55 files). Raw research in docs/research/eval-target-selection-research.md | In Progress | Write findings doc (milestone 3) |
+| 2026-04-11 | Findings doc written to docs/research/eval-target-criteria.md with all 3 required sections: criteria scorecard (6 mandatory + 6 recommended), candidate verdicts (4 candidates assessed), IS scorability notes. Research index updated. | In Progress | Create PRDs for Steps 5-7 (milestone 4) |
