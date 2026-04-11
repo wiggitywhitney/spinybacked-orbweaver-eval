@@ -115,6 +115,8 @@ Entry format: `- (YYYY-MM-DD) Description of feature-level change (PRD #X, miles
 - (2026-04-11) Updated all internal evaluation path references from evaluation/run-N/ to evaluation/commit-story-v2/run-N/ across all PRDs, docs, and .claude/settings.local.json; zero stale paths remain (PRD #43, milestone 2)
 - (2026-04-11) Updated 10 evaluation-run PRD titles to include target name: "Evaluation Run-N" → "JS Evaluation Run-N: commit-story-v2" (PRD #43, milestone 3)
 
+- (2026-04-11) Completed Step 0 of eval target criteria research spike: read framing documents, identified 9 hypotheses to investigate, confirmed no Python candidate exists, documented IS scorability requirements (PRD #45, milestone 1)
+
 ### Changed
 - (2026-03-16) Fixed span count discrepancy: total_spans_on_branch corrected from 48 to 38 in per-file-evaluation.json and rubric-scores.json (48 included working-directory-only changes from partial files not committed to branch). Updated baseline-comparison.md table to match canonical per-file-evaluation.json (PRD #4, CodeRabbit finding fix)
 - (2026-03-15) Renamed all "orb" references to "orbweaver" in PRD #4 and evaluation docs to match CLI rename (spinybacked-orbweaver #123)

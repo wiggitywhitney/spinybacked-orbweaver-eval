@@ -44,7 +44,7 @@ Full context — hypotheses table, research agent framing, candidate list, and t
 
 ## Implementation Milestones
 
-- [ ] **Step 0: Read the research spike framing before running any research**
+- [x] **Step 0: Read the research spike framing before running any research**
 
   Read `docs/language-extension-plan.md` in full, paying particular attention to: (1) "Research Spike: Ideal Eval Target Criteria" section — hypotheses table and the constraint that criteria must be derived from first principles; (2) "Language Candidates" table — which repos are known candidates for each language; (3) "Type C: Setup + Run-1 PRD" section — what a target repo must support for the full eval workflow, including IS scoring runs. Also read `docs/research/instrumentation-score-integration.md` for the IS scorability dimension (what makes a repo produce meaningful IS scores, particularly the k8s-dependent repo constraint).
 
@@ -129,3 +129,4 @@ Full context — hypotheses table, research agent framing, candidate list, and t
 | Date | Update | Status | Next Steps |
 |------|--------|--------|------------|
 | 2026-04-11 | PRD created | Draft | Await start |
+| 2026-04-11 | Step 0 complete — framing docs read, 9 hypotheses identified, Python candidate gap confirmed, IS scorability requirements documented | In Progress | Run research spike (milestone 2) |
