@@ -44,7 +44,7 @@ NDS-001 (compilation), NDS-003 (non-instrumentation lines unchanged), API-001 (o
 | **COV-003** Failable ops have error visibility | D | I/O operations inside existing `try/catch` blocks. Fires at intersection of outbound calls AND existing error handling. | Targets with error-guarded I/O operations provide more instances. |
 | **COV-004** Long-running/async ops | D | `async` functions with `await` (JS/TS), synchronous I/O calls in Python (`requests`, `subprocess`, `os.path`), external calls in Go. | More async/I/O functions = more instances. |
 | **COV-005** Domain-specific attributes | D | A Weaver `semconv/` schema defining expected span attributes for the domain. Target must have enough semantic richness to justify non-trivial attribute definitions. | Targets with domain concepts (not just generic file I/O) support richer schemas. |
-| **COV-006** Auto-instrumentation preferred | D | **At least one dependency from the OTel auto-instrumentation ecosystem.** JS/TS: `KNOWN_FRAMEWORK_PACKAGES` in `spinybacked-orbweaver/src/languages/javascript/ast.ts` (pg, mysql, mongodb, redis, express, fastify, koa, axios, got, node-fetch, undici, @grpc/grpc-js, amqplib, kafkajs, graphql, @apollo/server, knex, sequelize, typeorm, @prisma/client). Python: check against [OTel Python contrib](https://github.com/open-telemetry/opentelemetry-python-contrib/tree/main/instrumentation) (includes click, jinja2, redis, pymysql, requests, flask, django, sqlalchemy, psycopg2, etc.). Go: check against [OTel Go contrib](https://github.com/open-telemetry/opentelemetry-go-contrib/tree/main/instrumentation) (net/http via otelhttp, grpc via otelgrpc, mongo via otelmongo). Zero overlap = COV-006 cannot fire at all. | **Key differentiator.** Many candidates have no overlap and permanently skip this rule. |
+| **COV-006** Auto-instrumentation preferred | D | The COV-006 validator (`cov006.ts`) uses `AUTO_INSTRUMENTED_OPERATIONS` — a set of regex patterns that detect when the agent adds manual spans to call sites that already have OTel auto-instrumentation (e.g., `pool.query()`, `app.get()`, `http.request()`). This is **separate from** `KNOWN_FRAMEWORK_PACKAGES` (an import classifier in `ast.ts` used for file metadata, not for COV-006). Whether a target exercises COV-006 depends on whether its code contains specific call patterns covered by `AUTO_INSTRUMENTED_OPERATIONS` — **not** simply whether it imports certain packages. For JS/TS, Traceloop packages (`@traceloop/instrumentation-langchain`, etc.) are injected via the LLM prompt (`javascript/prompt.ts`); the agent recommending them is instruction-following, not COV-006 firing. | Requires empirical verification: check whether the candidate's call patterns match `AUTO_INSTRUMENTED_OPERATIONS` patterns in `cov006.ts`. Import presence alone is insufficient. |
 | **RST-001** No utility spans | D | Files with functions containing no I/O: pure formatters, type helpers, constants, type definitions. These should NOT be instrumented — the rule fires when the agent wrongly instruments them. | Skip-rate balance (30–60% non-instrumentable files) is a proxy for this. |
 | **RST-002** No accessor spans | D | Classes or objects with getter/setter methods or trivial single-statement property accessors. | Config classes, data models, settings objects. Less common in functional-style codebases. |
 | **RST-003** No thin-wrapper spans | D | Functions whose entire body is a single `return` calling another function (delegation/proxy). | Layered architectures, adapter layers, factory functions. |
@@ -73,7 +73,7 @@ A complete schema only tests SCH compliance. An incomplete schema tests SCH *ext
 
 ### 2.1 JavaScript (3 candidates)
 
-**Note:** commit-story-v2 exercises COV-006 via Traceloop auto-instrumentation — `@langchain/*` maps to `@traceloop/instrumentation-langchain` and `@modelcontextprotocol/sdk` maps to `@traceloop/instrumentation-mcp`. These are in the Traceloop mapping table in `javascript/prompt.ts`, not in `KNOWN_FRAMEWORK_PACKAGES`. COV-006 has fired on `journal-graph.js`, `summary-graph.js`, and `mcp/server.js` in run-13.
+**Note on Traceloop and COV-006:** In run-13, the agent recommended `@traceloop/instrumentation-langchain` and `@traceloop/instrumentation-mcp` for commit-story-v2's LangChain and MCP files. This recommendation comes from the Traceloop mapping table in `javascript/prompt.ts` — the agent is following prompt instructions, not independently identifying auto-instrumentation opportunities. Whether the COV-006 *validator* (`AUTO_INSTRUMENTED_OPERATIONS` in `cov006.ts`) flagged the manual spans on those operations is a separate question that has not been verified. The COV-006 assessments in the comparison table below are unverified for all candidates — they were derived from import presence, not from call-site pattern matching against `AUTO_INSTRUMENTED_OPERATIONS`.
 
 ### Rule Coverage Comparison — JavaScript
 
@@ -92,7 +92,7 @@ The 8 universal rules (NDS-001, NDS-003, API-001–004, NDS-006, CDQ-002) are ex
 | COV-003 Failable ops | ✓ | ✓ | ✓ |
 | COV-004 Long-running/async | ✓ async throughout | ✓ async throughout | ✓ async |
 | COV-005 Domain-specific attrs | ≈ | ≈ | ≈ |
-| **COV-006 Auto-instr preferred** | **✓ Traceloop (langchain+MCP)** | **✓ undici (in KFP)** | **✗ no overlap** |
+| **COV-006 Auto-instr preferred** | **🔍 unverified** (Traceloop recommendation confirmed in run-13; validator behavior unknown) | **🔍 unverified** (undici imported; call-site patterns not checked against AUTO_INSTRUMENTED_OPERATIONS) | **🔍 unverified** (no obvious instrumented call patterns, likely ✗) |
 | RST-001 No utility spans | ✓ 57% skip confirmed | ✓ log/spinner/util/prompt | ✓ in/out/state split |
 | RST-002 No accessor spans | 🔍 | 🔍 | 🔍 |
 | RST-003 No thin-wrapper spans | 🔍 | 🔍 | 🔍 |
@@ -125,18 +125,18 @@ The 8 universal rules (NDS-001, NDS-003, API-001–004, NDS-006, CDQ-002) are ex
 | Stars | ~100 (private/personal project) |
 | Source files | ~30 JS files |
 | I/O types | HTTP (Anthropic/LangChain API calls), file R/W (git history, journal entries), subprocess (git) |
-| KFP overlap | **Traceloop** ✓ — `@langchain/*` → `@traceloop/instrumentation-langchain`; `@modelcontextprotocol/sdk` → `@traceloop/instrumentation-mcp`. Detection is via the Traceloop mapping table in `javascript/prompt.ts`, separate from `KNOWN_FRAMEWORK_PACKAGES`. |
+| Auto-instr overlap | **Traceloop prompt** — agent is prompted to recommend `@traceloop/instrumentation-langchain` for `@langchain/*` and `@traceloop/instrumentation-mcp` for `@modelcontextprotocol/sdk` (via `javascript/prompt.ts`). Whether `AUTO_INSTRUMENTED_OPERATIONS` in `cov006.ts` has patterns for LangChain/MCP call sites (e.g., `model.invoke()`) is unverified. |
 | Existing OTel | None (clean baseline; spiny-orb adds it during eval) |
 
 **Rubric coverage notes:**
-- COV-006: ✓ **fires** — via Traceloop mapping in `javascript/prompt.ts`. `@langchain/*` → `@traceloop/instrumentation-langchain` (fires on `journal-graph.js`, `summary-graph.js`); `@modelcontextprotocol/sdk` → `@traceloop/instrumentation-mcp` (fires on `mcp/server.js`). Confirmed in run-13 PR.
+- COV-006: 🔍 **unverified** — agent recommended Traceloop libraries in run-13 (instruction-following via prompt table), but `AUTO_INSTRUMENTED_OPERATIONS` in `cov006.ts` may not have patterns for `model.invoke()`, `chain.invoke()`, etc. Whether the validator flags the coexisting manual spans is unknown.
 - COV-001: ✓ clear CLI entry point
 - COV-002: ✓ HTTP (LangChain API), file I/O, subprocess
 - RST-001: ✓ ~57% skip rate confirmed across 12 runs
 - CDQ-003: ✓ error handling in LLM API calls
 - SCH-*: ✓ 12 runs of schema history; deliberately incomplete schema strategy can be applied
 
-**Summary:** 12 runs of eval history validate this target produces meaningful failure modes. COV-006 fires via Traceloop (langchain + MCP). It was not selected via criteria — it was chosen by circumstance. Evaluate honestly in milestone 0 against the other 2 JS candidates.
+**Summary:** 12 runs of eval history validate this target produces meaningful failure modes. COV-006 status is unverified — the agent recommends Traceloop libraries (instruction-following), but whether the validator flags coexisting manual spans is unknown. It was not selected via criteria — it was chosen by circumstance. Evaluate honestly in milestone 0 against the other 2 JS candidates.
 
 ---
 
@@ -148,11 +148,11 @@ The 8 universal rules (NDS-001, NDS-003, API-001–004, NDS-006, CDQ-002) are ex
 | Stars | 8.9k |
 | Source files | 23 JS files in `lib/` |
 | I/O types | HTTP (GitHub/GitLab release API via undici), subprocess (git), file (package.json, changelog) |
-| KFP overlap | **`undici`** ✓ — direct dependency in package.json |
+| Auto-instr overlap | **`undici`** imported directly — whether `AUTO_INSTRUMENTED_OPERATIONS` in `cov006.ts` has patterns matching undici call sites (e.g., `new Client()`, `client.request()`) is unverified. |
 | Existing OTel | None confirmed |
 
 **Rubric coverage notes:**
-- COV-006: ✓ **fires** — uses `undici` directly for GitHub API calls
+- COV-006: 🔍 **unverified** — uses undici for HTTP; call-site patterns not checked against `AUTO_INSTRUMENTED_OPERATIONS` in `cov006.ts`
 - COV-001: ✓ CLI entry point (`release-it` command with lifecycle phases)
 - COV-002: ✓ HTTP (GitHub/GitLab API), subprocess (git commit/tag/push), file (package.json versioning)
 - NDS-005: ✓ HTTP error handling (retry on rate limits, auth failures), subprocess error handling
@@ -160,7 +160,7 @@ The 8 universal rules (NDS-001, NDS-003, API-001–004, NDS-006, CDQ-002) are ex
 - RST-001: ✓ utility files (log.js, spinner.js, util.js, prompt.js)
 - SCH domain: Release lifecycle events (`release.create`, `github.release`, `npm.publish`) — rich schema potential
 
-**Summary:** Strongest JS candidate on rubric coverage. Only candidate exercising COV-006. Different domain (release automation) from commit-story-v2 (LLM content generation) — adds diversity. 23 files is ideal runtime.
+**Summary:** Strong JS candidate on rubric coverage. Uses undici for HTTP (COV-006 unverified — depends on call-site pattern matching in AUTO_INSTRUMENTED_OPERATIONS). Different domain (release automation) from commit-story-v2 (LLM content generation) — adds diversity. 23 files is ideal runtime.
 
 ---
 
@@ -172,11 +172,11 @@ The 8 universal rules (NDS-001, NDS-003, API-001–004, NDS-006, CDQ-002) are ex
 | Stars | 6.6k |
 | Source files | 18 JS files in `lib/` (split into `in/`, `out/`, `state/` modules) |
 | I/O types | HTTP (npm registry via `package-json` npm library), subprocess (npm install), file (package.json, node_modules) |
-| KFP overlap | **None directly** — uses `package-json` npm lib which wraps npm-registry-fetch, not a KFP entry |
+| Auto-instr overlap | No obvious instrumented call patterns — HTTP is via `package-json` npm lib (no direct undici/axios/got import). COV-006 likely does not fire. |
 | Existing OTel | None confirmed |
 
 **Rubric coverage notes:**
-- COV-006: **Cannot fire** — no direct KFP import. `package-json` is not in KNOWN_FRAMEWORK_PACKAGES.
+- COV-006: 🔍 likely ✗ — no direct HTTP client imports that match known AUTO_INSTRUMENTED_OPERATIONS patterns
 - COV-001: ✓ CLI entry point
 - COV-002: ✓ HTTP (via package-json), subprocess (npm install), file (package.json scanning, node_modules)
 - RST-001: ✓ modular structure (out/emoji.js, state/debug.js are pure utility files)
@@ -189,7 +189,7 @@ The 8 universal rules (NDS-001, NDS-003, API-001–004, NDS-006, CDQ-002) are ex
 
 ### 2.2 TypeScript (3 candidates)
 
-**Key finding from rubric assessment:** `ofetch` (used by taze) is not in KNOWN_FRAMEWORK_PACKAGES. COV-006 testability for the TS candidates depends on whether the TS Type C PRD's "add auto-instrumentation libraries" milestone adds ofetch to KNOWN_FRAMEWORK_PACKAGES.
+**Note on COV-006 for TS candidates:** All COV-006 assessments below are unverified — they were based on import presence, not on call-site pattern matching against `AUTO_INSTRUMENTED_OPERATIONS` in `cov006.ts`. The TS provider shares `KNOWN_FRAMEWORK_PACKAGES` with JS (an import classifier, not the COV-006 mechanism). Whether any TS candidate exercises COV-006 requires empirical testing.
 
 ### Rule Coverage Comparison — TypeScript
 
@@ -206,7 +206,7 @@ The 8 universal rules (NDS-001, NDS-003, API-001–004, NDS-006, CDQ-002) are ex
 | COV-003 Failable ops | ✓ | ✓ | ✓ |
 | COV-004 Long-running/async | ✓ concurrent lookups | ✓ async commands | ✓ async event-driven |
 | COV-005 Domain-specific attrs | ≈ | ≈ | ≈ |
-| **COV-006 Auto-instr preferred** | **🔍 ofetch→undici (if added to KFP)** | **✗ no overlap** | **✗ no overlap** |
+| **COV-006 Auto-instr preferred** | **🔍 unverified** (uses ofetch/HTTP; call-site patterns not checked) | **🔍 likely ✗** (subprocess+file only) | **🔍 likely ✗** (subprocess+file+watch only) |
 | RST-001 No utility spans | ✓ ~40% utility files | ✓ types.ts, utils/types.ts | ✓ 62 files many utility |
 | RST-002 No accessor spans | 🔍 | 🔍 | 🔍 |
 | RST-003 No thin-wrapper spans | 🔍 | 🔍 | 🔍 |
@@ -239,11 +239,11 @@ The 8 universal rules (NDS-001, NDS-003, API-001–004, NDS-006, CDQ-002) are ex
 | Stars | 4.1k |
 | Source files | 33 TypeScript files in `src/` |
 | I/O types | HTTP (npm registry + JSR via ofetch), file R/W (package.json, yaml, lockfiles, cache), subprocess (package manager commands via tinyexec) |
-| KFP overlap | **Conditional** — uses `ofetch` which is not in KNOWN_FRAMEWORK_PACKAGES. `ofetch` uses Node 18+ native fetch (backed by undici). If `ofetch` is added to KFP during the "add auto-instrumentation libraries" milestone, COV-006 fires. |
+| Auto-instr overlap | Uses `ofetch` for HTTP — call-site patterns not checked against `AUTO_INSTRUMENTED_OPERATIONS` in `cov006.ts`. COV-006 unverified. |
 | Existing OTel | None |
 
 **Rubric coverage notes:**
-- COV-006: **Conditional** — fires only after KNOWN_FRAMEWORK_PACKAGES is updated to include `ofetch` (justified: `@opentelemetry/instrumentation-undici` instruments calls made through ofetch in Node 18+)
+- COV-006: 🔍 **unverified** — uses ofetch for HTTP; call-site patterns not checked against `AUTO_INSTRUMENTED_OPERATIONS`
 - COV-001: ✓ `check`, `list`, `interactive` CLI commands
 - COV-002: ✓ HTTP (npm/JSR registry), file (package.json, yaml, lockfiles), subprocess (package managers)
 - COV-004: ✓ async package resolution, concurrent registry lookups
@@ -252,7 +252,7 @@ The 8 universal rules (NDS-001, NDS-003, API-001–004, NDS-006, CDQ-002) are ex
 - CDQ-003: ✓ registry fetch errors, file parse errors, subprocess failures
 - SCH domain: Dependency version management (`dependency.name`, `dependency.current_version`, `dependency.latest_version`, `registry.name`)
 
-**Summary:** 33 files (just above 30 ideal; justified by good rubric coverage). HTTP + file + subprocess diversity. COV-006 is conditional on KFP update but achievable. Strongest TS candidate if KFP is updated.
+**Summary:** 33 files (just above 30 ideal; justified by good rubric coverage). HTTP + file + subprocess diversity. COV-006 unverified. Strongest TS candidate on I/O diversity.
 
 ---
 
@@ -264,11 +264,11 @@ The 8 universal rules (NDS-001, NDS-003, API-001–004, NDS-006, CDQ-002) are ex
 | Stars | 11.6k (monorepo; cli package is widely used) |
 | Source files | 25 TypeScript files in `packages/cli/src/` (excluding test files) |
 | I/O types | Subprocess (git, npm/yarn/pnpm via spawndamnit), file R/W (CHANGELOG.md, .changeset/ files, package.json versioning), terminal (interactive prompts via enquirer) |
-| KFP overlap | **None** — no HTTP client; uses spawndamnit (subprocess) and fs-extra (file). No KFP entry. |
+| Auto-instr overlap | No HTTP client imports — subprocess and file I/O only. COV-006 likely does not fire. |
 | Existing OTel | None confirmed |
 
 **Rubric coverage notes:**
-- COV-006: **Cannot fire** — no KFP imports.
+- COV-006: 🔍 likely ✗ — no HTTP client imports; subprocess and file only
 - COV-001: ✓ CLI commands (add, version, publish, status, etc.)
 - COV-002: ✓ subprocess (git, package manager), file (changelogs, package.json, .changeset files)
 - RST-001: ✓ utility files (types.ts, utils/createPromiseQueue.ts, utils/types.ts)
@@ -288,11 +288,11 @@ The 8 universal rules (NDS-001, NDS-003, API-001–004, NDS-006, CDQ-002) are ex
 | Stars | 6.4k |
 | Source files | 62 TypeScript files in `src/` |
 | I/O types | File R/W (cache files, lockfiles, fingerprints), subprocess (npm scripts), file watching (chokidar) |
-| KFP overlap | **None** — no HTTP client. Uses chokidar (file watching) and child_process (subprocess). |
+| Auto-instr overlap | No HTTP client imports — file watching and subprocess only. COV-006 likely does not fire. |
 | Existing OTel | None confirmed |
 
 **Rubric coverage notes:**
-- COV-006: **Cannot fire** — no KFP imports.
+- COV-006: 🔍 likely ✗ — no HTTP client imports; file watching and subprocess only
 - COV-001: ✓ `npx wireit` entry point
 - COV-002: ✓ subprocess (npm scripts), file (cache, lockfiles)
 - RST-001: ✓ 62 files means more utility/config files to correctly skip — strong RST-001 exercise
@@ -307,7 +307,7 @@ The 8 universal rules (NDS-001, NDS-003, API-001–004, NDS-006, CDQ-002) are ex
 
 ### 2.3 Python (3 candidates)
 
-**OTel Python contrib instruments used in assessment:** click, jinja2, redis, pymysql (check [opentelemetry-python-contrib](https://github.com/open-telemetry/opentelemetry-python-contrib/tree/main/instrumentation) for full list of 50+ instruments).
+**Note on COV-006 for Python candidates:** All COV-006 assessments below are unverified — they were based on import presence against the OTel Python contrib list, not on call-site pattern matching against the Python equivalent of `AUTO_INSTRUMENTED_OPERATIONS` (which does not exist yet in spiny-orb's Python provider). Requires empirical testing once the Python provider exists.
 
 ### Rule Coverage Comparison — Python
 
@@ -324,7 +324,7 @@ The 8 universal rules (NDS-001, NDS-003, API-001–004, NDS-006, CDQ-002) are ex
 | COV-003 Failable ops | ✓ | ✓ | ✓ |
 | COV-004 Long-running/async | ✓ prompt_toolkit async | ✓ prompt_toolkit async | ✓ I/O throughout |
 | COV-005 Domain-specific attrs | ≈ | ≈ | ≈ |
-| **COV-006 Auto-instr preferred** | **✓ PyMySQL** | **✓ redis + click (2 overlaps)** | **✓ jinja2** |
+| **COV-006 Auto-instr preferred** | **🔍 unverified** (PyMySQL imported; Python provider has no AUTO_INSTRUMENTED_OPERATIONS yet) | **🔍 unverified** (redis+click imported; Python provider has no AUTO_INSTRUMENTED_OPERATIONS yet) | **🔍 unverified** (jinja2 imported; Python provider has no AUTO_INSTRUMENTED_OPERATIONS yet) |
 | RST-001 No utility spans | ✓ constants/lexer/style | ✓ renders/style/lexer/warning | ✓ 51 files many utility |
 | RST-002 No accessor spans | 🔍 | 🔍 | 🔍 |
 | RST-003 No thin-wrapper spans | 🔍 | 🔍 | 🔍 |
@@ -357,11 +357,11 @@ The 8 universal rules (NDS-001, NDS-003, API-001–004, NDS-006, CDQ-002) are ex
 | Stars | 11.9k |
 | Source files | 15 Python files in `mycli/` |
 | I/O types | Database (MySQL via PyMySQL), file R/W (config `~/.myclirc`, query logs, password keyring), terminal (interactive prompt, auto-completion) |
-| KFP overlap | **`PyMySQL`** ✓ — `opentelemetry-instrumentation-pymysql` exists in OTel Python contrib |
+| Auto-instr overlap | `PyMySQL` imported — OTel Python contrib has `opentelemetry-instrumentation-pymysql`; call-site pattern matching unverified (Python provider has no AUTO_INSTRUMENTED_OPERATIONS equivalent yet) |
 | Existing OTel | None confirmed |
 
 **Rubric coverage notes:**
-- COV-006: ✓ **fires** — PyMySQL is in OTel Python contrib
+- COV-006: 🔍 **unverified** — PyMySQL imported; Python provider has no AUTO_INSTRUMENTED_OPERATIONS yet
 - COV-001: ✓ `mycli` CLI entry point
 - COV-002: ✓ MySQL DB operations, file I/O (config, logs), terminal
 - NDS-005: ✓ MySQL connection failures, query errors, config parse errors
@@ -381,11 +381,11 @@ The 8 universal rules (NDS-001, NDS-003, API-001–004, NDS-006, CDQ-002) are ex
 | Stars | 2.7k |
 | Source files | 17 Python files in `iredis/` |
 | I/O types | Network (Redis TCP/IP connections), file R/W (config `~/.iredisrc`, log `~/.iredis.log`), terminal (interactive CLI, autocomplete) |
-| KFP overlap | **`redis`** ✓ (`opentelemetry-instrumentation-redis`) AND **`click`** ✓ (`opentelemetry-instrumentation-click`) — two OTel Python contrib matches |
+| Auto-instr overlap | `redis` and `click` imported — OTel Python contrib has instrumentations for both; call-site pattern matching unverified (Python provider has no AUTO_INSTRUMENTED_OPERATIONS equivalent yet) |
 | Existing OTel | None confirmed |
 
 **Rubric coverage notes:**
-- COV-006: ✓ **fires** — redis-py AND click are both in OTel Python contrib (2 overlap points, more diverse than mycli's single driver)
+- COV-006: 🔍 **unverified** — redis+click imported; Python provider has no AUTO_INSTRUMENTED_OPERATIONS yet (2 import overlaps, strongest import signal of the 3 Python candidates)
 - COV-001: ✓ CLI entry point
 - COV-002: ✓ Redis TCP operations, file I/O (config, logs), terminal
 - NDS-005: ✓ Redis connection failures, command errors, config parse errors
@@ -405,11 +405,11 @@ The 8 universal rules (NDS-001, NDS-003, API-001–004, NDS-006, CDQ-002) are ex
 | Stars | 3.4k |
 | Source files | 51 Python files in `commitizen/` (excluding `__init__.py` and non-Python files) |
 | I/O types | Subprocess (git commands via Python subprocess), file R/W (changelog, version files, config files), template rendering (Jinja2) |
-| KFP overlap | **`jinja2`** ✓ (`opentelemetry-instrumentation-jinja2`) — template rendering is instrumented |
+| Auto-instr overlap | `jinja2` imported — OTel Python contrib has `opentelemetry-instrumentation-jinja2`; call-site pattern matching unverified (Python provider has no AUTO_INSTRUMENTED_OPERATIONS equivalent yet) |
 | Existing OTel | None confirmed |
 
 **Rubric coverage notes:**
-- COV-006: ✓ **fires** — jinja2 is in OTel Python contrib (template rendering instrumentation)
+- COV-006: 🔍 **unverified** — jinja2 imported; Python provider has no AUTO_INSTRUMENTED_OPERATIONS yet (weakest import signal of the 3 Python candidates)
 - COV-001: ✓ `cz` CLI with multiple commands (bump, changelog, commit, check)
 - COV-002: ✓ subprocess (git), file (changelog, version files, .commitizen.yaml), template rendering
 - RST-001: ✓ many utility/provider files to skip (9 providers, 5 changelog formats, 4 config parsers)
@@ -424,7 +424,7 @@ The 8 universal rules (NDS-001, NDS-003, API-001–004, NDS-006, CDQ-002) are ex
 
 ### 2.4 Go (3 candidates)
 
-**OTel Go contrib instruments used in assessment:** `net/http` → `otelhttp`, `google.golang.org/grpc` → `otelgrpc`, `go.mongodb.org/mongo-driver` → `otelmongo`. Standard library `database/sql` has community `otelsql` support (not official OTel Go contrib). The Go Type C PRD's "add auto-instrumentation libraries" milestone determines which packages get added to spiny-orb's Go equivalent of KNOWN_FRAMEWORK_PACKAGES.
+**Note on COV-006 for Go candidates:** All COV-006 assessments below are unverified — the Go provider does not have an AUTO_INSTRUMENTED_OPERATIONS equivalent yet. Import presence (net/http, database/sql) was used as a proxy, but the actual COV-006 validator works via call-site pattern matching, not import detection. Requires empirical testing once the Go provider exists.
 
 ### Rule Coverage Comparison — Go
 
@@ -441,7 +441,7 @@ The 8 universal rules (NDS-001, NDS-003, API-001–004, NDS-006, CDQ-002) are ex
 | COV-003 Failable ops | ✓ | ✓ | ✓ |
 | COV-004 Long-running/async | ✓ AI streaming | ✓ DB operations | ✓ git clone |
 | COV-005 Domain-specific attrs | ≈ | ≈ | ≈ |
-| **COV-006 Auto-instr preferred** | **✓ net/http direct (confirmed)** | **🔍 database/sql (if otelsql added)** | **✓ net/http direct (confirmed)** |
+| **COV-006 Auto-instr preferred** | **🔍 unverified** (net/http imported; Go provider has no AUTO_INSTRUMENTED_OPERATIONS yet) | **🔍 unverified** (database/sql used; Go provider has no AUTO_INSTRUMENTED_OPERATIONS yet) | **🔍 unverified** (net/http imported; Go provider has no AUTO_INSTRUMENTED_OPERATIONS yet) |
 | RST-001 No utility spans | ✓ internal/*/format.go files | ✓ dbutil.go, version.go | ✓ logger/log.go, helpers_*.go, url.go |
 | RST-002 No accessor spans | 🔍 | 🔍 | 🔍 |
 | RST-003 No thin-wrapper spans | 🔍 | 🔍 | 🔍 |
@@ -474,11 +474,11 @@ The 8 universal rules (NDS-001, NDS-003, API-001–004, NDS-006, CDQ-002) are ex
 | Stars | 4.5k |
 | Source files | 32 Go files (16 root-level + 16 in `internal/` provider packages) |
 | I/O types | HTTP (AI API calls via anthropic-sdk-go, openai-go, cohere-go which wrap net/http), SQLite (conversation storage via modernc.org/sqlite + sqlx), subprocess (os/exec for API key retrieval), stdin/stdout |
-| KFP overlap | **`net/http`** ✓ (direct import confirmed in mods.go) — `otelhttp` transport instrumentation applies |
+| Auto-instr overlap | `net/http` imported directly (confirmed in mods.go) — OTel Go contrib has `otelhttp`; call-site pattern matching unverified (Go provider has no AUTO_INSTRUMENTED_OPERATIONS equivalent yet) |
 | Existing OTel | None |
 
 **Rubric coverage notes:**
-- COV-006: ✓ **fires** — `net/http` imported directly in `mods.go` for proxy configuration; AI SDK calls also route through net/http transport
+- COV-006: 🔍 **unverified** — net/http imported directly; Go provider has no AUTO_INSTRUMENTED_OPERATIONS equivalent yet
 - COV-001: ✓ CLI entry point
 - COV-002: ✓ HTTP (AI APIs), SQLite DB, subprocess, stdin/stdout
 - COV-004: ✓ AI streaming responses (async-like patterns in Go)
@@ -499,11 +499,11 @@ The 8 universal rules (NDS-001, NDS-003, API-001–004, NDS-006, CDQ-002) are ex
 | Stars | 6.8k |
 | Source files | 14 Go files (2 root-level + 12 in `pkg/`) |
 | I/O types | Database (PostgreSQL via lib/pq, MySQL via go-sql-driver/mysql, SQLite via mattn/go-sqlite3, ClickHouse via clickhouse-go, BigQuery via cloud.google.com/bigquery), file R/W (migration .sql files, schema.sql) |
-| KFP overlap | **`database/sql`** (standard library) — not in official OTel Go contrib (`otelhttp`, `otelgrpc`, `otelmongo` are official). Community `otelsql` package instruments `database/sql` and is widely adopted. The Go Type C PRD's "add auto-instrumentation libraries" milestone decides whether to include `otelsql`; if included, COV-006 fires. If the milestone excludes community packages, COV-006 does not fire for dbmate. |
+| Auto-instr overlap | `database/sql` used for multiple DB drivers — community `otelsql` package exists; call-site pattern matching unverified (Go provider has no AUTO_INSTRUMENTED_OPERATIONS equivalent yet) |
 | Existing OTel | None confirmed |
 
 **Rubric coverage notes:**
-- COV-006: **Conditional** — fires if the Go Type C PRD adds database/sql (via otelsql) to spiny-orb's Go package list. This is planned and reasonable given database/sql is the core Go database abstraction.
+- COV-006: 🔍 **unverified** — database/sql used; Go provider has no AUTO_INSTRUMENTED_OPERATIONS equivalent yet
 - COV-001: ✓ `dbmate` CLI with migrate up/down/status commands
 - COV-002: ✓ SQL migrations (multi-database), file I/O (migration files, schema.sql)
 - NDS-005: ✓ SQL execution errors, connection failures, migration conflict errors
@@ -523,11 +523,11 @@ The 8 universal rules (NDS-001, NDS-003, API-001–004, NDS-006, CDQ-002) are ex
 | Stars | 3.5k |
 | Source files | 19 Go files |
 | I/O types | HTTP (Go module import path detection via `net/http` in `go_import.go`), subprocess (git clone, git commands via `vcs.go`), file R/W (local repository directory management) |
-| KFP overlap | **`net/http`** ✓ (direct import confirmed in `go_import.go`) — `otelhttp` transport instrumentation applies |
+| Auto-instr overlap | `net/http` imported directly (confirmed in go_import.go) — OTel Go contrib has `otelhttp`; call-site pattern matching unverified (Go provider has no AUTO_INSTRUMENTED_OPERATIONS equivalent yet) |
 | Existing OTel | None confirmed |
 
 **Rubric coverage notes:**
-- COV-006: ✓ **fires** — `net/http` imported directly for Go module discovery (fetches HTML pages to parse `<meta name="go-import">` tags)
+- COV-006: 🔍 **unverified** — net/http imported directly; Go provider has no AUTO_INSTRUMENTED_OPERATIONS equivalent yet
 - COV-001: ✓ CLI commands (`ghq get`, `ghq list`, `ghq create`, etc.)
 - COV-002: ✓ HTTP (Go import detection), subprocess (git), file (repository path management)
 - NDS-005: ✓ git clone failures, HTTP parse errors, repository path conflicts
@@ -564,18 +564,18 @@ IS (Instrumentation Score) scoring requires the target repo to emit OpenTelemetr
 
 | Language | Candidate | Files | COV-006 | Runtime est. | Recommendation |
 |----------|-----------|-------|---------|--------------|----------------|
-| **JS** | commit-story-v2 | ~30 | ✓ Traceloop | ~40 min | Evaluate in milestone 0 |
-| **JS** | release-it | 23 | ✓ undici | ~31 min | **Preferred** — only JS candidate with COV-006 |
-| **JS** | npm-check | 18 | ✗ None | ~24 min | Backup |
-| **TS** | taze | 33 | ✓ Conditional | ~44 min | **Preferred** — best I/O diversity; COV-006 after KFP update |
-| **TS** | changesets | 25 | ✗ None | ~33 min | Runner-up |
-| **TS** | wireit | 62 | ✗ None | ~83 min | Backup — high runtime |
-| **Python** | mycli | 15 | ✓ PyMySQL | ~20 min | **Preferred** — fastest + strong DB COV-006 |
-| **Python** | iredis | 17 | ✓ redis+click | ~23 min | Runner-up |
-| **Python** | commitizen | 51 | ✓ jinja2 | ~68 min | Backup — high runtime |
-| **Go** | mods | 32 | ✓ net/http | ~43 min | **Preferred** — most I/O-diverse |
-| **Go** | dbmate | 14 | ✓ Conditional | ~19 min | Runner-up |
-| **Go** | ghq | 19 | ✓ net/http | ~25 min | Runner-up |
+| **JS** | commit-story-v2 | ~30 | 🔍 unverified | ~40 min | Evaluate in milestone 0 |
+| **JS** | release-it | 23 | 🔍 unverified | ~31 min | **Preferred** — best I/O diversity |
+| **JS** | npm-check | 18 | 🔍 likely ✗ | ~24 min | Backup |
+| **TS** | taze | 33 | 🔍 unverified | ~44 min | **Preferred** — best I/O diversity |
+| **TS** | changesets | 25 | 🔍 likely ✗ | ~33 min | Runner-up |
+| **TS** | wireit | 62 | 🔍 likely ✗ | ~83 min | Backup — high runtime |
+| **Python** | mycli | 15 | 🔍 unverified | ~20 min | **Preferred** — fastest, strong DB import signal |
+| **Python** | iredis | 17 | 🔍 unverified | ~23 min | Runner-up — strongest import signal (redis+click) |
+| **Python** | commitizen | 51 | 🔍 unverified | ~68 min | Backup — high runtime |
+| **Go** | mods | 32 | 🔍 unverified | ~43 min | **Preferred** — most I/O-diverse |
+| **Go** | dbmate | 14 | 🔍 unverified | ~19 min | Runner-up |
+| **Go** | ghq | 19 | 🔍 unverified | ~25 min | Runner-up |
 
 Runtime estimates based on ~1.3 min/file (from 30 files ≈ 40 min operational data).
 
