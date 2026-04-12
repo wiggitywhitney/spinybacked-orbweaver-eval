@@ -59,9 +59,7 @@ The feature branch for this PRD **never merges to main**. The PR exists for Code
   4. Confirm no existing OTel instrumentation (grep for `go.opentelemetry.io` imports)
   5. Note any caveats discovered during cloning that differ from the research
 
-  Use the Section 2.4 comparison table and individual candidate summaries to make the final selection. The rubric coverage mapping is done.
-
-  Compare the 3 candidates. Pick the one that exercises the most rubric rules while staying at or below 30 source files. A candidate above 30 files is acceptable if the extra files exercise rubric rules that the smaller candidates cannot — document the justification. Prefer candidates from different GitHub authors/organizations — same-author candidates share coding style and reduce rubric diversity.
+  Using the pre-researched comparison table from Section 2.4 and the local verification results above, make the final selection. Decision factors: rubric coverage (pre-researched in table), test reliability (local), confirmed file count (local), no existing OTel (local). Accept an above-30-file candidate only if the extra rules it exercises justify the longer runtime — document that justification. Prefer candidates from different GitHub orgs (same-org candidates share coding conventions).
 
   Present the recommendation to Whitney with rationale. Do not proceed until Whitney confirms.
 
@@ -134,6 +132,7 @@ The feature branch for this PRD **never merges to main**. The PR exists for Code
 
   Full 32-rule rubric on ALL processed files.
   Produces: `evaluation/<target-name>/run-1/per-file-evaluation.md`
+  Style reference: `Read docs/templates/eval-run-style-reference/per-file-evaluation.md`
 
 - [ ] **PR artifact evaluation**
 

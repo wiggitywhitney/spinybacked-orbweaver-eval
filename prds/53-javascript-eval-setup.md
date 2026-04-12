@@ -57,9 +57,7 @@ If this PRD proceeds past milestone 0 (i.e., a new target is selected), the feat
   4. Confirm no existing OTel instrumentation (grep for `@opentelemetry` and `startActiveSpan`)
   5. Note any caveats discovered during cloning that differ from the research
 
-  Use the Section 2.1 comparison table and individual candidate summaries to make the final selection. The rubric coverage mapping is done.
-
-  Compare the 3 candidates. Pick the one that exercises the most rubric rules while staying at or below 30 source files. A candidate above 30 files is acceptable if the extra files exercise rubric rules that the smaller candidates cannot — document the justification. Prefer candidates from different GitHub authors/organizations — same-author candidates share coding style and reduce rubric diversity.
+  Using the pre-researched comparison table from Section 2.1 and the local verification results above, make the final selection. Decision factors: rubric coverage (pre-researched in table), test reliability (local), confirmed file count (local), no existing OTel (local). Accept an above-30-file candidate only if the extra rules it exercises justify the longer runtime — document that justification. Prefer candidates from different GitHub orgs (same-org candidates share coding conventions).
 
   **If commit-story-v2 wins**: Document the rationale. This PRD exits early — commit-story-v2 is already set up with 12 runs of history. Mark all remaining milestones as skipped. The existing JavaScript eval chain (PRDs #37+) continues.
 

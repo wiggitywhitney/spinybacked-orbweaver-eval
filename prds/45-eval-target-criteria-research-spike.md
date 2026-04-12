@@ -96,28 +96,32 @@ Full context — hypotheses table, research agent framing, candidate list, and t
 
   Success criteria: `docs/research/eval-target-criteria.md` has rubric-coverage-based scorecard; 3 candidates per language (12 total) with assessments; JS candidates include commit-story-v2.
 
-- [ ] **Create/revise Type C PRDs for all 4 languages** (Updated: was "Steps 5-7"; now includes JS and restructured milestone 0)
+- [ ] **Revise Type C PRDs for all 4 languages**
 
-  After `docs/research/eval-target-criteria.md` is revised with 12 candidates, create or revise 4 Type C PRDs using `/prd-create`:
+  **Do NOT use `/prd-create`** — PRDs #50–53 and their GitHub issues already exist. Edit the existing files only.
 
-  - **JavaScript**: Revise PRD #53. Milestone 0 evaluates 3 JS candidates (including commit-story-v2). **Early exit:** if milestone 0 picks commit-story-v2, the PRD exits early — it's already set up and running. If a different candidate wins, pause for Whitney's confirmation with rationale before proceeding with fork/setup/Run-1.
-  - **TypeScript**: Revise PRD #50. Milestone 0 evaluates 3 TS candidates from the shortlist.
-  - **Python**: Revise PRD #51. Milestone 0 evaluates 3 Python candidates from the shortlist.
-  - **Go**: Revise PRD #52. Milestone 0 evaluates 3 Go candidates from the shortlist.
+  **What is already done (do not repeat):**
+  - Milestone 0 sections of PRDs #50–53 have been rewritten to point to pre-researched rubric coverage tables in `docs/research/eval-target-criteria.md` Section 2.1–2.4. Local verification steps (clone, run tests 3×, confirm file count, grep for existing OTel) are already specified.
+  - `/write-prompt` review of all 4 PRDs is in progress this session.
 
-  Each Type C PRD must include these milestones (in addition to the standard eval chain milestones):
+  **What still needs to be done:**
 
-  - **Milestone 0: Evaluate and choose target from 3 candidates.** Clone all 3 candidates from `docs/research/eval-target-criteria.md`. For each: run test suite (3 times for deterministic reproducibility), count source files, check auto-instrumentation library overlap against KNOWN_FRAMEWORK_PACKAGES (or language equivalent), map rubric rule coverage. Pick the winner. Document rationale. For JS: if commit-story-v2 wins, exit early.
-  - **Milestone: Add auto-instrumentation libraries to spiny-orb.** Research and add the most popular auto-instrumentation libraries for this language to spiny-orb's `KNOWN_FRAMEWORK_PACKAGES` or language-specific equivalent. This is a contribution to spiny-orb itself, not just eval setup. Python examples: requests, flask, django, sqlalchemy, psycopg2. Go examples: net/http, database/sql, google.golang.org/grpc.
-  - **Milestone: Create deliberately incomplete Weaver schema.** When creating `semconv/` for the target, omit some spans/attributes that a human would include. Document exactly what was omitted so the eval can check whether spiny-orb surfaces the gaps. Tests SCH extension capability.
+  1. Read each of the 4 PRD files (`prds/50-typescript-eval-setup.md`, `prds/51-python-eval-setup.md`, `prds/52-go-eval-setup.md`, `prds/53-javascript-eval-setup.md`) in full.
 
-  Each PRD must document both gate conditions:
-  - Gate 1 (provider): Language provider merged to spiny-orb main.
-  - Gate 2 (research): `docs/research/eval-target-criteria.md` exists with 3 candidates for this language.
+  2. Verify each PRD contains these 3 required milestones (in addition to the standard eval chain milestones). Add any that are missing; leave existing milestones that already conform:
+     - **Milestone 0: Evaluate and choose target.** Must point to `docs/research/eval-target-criteria.md` Section 2.X for pre-researched coverage tables. Must NOT ask the agent to redo the rubric rule mapping or COV-006 overlap analysis — that research is done. Must ask the agent to: clone all 3 candidates, run test suite 3× per candidate, confirm file counts locally, confirm no existing OTel instrumentation.
+     - **Milestone: Add auto-instrumentation libraries to spiny-orb.** For this language, add the most popular OTel-instrumented packages to spiny-orb's `KNOWN_FRAMEWORK_PACKAGES` or language-specific equivalent. This is a contribution to spiny-orb, not just eval setup.
+     - **Milestone: Create deliberately incomplete Weaver schema.** When creating `semconv/` for the chosen target, deliberately omit some spans and attributes a human would include. Document what was omitted and why — so the eval can verify whether spiny-orb surfaces them. Tests SCH extension capability.
 
-  Edit the existing PRD files (`prds/50-typescript-eval-setup.md`, `prds/51-python-eval-setup.md`, `prds/52-go-eval-setup.md`, `prds/53-javascript-eval-setup.md`) to match the milestone structure above. Do NOT use `/prd-create` — these files and GitHub issues already exist. Invoke `/write-prompt` passing each PRD's full content for review before committing. Update `docs/ROADMAP.md` to show real issue numbers for all four. Commit with `[skip ci]` but do NOT invoke `/prd-start` on any of them.
+  3. Verify each PRD documents both gate conditions:
+     - Gate 1 (provider): Language provider merged to spiny-orb main.
+     - Gate 2 (research): `docs/research/eval-target-criteria.md` exists with 3 candidates for this language (already satisfied).
 
-  Success criteria: 4 Type C PRDs exist on main (JS, TS, Python, Go); each has milestone 0 (candidate evaluation), auto-instrumentation library expansion milestone, and deliberately incomplete Weaver schema milestone; `docs/ROADMAP.md` shows real issue numbers for all four.
+  4. Update `docs/ROADMAP.md` if any issue numbers are still showing as TBD. Real issue numbers: JS = #53, TS = #50, Python = #51, Go = #52.
+
+  5. Commit all changes with `[skip ci]`. Do NOT invoke `/prd-start` on any of the 4 PRDs.
+
+  Success criteria: PRDs #50–53 each contain Milestone 0 (pointing to pre-researched tables, verification-only steps), the auto-instrumentation expansion milestone, and the deliberately incomplete schema milestone. `docs/ROADMAP.md` shows real issue numbers for all four. No PRD has been started.
 
 ## Dependencies and Constraints
 
@@ -168,4 +172,4 @@ Full context — hypotheses table, research agent framing, candidate list, and t
 | 2026-04-11 | Findings doc written to docs/research/eval-target-criteria.md with all 3 required sections: criteria scorecard (6 mandatory + 6 recommended), candidate verdicts (4 candidates assessed), IS scorability notes. Research index updated. | In Progress | Create PRDs for Steps 5-7 (milestone 4) |
 | 2026-04-11 | Major post-review revision: rubric coverage as primary framing, auto-instrumentation library criterion, deliberately incomplete Weaver schemas, TypeScript candidate search (taze recommended), objectivity corrections on thresholds, "locally runnable" demoted to recommended. Both research doc and criteria doc updated. PRDs #50-52 created (TS/Python/Go) but need revision based on new decisions. | In Progress | Regroup on next steps — criteria and candidates may need further research |
 | 2026-04-11 | Structural decisions: 3 candidates per language (12 total), Type C PRDs get milestone 0 for target selection, JS gets its own Type C PRD with early exit, auto-instrumentation library expansion is a Type C milestone, file count ideal is 30 or less. Milestone 3 unmarked (needs redo with rubric-coverage framing). Milestone 4 rewritten (4 Type C PRDs, not 3). PRDs #50-52 need revision to match. | In Progress | Redo milestone 3 (criteria + 12 candidates), then milestone 4 (4 Type C PRDs) |
-| 2026-04-11 | Milestone 3 complete — rubric-coverage scorecard with 32-rule mapping written; 12 candidates (3 per language) evaluated fresh against rubric: JS (commit-story-v2, release-it, npm-check), TS (taze, changesets, wireit), Python (mycli, iredis, commitizen), Go (mods, dbmate, ghq). Key finding: commit-story-v2 has NO KNOWN_FRAMEWORK_PACKAGES overlap — COV-006 has never fired in 12 eval runs. | In Progress | Create/revise 4 Type C PRDs (milestone 4) |
+| 2026-04-11 | Milestone 3 complete — rubric-coverage scorecard with 32-rule mapping written; 12 candidates (3 per language) evaluated fresh against rubric: JS (commit-story-v2, release-it, npm-check), TS (taze, changesets, wireit), Python (mycli, iredis, commitizen), Go (mods, dbmate, ghq). Correction (post-review): commit-story-v2 DOES exercise COV-006 via Traceloop — `@langchain/*` → `@traceloop/instrumentation-langchain`, `@modelcontextprotocol/sdk` → `@traceloop/instrumentation-mcp`. Detection is via Traceloop mapping table in `javascript/prompt.ts`, not KNOWN_FRAMEWORK_PACKAGES. Confirmed in run-13 PR. | In Progress | Create/revise 4 Type C PRDs (milestone 4) |
