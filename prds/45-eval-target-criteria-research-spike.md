@@ -67,7 +67,7 @@ Full context — hypotheses table, research agent framing, candidate list, and t
 
   Success criteria: Research agent returns findings with evidence for/against each hypothesis, new factors identified, and per-candidate assessments for all four languages (including Python candidate recommendation).
 
-- [ ] **Revise criteria scorecard and find 12 candidates** (Updated: was "Write findings"; initial version done but needs revision per decisions above)
+- [x] **Revise criteria scorecard and find 12 candidates** (Updated: was "Write findings"; initial version done but needs revision per decisions above)
 
   The initial findings doc exists at `docs/research/eval-target-criteria.md` but needs revision. The revised document must:
 
@@ -168,3 +168,4 @@ Full context — hypotheses table, research agent framing, candidate list, and t
 | 2026-04-11 | Findings doc written to docs/research/eval-target-criteria.md with all 3 required sections: criteria scorecard (6 mandatory + 6 recommended), candidate verdicts (4 candidates assessed), IS scorability notes. Research index updated. | In Progress | Create PRDs for Steps 5-7 (milestone 4) |
 | 2026-04-11 | Major post-review revision: rubric coverage as primary framing, auto-instrumentation library criterion, deliberately incomplete Weaver schemas, TypeScript candidate search (taze recommended), objectivity corrections on thresholds, "locally runnable" demoted to recommended. Both research doc and criteria doc updated. PRDs #50-52 created (TS/Python/Go) but need revision based on new decisions. | In Progress | Regroup on next steps — criteria and candidates may need further research |
 | 2026-04-11 | Structural decisions: 3 candidates per language (12 total), Type C PRDs get milestone 0 for target selection, JS gets its own Type C PRD with early exit, auto-instrumentation library expansion is a Type C milestone, file count ideal is 30 or less. Milestone 3 unmarked (needs redo with rubric-coverage framing). Milestone 4 rewritten (4 Type C PRDs, not 3). PRDs #50-52 need revision to match. | In Progress | Redo milestone 3 (criteria + 12 candidates), then milestone 4 (4 Type C PRDs) |
+| 2026-04-11 | Milestone 3 complete — rubric-coverage scorecard with 32-rule mapping written; 12 candidates (3 per language) evaluated fresh against rubric: JS (commit-story-v2, release-it, npm-check), TS (taze, changesets, wireit), Python (mycli, iredis, commitizen), Go (mods, dbmate, ghq). Key finding: commit-story-v2 has NO KNOWN_FRAMEWORK_PACKAGES overlap — COV-006 has never fired in 12 eval runs. | In Progress | Create/revise 4 Type C PRDs (milestone 4) |
