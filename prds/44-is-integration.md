@@ -43,13 +43,13 @@ Full research findings live in `docs/research/instrumentation-score-integration.
 
 ## Implementation Milestones
 
-- [ ] **Step 0: Read the IS research document in full**
+- [x] **Step 0: Read the IS research document in full**
 
   Before writing any code, read `docs/research/instrumentation-score-integration.md` in its entirety. Pay particular attention to: (1) Rule Applicability by App Type table — these 9 rules are the only ones the scorer evaluates; (2) the exact Collector YAML config in the Findings section; (3) the "k8s-dependent repo constraint" — locally-runnable repos vs. repos requiring a cluster have different IS scoring workflows. Do not proceed to the next milestone until you can answer: which rules apply, what is the OTel Collector output format, and why MET rules are included even though they will fail.
 
   Success criteria: No code written. Milestone complete when you have read the full document and the answers to those three questions are clear.
 
-- [ ] **Create `evaluation/is/otelcol-config.yaml`**
+- [x] **Create `evaluation/is/otelcol-config.yaml`**
 
   Create the directory `evaluation/is/` and write `evaluation/is/otelcol-config.yaml` with the minimal OTel Collector config from the research document:
   - OTLP HTTP receiver on port 4318 (same port as Datadog Agent — they cannot run simultaneously; this is intentional and documented)
@@ -60,7 +60,7 @@ Full research findings live in `docs/research/instrumentation-score-integration.
 
   Success criteria: `evaluation/is/otelcol-config.yaml` exists with receiver, exporter, and pipeline sections; `evaluation/is/README.md` documents the four items above.
 
-- [ ] **Build IS scoring script**
+- [x] **Build IS scoring script**
 
   Write `evaluation/is/score-is.js` as a Node.js script (ESM, no dependencies beyond Node.js built-ins). The script:
   1. Reads a line-delimited JSON file path from `process.argv[2]` (e.g., `node score-is.js eval-traces.json`)
@@ -99,7 +99,7 @@ Full research findings live in `docs/research/instrumentation-score-integration.
 
   Success criteria: `node evaluation/is/score-is.js <fixture>` exits 0 and prints the structured output above; all 9 applicable rules are evaluated; MET rules show "not applicable" not "failed."
 
-- [ ] **Write tests for the IS scoring script**
+- [x] **Write tests for the IS scoring script**
 
   Create `tests/score-is.test.js` using Vitest (already in the project). Tests must cover:
   1. A synthetic OTLP JSON fixture where all 9 applicable rules pass — verify the weighted score equals 100
@@ -112,7 +112,7 @@ Full research findings live in `docs/research/instrumentation-score-integration.
 
   Success criteria: `npm test` passes; at least 5 test cases covering the scenarios above; fixtures in `tests/fixtures/is/`.
 
-- [ ] **Enable metrics in SDK bootstrap for IS scoring runs**
+- [x] **Enable metrics in SDK bootstrap for IS scoring runs**
 
   The target repo (commit-story-v2, located at `~/Documents/Repositories/commit-story-v2` or wherever Whitney has it cloned) has `OTEL_METRICS_EXPORTER=none` set in its SDK bootstrap file (`examples/instrumentation.js`). This file is in the commit-story-v2 repo, NOT this eval repo — do not look in this repo's files for this setting. For IS scoring runs, metrics must be enabled so MET rules can be evaluated (they will fail — this is expected and documented).
 
@@ -120,7 +120,7 @@ Full research findings live in `docs/research/instrumentation-score-integration.
 
   Success criteria: The SDK bootstrap file has a clear comment explaining the `OTEL_METRICS_EXPORTER=none` behavior and when to change it for IS scoring; the change is committed.
 
-- [ ] **Add IS scoring as step 9 to the Type D milestone sequence in docs/language-extension-plan.md**
+- [x] **Add IS scoring as step 9 to the Type D milestone sequence in docs/language-extension-plan.md**
 
   Open `docs/language-extension-plan.md` and find the Type D section. Step 9 currently reads: "(IS scoring run) *(active once Step 2 IS integration PRD completes — run instrumented code with OTel Collector, score OTLP output against IS spec, add IS score to rubric scoring document)*". Replace that placeholder with full step details:
 
@@ -165,3 +165,4 @@ Full research findings live in `docs/research/instrumentation-score-integration.
 | Date | Update | Status | Next Steps |
 |------|--------|--------|------------|
 | 2026-04-11 | PRD created | Draft | Wait for PRD #43 to merge, then start |
+| 2026-04-12 | All 6 milestones complete | Done | /prd-done |
