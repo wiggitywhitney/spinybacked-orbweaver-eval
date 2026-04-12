@@ -44,13 +44,21 @@ The feature branch for this PRD **never merges to main**. The PR exists for Code
 
 - [ ] **Milestone 0: Evaluate 3 TypeScript candidates and choose target**
 
-  Read the 3 TypeScript candidate assessments from `docs/research/eval-target-criteria.md`. For each candidate:
+  Read `docs/research/eval-target-criteria.md` Section 2.2 before cloning anything. The COV-006 overlap analysis and per-rule coverage table for all 3 TS candidates are already complete — do not redo them.
+
+  **What the research already covers (do not repeat):**
+  - COV-006 overlap: taze (ofetch→undici, conditional on KFP update), changesets (none), wireit (none)
+  - Full 24-rule differentiating coverage table with ✓/✗/🔍 for all 3 candidates
+  - File counts (taze: 33, changesets: 25, wireit: 62), I/O types, licenses, star counts
+
+  **What still requires local verification (do these for all 3 candidates):**
   1. Clone the repo
-  2. Run the test suite 3 times (deterministic reproducibility check)
-  3. Count `.ts` source files (excluding tests, configs, generated, `.d.ts`). Ideal: 30 or less.
-  4. Check `package.json` dependencies against spiny-orb's `KNOWN_FRAMEWORK_PACKAGES` list (`~/Documents/Repositories/spinybacked-orbweaver/src/languages/javascript/ast.ts` — shared by JS and TS providers) for auto-instrumentation library overlap (COV-006 testability)
-  5. Map rubric rule coverage: for each of the 32 rubric rules, assess whether this candidate's code patterns can exercise it
-  6. Note any caveats (already instrumented, infrastructure dependencies, etc.)
+  2. Run the test suite 3 times — flaky tests disqualify; this cannot be pre-researched
+  3. Confirm source file count from local clone matches the research doc's count
+  4. Confirm no existing OTel instrumentation (grep for `@opentelemetry` and `startActiveSpan`)
+  5. Note any caveats discovered during cloning that differ from the research
+
+  Use the Section 2.2 comparison table and individual candidate summaries to make the final selection. The rubric coverage mapping is done.
 
   Compare the 3 candidates. Pick the one that exercises the most rubric rules while staying at or below 30 source files. A candidate above 30 files is acceptable if the extra files exercise rubric rules that the smaller candidates cannot — document the justification. Prefer candidates from different GitHub authors/organizations — same-author candidates share coding style and reduce rubric diversity.
 

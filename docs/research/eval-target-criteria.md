@@ -73,7 +73,47 @@ A complete schema only tests SCH compliance. An incomplete schema tests SCH *ext
 
 ### 2.1 JavaScript (3 candidates)
 
-**Key finding from rubric assessment:** commit-story-v2 has NO KNOWN_FRAMEWORK_PACKAGES overlap (`@langchain/anthropic`, `@langchain/langgraph`, `@modelcontextprotocol/sdk` are not in the list). COV-006 has never fired in 12 eval runs on commit-story-v2. This is the primary criterion gap to address.
+**Note:** commit-story-v2 exercises COV-006 via Traceloop auto-instrumentation — `@langchain/*` maps to `@traceloop/instrumentation-langchain` and `@modelcontextprotocol/sdk` maps to `@traceloop/instrumentation-mcp`. These are in the Traceloop mapping table in `javascript/prompt.ts`, not in `KNOWN_FRAMEWORK_PACKAGES`. COV-006 has fired on `journal-graph.js`, `summary-graph.js`, and `mcp/server.js` in run-13.
+
+### Rule Coverage Comparison — JavaScript
+
+**Key:** ✓ confirmed fires (research-verified this session) · ✗ cannot fire · ≈ eval-design dependent · 🔍 needs local verification when cloning
+
+The 8 universal rules (NDS-001, NDS-003, API-001–004, NDS-006, CDQ-002) are excluded — they apply to all candidates equally. SCH rules (≈) depend entirely on the Weaver schema created in eval and are identical for all candidates. RST-005 passes vacuously for all (clean baselines, no pre-existing OTel) — listed ✓ but not a meaningful diagnostic.
+
+| Rule | commit-story-v2 | release-it | npm-check |
+|------|-----------------|------------|-----------|
+| NDS-002 Tests pass | ✓ confirmed (12 runs) | ✓ vitest | ✓ |
+| NDS-004 Public API preserved | ✓ | ✓ Plugin exports | ✓ |
+| NDS-005a Error handling structure | ✓ LLM API chain | ✓ HTTP+git errors | ✓ npm errors |
+| NDS-005b Silent catch preserved | ✓ LangGraph fallbacks | ✓ dry-run graceful | 🔍 |
+| COV-001 Entry points | ✓ CLI summarize cmds | ✓ release lifecycle | ✓ interactive+static |
+| COV-002 Outbound calls | ✓ HTTP+file+git (3 types) | ✓ HTTP+git+file (3 types) | ✓ HTTP+npm+file (3 types) |
+| COV-003 Failable ops | ✓ | ✓ | ✓ |
+| COV-004 Long-running/async | ✓ async throughout | ✓ async throughout | ✓ async |
+| COV-005 Domain-specific attrs | ≈ | ≈ | ≈ |
+| **COV-006 Auto-instr preferred** | **✓ Traceloop (langchain+MCP)** | **✓ undici (in KFP)** | **✗ no overlap** |
+| RST-001 No utility spans | ✓ 57% skip confirmed | ✓ log/spinner/util/prompt | ✓ in/out/state split |
+| RST-002 No accessor spans | 🔍 | 🔍 | 🔍 |
+| RST-003 No thin-wrapper spans | 🔍 | 🔍 | 🔍 |
+| RST-004 No internal spans | ✓ | ✓ | ✓ |
+| RST-005 No re-instrumentation | ✓ vacuous | ✓ vacuous | ✓ vacuous |
+| SCH-001 Span names match registry | ≈ | ≈ | ≈ |
+| SCH-002 Attr keys match registry | ≈ | ≈ | ≈ |
+| SCH-003 Attr values conform | ≈ | ≈ | ≈ |
+| SCH-004 No redundant entries | ≈ | ≈ | ≈ |
+| CDQ-001 Spans closed all paths | ✓ LangGraph async | ✓ plugin lifecycle | ✓ |
+| CDQ-003 Standard error recording | ✓ LLM API errors | ✓ HTTP+git errors | ✓ npm errors |
+| CDQ-005 Async context maintained | ✓ LangGraph chain | ✓ plugin chain | ✓ |
+| CDQ-006 Expensive attr guarding | 🔍 | 🔍 | 🔍 |
+| CDQ-007 No PII/unbounded attrs | ✓ git msgs, paths | ✓ tokens, paths | ✓ pkg names, paths |
+| CDQ-008 Consistent tracer naming | ✓ 30 files | ✓ 23 files | ✓ 18 files |
+| **Confirmed ✓ (of 24 D-rules)** | **17** | **17** | **15** |
+| **Cannot fire ✗** | **0** | **0** | **1** |
+| **Needs verify 🔍** | **3** | **3** | **4** |
+| **Eval-design ≈** | **5** | **5** | **5** |
+
+**Total exercisable (✓ + 8 universal):** commit-story-v2 = 25 · release-it = 25 · npm-check = 23
 
 ---
 
@@ -85,18 +125,18 @@ A complete schema only tests SCH compliance. An incomplete schema tests SCH *ext
 | Stars | ~100 (private/personal project) |
 | Source files | ~30 JS files |
 | I/O types | HTTP (Anthropic/LangChain API calls), file R/W (git history, journal entries), subprocess (git) |
-| KFP overlap | **None** — `@langchain/*` packages are not in KNOWN_FRAMEWORK_PACKAGES |
+| KFP overlap | **Traceloop** ✓ — `@langchain/*` → `@traceloop/instrumentation-langchain`; `@modelcontextprotocol/sdk` → `@traceloop/instrumentation-mcp`. Detection is via the Traceloop mapping table in `javascript/prompt.ts`, separate from `KNOWN_FRAMEWORK_PACKAGES`. |
 | Existing OTel | None (clean baseline; spiny-orb adds it during eval) |
 
 **Rubric coverage notes:**
-- COV-006: **Cannot fire.** No KFP imports. This is a permanent blind spot for this target unless KNOWN_FRAMEWORK_PACKAGES is extended to include LangChain packages.
+- COV-006: ✓ **fires** — via Traceloop mapping in `javascript/prompt.ts`. `@langchain/*` → `@traceloop/instrumentation-langchain` (fires on `journal-graph.js`, `summary-graph.js`); `@modelcontextprotocol/sdk` → `@traceloop/instrumentation-mcp` (fires on `mcp/server.js`). Confirmed in run-13 PR.
 - COV-001: ✓ clear CLI entry point
 - COV-002: ✓ HTTP (LangChain API), file I/O, subprocess
 - RST-001: ✓ ~57% skip rate confirmed across 12 runs
 - CDQ-003: ✓ error handling in LLM API calls
 - SCH-*: ✓ 12 runs of schema history; deliberately incomplete schema strategy can be applied
 
-**Summary:** 12 runs of eval history validate this target produces meaningful failure modes. However, it permanently skips COV-006, and was not selected via criteria — it was chosen by circumstance. Evaluate honestly in milestone 0 against the other 2 JS candidates.
+**Summary:** 12 runs of eval history validate this target produces meaningful failure modes. COV-006 fires via Traceloop (langchain + MCP). It was not selected via criteria — it was chosen by circumstance. Evaluate honestly in milestone 0 against the other 2 JS candidates.
 
 ---
 
@@ -150,6 +190,44 @@ A complete schema only tests SCH compliance. An incomplete schema tests SCH *ext
 ### 2.2 TypeScript (3 candidates)
 
 **Key finding from rubric assessment:** `ofetch` (used by taze) is not in KNOWN_FRAMEWORK_PACKAGES. COV-006 testability for the TS candidates depends on whether the TS Type C PRD's "add auto-instrumentation libraries" milestone adds ofetch to KNOWN_FRAMEWORK_PACKAGES.
+
+### Rule Coverage Comparison — TypeScript
+
+**Key:** ✓ confirmed fires · ✗ cannot fire · ≈ eval-design dependent · 🔍 needs local verification or conditional on a later milestone
+
+| Rule | taze | changesets | wireit |
+|------|------|------------|--------|
+| NDS-002 Tests pass | ✓ vitest (17 test files) | ✓ | ✓ |
+| NDS-004 Public API preserved | ✓ | ✓ | ✓ |
+| NDS-005a Error handling structure | ✓ HTTP+file errors | ✓ git+file errors | ✓ subprocess+file errors |
+| NDS-005b Silent catch preserved | 🔍 | 🔍 | 🔍 |
+| COV-001 Entry points | ✓ check/list/interactive | ✓ add/version/publish/status | ✓ npx wireit |
+| COV-002 Outbound calls | ✓ HTTP+file+subprocess | ✓ subprocess+file+terminal | ✓ subprocess+file+filewatcher |
+| COV-003 Failable ops | ✓ | ✓ | ✓ |
+| COV-004 Long-running/async | ✓ concurrent lookups | ✓ async commands | ✓ async event-driven |
+| COV-005 Domain-specific attrs | ≈ | ≈ | ≈ |
+| **COV-006 Auto-instr preferred** | **🔍 ofetch→undici (if added to KFP)** | **✗ no overlap** | **✗ no overlap** |
+| RST-001 No utility spans | ✓ ~40% utility files | ✓ types.ts, utils/types.ts | ✓ 62 files many utility |
+| RST-002 No accessor spans | 🔍 | 🔍 | 🔍 |
+| RST-003 No thin-wrapper spans | 🔍 | 🔍 | 🔍 |
+| RST-004 No internal spans | ✓ | ✓ | ✓ |
+| RST-005 No re-instrumentation | ✓ vacuous | ✓ vacuous | ✓ vacuous |
+| SCH-001 Span names match registry | ≈ | ≈ | ≈ |
+| SCH-002 Attr keys match registry | ≈ | ≈ | ≈ |
+| SCH-003 Attr values conform | ≈ | ≈ | ≈ |
+| SCH-004 No redundant entries | ≈ | ≈ | ≈ |
+| CDQ-001 Spans closed all paths | ✓ concurrent async | ✓ async commands | ✓ async event loop |
+| CDQ-003 Standard error recording | ✓ HTTP+file errors | ✓ git+npm errors | ✓ subprocess+cache errors |
+| CDQ-005 Async context maintained | ✓ | ✓ | ✓ |
+| CDQ-006 Expensive attr guarding | 🔍 | 🔍 | 🔍 |
+| CDQ-007 No PII/unbounded attrs | ✓ pkg names, paths | ✓ pkg names, changelog | ✓ file paths, script names |
+| CDQ-008 Consistent tracer naming | ✓ 33 files | ✓ 25 files | ✓ 62 files |
+| **Confirmed ✓ (of 24 D-rules)** | **15** | **15** | **15** |
+| **Cannot fire ✗** | **0** | **2** | **2** |
+| **Needs verify / conditional 🔍** | **5 (incl. COV-006)** | **4** | **4** |
+| **Eval-design ≈** | **5** | **5** | **5** |
+
+**Total exercisable (✓ + 8 universal):** taze = 23 (+ COV-006 if KFP updated) · changesets = 23 · wireit = 23
 
 ---
 
@@ -231,6 +309,44 @@ A complete schema only tests SCH compliance. An incomplete schema tests SCH *ext
 
 **OTel Python contrib instruments used in assessment:** click, jinja2, redis, pymysql (check [opentelemetry-python-contrib](https://github.com/open-telemetry/opentelemetry-python-contrib/tree/main/instrumentation) for full list of 50+ instruments).
 
+### Rule Coverage Comparison — Python
+
+**Key:** ✓ confirmed fires · ✗ cannot fire · ≈ eval-design dependent · 🔍 needs local verification
+
+| Rule | mycli | iredis | commitizen |
+|------|-------|--------|------------|
+| NDS-002 Tests pass | ✓ | ✓ pytest | ✓ pytest |
+| NDS-004 Public API preserved | ✓ | ✓ | ✓ |
+| NDS-005a Error handling structure | ✓ DB+config errors | ✓ Redis+config errors | ✓ git+version+config errors |
+| NDS-005b Silent catch preserved | 🔍 | 🔍 | ✓ fallbacks in bump/changelog |
+| COV-001 Entry points | ✓ mycli CLI | ✓ iredis CLI | ✓ cz bump/changelog/commit |
+| COV-002 Outbound calls | ✓ DB+file+terminal | ✓ Redis+file+terminal | ✓ subprocess+file+template |
+| COV-003 Failable ops | ✓ | ✓ | ✓ |
+| COV-004 Long-running/async | ✓ prompt_toolkit async | ✓ prompt_toolkit async | ✓ I/O throughout |
+| COV-005 Domain-specific attrs | ≈ | ≈ | ≈ |
+| **COV-006 Auto-instr preferred** | **✓ PyMySQL** | **✓ redis + click (2 overlaps)** | **✓ jinja2** |
+| RST-001 No utility spans | ✓ constants/lexer/style | ✓ renders/style/lexer/warning | ✓ 51 files many utility |
+| RST-002 No accessor spans | 🔍 | 🔍 | 🔍 |
+| RST-003 No thin-wrapper spans | 🔍 | 🔍 | 🔍 |
+| RST-004 No internal spans | ✓ | ✓ | ✓ |
+| RST-005 No re-instrumentation | ✓ vacuous | ✓ vacuous | ✓ vacuous |
+| SCH-001 Span names match registry | ≈ | ≈ | ≈ |
+| SCH-002 Attr keys match registry | ≈ | ≈ | ≈ |
+| SCH-003 Attr values conform | ≈ | ≈ | ≈ |
+| SCH-004 No redundant entries | ≈ | ≈ | ≈ |
+| CDQ-001 Spans closed all paths | ✓ DB with branches | ✓ Redis with branches | ✓ commands with branches |
+| CDQ-003 Standard error recording | ✓ DB+auth+config | ✓ Redis+auth+cmd | ✓ git+version+file |
+| CDQ-005 Async context maintained | ✓ | ✓ | ✓ |
+| CDQ-006 Expensive attr guarding | 🔍 | 🔍 | 🔍 |
+| CDQ-007 No PII/unbounded attrs | ✓ queries, conn strings | ✓ Redis keys, conn strings | ✓ commit msgs, version strings |
+| CDQ-008 Consistent tracer naming | ✓ 15 files | ✓ 17 files | ✓ 51 files |
+| **Confirmed ✓ (of 24 D-rules)** | **16** | **16** | **17** |
+| **Cannot fire ✗** | **0** | **0** | **0** |
+| **Needs verify 🔍** | **4** | **4** | **3** |
+| **Eval-design ≈** | **5** | **5** | **5** |
+
+**Total exercisable (✓ + 8 universal):** mycli = 24 · iredis = 24 (strongest: 2 COV-006 overlaps) · commitizen = 25
+
 ---
 
 #### mycli (dbcli/mycli)
@@ -309,6 +425,44 @@ A complete schema only tests SCH compliance. An incomplete schema tests SCH *ext
 ### 2.4 Go (3 candidates)
 
 **OTel Go contrib instruments used in assessment:** `net/http` → `otelhttp`, `google.golang.org/grpc` → `otelgrpc`, `go.mongodb.org/mongo-driver` → `otelmongo`. Standard library `database/sql` has community `otelsql` support (not official OTel Go contrib). The Go Type C PRD's "add auto-instrumentation libraries" milestone determines which packages get added to spiny-orb's Go equivalent of KNOWN_FRAMEWORK_PACKAGES.
+
+### Rule Coverage Comparison — Go
+
+**Key:** ✓ confirmed fires · ✗ cannot fire · ≈ eval-design dependent · 🔍 needs local verification or conditional on a later milestone
+
+| Rule | mods | dbmate | ghq |
+|------|------|--------|-----|
+| NDS-002 Tests pass | ✓ testing.go present | ✓ dbtest/ package | ✓ |
+| NDS-004 Public API preserved | ✓ | ✓ DB interface/driver | ✓ RemoteRepo/LocalRepo |
+| NDS-005a Error handling structure | ✓ AI+DB+subprocess | ✓ SQL+migration errors | ✓ HTTP+git+VCS errors |
+| NDS-005b Silent catch preserved | ✓ API key fallback | 🔍 | 🔍 |
+| COV-001 Entry points | ✓ mods CLI | ✓ up/down/status/migrate | ✓ get/list/create/rm |
+| COV-002 Outbound calls | ✓ HTTP+DB+subprocess+stdin | ✓ DB+file (4 DB drivers) | ✓ HTTP+git+file |
+| COV-003 Failable ops | ✓ | ✓ | ✓ |
+| COV-004 Long-running/async | ✓ AI streaming | ✓ DB operations | ✓ git clone |
+| COV-005 Domain-specific attrs | ≈ | ≈ | ≈ |
+| **COV-006 Auto-instr preferred** | **✓ net/http direct (confirmed)** | **🔍 database/sql (if otelsql added)** | **✓ net/http direct (confirmed)** |
+| RST-001 No utility spans | ✓ internal/*/format.go files | ✓ dbutil.go, version.go | ✓ logger/log.go, helpers_*.go, url.go |
+| RST-002 No accessor spans | 🔍 | 🔍 | 🔍 |
+| RST-003 No thin-wrapper spans | 🔍 | 🔍 | 🔍 |
+| RST-004 No internal spans | ✓ internal/ packages | ✓ pkg/ unexported | ✓ unexported cmd helpers |
+| RST-005 No re-instrumentation | ✓ vacuous | ✓ vacuous | ✓ vacuous |
+| SCH-001 Span names match registry | ≈ | ≈ | ≈ |
+| SCH-002 Attr keys match registry | ≈ | ≈ | ≈ |
+| SCH-003 Attr values conform | ≈ | ≈ | ≈ |
+| SCH-004 No redundant entries | ≈ | ≈ | ≈ |
+| CDQ-001 Spans closed all paths | ✓ streaming multi-path | ✓ migration with branches | ✓ clone with VCS branches |
+| CDQ-003 Standard error recording | ✓ AI+DB+subprocess errors | ✓ SQL+migration+conn errors | ✓ HTTP+git+VCS errors |
+| CDQ-005 Async context maintained | ✓ net/http context | ✓ DB context | ✓ net/http context |
+| CDQ-006 Expensive attr guarding | 🔍 | 🔍 | 🔍 |
+| CDQ-007 No PII/unbounded attrs | ✓ conv content, API keys | ✓ conn strings, SQL text | ✓ repo URLs, git config |
+| CDQ-008 Consistent tracer naming | ✓ 32 files | ✓ 14 files | ✓ 19 files |
+| **Confirmed ✓ (of 24 D-rules)** | **17** | **15** | **16** |
+| **Cannot fire ✗** | **0** | **0** | **0** |
+| **Needs verify / conditional 🔍** | **3** | **5 (incl. COV-006)** | **4** |
+| **Eval-design ≈** | **5** | **5** | **5** |
+
+**Total exercisable (✓ + 8 universal):** mods = 25 · dbmate = 23 (+ COV-006 if otelsql added) · ghq = 24
 
 ---
 
@@ -410,7 +564,7 @@ IS (Instrumentation Score) scoring requires the target repo to emit OpenTelemetr
 
 | Language | Candidate | Files | COV-006 | Runtime est. | Recommendation |
 |----------|-----------|-------|---------|--------------|----------------|
-| **JS** | commit-story-v2 | ~30 | ✗ None | ~40 min | Evaluate in milestone 0 |
+| **JS** | commit-story-v2 | ~30 | ✓ Traceloop | ~40 min | Evaluate in milestone 0 |
 | **JS** | release-it | 23 | ✓ undici | ~31 min | **Preferred** — only JS candidate with COV-006 |
 | **JS** | npm-check | 18 | ✗ None | ~24 min | Backup |
 | **TS** | taze | 33 | ✓ Conditional | ~44 min | **Preferred** — best I/O diversity; COV-006 after KFP update |

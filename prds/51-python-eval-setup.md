@@ -44,13 +44,22 @@ The feature branch for this PRD **never merges to main**. The PR exists for Code
 
 - [ ] **Milestone 0: Evaluate 3 Python candidates and choose target**
 
-  Read the 3 Python candidate assessments from `docs/research/eval-target-criteria.md`. For each candidate:
+  Read `docs/research/eval-target-criteria.md` Section 2.3 before cloning anything. The COV-006 overlap analysis and per-rule coverage table for all 3 Python candidates are already complete — do not redo them.
+
+  **What the research already covers (do not repeat):**
+  - COV-006 overlap: mycli (PyMySQL), iredis (redis + click — 2 overlaps), commitizen (jinja2)
+  - Full 24-rule differentiating coverage table with ✓/✗/🔍 for all 3 candidates
+  - File counts (mycli: 15, iredis: 17, commitizen: 51), I/O types, licenses, star counts
+  - IS scoring setup requirements (mycli needs MySQL Docker; iredis needs Redis Docker; commitizen is standalone)
+
+  **What still requires local verification (do these for all 3 candidates):**
   1. Clone the repo
-  2. Run the test suite 3 times (deterministic reproducibility check)
-  3. Count `.py` source files (excluding tests, configs, `__init__.py`). Ideal: 30 or less.
-  4. Check dependencies (`pyproject.toml` / `requirements.txt`) for auto-instrumentation library overlap. Check against the [OTel Python contrib instrumentation list](https://github.com/open-telemetry/opentelemetry-python-contrib/tree/main/instrumentation) — this is the authoritative reference since spiny-orb's Python provider does not have KNOWN_FRAMEWORK_PACKAGES yet. The "Add Python auto-instrumentation libraries" milestone (below) creates spiny-orb's Python list, but Milestone 0 runs first — use the OTel contrib list directly for this step. Notable packages with OTel instrumentation: `requests`, `flask`, `django`, `sqlalchemy`, `psycopg2`, `aiohttp`, `httpx`, `celery`, `redis`, `pymongo`, `grpc`, `jinja2`, `click`, `sqlite3`, `pymysql`, and many more. At least one overlap is needed to test COV-006.
-  5. Map rubric rule coverage: for each of the 32 rubric rules, assess whether this candidate's code patterns can exercise it
-  6. Note any caveats (already instrumented, infrastructure dependencies, etc.)
+  2. Run the test suite 3 times — flaky tests disqualify; this cannot be pre-researched
+  3. Confirm source file count from local clone matches the research doc's count
+  4. Confirm no existing OTel instrumentation (grep for `opentelemetry` imports)
+  5. Note any caveats discovered during cloning that differ from the research
+
+  Use the Section 2.3 comparison table and individual candidate summaries to make the final selection. The rubric coverage mapping is done.
 
   Compare the 3 candidates. Pick the one that exercises the most rubric rules while staying at or below 30 source files. A candidate above 30 files is acceptable if the extra files exercise rubric rules that the smaller candidates cannot — document the justification. Prefer candidates from different GitHub authors/organizations — same-author candidates share coding style and reduce rubric diversity.
 
