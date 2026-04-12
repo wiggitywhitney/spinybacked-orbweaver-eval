@@ -195,12 +195,28 @@ The spike's findings document at `docs/research/eval-target-criteria.md` must in
 
 | Language | spiny-orb provider status | Candidates (3 per language) | Notes |
 |----------|--------------------------|----------------------------|-------|
-| JavaScript | Supported | commit-story-v2, release-it, npm-check | commit-story-v2 is one of 3 candidates, not assumed winner. PRD #53 milestone 0 selects. Key finding: commit-story-v2 has no KNOWN_FRAMEWORK_PACKAGES overlap (COV-006 never fired in 12 runs); release-it uses undici directly. |
+| JavaScript | Supported | commit-story-v2, release-it, npm-check | commit-story-v2 is one of 3 candidates, not assumed winner. PRD #53 milestone 0 selects. Both commit-story-v2 (Traceloop: langchain+mcp) and release-it (undici in KFP) exercise COV-006. npm-check has no COV-006 overlap. |
 | TypeScript | spinybacked-orbweaver PRD B (in progress) | taze, @changesets/cli, wireit | taze uses ofetch (COV-006 conditional on KFP update); changesets is subprocess+file; wireit is 62 files (backup). PRD #50 milestone 0 selects. |
 | Python | spinybacked-orbweaver PRD D (future) | mycli, iredis, commitizen | mycli (PyMySQL, 15 files) and iredis (redis+click, 17 files) are preferred; commitizen (jinja2, 51 files) is backup. PRD #51 milestone 0 selects. |
 | Go | spinybacked-orbweaver PRD E (future) | mods, dbmate, ghq | mods (net/http direct, 32 files); dbmate (database/sql, 14 files); ghq (net/http direct, 19 files). PRD #52 milestone 0 selects. |
 
 Each language gets 3 candidates in `docs/research/eval-target-criteria.md`. The Type C PRD for each language (PRDs #50-53) evaluates all 3 and selects the best one in milestone 0. Fork once, freeze it, never pull upstream.
+
+---
+
+## Adding a New Language to Eval
+
+When spiny-orb adds a new language provider, add it to the eval framework in two phases:
+
+### Phase 1: Research
+
+1. Add a new section to `docs/research/eval-target-criteria.md` — one Section 2.X per language. Follow the exact structure used for JS (2.1), TS (2.2), Python (2.3), and Go (2.4): a rule coverage comparison table (24 differentiating rules × 3 candidates) and per-candidate writeups with IS scorability notes. The `## 1. Rubric-Coverage Scorecard` section of that document is language-agnostic — use it as-is to assess candidates.
+
+2. To find and evaluate 3 candidates: use the `/research` skill. The completed sections for JS, TS, Python, and Go show the expected depth and format.
+
+### Phase 2: Type C PRD (Gate 1: provider on spiny-orb main)
+
+3. Copy the most structurally similar existing Type C PRD. For a CLI-focused language, use PRD #52 (Go) as the template. Update: language name, source file extension, OTel bootstrap mechanism (see `docs/research/instrumentation-score-integration.md`), grep pattern for existing OTel instrumentation, and the Section 2.X reference in Milestone 0.
 
 ---
 
