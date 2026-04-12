@@ -16,6 +16,10 @@ commit-story-v2 was chosen as the JavaScript eval target by circumstance, not by
 - **Gate 1 (provider):** JavaScript provider already exists in spiny-orb. No gate.
 - **Gate 2 (research):** `docs/research/eval-target-criteria.md` must exist with 3 JavaScript candidates before this PRD can start.
 
+### Eval Branch Convention
+
+If this PRD proceeds past milestone 0 (i.e., a new target is selected), the feature branch **never merges to main**. The PR exists for CodeRabbit review only. When `/prd-done` runs at completion, close the issue without merging the eval branch. If milestone 0 selects commit-story-v2 (early exit), no eval branch is created.
+
 ## Success Metrics
 
 - **Primary**: Best JS target selected with documented rationale based on rubric rule coverage
@@ -24,9 +28,9 @@ commit-story-v2 was chosen as the JavaScript eval target by circumstance, not by
 
 ## Key Inputs
 
-- **Evaluation rubric** (spiny-orb repo): `spinybacked-orbweaver/research/evaluation-rubric.md` (32 rules across 6 dimensions: NDS, COV, RST, API, SCH, CDQ)
+- **Evaluation rubric** (spiny-orb repo): `~/Documents/Repositories/spinybacked-orbweaver/research/evaluation-rubric.md` (32 rules across 6 dimensions: NDS, COV, RST, API, SCH, CDQ)
 - **Candidate shortlist**: `docs/research/eval-target-criteria.md` (3 JS candidates)
-- **Auto-instrumentation library list**: `spinybacked-orbweaver/src/languages/javascript/ast.ts` (`KNOWN_FRAMEWORK_PACKAGES`, line ~124)
+- **Auto-instrumentation library list**: `~/Documents/Repositories/spinybacked-orbweaver/src/languages/javascript/ast.ts` (`KNOWN_FRAMEWORK_PACKAGES`, line ~124)
 - **Language extension plan**: `docs/language-extension-plan.md` (Type C structure, instrument command, checkpoints)
 
 ## Implementation Milestones
@@ -43,7 +47,7 @@ commit-story-v2 was chosen as the JavaScript eval target by circumstance, not by
   1. Clone the repo
   2. Run the test suite 3 times (deterministic reproducibility check)
   3. Count `.js` source files (excluding tests, configs, generated files). Ideal: 30 or less.
-  4. Check `package.json` dependencies against spiny-orb's `KNOWN_FRAMEWORK_PACKAGES` list (`spinybacked-orbweaver/src/languages/javascript/ast.ts`) for auto-instrumentation library overlap (COV-006 testability)
+  4. Check `package.json` dependencies against spiny-orb's `KNOWN_FRAMEWORK_PACKAGES` list (`~/Documents/Repositories/spinybacked-orbweaver/src/languages/javascript/ast.ts`) for auto-instrumentation library overlap (COV-006 testability)
   5. Map rubric rule coverage: for each of the 32 rubric rules, assess whether this candidate's code patterns can exercise it
   6. Note any caveats (already instrumented, infrastructure dependencies, etc.)
 
@@ -57,13 +61,13 @@ commit-story-v2 was chosen as the JavaScript eval target by circumstance, not by
 
 - [ ] **Add JavaScript auto-instrumentation libraries to spiny-orb**
 
-  Review and update spiny-orb's `KNOWN_FRAMEWORK_PACKAGES` list in `spinybacked-orbweaver/src/languages/javascript/ast.ts`. This list already covers JS/TS, but verify it includes the most popular auto-instrumentation packages. Cross-reference against `@opentelemetry/auto-instrumentations-node` to ensure nothing major is missing. If new entries are needed, submit a PR to spiny-orb.
+  Work in `~/Documents/Repositories/spinybacked-orbweaver/` on a feature branch. Review and update `KNOWN_FRAMEWORK_PACKAGES` in `src/languages/javascript/ast.ts` (around line 124). Cross-reference against `@opentelemetry/auto-instrumentations-node` package list to ensure nothing major is missing. Run `npm test` to verify changes don't break anything. If new entries are needed, submit a PR to spiny-orb.
 
-  Success criteria: KNOWN_FRAMEWORK_PACKAGES is current and complete for JavaScript. Any additions submitted as a PR.
+  Success criteria: KNOWN_FRAMEWORK_PACKAGES is current and complete for JavaScript. Any additions submitted as a PR with passing tests.
 
 - [ ] **Fork target repo and create eval directory structure**
 
-  Fork the chosen candidate to Whitney's GitHub account. Create `evaluation/<target-name>/run-1/` directory in the eval repo with skeleton documents: `lessons-for-run2.md`, `spiny-orb-findings.md`.
+  Fork the chosen candidate to Whitney's GitHub account. Create `evaluation/<target-name>/run-1/` directory in the eval repo with these skeleton files: `lessons-for-run2.md`, `spiny-orb-findings.md`. Reference `~/Documents/Repositories/commit-story-v2/spiny-orb.yaml` and `~/Documents/Repositories/commit-story-v2/semconv/` as the working examples for spiny-orb prerequisites.
 
   Success criteria: Forked repo exists; eval directory created with skeleton files.
 
@@ -105,7 +109,7 @@ commit-story-v2 was chosen as the JavaScript eval target by circumstance, not by
 
 - [ ] **Evaluation run-1**
 
-  Whitney runs `spiny-orb instrument` in her own terminal. **Do NOT run the command yourself.** The exact command is in `docs/language-extension-plan.md` — update the `run-N` placeholder and target repo path.
+  Whitney runs `spiny-orb instrument` in her own terminal. **Do NOT run the command yourself.** Copy the command template from `docs/language-extension-plan.md` (line ~72). Replace `commit-story-v2` with the chosen target name, `run-N` with `run-1`, and `src` with the target's source directory (check the forked repo's structure — it may be `src/`, `lib/`, or `.`).
 
   AI role: (1) confirm readiness, (2) save log output to `evaluation/<target-name>/run-1/spiny-orb-output.log`, (3) write `evaluation/<target-name>/run-1/run-summary.md`.
 
@@ -121,7 +125,7 @@ commit-story-v2 was chosen as the JavaScript eval target by circumstance, not by
 
   Root cause analysis for each failed/partial file and run-level failures.
   Produces: `evaluation/<target-name>/run-1/failure-deep-dives.md`
-  Style reference: `git show feature/prd-33-evaluation-run-12:evaluation/run-12/failure-deep-dives.md`
+  Style reference: `git fetch origin feature/prd-33-evaluation-run-12 && git show feature/prd-33-evaluation-run-12:evaluation/run-12/failure-deep-dives.md`
 
 - [ ] **Per-file evaluation**
 
@@ -141,12 +145,12 @@ commit-story-v2 was chosen as the JavaScript eval target by circumstance, not by
 
 - [ ] **Baseline comparison**
 
-  If this is a new JS target, compare against commit-story-v2's most recent run for cross-target context.
+  If this is a new JS target, compare against commit-story-v2's most recent run for cross-target context. Compare: overall rubric score, per-dimension scores (NDS/COV/RST/API/SCH/CDQ), file counts, skip rate, and cost. Highlight dimensions where the new target scores differ by more than 1 point.
   Produces: `evaluation/<target-name>/run-1/baseline-comparison.md`
 
 - [ ] **IS scoring run**
 
-  **Conditional:** Check if `evaluation/is/otelcol-config.yaml` exists on main. If yes, use the scoring script. If no, document raw OTLP output for manual review.
+  **Conditional:** Check if `evaluation/is/otelcol-config.yaml` exists on main. If yes, use the scoring script. If no, skip IS scoring entirely and write `is-scores.md` containing only: "IS scoring deferred — infrastructure not yet on main (PRD #44)."
   Produces: `evaluation/<target-name>/run-1/is-scores.md`
 
 - [ ] **Actionable fix output**
@@ -159,8 +163,8 @@ commit-story-v2 was chosen as the JavaScript eval target by circumstance, not by
 
 - [ ] **Draft Run-2 PRD**
 
-  Create on a separate branch from main. Carry forward both user-facing checkpoints.
-  Success criteria: Run-2 PRD exists on main with proper milestone structure.
+  Create on a separate branch from main (eval branches never merge). Use Type D structure from `docs/language-extension-plan.md` and `prds/37-evaluation-run-13.md` as the milestone style reference. Carry forward both user-facing checkpoints. Merge the PRD-only PR to main so `/prd-start` can pick it up.
+  Success criteria: Run-2 PRD PR merged to main with proper milestone structure and both checkpoints.
 
 ## Dependencies and Constraints
 

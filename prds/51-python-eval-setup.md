@@ -16,6 +16,10 @@ The eval framework has no Python evaluation chain. This PRD evaluates 3 Python c
 - **Gate 1 (provider):** The Python language provider must be merged to spiny-orb main. Check current status in `docs/language-extension-plan.md` "Language Candidates" table.
 - **Gate 2 (research):** `docs/research/eval-target-criteria.md` must exist with 3 Python candidates before this PRD can start.
 
+### Eval Branch Convention
+
+The feature branch for this PRD **never merges to main**. The PR exists for CodeRabbit review only. When `/prd-done` runs at completion, close the issue without merging the eval branch.
+
 ## Success Metrics
 
 - **Primary**: Best Python target selected with documented rationale; Run-1 produces complete evaluation artifacts
@@ -24,7 +28,7 @@ The eval framework has no Python evaluation chain. This PRD evaluates 3 Python c
 
 ## Key Inputs
 
-- **Evaluation rubric** (spiny-orb repo): `spinybacked-orbweaver/research/evaluation-rubric.md` (32 rules across 6 dimensions: NDS, COV, RST, API, SCH, CDQ)
+- **Evaluation rubric** (spiny-orb repo): `~/Documents/Repositories/spinybacked-orbweaver/research/evaluation-rubric.md` (32 rules across 6 dimensions: NDS, COV, RST, API, SCH, CDQ)
 - **Candidate shortlist**: `docs/research/eval-target-criteria.md` (3 Python candidates)
 - **Auto-instrumentation library list**: Python provider does not have KNOWN_FRAMEWORK_PACKAGES yet — use `opentelemetry-python-contrib/instrumentation/` as the reference for what Python packages have OTel auto-instrumentation. See the "Add Python auto-instrumentation libraries" milestone.
 - **Language extension plan**: `docs/language-extension-plan.md` (Type C structure, instrument command, checkpoints)
@@ -56,15 +60,15 @@ The eval framework has no Python evaluation chain. This PRD evaluates 3 Python c
 
 - [ ] **Add Python auto-instrumentation libraries to spiny-orb**
 
-  The Python language provider will need its own equivalent of `KNOWN_FRAMEWORK_PACKAGES`. Research the most popular Python packages that have OTel auto-instrumentation libraries. Cross-reference against `opentelemetry-python-contrib/instrumentation/` directory for the full list. Create the Python equivalent in the spiny-orb Python provider and submit a PR.
+  Work in `~/Documents/Repositories/spinybacked-orbweaver/` on a feature branch. The Python language provider will need its own equivalent of `KNOWN_FRAMEWORK_PACKAGES`. Reference the JS version at `src/languages/javascript/ast.ts` (around line 124) for the pattern. Research the most popular Python packages with OTel auto-instrumentation by browsing `https://github.com/open-telemetry/opentelemetry-python-contrib/tree/main/instrumentation`. Create the Python equivalent in the spiny-orb Python provider. Run `npm test` to verify.
 
-  Key packages to include: `requests`, `flask`, `django`, `fastapi`, `sqlalchemy`, `psycopg2`, `pymongo`, `redis`, `celery`, `aiohttp`, `httpx`, `grpc`, `boto3`, `urllib3`, `jinja2`, `sqlite3`.
+  Key packages to include (minimum): `requests`, `flask`, `django`, `fastapi`, `sqlalchemy`, `psycopg2`, `pymongo`, `redis`, `celery`, `aiohttp`, `httpx`, `grpc`, `boto3`, `urllib3`, `jinja2`, `sqlite3`.
 
-  Success criteria: Python KNOWN_FRAMEWORK_PACKAGES equivalent created in spiny-orb with comprehensive coverage. PR submitted.
+  Success criteria: Python KNOWN_FRAMEWORK_PACKAGES equivalent created with at least 15 packages. PR submitted with passing tests.
 
 - [ ] **Fork target repo and create eval directory structure**
 
-  Fork the chosen candidate. Create `evaluation/<target-name>/run-1/` directory with skeleton documents.
+  Fork the chosen candidate. Create `evaluation/<target-name>/run-1/` directory with these skeleton files: `lessons-for-run2.md`, `spiny-orb-findings.md`. Reference `~/Documents/Repositories/commit-story-v2/spiny-orb.yaml` and `~/Documents/Repositories/commit-story-v2/semconv/` as the working examples for prerequisites (adapt for Python).
 
   Success criteria: Forked repo exists; eval directory created.
 
@@ -104,7 +108,7 @@ The eval framework has no Python evaluation chain. This PRD evaluates 3 Python c
 
 - [ ] **Evaluation run-1**
 
-  Whitney runs `spiny-orb instrument`. **Do NOT run yourself.**
+  Whitney runs `spiny-orb instrument`. **Do NOT run yourself.** Copy the command template from `docs/language-extension-plan.md` (line ~72). Replace `commit-story-v2` with the chosen target name, `run-N` with `run-1`, and `src` with the target's source directory (Python repos may use `commitizen/`, `src/`, or the package name as the source dir).
   AI role: confirm readiness, save log, write run-summary.md.
 
 - [ ] **Findings Discussion** *(user-facing checkpoint 1)*
@@ -115,7 +119,7 @@ The eval framework has no Python evaluation chain. This PRD evaluates 3 Python c
 
   Document Python-specific failure patterns (decorator handling, import patterns, class-based vs function-based code).
   Produces: `evaluation/<target-name>/run-1/failure-deep-dives.md`
-  Style reference: `git show feature/prd-33-evaluation-run-12:evaluation/run-12/failure-deep-dives.md`
+  Style reference: `git fetch origin feature/prd-33-evaluation-run-12 && git show feature/prd-33-evaluation-run-12:evaluation/run-12/failure-deep-dives.md`
 
 - [ ] **Per-file evaluation**
 
@@ -136,13 +140,13 @@ The eval framework has no Python evaluation chain. This PRD evaluates 3 Python c
 
 - [ ] **Baseline comparison**
 
-  No prior Python baseline. Compare against most recent JS run for cross-language context. Note Python-specific patterns.
+  No prior Python baseline. Compare against most recent JS run for cross-language context. Compare: overall rubric score, per-dimension scores (NDS/COV/RST/API/SCH/CDQ), file counts, skip rate, and cost. Note Python-specific patterns (decorator handling, class methods, import-time side effects).
   Produces: `evaluation/<target-name>/run-1/baseline-comparison.md`
   Style reference: `git show feature/prd-33-evaluation-run-12:evaluation/run-12/baseline-comparison.md` (adapt — focus on cross-language comparison)
 
 - [ ] **IS scoring run**
 
-  **Conditional:** Check if `evaluation/is/otelcol-config.yaml` exists on main.
+  **Conditional:** Check if `evaluation/is/otelcol-config.yaml` exists on main. If yes, use scoring script. If no, skip IS scoring entirely and write `is-scores.md` containing only: "IS scoring deferred — infrastructure not yet on main (PRD #44)."
   Produces: `evaluation/<target-name>/run-1/is-scores.md`
 
 - [ ] **Actionable fix output**
@@ -153,7 +157,7 @@ The eval framework has no Python evaluation chain. This PRD evaluates 3 Python c
 
 - [ ] **Draft Run-2 PRD**
 
-  First Type D for Python chain. Carry forward both checkpoints.
+  Create on separate branch from main (eval branches never merge). Use Type D structure from `docs/language-extension-plan.md` and `prds/37-evaluation-run-13.md` as the milestone style reference. First Type D for Python chain. Carry forward both checkpoints. Merge the PRD-only PR to main.
 
 ## Dependencies and Constraints
 

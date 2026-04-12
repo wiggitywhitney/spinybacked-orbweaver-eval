@@ -16,6 +16,10 @@ The eval framework has no TypeScript evaluation chain. This PRD evaluates 3 Type
 - **Gate 1 (provider):** The TypeScript language provider must be merged to spiny-orb main. Check current status in `docs/language-extension-plan.md` "Language Candidates" table.
 - **Gate 2 (research):** `docs/research/eval-target-criteria.md` must exist with 3 TypeScript candidates before this PRD can start.
 
+### Eval Branch Convention
+
+The feature branch for this PRD **never merges to main**. The PR exists for CodeRabbit review only. When `/prd-done` runs at completion, close the issue without merging the eval branch.
+
 ## Success Metrics
 
 - **Primary**: Best TS target selected with documented rationale; Run-1 produces complete evaluation artifacts
@@ -24,9 +28,9 @@ The eval framework has no TypeScript evaluation chain. This PRD evaluates 3 Type
 
 ## Key Inputs
 
-- **Evaluation rubric** (spiny-orb repo): `spinybacked-orbweaver/research/evaluation-rubric.md` (32 rules across 6 dimensions: NDS, COV, RST, API, SCH, CDQ)
+- **Evaluation rubric** (spiny-orb repo): `~/Documents/Repositories/spinybacked-orbweaver/research/evaluation-rubric.md` (32 rules across 6 dimensions: NDS, COV, RST, API, SCH, CDQ)
 - **Candidate shortlist**: `docs/research/eval-target-criteria.md` (3 TS candidates)
-- **Auto-instrumentation library list**: `spinybacked-orbweaver/src/languages/javascript/ast.ts` (`KNOWN_FRAMEWORK_PACKAGES`, line ~124 — shared by JS and TS providers)
+- **Auto-instrumentation library list**: `~/Documents/Repositories/spinybacked-orbweaver/src/languages/javascript/ast.ts` (`KNOWN_FRAMEWORK_PACKAGES`, line ~124 — shared by JS and TS providers)
 - **Language extension plan**: `docs/language-extension-plan.md` (Type C structure, instrument command, checkpoints)
 - **OTel bootstrap reference**: `docs/research/instrumentation-score-integration.md` (SDK bootstrap by language table)
 
@@ -44,7 +48,7 @@ The eval framework has no TypeScript evaluation chain. This PRD evaluates 3 Type
   1. Clone the repo
   2. Run the test suite 3 times (deterministic reproducibility check)
   3. Count `.ts` source files (excluding tests, configs, generated, `.d.ts`). Ideal: 30 or less.
-  4. Check `package.json` dependencies against spiny-orb's `KNOWN_FRAMEWORK_PACKAGES` list (`spinybacked-orbweaver/src/languages/javascript/ast.ts` — shared by JS and TS providers) for auto-instrumentation library overlap (COV-006 testability)
+  4. Check `package.json` dependencies against spiny-orb's `KNOWN_FRAMEWORK_PACKAGES` list (`~/Documents/Repositories/spinybacked-orbweaver/src/languages/javascript/ast.ts` — shared by JS and TS providers) for auto-instrumentation library overlap (COV-006 testability)
   5. Map rubric rule coverage: for each of the 32 rubric rules, assess whether this candidate's code patterns can exercise it
   6. Note any caveats (already instrumented, infrastructure dependencies, etc.)
 
@@ -56,13 +60,13 @@ The eval framework has no TypeScript evaluation chain. This PRD evaluates 3 Type
 
 - [ ] **Add TypeScript auto-instrumentation libraries to spiny-orb**
 
-  The TypeScript provider reuses the JavaScript `KNOWN_FRAMEWORK_PACKAGES` list via `detectOTelImports` import. Review whether any TypeScript-specific packages need to be added (e.g., TypeScript-only HTTP clients, TS-specific ORMs). Cross-reference against `@opentelemetry/auto-instrumentations-node` for coverage. If new entries are needed, submit a PR to spiny-orb.
+  Work in `~/Documents/Repositories/spinybacked-orbweaver/` on a feature branch. The TypeScript provider reuses the JavaScript `KNOWN_FRAMEWORK_PACKAGES` list in `src/languages/javascript/ast.ts` (around line 124) via the shared `detectOTelImports` import. Review whether any TypeScript-specific packages need to be added. Cross-reference against `@opentelemetry/auto-instrumentations-node` for coverage. Run `npm test` to verify. If new entries are needed, submit a PR to spiny-orb.
 
-  Success criteria: KNOWN_FRAMEWORK_PACKAGES is current and complete for TypeScript usage. Any additions submitted as a PR.
+  Success criteria: KNOWN_FRAMEWORK_PACKAGES is current and complete for TypeScript usage. Any additions submitted as a PR with passing tests.
 
 - [ ] **Fork target repo and create eval directory structure**
 
-  Fork the chosen candidate to Whitney's GitHub account. Create `evaluation/<target-name>/run-1/` directory in the eval repo with skeleton documents: `lessons-for-run2.md`, `spiny-orb-findings.md`. If the chosen target requires infrastructure to exercise (e.g., k8s cluster), document the provisioning steps.
+  Fork the chosen candidate to Whitney's GitHub account. Create `evaluation/<target-name>/run-1/` directory in the eval repo with these skeleton files: `lessons-for-run2.md`, `spiny-orb-findings.md`. Reference `~/Documents/Repositories/commit-story-v2/spiny-orb.yaml` and `~/Documents/Repositories/commit-story-v2/semconv/` as the working examples for prerequisites. If the chosen target requires infrastructure (e.g., k8s cluster), document the provisioning steps.
 
   Success criteria: Forked repo exists; eval directory created with skeleton files.
 
@@ -104,7 +108,7 @@ The eval framework has no TypeScript evaluation chain. This PRD evaluates 3 Type
 
 - [ ] **Evaluation run-1**
 
-  Whitney runs `spiny-orb instrument` in her own terminal. **Do NOT run the command yourself.**
+  Whitney runs `spiny-orb instrument` in her own terminal. **Do NOT run the command yourself.** Copy the command template from `docs/language-extension-plan.md` (line ~72). Replace `commit-story-v2` with the chosen target name, `run-N` with `run-1`, and `src` with the target's source directory.
   AI role: (1) confirm readiness, (2) save log, (3) write run-summary.md.
 
   Success criteria: Log saved; run-summary.md written.
@@ -116,7 +120,7 @@ The eval framework has no TypeScript evaluation chain. This PRD evaluates 3 Type
 - [ ] **Failure deep-dives**
 
   Produces: `evaluation/<target-name>/run-1/failure-deep-dives.md`
-  Style reference: `git show feature/prd-33-evaluation-run-12:evaluation/run-12/failure-deep-dives.md`
+  Style reference: `git fetch origin feature/prd-33-evaluation-run-12 && git show feature/prd-33-evaluation-run-12:evaluation/run-12/failure-deep-dives.md`
 
 - [ ] **Per-file evaluation**
 
@@ -137,12 +141,12 @@ The eval framework has no TypeScript evaluation chain. This PRD evaluates 3 Type
 
 - [ ] **Baseline comparison**
 
-  No prior TypeScript baseline. Compare against most recent JS run for cross-language context.
+  No prior TypeScript baseline. Compare against most recent JS run for cross-language context. Compare: overall rubric score, per-dimension scores (NDS/COV/RST/API/SCH/CDQ), file counts, skip rate, and cost. Highlight dimensions where scores differ.
   Produces: `evaluation/<target-name>/run-1/baseline-comparison.md`
 
 - [ ] **IS scoring run**
 
-  **Conditional:** Check if `evaluation/is/otelcol-config.yaml` exists on main. If yes, use scoring script. If no, document raw OTLP output.
+  **Conditional:** Check if `evaluation/is/otelcol-config.yaml` exists on main. If yes, use scoring script. If no, skip IS scoring entirely and write `is-scores.md` containing only: "IS scoring deferred — infrastructure not yet on main (PRD #44)."
   Produces: `evaluation/<target-name>/run-1/is-scores.md`
 
 - [ ] **Actionable fix output**
@@ -154,7 +158,7 @@ The eval framework has no TypeScript evaluation chain. This PRD evaluates 3 Type
 
 - [ ] **Draft Run-2 PRD**
 
-  Create on separate branch from main. First Type D PRD for TypeScript chain. Carry forward both checkpoints.
+  Create on separate branch from main (eval branches never merge). Use Type D structure from `docs/language-extension-plan.md` and `prds/37-evaluation-run-13.md` as the milestone style reference. First Type D PRD for TypeScript chain. Carry forward both checkpoints. Merge the PRD-only PR to main.
 
 ## Dependencies and Constraints
 

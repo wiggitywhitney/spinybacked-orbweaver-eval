@@ -16,6 +16,10 @@ The eval framework has no Go evaluation chain. This PRD evaluates 3 Go candidate
 - **Gate 1 (provider):** The Go language provider must be merged to spiny-orb main. Check current status in `docs/language-extension-plan.md` "Language Candidates" table.
 - **Gate 2 (research):** `docs/research/eval-target-criteria.md` must exist with 3 Go candidates before this PRD can start.
 
+### Eval Branch Convention
+
+The feature branch for this PRD **never merges to main**. The PR exists for CodeRabbit review only. When `/prd-done` runs at completion, close the issue without merging the eval branch.
+
 ## Success Metrics
 
 - **Primary**: Best Go target selected with documented rationale; Run-1 produces complete evaluation artifacts
@@ -24,7 +28,7 @@ The eval framework has no Go evaluation chain. This PRD evaluates 3 Go candidate
 
 ## Key Inputs
 
-- **Evaluation rubric** (spiny-orb repo): `spinybacked-orbweaver/research/evaluation-rubric.md` (32 rules across 6 dimensions: NDS, COV, RST, API, SCH, CDQ)
+- **Evaluation rubric** (spiny-orb repo): `~/Documents/Repositories/spinybacked-orbweaver/research/evaluation-rubric.md` (32 rules across 6 dimensions: NDS, COV, RST, API, SCH, CDQ)
 - **Candidate shortlist**: `docs/research/eval-target-criteria.md` (3 Go candidates)
 - **Auto-instrumentation library list**: Go provider does not have KNOWN_FRAMEWORK_PACKAGES yet — use `go.opentelemetry.io/contrib/instrumentation/` as the reference for what Go packages have OTel auto-instrumentation. See the "Add Go auto-instrumentation libraries" milestone.
 - **Language extension plan**: `docs/language-extension-plan.md` (Type C structure, instrument command, checkpoints)
@@ -56,15 +60,15 @@ The eval framework has no Go evaluation chain. This PRD evaluates 3 Go candidate
 
 - [ ] **Add Go auto-instrumentation libraries to spiny-orb**
 
-  The Go language provider will need its own equivalent of `KNOWN_FRAMEWORK_PACKAGES`. Research the most popular Go packages that have OTel auto-instrumentation libraries. Cross-reference against `go.opentelemetry.io/contrib/instrumentation/` for the full list. Create the Go equivalent in the spiny-orb Go provider and submit a PR.
+  Work in `~/Documents/Repositories/spinybacked-orbweaver/` on a feature branch. The Go language provider will need its own equivalent of `KNOWN_FRAMEWORK_PACKAGES`. Reference the JS version at `src/languages/javascript/ast.ts` (around line 124) for the pattern. Research the most popular Go packages with OTel auto-instrumentation by browsing `https://github.com/open-telemetry/opentelemetry-go-contrib/tree/main/instrumentation`. Create the Go equivalent in the spiny-orb Go provider. Run `npm test` to verify.
 
-  Key packages to include: `net/http`, `database/sql`, `google.golang.org/grpc`, `github.com/gin-gonic/gin`, `github.com/gorilla/mux`, `github.com/labstack/echo`, `github.com/go-redis/redis`, `go.mongodb.org/mongo-driver`, `github.com/aws/aws-sdk-go-v2`, `github.com/segmentio/kafka-go`.
+  Key packages to include (minimum): `net/http`, `database/sql`, `google.golang.org/grpc`, `github.com/gin-gonic/gin`, `github.com/gorilla/mux`, `github.com/labstack/echo`, `github.com/go-redis/redis`, `go.mongodb.org/mongo-driver`, `github.com/aws/aws-sdk-go-v2`, `github.com/segmentio/kafka-go`.
 
-  Success criteria: Go KNOWN_FRAMEWORK_PACKAGES equivalent created in spiny-orb. PR submitted.
+  Success criteria: Go KNOWN_FRAMEWORK_PACKAGES equivalent created with at least 10 packages. PR submitted with passing tests.
 
 - [ ] **Fork target repo and create eval directory structure**
 
-  Fork the chosen candidate. Create `evaluation/<target-name>/run-1/` directory with skeleton documents. If the chosen target requires infrastructure (k8s, database), document provisioning steps.
+  Fork the chosen candidate. Create `evaluation/<target-name>/run-1/` directory with these skeleton files: `lessons-for-run2.md`, `spiny-orb-findings.md`. Reference `~/Documents/Repositories/commit-story-v2/spiny-orb.yaml` and `~/Documents/Repositories/commit-story-v2/semconv/` as the working examples for prerequisites (adapt for Go). If the chosen target requires infrastructure (k8s, database), document provisioning steps.
 
   Success criteria: Forked repo exists; eval directory created; infrastructure docs if needed.
 
@@ -104,7 +108,7 @@ The eval framework has no Go evaluation chain. This PRD evaluates 3 Go candidate
 
 - [ ] **Evaluation run-1**
 
-  Whitney runs `spiny-orb instrument`. **Do NOT run yourself.**
+  Whitney runs `spiny-orb instrument`. **Do NOT run yourself.** Copy the command template from `docs/language-extension-plan.md` (line ~72). Replace `commit-story-v2` with the chosen target name, `run-N` with `run-1`, and `src` with the target's source directory (Go repos typically use `.`, `cmd/`, or `internal/` — check the forked repo's layout).
   AI role: confirm readiness, save log, write run-summary.md.
 
 - [ ] **Findings Discussion** *(user-facing checkpoint 1)*
@@ -115,7 +119,7 @@ The eval framework has no Go evaluation chain. This PRD evaluates 3 Go candidate
 
   Document Go-specific failure patterns (goroutine/channel patterns, interface handling, struct method receivers, error return patterns).
   Produces: `evaluation/<target-name>/run-1/failure-deep-dives.md`
-  Style reference: `git show feature/prd-33-evaluation-run-12:evaluation/run-12/failure-deep-dives.md`
+  Style reference: `git fetch origin feature/prd-33-evaluation-run-12 && git show feature/prd-33-evaluation-run-12:evaluation/run-12/failure-deep-dives.md`
 
 - [ ] **Per-file evaluation**
 
@@ -135,13 +139,13 @@ The eval framework has no Go evaluation chain. This PRD evaluates 3 Go candidate
 
 - [ ] **Baseline comparison**
 
-  No prior Go baseline. Compare against most recent JS run for cross-language context. Note Go-specific patterns.
+  No prior Go baseline. Compare against most recent JS run for cross-language context. Compare: overall rubric score, per-dimension scores (NDS/COV/RST/API/SCH/CDQ), file counts, skip rate, and cost. Note Go-specific patterns (goroutine context propagation, interface dispatch, error return instrumentation).
   Produces: `evaluation/<target-name>/run-1/baseline-comparison.md`
   Style reference: `git show feature/prd-33-evaluation-run-12:evaluation/run-12/baseline-comparison.md` (adapt — focus on cross-language comparison)
 
 - [ ] **IS scoring run**
 
-  **Conditional:** Check if `evaluation/is/otelcol-config.yaml` exists on main. If the chosen target requires infrastructure, provision it.
+  **Conditional:** Check if `evaluation/is/otelcol-config.yaml` exists on main. If yes, use scoring script (provision infrastructure if needed). If no, skip IS scoring entirely and write `is-scores.md` containing only: "IS scoring deferred — infrastructure not yet on main (PRD #44)."
   Produces: `evaluation/<target-name>/run-1/is-scores.md`
 
 - [ ] **Actionable fix output**
@@ -152,7 +156,7 @@ The eval framework has no Go evaluation chain. This PRD evaluates 3 Go candidate
 
 - [ ] **Draft Run-2 PRD**
 
-  First Type D for Go chain. Carry forward both checkpoints.
+  Create on separate branch from main (eval branches never merge). Use Type D structure from `docs/language-extension-plan.md` and `prds/37-evaluation-run-13.md` as the milestone style reference. First Type D for Go chain. Carry forward both checkpoints. Merge the PRD-only PR to main.
 
 ## Dependencies and Constraints
 
