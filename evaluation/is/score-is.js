@@ -227,9 +227,10 @@ function evalSPA005(spans) {
   return { status: 'pass', reason: `${shortCount} span(s) with duration <5ms (within limit of 20)` };
 }
 
-// SDK-001: check telemetry.sdk.language and telemetry.sdk.version against minimum
-// supported runtime versions. Note: telemetry.sdk.version is the language runtime
-// version as embedded in this eval's instrumentation bootstrap (not the OTel SDK version).
+// SDK-001: check telemetry.sdk.language and process.runtime.version against minimum
+// supported runtime versions. telemetry.sdk.version is the OTel SDK version (e.g. 1.25.0);
+// process.runtime.version is the language runtime version (e.g. 22.0.0 for Node.js).
+// The OTel Node.js SDK auto-populates process.runtime.version from the running Node.js version.
 const SDK_MIN_VERSIONS = { nodejs: '18', python: '3.8', go: '1.20' };
 
 function evalSDK001(resourceSpans) {
@@ -243,15 +244,15 @@ function evalSDK001(resourceSpans) {
       return { status: 'not_applicable', reason: `unknown SDK language: ${language}` };
     }
 
-    const versionStr = getAttrValue(attrs, 'telemetry.sdk.version');
+    const versionStr = getAttrValue(attrs, 'process.runtime.version');
     if (versionStr === undefined) {
-      return { status: 'fail', reason: `telemetry.sdk.language is ${language} but telemetry.sdk.version is absent` };
+      return { status: 'fail', reason: `telemetry.sdk.language is ${language} but process.runtime.version is absent` };
     }
 
     if (versionGte(versionStr, minVersion)) {
-      return { status: 'pass', reason: `${language} SDK version ${versionStr} meets minimum (≥${minVersion})` };
+      return { status: 'pass', reason: `${language} runtime version ${versionStr} meets minimum (≥${minVersion})` };
     }
-    return { status: 'fail', reason: `${language} SDK version ${versionStr} below minimum (≥${minVersion})` };
+    return { status: 'fail', reason: `${language} runtime version ${versionStr} below minimum (≥${minVersion})` };
   }
   return { status: 'not_applicable', reason: 'telemetry.sdk.language absent' };
 }
