@@ -119,7 +119,7 @@ The feature branch for this PRD **never merges to main**. The PR exists for Code
 
   Document Go-specific failure patterns (goroutine/channel patterns, interface handling, struct method receivers, error return patterns).
   Produces: `evaluation/<target-name>/run-1/failure-deep-dives.md`
-  Style reference: `git fetch origin feature/prd-33-evaluation-run-12 && git show feature/prd-33-evaluation-run-12:evaluation/run-12/failure-deep-dives.md`
+  Style reference: `Read docs/templates/eval-run-style-reference/failure-deep-dives.md`
 
 - [ ] **Per-file evaluation**
 
@@ -129,19 +129,19 @@ The feature branch for this PRD **never merges to main**. The PR exists for Code
 - [ ] **PR artifact evaluation**
 
   Produces: `evaluation/<target-name>/run-1/pr-evaluation.md`
-  Style reference: `git show feature/prd-33-evaluation-run-12:evaluation/run-12/pr-evaluation.md`
+  Style reference: `Read docs/templates/eval-run-style-reference/pr-evaluation.md`
 
 - [ ] **Rubric scoring**
 
   First Go run — establish baseline.
   Produces: `evaluation/<target-name>/run-1/rubric-scores.md`
-  Style reference: `git show feature/prd-33-evaluation-run-12:evaluation/run-12/rubric-scores.md`
+  Style reference: `Read docs/templates/eval-run-style-reference/rubric-scores.md`
 
 - [ ] **Baseline comparison**
 
   No prior Go baseline. Compare against most recent JS run for cross-language context. Compare: overall rubric score, per-dimension scores (NDS/COV/RST/API/SCH/CDQ), file counts, skip rate, and cost. Note Go-specific patterns (goroutine context propagation, interface dispatch, error return instrumentation).
   Produces: `evaluation/<target-name>/run-1/baseline-comparison.md`
-  Style reference: `git show feature/prd-33-evaluation-run-12:evaluation/run-12/baseline-comparison.md` (adapt — focus on cross-language comparison)
+  Style reference: `Read docs/templates/eval-run-style-reference/baseline-comparison.md` (adapt — focus on cross-language comparison)
 
 - [ ] **IS scoring run**
 

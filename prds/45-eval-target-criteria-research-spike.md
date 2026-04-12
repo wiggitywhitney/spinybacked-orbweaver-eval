@@ -156,6 +156,7 @@ Full context — hypotheses table, research agent framing, candidate list, and t
 | 2026-04-11 | Type C PRDs include auto-instrumentation library expansion milestone | Each Type C PRD adds the most popular auto-instrumentation libraries for that language to spiny-orb's KNOWN_FRAMEWORK_PACKAGES (or language equivalent). This is a contribution to spiny-orb, not just eval setup. | New milestone in all Type C PRDs |
 | 2026-04-11 | 4 Type C PRDs needed (JS, TS, Python, Go), not 3 | JavaScript needs a Type C PRD too — milestone 0 evaluates 3 JS candidates including commit-story-v2. If commit-story-v2 wins, early exit. If not, proceed with fork/setup/Run-1 on the new target. | New JS Type C PRD required |
 | 2026-04-11 | Redo criteria scorecard with rubric rule coverage as primary | The scorecard needs to map each rubric rule to what a target repo needs. Hypotheses are incorporated but subordinate to rule coverage. Research must be redone with the right framing. | Milestone 3 findings doc needs revision; milestone 4 blocked on revised scorecard |
+| 2026-04-11 | Copy style reference artifacts to docs/templates/ on main | The eval branch (feature/prd-33-evaluation-run-12) could be deleted per git workflow rules, breaking all git show style references permanently. Copying to main makes references durable. | All PRDs now reference docs/templates/eval-run-style-reference/ instead of git show commands |
 
 ## Progress Log
 

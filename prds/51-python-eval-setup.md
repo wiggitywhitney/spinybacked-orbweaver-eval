@@ -119,30 +119,30 @@ The feature branch for this PRD **never merges to main**. The PR exists for Code
 
   Document Python-specific failure patterns (decorator handling, import patterns, class-based vs function-based code).
   Produces: `evaluation/<target-name>/run-1/failure-deep-dives.md`
-  Style reference: `git fetch origin feature/prd-33-evaluation-run-12 && git show feature/prd-33-evaluation-run-12:evaluation/run-12/failure-deep-dives.md`
+  Style reference: `Read docs/templates/eval-run-style-reference/failure-deep-dives.md`
 
 - [ ] **Per-file evaluation**
 
   Full 32-rule rubric on ALL processed files.
   Produces: `evaluation/<target-name>/run-1/per-file-evaluation.md`
-  Style reference: `git show feature/prd-33-evaluation-run-12:evaluation/run-12/per-file-evaluation.md`
+  Style reference: `Read docs/templates/eval-run-style-reference/per-file-evaluation.md`
 
 - [ ] **PR artifact evaluation**
 
   Produces: `evaluation/<target-name>/run-1/pr-evaluation.md`
-  Style reference: `git show feature/prd-33-evaluation-run-12:evaluation/run-12/pr-evaluation.md`
+  Style reference: `Read docs/templates/eval-run-style-reference/pr-evaluation.md`
 
 - [ ] **Rubric scoring**
 
   First Python run — establish baseline.
   Produces: `evaluation/<target-name>/run-1/rubric-scores.md`
-  Style reference: `git show feature/prd-33-evaluation-run-12:evaluation/run-12/rubric-scores.md`
+  Style reference: `Read docs/templates/eval-run-style-reference/rubric-scores.md`
 
 - [ ] **Baseline comparison**
 
   No prior Python baseline. Compare against most recent JS run for cross-language context. Compare: overall rubric score, per-dimension scores (NDS/COV/RST/API/SCH/CDQ), file counts, skip rate, and cost. Note Python-specific patterns (decorator handling, class methods, import-time side effects).
   Produces: `evaluation/<target-name>/run-1/baseline-comparison.md`
-  Style reference: `git show feature/prd-33-evaluation-run-12:evaluation/run-12/baseline-comparison.md` (adapt — focus on cross-language comparison)
+  Style reference: `Read docs/templates/eval-run-style-reference/baseline-comparison.md` (adapt — focus on cross-language comparison)
 
 - [ ] **IS scoring run**
 

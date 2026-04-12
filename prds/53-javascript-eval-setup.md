@@ -125,23 +125,23 @@ If this PRD proceeds past milestone 0 (i.e., a new target is selected), the feat
 
   Root cause analysis for each failed/partial file and run-level failures.
   Produces: `evaluation/<target-name>/run-1/failure-deep-dives.md`
-  Style reference: `git fetch origin feature/prd-33-evaluation-run-12 && git show feature/prd-33-evaluation-run-12:evaluation/run-12/failure-deep-dives.md`
+  Style reference: `Read docs/templates/eval-run-style-reference/failure-deep-dives.md`
 
 - [ ] **Per-file evaluation**
 
   Full 32-rule rubric on ALL processed files.
   Produces: `evaluation/<target-name>/run-1/per-file-evaluation.md`
-  Style reference: `git show feature/prd-33-evaluation-run-12:evaluation/run-12/per-file-evaluation.md`
+  Style reference: `Read docs/templates/eval-run-style-reference/per-file-evaluation.md`
 
 - [ ] **PR artifact evaluation**
 
   Produces: `evaluation/<target-name>/run-1/pr-evaluation.md`
-  Style reference: `git show feature/prd-33-evaluation-run-12:evaluation/run-12/pr-evaluation.md`
+  Style reference: `Read docs/templates/eval-run-style-reference/pr-evaluation.md`
 
 - [ ] **Rubric scoring**
 
   Produces: `evaluation/<target-name>/run-1/rubric-scores.md`
-  Style reference: `git show feature/prd-33-evaluation-run-12:evaluation/run-12/rubric-scores.md`
+  Style reference: `Read docs/templates/eval-run-style-reference/rubric-scores.md`
 
 - [ ] **Baseline comparison**
 

@@ -120,24 +120,24 @@ The feature branch for this PRD **never merges to main**. The PR exists for Code
 - [ ] **Failure deep-dives**
 
   Produces: `evaluation/<target-name>/run-1/failure-deep-dives.md`
-  Style reference: `git fetch origin feature/prd-33-evaluation-run-12 && git show feature/prd-33-evaluation-run-12:evaluation/run-12/failure-deep-dives.md`
+  Style reference: `Read docs/templates/eval-run-style-reference/failure-deep-dives.md`
 
 - [ ] **Per-file evaluation**
 
   Full 32-rule rubric on ALL processed files.
   Produces: `evaluation/<target-name>/run-1/per-file-evaluation.md`
-  Style reference: `git show feature/prd-33-evaluation-run-12:evaluation/run-12/per-file-evaluation.md`
+  Style reference: `Read docs/templates/eval-run-style-reference/per-file-evaluation.md`
 
 - [ ] **PR artifact evaluation**
 
   Produces: `evaluation/<target-name>/run-1/pr-evaluation.md`
-  Style reference: `git show feature/prd-33-evaluation-run-12:evaluation/run-12/pr-evaluation.md`
+  Style reference: `Read docs/templates/eval-run-style-reference/pr-evaluation.md`
 
 - [ ] **Rubric scoring**
 
   First TypeScript run — establish baseline.
   Produces: `evaluation/<target-name>/run-1/rubric-scores.md`
-  Style reference: `git show feature/prd-33-evaluation-run-12:evaluation/run-12/rubric-scores.md`
+  Style reference: `Read docs/templates/eval-run-style-reference/rubric-scores.md`
 
 - [ ] **Baseline comparison**
 
