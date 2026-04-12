@@ -187,7 +187,7 @@ The Type C PRD for each target should document exactly which spans/attributes we
 |-----------|-------|
 | License | MIT |
 | Stars | 3.4k |
-| Source files | ~45-55 Python files (17 top-level + 6 subdirectories) |
+| Source files | 51 Python files (17 top-level + 6 subdirectories, confirmed via gh api tree count) |
 | I/O diversity | Git subprocess calls, file read/write, template rendering, changelog generation, version bumping |
 | Test suite | Yes (tests/ directory, CI pipeline) |
 | Async | No (synchronous, but I/O-heavy) |
@@ -358,6 +358,5 @@ Use the criteria scorecard as a **filter** (pass/fail each criterion) rather tha
 - [ni (GitHub)](https://github.com/antfu-collective/ni) — TypeScript candidate: MIT, 8.2k stars, strong runner-up
 - [wireit (GitHub)](https://github.com/google/wireit) — TypeScript candidate: Apache-2.0, 6.4k stars, viable alternative
 - spiny-orb `KNOWN_FRAMEWORK_PACKAGES` — auto-instrumentation library list at `spinybacked-orbweaver/src/languages/javascript/ast.ts:124-139`, shared by JS+TS providers
-- [litecli (GitHub)](https://github.com/dbcli/litecli) — Python candidate considered: BSD-3, 3.2k stars, viable alternative
 - [FEA-Bench (ACL)](https://aclanthology.org/2025.acl-long.839.pdf) — feature addition benchmark, repo scope determination
 - [instrumentation-score-integration.md](instrumentation-score-integration.md) — prior research on IS rule applicability and target requirements

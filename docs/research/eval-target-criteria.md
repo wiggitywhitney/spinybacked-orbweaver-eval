@@ -345,7 +345,7 @@ A complete schema only tests SCH compliance. An incomplete schema tests SCH *ext
 | Stars | 6.8k |
 | Source files | 14 Go files (2 root-level + 12 in `pkg/`) |
 | I/O types | Database (PostgreSQL via lib/pq, MySQL via go-sql-driver/mysql, SQLite via mattn/go-sqlite3, ClickHouse via clickhouse-go, BigQuery via cloud.google.com/bigquery), file R/W (migration .sql files, schema.sql) |
-| KFP overlap | **`database/sql`** (standard library) — community `otelsql` instrumentation covers this. Not in official OTel Go contrib, but widely used and will be in the Go Type C PRD's KNOWN_FRAMEWORK_PACKAGES equivalent. |
+| KFP overlap | **`database/sql`** (standard library) — not in official OTel Go contrib (`otelhttp`, `otelgrpc`, `otelmongo` are official). Community `otelsql` package instruments `database/sql` and is widely adopted. The Go Type C PRD's "add auto-instrumentation libraries" milestone decides whether to include `otelsql`; if included, COV-006 fires. If the milestone excludes community packages, COV-006 does not fire for dbmate. |
 | Existing OTel | None confirmed |
 
 **Rubric coverage notes:**

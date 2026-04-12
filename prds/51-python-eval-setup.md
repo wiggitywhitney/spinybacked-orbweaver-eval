@@ -48,7 +48,7 @@ The feature branch for this PRD **never merges to main**. The PR exists for Code
   1. Clone the repo
   2. Run the test suite 3 times (deterministic reproducibility check)
   3. Count `.py` source files (excluding tests, configs, `__init__.py`). Ideal: 30 or less.
-  4. Check dependencies (`pyproject.toml` / `requirements.txt`) for auto-instrumentation library overlap. Python OTel auto-instrumentation packages exist for: `requests`, `flask`, `django`, `sqlalchemy`, `psycopg2`, `aiohttp`, `httpx`, `celery`, `redis`, `pymongo`, `grpc`, and many more. At least one overlap is needed to test COV-006.
+  4. Check dependencies (`pyproject.toml` / `requirements.txt`) for auto-instrumentation library overlap. Check against the [OTel Python contrib instrumentation list](https://github.com/open-telemetry/opentelemetry-python-contrib/tree/main/instrumentation) — this is the authoritative reference since spiny-orb's Python provider does not have KNOWN_FRAMEWORK_PACKAGES yet. The "Add Python auto-instrumentation libraries" milestone (below) creates spiny-orb's Python list, but Milestone 0 runs first — use the OTel contrib list directly for this step. Notable packages with OTel instrumentation: `requests`, `flask`, `django`, `sqlalchemy`, `psycopg2`, `aiohttp`, `httpx`, `celery`, `redis`, `pymongo`, `grpc`, `jinja2`, `click`, `sqlite3`, `pymysql`, and many more. At least one overlap is needed to test COV-006.
   5. Map rubric rule coverage: for each of the 32 rubric rules, assess whether this candidate's code patterns can exercise it
   6. Note any caveats (already instrumented, infrastructure dependencies, etc.)
 

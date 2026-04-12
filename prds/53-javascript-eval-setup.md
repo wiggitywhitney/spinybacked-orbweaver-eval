@@ -47,7 +47,7 @@ If this PRD proceeds past milestone 0 (i.e., a new target is selected), the feat
   1. Clone the repo
   2. Run the test suite 3 times (deterministic reproducibility check)
   3. Count `.js` source files (excluding tests, configs, generated files). Ideal: 30 or less.
-  4. Check `package.json` dependencies against spiny-orb's `KNOWN_FRAMEWORK_PACKAGES` list (`~/Documents/Repositories/spinybacked-orbweaver/src/languages/javascript/ast.ts`) for auto-instrumentation library overlap (COV-006 testability)
+  4. Check `package.json` dependencies against spiny-orb's `KNOWN_FRAMEWORK_PACKAGES` list (`~/Documents/Repositories/spinybacked-orbweaver/src/languages/javascript/ast.ts`) for auto-instrumentation library overlap (COV-006 testability). **Note from research:** commit-story-v2 has zero KNOWN_FRAMEWORK_PACKAGES overlap (`@langchain/*` packages are not in the list) — COV-006 has never fired in 12 eval runs. release-it uses `undici` directly (KFP ✓). npm-check has no direct KFP import. Factor this into the rubric coverage comparison.
   5. Map rubric rule coverage: for each of the 32 rubric rules, assess whether this candidate's code patterns can exercise it
   6. Note any caveats (already instrumented, infrastructure dependencies, etc.)
 
