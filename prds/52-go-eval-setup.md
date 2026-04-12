@@ -85,7 +85,7 @@ The feature branch for this PRD **never merges to main**. The PR exists for Code
   1. Create `spiny-orb.yaml` configuration (adapt for Go)
   2. Create initial `semconv/` Weaver schema directory for the target's domain
   3. Create Go OTel bootstrap function — `setupOTelSDK()` using `go.opentelemetry.io/otel/sdk/trace` and OTLP exporter. Must include `defer shutdown(ctx)` AND explicit `os/signal.Notify` for SIGTERM/SIGINT
-  4. Add OTel API dependency to `go.mod`: `go.opentelemetry.io/otel` (API only — per OpenTelemetry packaging rules, libraries depend on the API, not the SDK)
+  4. Add OTel dependencies to `go.mod`: the API (`go.opentelemetry.io/otel`), the SDK (`go.opentelemetry.io/otel/sdk/trace`), and the OTLP exporter module. Note: the API-only rule applies to libraries; this bootstrap executable requires the full SDK and exporter to compile and export traces.
 
   Success criteria: All prerequisites present. Forked repo builds and tests pass.
 

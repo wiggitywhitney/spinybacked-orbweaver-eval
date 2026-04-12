@@ -227,7 +227,7 @@ The 8 universal rules (NDS-001, NDS-003, API-001–004, NDS-006, CDQ-002) are ex
 | **Needs verify / conditional 🔍** | **5 (incl. COV-006)** | **4** | **4** |
 | **Eval-design ≈** | **5** | **5** | **5** |
 
-**Total exercisable (✓ + 8 universal):** taze = 23 (+ COV-006 if KFP updated) · changesets = 23 · wireit = 23
+**Total exercisable (✓ + 8 universal):** taze = 23 (+ COV-006 if AUTO_INSTRUMENTED_OPERATIONS updated) · changesets = 23 · wireit = 23
 
 ---
 
@@ -511,7 +511,7 @@ The 8 universal rules (NDS-001, NDS-003, API-001–004, NDS-006, CDQ-002) are ex
 - RST-001: ✓ utility files (pkg/dbutil/dbutil.go, pkg/dbmate/version.go are pure utilities)
 - SCH domain: Database migration lifecycle (`migration.name`, `migration.direction`, `db.system.name`) — clean schema
 
-**Summary:** Smallest file count (14 files = ~19 min). Multiple database drivers means excellent DB I/O coverage. COV-006 is conditional on Go Type C PRD's KNOWN_FRAMEWORK_PACKAGES update. Locally runnable with SQLite (no external DB needed). Recommended second choice.
+**Summary:** Smallest file count (14 files = ~19 min). Multiple database drivers means excellent DB I/O coverage. COV-006 is conditional on Go provider gaining AUTO_INSTRUMENTED_OPERATIONS (call-site pattern) support for database drivers. Locally runnable with SQLite (no external DB needed). Recommended second choice.
 
 ---
 
@@ -535,7 +535,7 @@ The 8 universal rules (NDS-001, NDS-003, API-001–004, NDS-006, CDQ-002) are ex
 - RST-001: ✓ utility files (logger/log.go, helpers_unix.go, helpers_windows.go, url.go)
 - SCH domain: Repository management (`repo.url`, `repo.vcs`, `repo.local_path`, `import.path`)
 
-**Summary:** 19 files (ideal runtime ~25 min). Direct `net/http` import confirmed — COV-006 fires without KNOWN_FRAMEWORK_PACKAGES updates. Different domain from mods (repo management) and dbmate (DB migrations). Good structural diversity across the 3 Go candidates. Recommended third choice.
+**Summary:** 19 files (ideal runtime ~25 min). Direct `net/http` import confirmed — COV-006 exercisable once Go provider gains AUTO_INSTRUMENTED_OPERATIONS (call-site pattern) support for `net/http`. Different domain from mods (repo management) and dbmate (DB migrations). Good structural diversity across the 3 Go candidates. Recommended third choice.
 
 ---
 

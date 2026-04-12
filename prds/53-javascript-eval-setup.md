@@ -82,7 +82,7 @@ If this PRD proceeds past milestone 0 (i.e., a new target is selected), the feat
   In the forked target repo, add all required spiny-orb configuration:
   1. Create `spiny-orb.yaml` configuration (adapt from commit-story-v2 reference)
   2. Create initial `semconv/` Weaver schema directory for the target's domain
-  3. Create JavaScript OTel init file (`--import` flag with SDK setup using `@opentelemetry/sdk-node`). Include graceful shutdown handling (intercept `process.exit()`, handle SIGTERM/SIGINT, flush spans before exit)
+  3. Create JavaScript OTel init file (`--import` flag with SDK setup using `@opentelemetry/sdk-node`). Add graceful shutdown: register `SIGTERM` and `SIGINT` handlers that call `sdk.shutdown()` and then `process.exit(0)` — do not intercept `process.exit()` directly
   4. Add OTel `@opentelemetry/api` as a peerDependency in package.json
 
   Success criteria: spiny-orb.yaml, semconv/, OTel init file, and peerDependency all present. Forked repo builds and tests pass.

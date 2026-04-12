@@ -104,7 +104,7 @@ Same as runs 9-12.
 - **Run-12 findings** (eval repo): `evaluation/commit-story-v2/run-12/spiny-orb-findings.md` (6 findings)
 - **Run-12 lessons** (eval repo): `evaluation/commit-story-v2/run-12/lessons-for-prd13.md`
 
-> **Note**: Run-12 artifacts live on branch `feature/prd-33-evaluation-run-12`, not on main. Access with: `Read docs/templates/eval-run-style-reference/<filename>`
+> **Note**: The actual Run-12 eval artifacts (findings, actionable fixes, lessons) live on branch `feature/prd-33-evaluation-run-12`. The `docs/templates/eval-run-style-reference/` directory on main contains formatting/style reference copies only — use these for style guidance, not as artifact sources.
 
 ### Eval Branch Convention
 

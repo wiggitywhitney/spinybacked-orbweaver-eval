@@ -167,7 +167,7 @@ The target repo should use at least one library that has a corresponding OTel au
 
 The known auto-instrumentation library list lives in `spinybacked-orbweaver/src/languages/javascript/ast.ts` (`KNOWN_FRAMEWORK_PACKAGES`). Currently covers JS/TS only: database drivers (pg, mysql, mongodb, redis, ioredis), HTTP frameworks (express, fastify, koa), HTTP clients (axios, got, node-fetch, undici), gRPC, message queues, GraphQL, and ORMs. The TypeScript provider reuses this list. Python and Go providers will need language-specific equivalents (e.g., Python: `requests`, `flask`, `django`, `sqlalchemy`, `psycopg2`; Go: `net/http`, `database/sql`, `google.golang.org/grpc`).
 
-**How to evaluate:** Check if the target's `package.json` / `requirements.txt` / `go.mod` imports any package in the KNOWN_FRAMEWORK_PACKAGES list (or future language equivalents). At least one overlap is needed to exercise COV-006.
+**How to evaluate:** Check if the target uses call-site patterns matching `AUTO_INSTRUMENTED_OPERATIONS` in `cov006.ts` (JS/TS) or language-equivalent call-site patterns (Python/Go when providers are built). Package import overlap with `KNOWN_FRAMEWORK_PACKAGES` is a useful proxy for initial screening, but COV-006 fires on call-site patterns detected in instrumented code, not on import presence alone. At least one verified call-site pattern match is needed to exercise COV-006.
 
 #### Deliberately incomplete Weaver schema strategy 🟢 high (added post-review)
 

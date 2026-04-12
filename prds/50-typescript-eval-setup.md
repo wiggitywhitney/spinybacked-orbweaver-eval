@@ -81,7 +81,7 @@ The feature branch for this PRD **never merges to main**. The PR exists for Code
   In the forked target repo:
   1. Create `spiny-orb.yaml` configuration (adapt from commit-story-v2 reference, adjusting for TypeScript)
   2. Create initial `semconv/` Weaver schema directory for the target's domain
-  3. Create TypeScript OTel init file — same mechanism as Node.js (`--import` flag with SDK setup using `@opentelemetry/sdk-node`). Include `@opentelemetry/exporter-trace-otlp-http`. Add graceful shutdown (intercept `process.exit()`, SIGTERM/SIGINT handlers, flush spans)
+  3. Create TypeScript OTel init file — same mechanism as Node.js (`--import` flag with SDK setup using `@opentelemetry/sdk-node`). Include `@opentelemetry/exporter-trace-otlp-http`. Add graceful shutdown: register `SIGTERM` and `SIGINT` handlers that call `sdk.shutdown()` and then `process.exit(0)` — do not intercept `process.exit()` directly
   4. Add OTel `@opentelemetry/api` as a peerDependency in package.json
 
   Success criteria: All prerequisites present. Forked repo builds and tests pass.
