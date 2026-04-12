@@ -95,7 +95,7 @@ Same as runs 9-13.
 
 This PRD document (`prds/55-evaluation-run-14.md`) merges to `main` so `/prd-start` can pick it up.
 
-The **evaluation execution branch** created by `/prd-start` (e.g., `feature/prd-55-eval-run-14`) **never merges to main**. That branch holds eval artifacts and exists for CodeRabbit review only. When `/prd-done` runs at completion, close issue #55 without merging the eval execution branch.
+The **evaluation execution branch** created by `/prd-start` from main **never merges to main**. That branch holds eval artifacts and exists for CodeRabbit review only. When `/prd-done` runs at completion, close issue #55 without merging the eval execution branch.
 
 ---
 
