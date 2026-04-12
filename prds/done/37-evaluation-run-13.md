@@ -1,7 +1,8 @@
 # PRD #13: JS Evaluation Run-13: commit-story-v2 — NDS-003 Truthy-Check Fix Verification
 
-**Status:** Draft
+**Status:** Complete
 **Created:** 2026-04-09
+**Completed:** 2026-04-12
 **GitHub Issue:** #37
 **Depends on:** PRD #12 (run-12 complete, 6 findings documented, actionable fix output delivered to spiny-orb team)
 

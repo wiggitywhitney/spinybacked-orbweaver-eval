@@ -3,7 +3,7 @@
 Execution order within each tier matters. Items are listed in dependency order — complete earlier items before starting later ones. See `docs/language-extension-plan.md` for the full dependency chain (Steps 1-7).
 
 ## Short-term
-- JS evaluation run-13: NDS-003 truthy fix verification (PRD #37)
+- JS evaluation run-14: Smart rollback + type-safety fix verification (PRD #55)
 
 ## Medium-term (in order)
 1. Repo generalization (PRD #43)
