@@ -120,7 +120,7 @@ Full research findings live in `docs/research/instrumentation-score-integration.
 
   Success criteria: The SDK bootstrap file has a clear comment explaining the `OTEL_METRICS_EXPORTER=none` behavior and when to change it for IS scoring; the change is committed.
 
-- [ ] **Add IS scoring as step 9 to the Type D milestone sequence in docs/language-extension-plan.md**
+- [ ] **Add IS scoring as step 9 to the Type D milestone sequence in docs/language-extension-plan.md, and cascade to all existing open eval PRDs** (Decision 2026-04-12)
 
   Open `docs/language-extension-plan.md` and find the Type D section. Step 9 currently reads: "(IS scoring run) *(active once Step 2 IS integration PRD completes — run instrumented code with OTel Collector, score OTLP output against IS spec, add IS score to rubric scoring document)*". Replace that placeholder with full step details:
 
@@ -129,9 +129,13 @@ Full research findings live in `docs/research/instrumentation-score-integration.
   3. Output: Record the IS score and per-rule breakdown in `evaluation/[TARGET]/run-[N]/is-score.md`
   4. Note for k8s repos: IS scoring requires a running cluster; see `evaluation/is/README.md` for the Kind-based workflow
 
-  Commit with `[skip ci]`.
+  **After updating the template, cascade the same IS scoring step to all existing open eval PRDs that were created from this template:**
+  - PRDs #50, #51, #52, #53 (Type C eval setup PRDs) — each has a conditional IS scoring placeholder ("Check if `evaluation/is/otelcol-config.yaml` exists on main..."). Replace that placeholder with the full IS scoring step details above.
+  - PRD #55 (eval run-14) — has no IS scoring step at all. Add it as step 9 between rubric scoring and baseline comparison.
 
-  Success criteria: `docs/language-extension-plan.md` Type D step 9 contains all four items above and references `evaluation/is/score-is.js` and `evaluation/is/otelcol-config.yaml` by exact path; the placeholder note is removed.
+  Commit all changes with `[skip ci]`.
+
+  Success criteria: `docs/language-extension-plan.md` Type D step 9 contains all four items above; PRDs #50, #51, #52, #53 each have the full IS scoring step replacing the placeholder; PRD #55 has an IS scoring step 9 added; all reference `evaluation/is/score-is.js` and `evaluation/is/otelcol-config.yaml` by exact path.
 
 ## Dependencies and Constraints
 
@@ -159,6 +163,7 @@ Full research findings live in `docs/research/instrumentation-score-integration.
 | 2026-04-10 | MET rules: include as "not applicable" not "failed" | spiny-orb produces no OTel metrics by design; failing MET rules would punish a deliberate scope decision | MET rules don't affect weighted score |
 | 2026-04-10 | SPA-003 threshold: >50 unique span names | Spec marks threshold as "TODO"; using 50 as a reasonable default with a comment | Revisit when spec defines the threshold |
 | 2026-04-11 | Pin IS spec to commit 52c14ba | Spec is v0.1, actively changing; pinning ensures reproducible scoring | Must check spec repo for updates before each new language eval chain begins |
+| 2026-04-12 | Cascade Type D template update to all existing open eval PRDs | PRDs #50, #51, #52, #53 (Type C eval setup PRDs) and #55 (run-14) were created from the Type D template and contain IS scoring placeholder text. When milestone 5 updates the template, it must also update those PRDs — otherwise agents running those PRDs will use stale IS scoring instructions. | Milestone 5 expanded to include cascade step |
 
 ## Progress Log
 
