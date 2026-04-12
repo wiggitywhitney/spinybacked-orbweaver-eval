@@ -348,6 +348,6 @@ if (import.meta.url === pathToFileURL(process.argv[1]).href) {
   const content = readFileSync(filePath, 'utf8');
   const lines = content.trim().split('\n').filter(Boolean);
   const result = scoreIS(lines);
-  console.log(formatOutput(result));
+  console.log(formatOutput(result)); // eslint-disable-line no-console
   process.exit(0);
 }
