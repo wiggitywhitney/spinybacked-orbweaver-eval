@@ -121,7 +121,7 @@ The feature branch for this PRD (`feature/prd-55-eval-run-14`) **never merges to
   2. **Smart checkpoint rollback fix** (P1 — critical): Verify RUN13-1 is merged. Check that checkpoint failures now parse the test stack trace and roll back only the file(s) named in the failing test output, not the full window.
   3. **Type-safety setAttribute guidance** (P1 — critical): Verify RUN13-2 is merged. Check that the agent instrumentation prompt includes guidance to use `!= null` over `!== undefined`, and `new Date(value).toISOString()` for timestamp fields.
   4. **summaryNode NDS-003 fix** (P1): Verify RUN13-3 is merged. Check that either the NDS-003 allowlist or the agent prompt addresses template literal modification in summaryNode.
-  5. **Target repo readiness** (commit-story-v2): Verify on `main`, clean working tree, spiny-orb.yaml and semconv/ exist. **Before switching to main, commit any uncommitted artifacts to the instrument branch** (`spiny-orb/instrument-1776014409398` from run-13).
+  5. **Target repo readiness** (commit-story-v2): Verify on `main`, clean working tree, spiny-orb.yaml and semconv/ exist. **Before switching to main, check for uncommitted artifacts on the current instrument branch** (run `git status` in commit-story-v2) and commit any to that branch before switching.
   6. **Push auth stability check**: Verify token still works (dry-run push).
   7. **File inventory**: Count .js files in commit-story-v2's `src/` directory.
   8. Rebuild spiny-orb from **current branch** (not necessarily main — rebuild from whatever branch it's on).
