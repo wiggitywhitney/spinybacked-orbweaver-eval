@@ -1,0 +1,22 @@
+# OTel Collector config for IS scoring runs.
+# Receives OTLP traces on port 4318 (same port as Datadog Agent — they cannot
+# run simultaneously). Writes line-delimited JSON to eval-traces.json.
+# Each line is an ExportTraceServiceRequest JSON object, parseable by score-is.js.
+#
+# IS spec pinned to commit 52c14ba.
+
+receivers:
+  otlp:
+    protocols:
+      http:
+        endpoint: 0.0.0.0:4318
+
+exporters:
+  file:
+    path: ./eval-traces.json
+
+service:
+  pipelines:
+    traces:
+      receivers: [otlp]
+      exporters: [file]

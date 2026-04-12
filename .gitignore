@@ -37,3 +37,6 @@ journal/context/
 
 # Weaver generated output
 semconv/resolved.json
+
+# IS scoring — captured trace data from local runs
+evaluation/is/eval-traces.json
