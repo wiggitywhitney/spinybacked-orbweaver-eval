@@ -53,7 +53,7 @@ The PR summary includes **7 advisory findings**. Three are on rolled-back files 
 | SCH-004: month_label redundant with month_count | summary-graph.js | Incorrect (string label ≠ integer count) + moot |
 | NDS-005: original try/catch missing | index.js | Moot — file rolled back |
 
-**Advisory contradiction rate**: 4 incorrect out of 6 non-moot advisories = **67%** (up from run-12's 44%, well above 30% target).
+**Advisory contradiction rate**: 2 clearly incorrect out of 4 non-moot advisories = **50%** (up from run-12's 44%, above 30% target). Note: week_label and month_label findings are also incorrect but on rolled-back files (moot), so excluded from the rate denominator.
 
 The SCH-004 judge continues to produce false semantic equivalences. In this run it hallucinated that a boolean flag (`force`) is equivalent to a token limit, and that a count of input dates is equivalent to time window timestamps. This has been a persistent issue since run-11.
 
