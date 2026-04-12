@@ -322,7 +322,7 @@ Use the criteria scorecard as a **filter** (pass/fail each criterion) rather tha
 | Fork-and-freeze compatible | Mandatory | H8, universal benchmark practice |
 | I/O operation diversity (≥2 types) | Mandatory | H3 refined, H7, rubric coverage |
 | Rubric coverage maximization | Primary | Post-review: the real measure — how many of 32 rules can this target exercise? |
-| Auto-instrumentation library overlap | Recommended | Post-review: tests COV-006 rule; requires overlap with KNOWN_FRAMEWORK_PACKAGES or language equivalent |
+| Auto-instrumentation call-site coverage | Recommended | Post-review: tests COV-006 rule; requires at least one verified call-site-pattern match (AUTO_INSTRUMENTED_OPERATIONS in cov006.ts or language equivalent). Import overlap is screening-only evidence. |
 | Clear entry point (CLI/server) | Recommended | IS scoring, entry point clarity |
 | Skip-rate balance (30-60% non-instrumentable) | Recommended | H2 refined |
 | Error handling pattern diversity | Recommended | H4, CDQ-003 rubric rule |
