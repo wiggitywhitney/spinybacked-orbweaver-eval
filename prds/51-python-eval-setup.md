@@ -22,6 +22,14 @@ The eval framework has no Python evaluation chain. This PRD evaluates 3 Python c
 - **Secondary**: Rubric scores establish the Python baseline for future runs
 - **Validation**: All evaluation artifacts pass cross-document audit; both user-facing checkpoints completed
 
+## Key Inputs
+
+- **Evaluation rubric** (spiny-orb repo): `spinybacked-orbweaver/research/evaluation-rubric.md` (32 rules across 6 dimensions: NDS, COV, RST, API, SCH, CDQ)
+- **Candidate shortlist**: `docs/research/eval-target-criteria.md` (3 Python candidates)
+- **Auto-instrumentation library list**: Python provider does not have KNOWN_FRAMEWORK_PACKAGES yet — use `opentelemetry-python-contrib/instrumentation/` as the reference for what Python packages have OTel auto-instrumentation. See the "Add Python auto-instrumentation libraries" milestone.
+- **Language extension plan**: `docs/language-extension-plan.md` (Type C structure, instrument command, checkpoints)
+- **OTel bootstrap reference**: `docs/research/instrumentation-score-integration.md` (SDK bootstrap by language table — Python section)
+
 ## Implementation Milestones
 
 - [ ] **Step 0: Read `docs/language-extension-plan.md` completely before proceeding with any other milestone**
@@ -40,7 +48,7 @@ The eval framework has no Python evaluation chain. This PRD evaluates 3 Python c
   5. Map rubric rule coverage: for each of the 32 rubric rules, assess whether this candidate's code patterns can exercise it
   6. Note any caveats (already instrumented, infrastructure dependencies, etc.)
 
-  Compare the 3 candidates. Pick the one that exercises the most rubric rules while staying at or below 30 source files. Prefer candidates from different GitHub authors/organizations — same-author candidates share coding style and reduce rubric diversity.
+  Compare the 3 candidates. Pick the one that exercises the most rubric rules while staying at or below 30 source files. A candidate above 30 files is acceptable if the extra files exercise rubric rules that the smaller candidates cannot — document the justification. Prefer candidates from different GitHub authors/organizations — same-author candidates share coding style and reduce rubric diversity.
 
   Present the recommendation to Whitney with rationale. Do not proceed until Whitney confirms the selection.
 
@@ -72,9 +80,11 @@ The eval framework has no Python evaluation chain. This PRD evaluates 3 Python c
 
 - [ ] **Create deliberately incomplete Weaver schema**
 
-  Deliberately omit some spans and attributes. Document the omissions. Tests SCH extension capability.
+  The `semconv/` schema should deliberately omit some spans and attributes that a human would include. Tests SCH extension capability. The process: (1) first draft a complete schema, (2) remove items to create the incomplete version, (3) document both.
 
-  Success criteria: At least 3 intentional omissions documented.
+  **What to omit**: Domain-specific attributes inferable from code — not trivial metadata. Good omissions: attributes for function parameters, span names for operations the code performs. Bad omissions: generic OTel attributes.
+
+  Success criteria: Complete schema drafted first. At least 3 semantically meaningful omissions documented with rationale.
 
 - [ ] **Verify test suite runs clean on unmodified target**
 
@@ -105,27 +115,30 @@ The eval framework has no Python evaluation chain. This PRD evaluates 3 Python c
 
   Document Python-specific failure patterns (decorator handling, import patterns, class-based vs function-based code).
   Produces: `evaluation/<target-name>/run-1/failure-deep-dives.md`
-  Style reference: `git show feature/prd-33-evaluation-run-12:evaluation/commit-story-v2/run-12/failure-deep-dives.md`
+  Style reference: `git show feature/prd-33-evaluation-run-12:evaluation/run-12/failure-deep-dives.md`
 
 - [ ] **Per-file evaluation**
 
   Full 32-rule rubric on ALL processed files.
-  Produces: `evaluation/<target-name>/run-1/per-file-evaluation.md` and `per-file-evaluation.json`
-  Style reference: `git show feature/prd-33-evaluation-run-12:evaluation/commit-story-v2/run-12/per-file-evaluation.md`
+  Produces: `evaluation/<target-name>/run-1/per-file-evaluation.md`
+  Style reference: `git show feature/prd-33-evaluation-run-12:evaluation/run-12/per-file-evaluation.md`
 
 - [ ] **PR artifact evaluation**
 
   Produces: `evaluation/<target-name>/run-1/pr-evaluation.md`
+  Style reference: `git show feature/prd-33-evaluation-run-12:evaluation/run-12/pr-evaluation.md`
 
 - [ ] **Rubric scoring**
 
   First Python run — establish baseline.
   Produces: `evaluation/<target-name>/run-1/rubric-scores.md`
+  Style reference: `git show feature/prd-33-evaluation-run-12:evaluation/run-12/rubric-scores.md`
 
 - [ ] **Baseline comparison**
 
   No prior Python baseline. Compare against most recent JS run for cross-language context. Note Python-specific patterns.
   Produces: `evaluation/<target-name>/run-1/baseline-comparison.md`
+  Style reference: `git show feature/prd-33-evaluation-run-12:evaluation/run-12/baseline-comparison.md` (adapt — focus on cross-language comparison)
 
 - [ ] **IS scoring run**
 

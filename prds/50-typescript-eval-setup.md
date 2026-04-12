@@ -22,6 +22,14 @@ The eval framework has no TypeScript evaluation chain. This PRD evaluates 3 Type
 - **Secondary**: Rubric scores establish the TypeScript baseline for future runs
 - **Validation**: All evaluation artifacts pass cross-document audit; both user-facing checkpoints completed
 
+## Key Inputs
+
+- **Evaluation rubric** (spiny-orb repo): `spinybacked-orbweaver/research/evaluation-rubric.md` (32 rules across 6 dimensions: NDS, COV, RST, API, SCH, CDQ)
+- **Candidate shortlist**: `docs/research/eval-target-criteria.md` (3 TS candidates)
+- **Auto-instrumentation library list**: `spinybacked-orbweaver/src/languages/javascript/ast.ts` (`KNOWN_FRAMEWORK_PACKAGES`, line ~124 — shared by JS and TS providers)
+- **Language extension plan**: `docs/language-extension-plan.md` (Type C structure, instrument command, checkpoints)
+- **OTel bootstrap reference**: `docs/research/instrumentation-score-integration.md` (SDK bootstrap by language table)
+
 ## Implementation Milestones
 
 - [ ] **Step 0: Read `docs/language-extension-plan.md` completely before proceeding with any other milestone**
@@ -40,7 +48,7 @@ The eval framework has no TypeScript evaluation chain. This PRD evaluates 3 Type
   5. Map rubric rule coverage: for each of the 32 rubric rules, assess whether this candidate's code patterns can exercise it
   6. Note any caveats (already instrumented, infrastructure dependencies, etc.)
 
-  Compare the 3 candidates. Pick the one that exercises the most rubric rules while staying at or below 30 source files. Prefer candidates from different GitHub authors/organizations — same-author candidates share coding style and reduce rubric diversity.
+  Compare the 3 candidates. Pick the one that exercises the most rubric rules while staying at or below 30 source files. A candidate above 30 files is acceptable if the extra files exercise rubric rules that the smaller candidates cannot — document the justification. Prefer candidates from different GitHub authors/organizations — same-author candidates share coding style and reduce rubric diversity.
 
   Present the recommendation to Whitney with rationale. Do not proceed until Whitney confirms the selection.
 
@@ -70,9 +78,11 @@ The eval framework has no TypeScript evaluation chain. This PRD evaluates 3 Type
 
 - [ ] **Create deliberately incomplete Weaver schema**
 
-  The `semconv/` schema should deliberately omit some spans and attributes that a human would include. Tests whether spiny-orb identifies missing attributes and proposes schema extensions (SCH extension capability). Document exactly which spans/attributes were omitted and why.
+  The `semconv/` schema should deliberately omit some spans and attributes that a human would include. Tests whether spiny-orb identifies missing attributes and proposes schema extensions (SCH extension capability). The process: (1) first draft a complete schema covering all domain concepts, (2) then remove items to create the deliberately incomplete version, (3) document both versions so the eval can compare.
 
-  Success criteria: At least 3 intentional omissions documented.
+  **What to omit**: Domain-specific attributes that spiny-orb should be able to infer from reading the code — not trivial metadata like `service.version`. Good omissions: attributes for function parameters that appear in the code, span names for operations the code clearly performs. Bad omissions: generic OTel attributes that don't require code understanding.
+
+  Success criteria: Complete schema drafted first. At least 3 semantically meaningful omissions documented with rationale.
 
 - [ ] **Verify test suite runs clean on unmodified target**
 
@@ -106,24 +116,24 @@ The eval framework has no TypeScript evaluation chain. This PRD evaluates 3 Type
 - [ ] **Failure deep-dives**
 
   Produces: `evaluation/<target-name>/run-1/failure-deep-dives.md`
-  Style reference: `git show feature/prd-33-evaluation-run-12:evaluation/commit-story-v2/run-12/failure-deep-dives.md`
+  Style reference: `git show feature/prd-33-evaluation-run-12:evaluation/run-12/failure-deep-dives.md`
 
 - [ ] **Per-file evaluation**
 
   Full 32-rule rubric on ALL processed files.
-  Produces: `evaluation/<target-name>/run-1/per-file-evaluation.md` and `per-file-evaluation.json`
-  Style reference: `git show feature/prd-33-evaluation-run-12:evaluation/commit-story-v2/run-12/per-file-evaluation.md`
+  Produces: `evaluation/<target-name>/run-1/per-file-evaluation.md`
+  Style reference: `git show feature/prd-33-evaluation-run-12:evaluation/run-12/per-file-evaluation.md`
 
 - [ ] **PR artifact evaluation**
 
   Produces: `evaluation/<target-name>/run-1/pr-evaluation.md`
-  Style reference: `git show feature/prd-33-evaluation-run-12:evaluation/commit-story-v2/run-12/pr-evaluation.md`
+  Style reference: `git show feature/prd-33-evaluation-run-12:evaluation/run-12/pr-evaluation.md`
 
 - [ ] **Rubric scoring**
 
   First TypeScript run — establish baseline.
   Produces: `evaluation/<target-name>/run-1/rubric-scores.md`
-  Style reference: `git show feature/prd-33-evaluation-run-12:evaluation/commit-story-v2/run-12/rubric-scores.md`
+  Style reference: `git show feature/prd-33-evaluation-run-12:evaluation/run-12/rubric-scores.md`
 
 - [ ] **Baseline comparison**
 

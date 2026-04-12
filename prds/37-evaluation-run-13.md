@@ -104,7 +104,7 @@ Same as runs 9-12.
 - **Run-12 findings** (eval repo): `evaluation/commit-story-v2/run-12/spiny-orb-findings.md` (6 findings)
 - **Run-12 lessons** (eval repo): `evaluation/commit-story-v2/run-12/lessons-for-prd13.md`
 
-> **Note**: Run-12 artifacts live on branch `feature/prd-33-evaluation-run-12`, not on main. Access with: `git show feature/prd-33-evaluation-run-12:evaluation/commit-story-v2/run-12/<filename>`
+> **Note**: Run-12 artifacts live on branch `feature/prd-33-evaluation-run-12`, not on main. Access with: `git show feature/prd-33-evaluation-run-12:evaluation/run-12/<filename>`
 
 ### Eval Branch Convention
 
@@ -148,23 +148,23 @@ The feature branch for this PRD (`feature/prd-37-evaluation-run-13`) **never mer
 
 - [ ] **Failure deep-dives** — For each failed file AND run-level failure. Includes the partial file if any.
   Produces: `evaluation/commit-story-v2/run-13/failure-deep-dives.md`
-  Style reference: `git show feature/prd-33-evaluation-run-12:evaluation/commit-story-v2/run-12/failure-deep-dives.md`
+  Style reference: `git show feature/prd-33-evaluation-run-12:evaluation/run-12/failure-deep-dives.md`
 
 - [ ] **Per-file evaluation** — Full rubric on ALL files (no spot-checking). Evaluate all 32 rules across all committed and partial files.
   Produces: `evaluation/commit-story-v2/run-13/per-file-evaluation.md`
-  Style reference: `git show feature/prd-33-evaluation-run-12:evaluation/commit-story-v2/run-12/per-file-evaluation.md`
+  Style reference: `git show feature/prd-33-evaluation-run-12:evaluation/run-12/per-file-evaluation.md`
 
 - [ ] **PR artifact evaluation** — Evaluate PR quality.
   Produces: `evaluation/commit-story-v2/run-13/pr-evaluation.md`
-  Style reference: `git show feature/prd-33-evaluation-run-12:evaluation/commit-story-v2/run-12/pr-evaluation.md`
+  Style reference: `git show feature/prd-33-evaluation-run-12:evaluation/run-12/pr-evaluation.md`
 
 - [ ] **Rubric scoring** — Synthesize dimension-level scores.
   Produces: `evaluation/commit-story-v2/run-13/rubric-scores.md`
-  Style reference: `git show feature/prd-33-evaluation-run-12:evaluation/commit-story-v2/run-12/rubric-scores.md`
+  Style reference: `git show feature/prd-33-evaluation-run-12:evaluation/run-12/rubric-scores.md`
 
 - [ ] **Baseline comparison** — Compare run-13 vs runs 2-12.
   Produces: `evaluation/commit-story-v2/run-13/baseline-comparison.md`
-  Style reference: `git show feature/prd-33-evaluation-run-12:evaluation/commit-story-v2/run-12/baseline-comparison.md`
+  Style reference: `git show feature/prd-33-evaluation-run-12:evaluation/run-12/baseline-comparison.md`
 
 - [ ] **Actionable fix output** — Primary handoff deliverable. At milestone completion:
   1. Run the cross-document audit agent to verify consistency across all run-13 evaluation artifacts.

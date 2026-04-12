@@ -71,7 +71,16 @@ Full context — hypotheses table, research agent framing, candidate list, and t
 
   The initial findings doc exists at `docs/research/eval-target-criteria.md` but needs revision. The revised document must:
 
-  1. **Redo the criteria scorecard with rubric rule coverage as the primary criterion.** Map each of the 32 rubric rules to what a target repo needs for that rule to fire. The 9 hypotheses from the original research are incorporated but subordinate to rule coverage. File count guidance: 30 files or less is ideal; higher only if extra rubric coverage justifies longer runtime (grounded in operational data: 30 files = ~40 minutes). Include auto-instrumentation library overlap as a criterion (tests COV-006). Include deliberately incomplete Weaver schema strategy. Note that `KNOWN_FRAMEWORK_PACKAGES` in `spinybacked-orbweaver/src/languages/javascript/ast.ts` is the current auto-instrumentation list (JS/TS only); Python and Go equivalents need to be created.
+  1. **Redo the criteria scorecard with rubric rule coverage as the primary criterion.** Read the 32-rule rubric at `spinybacked-orbweaver/research/evaluation-rubric.md`. For each rule, document what a target repo needs for that rule to fire. Format as a table: `| Rule | What the target needs | Example |`. The 9 hypotheses from the original research are incorporated as supporting context for specific rules, not as standalone criteria.
+
+     **Rubric rule mapping examples** (to calibrate the expected depth):
+     - `COV-006`: Target must import a library from `KNOWN_FRAMEWORK_PACKAGES` (or language equivalent) so the agent can test auto-instrumentation recommendation vs. manual spans. This is about ANY library with OTel auto-instrumentation (HTTP clients, DB drivers, web frameworks, message queues) — NOT specifically about LLM frameworks. Do not over-weight LLM-calling repos just because the existing target (commit-story-v2) uses LangGraph.
+     - `CDQ-003`: Target must have diverse error handling patterns (try/catch with specific exceptions, retry logic, custom exception hierarchies) so the agent's error handling instrumentation quality is tested across multiple patterns.
+     - `RST-001`: Target must have files with no I/O operations (pure types, utilities, constants) so the agent's skip judgment is tested — these files should NOT be instrumented.
+     - `SCH-*` rules: Target must have domain concepts that map to semantic convention attributes. A deliberately incomplete Weaver schema (see eval design strategy) tests whether the agent extends the schema.
+     - `NDS-002`: Target must have a passing test suite. This is a hard gate — if tests fail after instrumentation, the entire run fails.
+
+     File count guidance: 30 files or less is ideal; higher only if extra rubric coverage justifies longer runtime (grounded in operational data: 30 files = ~40 minutes). Include auto-instrumentation library overlap as a criterion (tests COV-006). Note that `KNOWN_FRAMEWORK_PACKAGES` in `spinybacked-orbweaver/src/languages/javascript/ast.ts` is the current auto-instrumentation list (JS/TS only); Python and Go equivalents do not exist yet. When evaluating Python/Go candidates for auto-instrumentation overlap, check against the OTel contrib instrumentation list for that language (`opentelemetry-python-contrib/instrumentation/` for Python, `go.opentelemetry.io/contrib/instrumentation/` for Go), not against a spiny-orb list.
 
   2. **Find and assess 3 candidates per language (12 total).** Use `/research` to search for candidates. Assess each against the rubric-coverage scorecard. For each candidate, document: name, GitHub URL, license, stars, source file count, I/O types, auto-instrumentation library overlap, rubric rules exercisable, and any caveats (already instrumented, k8s-dependent, etc.).
      - **JavaScript**: Must include commit-story-v2. Find 2 more open-source JS CLI tools.
@@ -91,7 +100,7 @@ Full context — hypotheses table, research agent framing, candidate list, and t
 
   After `docs/research/eval-target-criteria.md` is revised with 12 candidates, create or revise 4 Type C PRDs using `/prd-create`:
 
-  - **JavaScript**: New Type C PRD. Milestone 0 evaluates 3 JS candidates (including commit-story-v2). **Early exit:** if milestone 0 picks commit-story-v2, the PRD exits early — it's already set up and running. If a different candidate wins, pause for Whitney's confirmation with rationale before proceeding with fork/setup/Run-1.
+  - **JavaScript**: Revise PRD #53. Milestone 0 evaluates 3 JS candidates (including commit-story-v2). **Early exit:** if milestone 0 picks commit-story-v2, the PRD exits early — it's already set up and running. If a different candidate wins, pause for Whitney's confirmation with rationale before proceeding with fork/setup/Run-1.
   - **TypeScript**: Revise PRD #50. Milestone 0 evaluates 3 TS candidates from the shortlist.
   - **Python**: Revise PRD #51. Milestone 0 evaluates 3 Python candidates from the shortlist.
   - **Go**: Revise PRD #52. Milestone 0 evaluates 3 Go candidates from the shortlist.

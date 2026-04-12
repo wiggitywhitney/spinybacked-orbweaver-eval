@@ -72,7 +72,7 @@ This PRD type exists exactly once per target. It is the "onboarding" for that la
 caffeinate -s env -u ANTHROPIC_CUSTOM_HEADERS -u ANTHROPIC_BASE_URL vals exec -i -f .vals.yaml -- node ~/Documents/Repositories/spinybacked-orbweaver/bin/spiny-orb.js instrument src --verbose 2>&1 | tee ~/Documents/Repositories/spinybacked-orbweaver-eval/evaluation/commit-story-v2/run-N/spiny-orb-output.log
 ```
 
-Note: update `run-N` to the current run number before each run. Everything else stays the same.
+Note: update `run-N` to the current run number and `commit-story-v2` to the target repo name (e.g., `taze`, `commitizen`, `k8s-vectordb-sync`) before each run. The `src` argument is the directory to instrument — adapt if the target uses a different source directory.
 
 ### Type D: Run-N PRD (recurring, indefinitely)
 Identical in structure to the existing PRDs #3–13. Triggered by findings from the previous run. Follows the established milestone sequence:
@@ -193,14 +193,14 @@ The spike's findings document at `docs/research/eval-target-criteria.md` must in
 
 ## Language Candidates
 
-| Language | spiny-orb provider status | Primary candidate | Notes |
-|----------|--------------------------|-------------------|-------|
-| JavaScript | Supported | commit-story-v2 | Validate against criteria — not assumed good |
-| TypeScript | spinybacked-orbweaver PRD B (in progress) | Cluster Whisperer | Whitney's existing repo; validate against criteria. **Do NOT use Spinybacked Orbweaver itself** — instrumenting the agent on itself creates confounding noise (failures could be TypeScript provider issues or self-referential edge cases; can't distinguish) |
-| Python | spinybacked-orbweaver PRD D (future) | TBD | No personal repo Whitney is excited about; research spike finds candidate |
-| Go | spinybacked-orbweaver PRD E (future) | k8s-vectordb-sync | Whitney's existing repo; validate against criteria |
+| Language | spiny-orb provider status | Candidates (3 per language) | Notes |
+|----------|--------------------------|----------------------------|-------|
+| JavaScript | Supported | commit-story-v2 + 2 TBD from research | commit-story-v2 is one of 3 candidates, not assumed winner. PRD #53 milestone 0 selects. |
+| TypeScript | spinybacked-orbweaver PRD B (in progress) | taze (recommended) + 2 TBD from research | taze identified via research. Cluster Whisperer is a candidate but already instrumented and has 59 files. PRD #50 milestone 0 selects. |
+| Python | spinybacked-orbweaver PRD D (future) | commitizen (identified) + 2 TBD from research | commitizen identified via research. PRD #51 milestone 0 selects. |
+| Go | spinybacked-orbweaver PRD E (future) | 3 TBD from research | k8s-vectordb-sync is a candidate but already instrumented and k8s-dependent. PRD #52 milestone 0 selects. |
 
-For languages without a good personal repo candidate (Python, future languages), the research spike finds a small, popular, permissively-licensed open-source project that hits the target criteria. Fork once, freeze it, never pull upstream.
+Each language gets 3 candidates in `docs/research/eval-target-criteria.md`. The Type C PRD for each language (PRDs #50-53) evaluates all 3 and selects the best one in milestone 0. Fork once, freeze it, never pull upstream.
 
 ---
 

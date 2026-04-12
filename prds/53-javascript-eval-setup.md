@@ -20,7 +20,14 @@ commit-story-v2 was chosen as the JavaScript eval target by circumstance, not by
 
 - **Primary**: Best JS target selected with documented rationale based on rubric rule coverage
 - **If early exit**: Decision documented; existing commit-story-v2 eval chain continues
-- **If new target**: Run-1 produces complete evaluation artifacts; TypeScript baseline established
+- **If new target**: Run-1 produces complete evaluation artifacts; JavaScript baseline established
+
+## Key Inputs
+
+- **Evaluation rubric** (spiny-orb repo): `spinybacked-orbweaver/research/evaluation-rubric.md` (32 rules across 6 dimensions: NDS, COV, RST, API, SCH, CDQ)
+- **Candidate shortlist**: `docs/research/eval-target-criteria.md` (3 JS candidates)
+- **Auto-instrumentation library list**: `spinybacked-orbweaver/src/languages/javascript/ast.ts` (`KNOWN_FRAMEWORK_PACKAGES`, line ~124)
+- **Language extension plan**: `docs/language-extension-plan.md` (Type C structure, instrument command, checkpoints)
 
 ## Implementation Milestones
 
@@ -40,7 +47,7 @@ commit-story-v2 was chosen as the JavaScript eval target by circumstance, not by
   5. Map rubric rule coverage: for each of the 32 rubric rules, assess whether this candidate's code patterns can exercise it
   6. Note any caveats (already instrumented, infrastructure dependencies, etc.)
 
-  Compare the 3 candidates. Pick the one that exercises the most rubric rules while staying at or below 30 source files. Prefer candidates from different GitHub authors/organizations — same-author candidates share coding style and reduce rubric diversity.
+  Compare the 3 candidates. Pick the one that exercises the most rubric rules while staying at or below 30 source files. A candidate above 30 files is acceptable if the extra files exercise rubric rules that the smaller candidates cannot — document the justification. Prefer candidates from different GitHub authors/organizations — same-author candidates share coding style and reduce rubric diversity.
 
   **If commit-story-v2 wins**: Document the rationale. This PRD exits early — commit-story-v2 is already set up with 12 runs of history. Mark all remaining milestones as skipped. The existing JavaScript eval chain (PRDs #37+) continues.
 
@@ -72,9 +79,11 @@ commit-story-v2 was chosen as the JavaScript eval target by circumstance, not by
 
 - [ ] **Create deliberately incomplete Weaver schema**
 
-  The `semconv/` schema created in the previous milestone should deliberately omit some spans and attributes that a human would include. This tests whether spiny-orb identifies missing attributes and proposes schema extensions. Document exactly which spans/attributes were omitted and why, so the eval can verify whether spiny-orb surfaces them.
+  The `semconv/` schema created in the previous milestone should deliberately omit some spans and attributes that a human would include. This tests whether spiny-orb identifies missing attributes and proposes schema extensions (SCH extension capability). The process: (1) first draft a complete schema covering all domain concepts, (2) then remove items to create the deliberately incomplete version, (3) document both the complete and incomplete versions so the eval can compare.
 
-  Success criteria: Schema gaps documented in this milestone's notes. At least 3 intentional omissions recorded.
+  **What to omit**: Domain-specific attributes that spiny-orb should be able to infer from reading the code — not trivial metadata like `service.version`. Good omissions: attributes for function parameters that appear in the code, span names for operations the code clearly performs, semantic attributes for external calls the code makes. Bad omissions: generic OTel attributes that don't require code understanding.
+
+  Success criteria: Complete schema drafted first. At least 3 semantically meaningful omissions documented with rationale for why spiny-orb should be able to infer each one.
 
 - [ ] **Verify test suite runs clean on unmodified target**
 
@@ -112,23 +121,23 @@ commit-story-v2 was chosen as the JavaScript eval target by circumstance, not by
 
   Root cause analysis for each failed/partial file and run-level failures.
   Produces: `evaluation/<target-name>/run-1/failure-deep-dives.md`
-  Style reference: `git show feature/prd-33-evaluation-run-12:evaluation/commit-story-v2/run-12/failure-deep-dives.md`
+  Style reference: `git show feature/prd-33-evaluation-run-12:evaluation/run-12/failure-deep-dives.md`
 
 - [ ] **Per-file evaluation**
 
   Full 32-rule rubric on ALL processed files.
-  Produces: `evaluation/<target-name>/run-1/per-file-evaluation.md` and `per-file-evaluation.json`
-  Style reference: `git show feature/prd-33-evaluation-run-12:evaluation/commit-story-v2/run-12/per-file-evaluation.md`
+  Produces: `evaluation/<target-name>/run-1/per-file-evaluation.md`
+  Style reference: `git show feature/prd-33-evaluation-run-12:evaluation/run-12/per-file-evaluation.md`
 
 - [ ] **PR artifact evaluation**
 
   Produces: `evaluation/<target-name>/run-1/pr-evaluation.md`
-  Style reference: `git show feature/prd-33-evaluation-run-12:evaluation/commit-story-v2/run-12/pr-evaluation.md`
+  Style reference: `git show feature/prd-33-evaluation-run-12:evaluation/run-12/pr-evaluation.md`
 
 - [ ] **Rubric scoring**
 
   Produces: `evaluation/<target-name>/run-1/rubric-scores.md`
-  Style reference: `git show feature/prd-33-evaluation-run-12:evaluation/commit-story-v2/run-12/rubric-scores.md`
+  Style reference: `git show feature/prd-33-evaluation-run-12:evaluation/run-12/rubric-scores.md`
 
 - [ ] **Baseline comparison**
 
