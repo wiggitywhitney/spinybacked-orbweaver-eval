@@ -112,13 +112,15 @@ Full research findings live in `docs/research/instrumentation-score-integration.
 
   Success criteria: `npm test` passes; at least 5 test cases covering the scenarios above; fixtures in `tests/fixtures/is/`.
 
-- [x] **Enable metrics in SDK bootstrap for IS scoring runs**
+- [ ] **Enable metrics in SDK bootstrap for IS scoring runs**
 
   The target repo (commit-story-v2, located at `~/Documents/Repositories/commit-story-v2` or wherever Whitney has it cloned) has `OTEL_METRICS_EXPORTER=none` set in its SDK bootstrap file (`examples/instrumentation.js`). This file is in the commit-story-v2 repo, NOT this eval repo — do not look in this repo's files for this setting. For IS scoring runs, metrics must be enabled so MET rules can be evaluated (they will fail — this is expected and documented).
 
-  Add a comment in the SDK bootstrap explaining: "For IS scoring runs, remove OTEL_METRICS_EXPORTER=none so the IS scorer can evaluate MET rules. MET rules will fail because spiny-orb produces no OTel metrics — this is honest signal about spiny-orb's scope." Do NOT remove the `OTEL_METRICS_EXPORTER=none` line from the default config — add a comment explaining when to remove it, or make it conditional on an env var (e.g., `process.env.IS_SCORING_RUN`). Commit with `[skip ci]`.
+  Add a comment in the SDK bootstrap explaining: "For IS scoring runs, remove OTEL_METRICS_EXPORTER=none so the IS scorer can evaluate MET rules. MET rules will fail because spiny-orb produces no OTel metrics — this is honest signal about spiny-orb's scope." Do NOT remove the `OTEL_METRICS_EXPORTER=none` line from the default config — add a comment explaining when to remove it, or make it conditional on an env var (e.g., `process.env.IS_SCORING_RUN`). Commit on a feature branch. (Updated per Decision 2026-04-12: merge to main via PR — do not leave as a committed branch.)
 
-  Success criteria: The SDK bootstrap file has a clear comment explaining the `OTEL_METRICS_EXPORTER=none` behavior and when to change it for IS scoring; the change is committed.
+  **Merge to main**: Create a PR for `feature/is-scoring-metrics-bootstrap` in commit-story-v2, handle CodeRabbit review, and merge. No eval-repo changes need to be added to this branch — the `examples/instrumentation.js` commit is the only change.
+
+  Success criteria: The SDK bootstrap file has a clear comment; the change is merged to main in commit-story-v2 via PR.
 
 - [x] **Add IS scoring as step 9 to the Type D milestone sequence in docs/language-extension-plan.md**
 
@@ -159,6 +161,7 @@ Full research findings live in `docs/research/instrumentation-score-integration.
 | 2026-04-10 | MET rules: include as "not applicable" not "failed" | spiny-orb produces no OTel metrics by design; failing MET rules would punish a deliberate scope decision | MET rules don't affect weighted score |
 | 2026-04-10 | SPA-003 threshold: >50 unique span names | Spec marks threshold as "TODO"; using 50 as a reasonable default with a comment | Revisit when spec defines the threshold |
 | 2026-04-11 | Pin IS spec to commit 52c14ba | Spec is v0.1, actively changing; pinning ensures reproducible scoring | Must check spec repo for updates before each new language eval chain begins |
+| 2026-04-12 | Merge commit-story-v2 SDK bootstrap change via PR (not leave as committed branch) | Change must land on main to be available for IS scoring runs; eval PR/merge workflow applies to commit-story-v2 as well | Milestone 5 requires creating a PR and merging feature/is-scoring-metrics-bootstrap to main in commit-story-v2 |
 
 ## Progress Log
 
