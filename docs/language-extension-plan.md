@@ -78,7 +78,11 @@ Note: update `run-N` to the current run number and `commit-story-v2` to the targ
 Identical in structure to the existing PRDs #3–13. Triggered by findings from the previous run. Follows the established milestone sequence:
 1. Collect skeleton documents
 2. Pre-run verification (verify prior findings fixed, check prerequisites)
-3. Evaluation run (Whitney runs `spiny-orb instrument` in her terminal — see exact command in Type C section above)
+3. Evaluation run (Whitney runs `spiny-orb instrument` in her terminal — **do NOT run this yourself**). Exact command (run from the target repo directory):
+   ```bash
+   caffeinate -s env -u ANTHROPIC_CUSTOM_HEADERS -u ANTHROPIC_BASE_URL vals exec -i -f .vals.yaml -- node ~/Documents/Repositories/spinybacked-orbweaver/bin/spiny-orb.js instrument src --verbose 2>&1 | tee ~/Documents/Repositories/spinybacked-orbweaver-eval/evaluation/<target-repo>/run-N/spiny-orb-output.log
+   ```
+   Update `<target-repo>` and `run-N` before each run. Adapt `src` if the target uses a different source directory.
 4. Findings Discussion *(user-facing checkpoint 1: raw signal before analysis)*
 5. Failure deep-dives
 6. Per-file evaluation

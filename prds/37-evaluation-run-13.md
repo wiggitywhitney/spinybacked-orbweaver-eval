@@ -129,9 +129,9 @@ The feature branch for this PRD (`feature/prd-37-evaluation-run-13`) **never mer
 
 ## Milestones
 
-- [ ] **Collect skeleton documents** — Create `evaluation/commit-story-v2/run-13/` directory with `lessons-for-prd14.md` skeleton. Must run before pre-run verification step 9.
+- [x] **Collect skeleton documents** — Create `evaluation/commit-story-v2/run-13/` directory with `lessons-for-prd14.md` skeleton. Must run before pre-run verification step 9.
 
-- [ ] **Pre-run verification** — Verify spiny-orb fixes and validate run prerequisites:
+- [x] **Pre-run verification** — Verify spiny-orb fixes and validate run prerequisites:
   1. **Handoff triage review**: Read the spiny-orb team's triage of `evaluation/commit-story-v2/run-12/actionable-fix-output.md`. Check which findings were filed as issues.
   2. **NDS-003 truthy-check fix** (P1 — critical): Verify orbweaver#388 is merged. Check that `if (value)` and `if (obj.property)` guard patterns are now in the NDS-003 allowlist when the guarded body contains only `span.*` calls.
   3. **COV-004 guidance** (P2): Check if any validator or guidance was added to prevent the "context propagation" span omission pattern for exported async I/O functions.
@@ -142,37 +142,42 @@ The feature branch for this PRD (`feature/prd-37-evaluation-run-13`) **never mer
   8. Record version and findings status.
   9. Append observations to `evaluation/commit-story-v2/run-13/lessons-for-prd14.md`.
 
-- [ ] **Evaluation run-13** — Whitney runs `spiny-orb instrument` in her own terminal. **Do NOT run the command yourself.** AI role in this milestone: (1) create `evaluation/commit-story-v2/run-13/` directory, (2) confirm readiness with Whitney, (3) once Whitney provides the log output, save it to `evaluation/commit-story-v2/run-13/spiny-orb-output.log` and write `evaluation/commit-story-v2/run-13/run-summary.md`.
+- [x] **Evaluation run-13** — Whitney runs `spiny-orb instrument` in her own terminal. **Do NOT run the command yourself.** AI role in this milestone: (1) confirm readiness with Whitney, (2) once Whitney provides the log output, save it to `evaluation/commit-story-v2/run-13/spiny-orb-output.log` and write `evaluation/commit-story-v2/run-13/run-summary.md`.
 
-- [ ] **Findings Discussion** *(user-facing checkpoint 1)* — After `run-summary.md` is written, before any evaluation documents are started: report to Whitney: (1) files committed / failed / partial, (2) quality score if visible in log, (3) cost, (4) push/PR status, (5) top 1-2 surprises or regressions. Keep it conversational, under 10 lines. Wait for her acknowledgment before proceeding.
+  **Exact command** (run from `~/Documents/Repositories/commit-story-v2`):
+  ```bash
+  caffeinate -s env -u ANTHROPIC_CUSTOM_HEADERS -u ANTHROPIC_BASE_URL vals exec -i -f .vals.yaml -- node ~/Documents/Repositories/spinybacked-orbweaver/bin/spiny-orb.js instrument src --verbose 2>&1 | tee ~/Documents/Repositories/spinybacked-orbweaver-eval/evaluation/commit-story-v2/run-13/spiny-orb-output.log
+  ```
 
-- [ ] **Failure deep-dives** — For each failed file AND run-level failure. Includes the partial file if any.
+- [x] **Findings Discussion** *(user-facing checkpoint 1)* — After `run-summary.md` is written, before any evaluation documents are started: report to Whitney: (1) files committed / failed / partial, (2) quality score if visible in log, (3) cost, (4) push/PR status, (5) top 1-2 surprises or regressions. Keep it conversational, under 10 lines. Wait for her acknowledgment before proceeding.
+
+- [x] **Failure deep-dives** — For each failed file AND run-level failure. Includes the partial file if any.
   Produces: `evaluation/commit-story-v2/run-13/failure-deep-dives.md`
   Style reference: `Read docs/templates/eval-run-style-reference/failure-deep-dives.md`
 
-- [ ] **Per-file evaluation** — Full rubric on ALL files (no spot-checking). Evaluate all 32 rules across all committed and partial files.
+- [x] **Per-file evaluation** — Full rubric on ALL files (no spot-checking). Evaluate all 32 rules across all committed and partial files.
   Produces: `evaluation/commit-story-v2/run-13/per-file-evaluation.md`
   Style reference: `Read docs/templates/eval-run-style-reference/per-file-evaluation.md`
 
-- [ ] **PR artifact evaluation** — Evaluate PR quality.
+- [x] **PR artifact evaluation** — Evaluate PR quality.
   Produces: `evaluation/commit-story-v2/run-13/pr-evaluation.md`
   Style reference: `Read docs/templates/eval-run-style-reference/pr-evaluation.md`
 
-- [ ] **Rubric scoring** — Synthesize dimension-level scores.
+- [x] **Rubric scoring** — Synthesize dimension-level scores.
   Produces: `evaluation/commit-story-v2/run-13/rubric-scores.md`
   Style reference: `Read docs/templates/eval-run-style-reference/rubric-scores.md`
 
-- [ ] **Baseline comparison** — Compare run-13 vs runs 2-12.
+- [x] **Baseline comparison** — Compare run-13 vs runs 2-12.
   Produces: `evaluation/commit-story-v2/run-13/baseline-comparison.md`
   Style reference: `Read docs/templates/eval-run-style-reference/baseline-comparison.md`
 
-- [ ] **Actionable fix output** — Primary handoff deliverable. At milestone completion:
+- [x] **Actionable fix output** — Primary handoff deliverable. At milestone completion:
   1. Run the cross-document audit agent to verify consistency across all run-13 evaluation artifacts.
   2. *(User-facing checkpoint 2)* Give Whitney an interpreted summary of key findings — failures, root causes, notable patterns, what to watch for in run-14.
   3. Print the absolute file path of `evaluation/commit-story-v2/run-13/actionable-fix-output.md` (derive from current working directory).
   4. **Pause.** Do not proceed to Draft PRD #14 until Whitney confirms she has handed the document off to the spiny-orb team.
 
-- [ ] **Draft PRD #14** — Create on a separate branch from main. Merge the PRD PR to main so `/prd-start` can pick it up. Carry forward both user-facing checkpoints (Findings Discussion + handoff pause) into PRD #14's milestone structure.
+- [x] **Draft PRD #14** — Create on a separate branch from main. Merge the PRD PR to main so `/prd-start` can pick it up. Carry forward both user-facing checkpoints (Findings Discussion + handoff pause) into PRD #14's milestone structure.
 
 ---
 

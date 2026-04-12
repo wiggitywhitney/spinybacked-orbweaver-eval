@@ -10,6 +10,8 @@ Entry format: `- (YYYY-MM-DD) Description of feature-level change (PRD #X, miles
 - (2026-04-11) Fixed stale repo name references missed during PRD #43 generalization: updated Two-Repo Workflow tables in prd-32 and prd-33 to spinybacked-orbweaver-eval, removed commit-story-v2-eval/ prefix from prd-3 run-2 path, corrected self-contradictory grep patterns in prd-43 validation section (PRD #43, CodeRabbit review)
 
 ### Added
+- (2026-04-12) Completed evaluation run-13: 25/25 quality on 7 committed files (Q×F = 7.0), 10 rollbacks from 2 checkpoint failures, PR #62 created (third consecutive). Full evaluation artifacts written: run-summary, failure-deep-dives, per-file-evaluation, pr-evaluation, rubric-scores, baseline-comparison, actionable-fix-output. Handoff delivered to spiny-orb team — 5 issues filed (#435–#439). (PRD #37, all milestones)
+- (2026-04-12) Drafted PRD #14 (issue #55): evaluation run-14 verifying smart rollback + type-safety fixes. Merged to main via PR #56. (PRD #37, Draft PRD #14 milestone)
 - (2026-03-13) Moved Weaver schema to canonical `semconv/` location on main (PRD #3, pre-run preparation)
 - (2026-03-13) Added `orb.yaml`, `src/instrumentation.js`, and OTel peerDependencies as permanent eval config on main (PRD #3, pre-run preparation)
 - (2026-03-13) Added graceful shutdown handling to OTel SDK init file (PRD #3, pre-run preparation)
