@@ -106,7 +106,7 @@ This repo was originally forked from commit-story-v2 and contains a tracked copy
 
   Success criteria: All four eval-specific items exist at their new paths; `spiny-orb.yaml` `sdkInitFile` points to the new location; no eval files remain under `src/` or `tests/`.
 
-- [ ] **Remove source files from eval repo**
+- [x] **Remove source files from eval repo**
 
   *(Prerequisite: milestone 2 must be complete — eval-specific files must be relocated before running git rm. Updated per Decision 3.)*
 
@@ -122,7 +122,7 @@ This repo was originally forked from commit-story-v2 and contains a tracked copy
 
   Success criteria: No commit-story source files remain tracked in this repo.
 
-- [ ] **Update CI workflows and any scripts that referenced removed files**
+- [x] **Update CI workflows and any scripts that referenced removed files**
 
   Check `.github/` workflows and `scripts/` for any step that runs `npm test`, `npm install`, references `src/`, `tests/`, or assumes a Node.js project structure. Update or remove those steps. The eval repo no longer has a package.json, so npm-based CI steps are invalid.
 
@@ -132,7 +132,7 @@ This repo was originally forked from commit-story-v2 and contains a tracked copy
 
   Success criteria: No workflow or script references `npm test`, `src/`, or `tests/` in ways that assume they still exist here.
 
-- [ ] **Verify eval workflow runs end-to-end**
+- [x] **Verify eval workflow runs end-to-end**
 
   Read `prds/37-evaluation-run-13.md` and locate the prerequisites or pre-run verification milestone. Step through each item, confirming it works without local source. If no explicit checklist exists in that PRD, verify these three things manually:
   1. The instrument command from `docs/language-extension-plan.md` can be assembled and would run without error (the target path `../commit-story-v2/src` exists; the output path `evaluation/commit-story-v2/run-N/` exists)
