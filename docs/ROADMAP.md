@@ -13,6 +13,9 @@ Execution order within each tier matters. Items are listed in dependency order �
 5. JavaScript eval setup + Run-1: target selection from 3 candidates (PRD #53) — depends on #45; JS provider already exists
 6. TypeScript eval setup + Run-1: target selection from 3 candidates (PRD #50) — depends on #45 + TS provider landing
 
+## Post-run-14 (unblocked, sequenced after run-14)
+- Save all eval run artifacts to main with per-target run log (PRD #57) — backfill runs 2–14, wire into Type D template
+
 ## Long-term (blocked by language providers)
 7. Python eval setup + Run-1: target selection from 3 candidates (PRD #51) — depends on #45 + Python provider landing
 8. Go eval setup + Run-1: target selection from 3 candidates (PRD #52) — depends on #45 + Go provider landing
