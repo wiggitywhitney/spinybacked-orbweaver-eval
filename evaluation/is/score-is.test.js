@@ -5,10 +5,10 @@ import { describe, it, expect } from 'vitest';
 import { readFileSync } from 'fs';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
-import { scoreIS } from '../evaluation/is/score-is.js';
+import { scoreIS } from './score-is.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-const fixturesDir = join(__dirname, 'fixtures/is');
+const fixturesDir = join(__dirname, 'fixtures');
 
 function loadFixture(name) {
   const content = readFileSync(join(fixturesDir, name), 'utf8');
