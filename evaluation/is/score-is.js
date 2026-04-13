@@ -52,8 +52,9 @@ function toNanos(val) {
 }
 
 function versionGte(versionStr, minStr) {
-  const vParts = String(versionStr).split('.').map(Number);
-  const mParts = String(minStr).split('.').map(Number);
+  // Strip leading 'v' — Node.js process.version returns "v18.x.x" format.
+  const vParts = String(versionStr).replace(/^v/, '').split('.').map(Number);
+  const mParts = String(minStr).replace(/^v/, '').split('.').map(Number);
   for (let i = 0; i < Math.max(vParts.length, mParts.length); i++) {
     const v = vParts[i] ?? 0;
     const m = mParts[i] ?? 0;
