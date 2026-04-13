@@ -81,26 +81,42 @@ This repo was originally forked from commit-story-v2 and contains a tracked copy
 
   Success criteria: `docs/research/source-cleanup-audit.md` exists with a classification for every file listed above.
 
-- [ ] **Migrate eval-originated changes upstream to commit-story-v2**
+- [ ] **Relocate eval-specific files within the repo before removal**
 
-  Using the audit from the previous milestone, migrate each file classified `needs-upstream-migration` to `../commit-story-v2`: create a branch there, add the file with appropriate context, push, and open a PR following the standard git workflow for that repo. Do not proceed with removal until each PR is merged to commit-story-v2 main. Verify with `git show upstream/main -- <path>` after each merge.
+  *(Updated per Decision 3: no upstream migration needed — all eval-specific files stay in this repo but must move out of src/ and tests/ before git rm.)*
 
-  If no files require migration, document that conclusion in the audit doc and proceed.
+  The audit identified four eval-specific files that must be preserved but relocated out of the directories slated for removal:
 
-  Do not remove files from this repo in this milestone. Commit any audit doc updates with `[skip ci]`.
+  | Current path | Move to | Why |
+  |---|---|---|
+  | `src/instrumentation.js` | `evaluation/examples/instrumentation.js` | Eval OTel bootstrap; required by `spiny-orb.yaml` as `sdkInitFile` |
+  | `tests/score-is.test.js` | `evaluation/is/score-is.test.js` | IS scoring test; import path (`../evaluation/is/score-is.js`) stays valid from new location |
+  | `tests/fixtures/is/all-pass.jsonl` | `evaluation/is/fixtures/all-pass.jsonl` | IS scoring fixture |
+  | `tests/fixtures/is/missing-service-name.jsonl` | `evaluation/is/fixtures/missing-service-name.jsonl` | IS scoring fixture |
+  | `tests/fixtures/is/orphan-span.jsonl` | `evaluation/is/fixtures/orphan-span.jsonl` | IS scoring fixture |
+  | `tests/fixtures/is/too-many-internal.jsonl` | `evaluation/is/fixtures/too-many-internal.jsonl` | IS scoring fixture |
 
-  Success criteria: Every `needs-upstream-migration` file either (a) exists on commit-story-v2 main in equivalent form, or (b) is documented as intentionally not migrated with rationale.
+  Use `git mv` for each move so history is preserved. After moving, update:
+  - `spiny-orb.yaml`: change `sdkInitFile` from `src/instrumentation.js` to `evaluation/examples/instrumentation.js`
+  - `tests/score-is.test.js` (at its new path): verify the relative import path `../evaluation/is/score-is.js` still resolves correctly from `evaluation/is/score-is.test.js`
+
+  Do not remove any other files in this milestone.
+
+  Commit with `[skip ci]`.
+
+  Success criteria: All four eval-specific items exist at their new paths; `spiny-orb.yaml` `sdkInitFile` points to the new location; no eval files remain under `src/` or `tests/`.
 
 - [ ] **Remove source files from eval repo**
 
-  Using the audit classification, remove all files and directories classified `safe-to-remove` using `git rm -r`. Do not touch `eval-specific` files. For any `unknown` files, resolve the classification first (consult the audit doc or ask).
+  *(Prerequisite: milestone 2 must be complete — eval-specific files must be relocated before running git rm. Updated per Decision 3.)*
+
+  Using the audit classification, remove all files and directories classified `safe-to-remove` using `git rm -r`. Do not touch `eval-specific` files (they were already moved in milestone 2). There are no `unknown` files; the audit found none.
 
   After removal, verify:
   1. `git ls-files src/ tests/` returns empty
   2. `git ls-files semconv/` returns empty (or only eval-specific entries if any exist)
   3. The remaining `scripts/` entries are all eval-specific
   4. `package.json`, `package-lock.json`, `vitest.config.js` are removed (they are commit-story-specific)
-  5. `evaluation-run-2.log` is removed (stray artifact)
 
   Commit with `[skip ci]`.
 
@@ -133,12 +149,12 @@ This repo was originally forked from commit-story-v2 and contains a tracked copy
 
 - **Depends on**: PRD #43 (repo generalization) — must be merged before starting this PRD so the directory structure is stable
 - **Must not block**: PRD #37 (eval run-13) — run-13 may proceed in `../commit-story-v2` independently; this PRD does not affect that workflow
-- **Upstream repo**: commit-story-v2 (`upstream` remote points to `../commit-story-v2`) — migration milestone requires write access
+- **Upstream repo**: commit-story-v2 (`upstream` remote points to `../commit-story-v2`) — no write access required; audit confirmed no upstream migration needed (Decision 3)
 
 ## Risks and Mitigations
 
-- **Risk**: `src/instrumentation.js` or semconv changes are not in commit-story-v2 and are needed for future runs
-  - **Mitigation**: Audit milestone explicitly checks for this; migration milestone ensures upstream before removal
+- **Risk**: `src/instrumentation.js` is removed before being relocated, breaking spiny-orb.yaml and future eval runs
+  - **Mitigation**: Milestone 2 relocates it to `evaluation/examples/instrumentation.js` and updates `spiny-orb.yaml` before any `git rm` runs (Decision 3)
 - **Risk**: A CI workflow or script depends on the removed files
   - **Mitigation**: Dedicated CI update milestone with explicit grep for npm/src/tests references
 - **Risk**: Unknown files are incorrectly removed
@@ -150,6 +166,7 @@ This repo was originally forked from commit-story-v2 and contains a tracked copy
 |------|----------|-----------|--------|
 | 2026-04-11 | Research/discovery milestone first | Known divergence (src/instrumentation.js, semconv) means removal without audit risks data loss | Removal blocked on audit completion |
 | 2026-04-11 | coverage/ and node_modules/ excluded from PRD | Already gitignored; no git action needed | Scope reduced |
+| 2026-04-13 | No upstream migration to commit-story-v2 needed | Audit found zero `needs-upstream-migration` files. `src/instrumentation.js` is eval infrastructure (OTLP/Datadog exporter, IS_SCORING_RUN support) — not commit-story application code; it must not go to commit-story-v2. All other diverged files have upstream as the canonical/improved version. | Milestone 2 scope changes: skip upstream PRs entirely; instead move eval-specific files to safe locations within this repo before `git rm`. Milestone 3 prerequisite: eval-specific files must be relocated first. |
 
 ## Progress Log
 
