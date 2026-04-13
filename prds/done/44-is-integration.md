@@ -114,13 +114,9 @@ Full research findings live in `docs/research/instrumentation-score-integration.
 
 - [x] **Enable metrics in SDK bootstrap for IS scoring runs**
 
-  The target repo (commit-story-v2, located at `~/Documents/Repositories/commit-story-v2` or wherever Whitney has it cloned) has `OTEL_METRICS_EXPORTER=none` set in its SDK bootstrap file (`examples/instrumentation.js`). This file is in the commit-story-v2 repo, NOT this eval repo — do not look in this repo's files for this setting. For IS scoring runs, metrics must be enabled so MET rules can be evaluated (they will fail — this is expected and documented).
+  Added `IS_SCORING_RUN` env var support to `commit-story-v2/examples/instrumentation.js`. When `IS_SCORING_RUN=1`, the `OTEL_METRICS_EXPORTER=none` suppression is skipped. Note: MET rules are marked `not_applicable` by the IS scorer regardless of metrics exporter settings — the scorer does not penalize apps that produce no OTel metrics by design. The PR was merged to main in commit-story-v2 via PR #63 (`feature/is-scoring-metrics-bootstrap`).
 
-  Add a comment in the SDK bootstrap explaining: "For IS scoring runs, remove OTEL_METRICS_EXPORTER=none so the IS scorer can evaluate MET rules. MET rules will fail because spiny-orb produces no OTel metrics — this is honest signal about spiny-orb's scope." Do NOT remove the `OTEL_METRICS_EXPORTER=none` line from the default config — add a comment explaining when to remove it, or make it conditional on an env var (e.g., `process.env.IS_SCORING_RUN`). Commit on a feature branch. (Updated per Decision 2026-04-12: merge to main via PR — do not leave as a committed branch.)
-
-  **Merge to main**: Create a PR for `feature/is-scoring-metrics-bootstrap` in commit-story-v2, handle CodeRabbit review, and merge. No eval-repo changes need to be added to this branch — the `examples/instrumentation.js` commit is the only change.
-
-  Success criteria: The SDK bootstrap file has a clear comment; the change is merged to main in commit-story-v2 via PR.
+  Success criteria: Change merged to main in commit-story-v2 via PR. ✅ Complete (wiggitywhitney/commit-story-v2#63).
 
 - [x] **Add IS scoring as step 9 to the Type D milestone sequence in docs/language-extension-plan.md**
 

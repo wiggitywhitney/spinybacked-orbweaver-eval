@@ -85,9 +85,9 @@ Identical in structure to the existing PRDs #3–13. Triggered by findings from 
 7. PR artifact evaluation
 8. Rubric scoring
 9. IS scoring run
-   1. **Prerequisites**: OTel Collector running with `evaluation/is/otelcol-config.yaml`; `OTEL_METRICS_EXPORTER` removed or overridden via `IS_SCORING_RUN=1` for this run (see `evaluation/is/README.md`)
-   2. **Action**: Run the target app with the Collector as OTLP receiver; collect `evaluation/is/eval-traces.json`; run `node evaluation/is/score-is.js evaluation/is/eval-traces.json`
-   3. **Output**: Record the IS score and per-rule breakdown in `evaluation/[TARGET]/run-[N]/is-score.md`
+   1. **Prerequisites**: OTel Collector running with `evaluation/is/otelcol-config.yaml` (see `evaluation/is/README.md` for install and start instructions). No metrics-exporter override needed — MET rules are marked `not_applicable` by the scorer regardless.
+   2. **Action**: Run the target app with the Collector as OTLP receiver; collect `evaluation/is/eval-traces.json`; run `node evaluation/is/score-is.js evaluation/is/eval-traces.json > evaluation/[TARGET]/run-[N]/is-score.md`
+   3. **Output**: `evaluation/[TARGET]/run-[N]/is-score.md` is written by the command above.
    4. **Note for k8s repos**: IS scoring requires a running cluster; see `evaluation/is/README.md` for the Kind-based workflow
 10. Baseline comparison
 11. Actionable fix output *(user-facing checkpoint 2: interpreted summary + handoff pause)*

@@ -156,9 +156,9 @@ If this PRD proceeds past milestone 0 (i.e., a new target is selected), the feat
 
 - [ ] **IS scoring run**
 
-  1. **Prerequisites**: OTel Collector running with `evaluation/is/otelcol-config.yaml`; `OTEL_METRICS_EXPORTER` removed or overridden via `IS_SCORING_RUN=1` for this run (see `evaluation/is/README.md`)
-  2. **Action**: Run the target app with the Collector as OTLP receiver; collect `evaluation/is/eval-traces.json`; run `node evaluation/is/score-is.js evaluation/is/eval-traces.json`
-  3. **Output**: Record the IS score and per-rule breakdown in `evaluation/<target-name>/run-1/is-score.md`
+  1. **Prerequisites**: OTel Collector running with `evaluation/is/otelcol-config.yaml` (see `evaluation/is/README.md` for install and start instructions). No metrics-exporter override needed — MET rules are marked `not_applicable` by the scorer regardless.
+  2. **Action**: Run the target app with the Collector as OTLP receiver; collect `evaluation/is/eval-traces.json`; run `node evaluation/is/score-is.js evaluation/is/eval-traces.json > evaluation/<target-name>/run-1/is-score.md`
+  3. **Output**: `evaluation/<target-name>/run-1/is-score.md` is written by the command above.
   4. **Note for k8s repos**: IS scoring requires a running cluster; see `evaluation/is/README.md` for the Kind-based workflow
   Produces: `evaluation/<target-name>/run-1/is-score.md`
 

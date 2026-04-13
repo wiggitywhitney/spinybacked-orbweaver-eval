@@ -45,8 +45,10 @@ function spanKindInt(kind) {
 function toNanos(val) {
   if (val === undefined || val === null || val === '') return 0n;
   if (typeof val === 'bigint') return val;
-  if (typeof val === 'string') return BigInt(val);
-  return BigInt(Math.trunc(val));
+  if (typeof val === 'string') {
+    try { return BigInt(val); } catch { return 0n; }
+  }
+  return isFinite(val) ? BigInt(Math.trunc(val)) : 0n;
 }
 
 function versionGte(versionStr, minStr) {
@@ -65,9 +67,15 @@ function versionGte(versionStr, minStr) {
 
 function collectResourceSpans(lines) {
   const resourceSpans = [];
-  for (const line of lines) {
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
     if (!line.trim()) continue;
-    const obj = JSON.parse(line);
+    let obj;
+    try {
+      obj = JSON.parse(line);
+    } catch (e) {
+      throw new Error(`Failed to parse JSON at line ${i + 1}: ${e.message}`);
+    }
     for (const rs of (obj.resourceSpans || [])) {
       resourceSpans.push(rs);
     }

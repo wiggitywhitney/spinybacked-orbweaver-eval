@@ -29,7 +29,7 @@ This PRD adds a repeatable end-of-run step: copy all generated artifacts to main
 ### Functional Requirements
 
 - **Must Have**: All artifacts from every eval run copied to `evaluation/<target>/run-N/` on main (no curation — per-file-evaluation.md, failure-deep-dives.md, rubric-scores.md, baseline-comparison.md, pr-evaluation.md, actionable-fix-output.md, run-summary.md, spiny-orb-output.log, lessons-for-prdN.md, is-score.md when present)
-- **Must Have**: `evaluation/<target>/run-log.md` on main — a compact markdown table updated each run: run number, date, score, committed file count, Q×F, push/PR status, top 1–2 findings
+- **Must Have**: `evaluation/<target>/run-log.md` on main — a compact Markdown table updated each run: run number, date, score, committed file count, Q×F, push/PR status, top 1–2 findings
 - **Must Have**: The artifact copy happens before the eval branch is closed by `/prd-done`, using `git checkout <eval-branch> -- evaluation/<target>/run-N/` from main
 - **Must Have**: Type D milestone template updated to include artifact copy + run-log update as the final step before "Draft next PRD"
 - **Must Have**: All existing commit-story-v2 run artifacts backfilled to main (runs 2–14, using their existing eval branches)
