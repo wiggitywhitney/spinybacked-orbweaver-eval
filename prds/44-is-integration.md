@@ -112,7 +112,7 @@ Full research findings live in `docs/research/instrumentation-score-integration.
 
   Success criteria: `npm test` passes; at least 5 test cases covering the scenarios above; fixtures in `tests/fixtures/is/`.
 
-- [ ] **Enable metrics in SDK bootstrap for IS scoring runs**
+- [x] **Enable metrics in SDK bootstrap for IS scoring runs**
 
   The target repo (commit-story-v2, located at `~/Documents/Repositories/commit-story-v2` or wherever Whitney has it cloned) has `OTEL_METRICS_EXPORTER=none` set in its SDK bootstrap file (`examples/instrumentation.js`). This file is in the commit-story-v2 repo, NOT this eval repo — do not look in this repo's files for this setting. For IS scoring runs, metrics must be enabled so MET rules can be evaluated (they will fail — this is expected and documented).
 
