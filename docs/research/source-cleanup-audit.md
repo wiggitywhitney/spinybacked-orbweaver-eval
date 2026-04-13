@@ -22,7 +22,6 @@ Divergence checked with `git diff upstream/main -- <path>` after running `git fe
 | `package.json` | safe-to-remove | Diverged from upstream; eval removed `files`, `peerDependencies`, and some devDependencies — upstream is the authoritative version for the npm package |
 | `package-lock.json` | safe-to-remove | Diverged (stale snapshot from fork time); upstream is authoritative |
 | `vitest.config.js` | safe-to-remove | Identical to upstream/main |
-| `evaluation-run-2.log` | safe-to-remove | Not tracked (not in `git ls-files` output); already gitignored or cleaned up — no action needed |
 | `scripts/.gitkeep` | safe-to-remove | Identical to upstream/main |
 | `scripts/install-hook.sh` | safe-to-remove | Eval has older simpler version; upstream/main has improved version with runtime path discovery — upstream is canonical |
 | `scripts/test-claude-collector.js` | safe-to-remove | Identical to upstream/main |
@@ -99,6 +98,10 @@ Divergence checked with `git diff upstream/main -- <path>` after running `git fe
 | `tests/utils/commit-analyzer.test.js` | safe-to-remove | Identical to upstream/main |
 | `tests/utils/journal-paths.test.js` | safe-to-remove | Identical to upstream/main |
 | `tests/utils/summary-detector.test.js` | safe-to-remove | Diverged: eval changed to `toISOString().slice(0, 10)` (UTC-based) while upstream uses local date construction (correct, matches `getTodayString()`) — upstream is canonical |
+
+## Files Not Tracked by Git (No Action Needed)
+
+`evaluation-run-2.log` — listed in the PRD's `git ls-files` command as a candidate but was not returned by that command; it is already gitignored or was never committed. No git action required.
 
 ## Notes on Files Present on Upstream but NOT in Eval
 
