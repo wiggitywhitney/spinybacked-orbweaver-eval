@@ -1,10 +1,10 @@
 # Source Cleanup — PRD
 
 **Issue**: [#47](https://github.com/wiggitywhitney/spinybacked-orbweaver-eval/issues/47)
-**Status**: Draft
+**Status**: Complete
 **Owner**: Whitney Lee
 **Created**: 2026-04-11
-**Last Updated**: 2026-04-11
+**Last Updated**: 2026-04-13
 
 ## Overview
 
@@ -90,7 +90,7 @@ This repo was originally forked from commit-story-v2 and contains a tracked copy
   | Current path | Move to | Why |
   |---|---|---|
   | `src/instrumentation.js` | `evaluation/examples/instrumentation.js` | Eval OTel bootstrap; required by `spiny-orb.yaml` as `sdkInitFile` |
-  | `tests/score-is.test.js` | `evaluation/is/score-is.test.js` | IS scoring test; import path (`../evaluation/is/score-is.js`) stays valid from new location |
+  | `tests/score-is.test.js` | `evaluation/is/score-is.test.js` | IS scoring test; update import path to `./score-is.js` after move |
   | `tests/fixtures/is/all-pass.jsonl` | `evaluation/is/fixtures/all-pass.jsonl` | IS scoring fixture |
   | `tests/fixtures/is/missing-service-name.jsonl` | `evaluation/is/fixtures/missing-service-name.jsonl` | IS scoring fixture |
   | `tests/fixtures/is/orphan-span.jsonl` | `evaluation/is/fixtures/orphan-span.jsonl` | IS scoring fixture |
@@ -98,7 +98,7 @@ This repo was originally forked from commit-story-v2 and contains a tracked copy
 
   Use `git mv` for each move so history is preserved. After moving, update:
   - `spiny-orb.yaml`: change `sdkInitFile` from `src/instrumentation.js` to `evaluation/examples/instrumentation.js`
-  - `tests/score-is.test.js` (at its new path): verify the relative import path `../evaluation/is/score-is.js` still resolves correctly from `evaluation/is/score-is.test.js`
+  - `tests/score-is.test.js` (at its new path): verify the relative import path `./score-is.js` resolves correctly from `evaluation/is/score-is.test.js`
 
   Do not remove any other files in this milestone.
 
