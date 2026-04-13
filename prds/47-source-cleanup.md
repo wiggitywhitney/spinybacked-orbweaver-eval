@@ -41,7 +41,7 @@ This repo was originally forked from commit-story-v2 and contains a tracked copy
 
 ## Implementation Milestones
 
-- [ ] **Audit: classify every tracked non-evaluation file**
+- [x] **Audit: classify every tracked non-evaluation file**
 
   Read `docs/language-extension-plan.md` (the intended future repo structure is in the "Repo Generalization" section).
 

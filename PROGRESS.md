@@ -125,6 +125,8 @@ Entry format: `- (YYYY-MM-DD) Description of feature-level change (PRD #X, miles
 - (2026-04-12) Added IS_SCORING_RUN env var to commit-story-v2 instrumentation.js to enable metrics exporter during IS scoring runs (PRD #44, milestone 5)
 - (2026-04-12) Updated Type D step 9 placeholder in docs/language-extension-plan.md with full IS scoring instructions; cascaded to PRDs #50, #51, #52, #53 (replacing conditional placeholder) and added IS scoring step to PRD #55 (run-14) (PRD #44, milestone 6)
 
+- (2026-04-13) Audited all tracked non-evaluation files (src/, tests/, semconv/, scripts/, package.json, etc.) against upstream/main — classified 72 files as safe-to-remove, 4 as eval-specific (must be preserved/moved), and 0 requiring upstream migration. Key finding: src/instrumentation.js is eval infrastructure (OTLP/Datadog setup for IS scoring runs), not commit-story application code — it must stay in the eval repo at a new path, not go upstream. Audit saved to docs/research/source-cleanup-audit.md (PRD #47, milestone 1)
+
 ### Changed
 - (2026-03-16) Fixed span count discrepancy: total_spans_on_branch corrected from 48 to 38 in per-file-evaluation.json and rubric-scores.json (48 included working-directory-only changes from partial files not committed to branch). Updated baseline-comparison.md table to match canonical per-file-evaluation.json (PRD #4, CodeRabbit finding fix)
 - (2026-03-15) Renamed all "orb" references to "orbweaver" in PRD #4 and evaluation docs to match CLI rename (spinybacked-orbweaver #123)
