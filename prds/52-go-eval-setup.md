@@ -153,8 +153,11 @@ The feature branch for this PRD **never merges to main**. The PR exists for Code
 
 - [ ] **IS scoring run**
 
-  **Conditional:** Check if `evaluation/is/otelcol-config.yaml` exists on main. If yes, use scoring script (provision infrastructure if needed). If no, skip IS scoring entirely and write `is-scores.md` containing only: "IS scoring deferred — infrastructure not yet on main (PRD #44)."
-  Produces: `evaluation/<target-name>/run-1/is-scores.md`
+  1. **Prerequisites**: OTel Collector running with `evaluation/is/otelcol-config.yaml` (see `evaluation/is/README.md` for install and start instructions). No metrics-exporter override needed — MET rules are marked `not_applicable` by the scorer regardless.
+  2. **Action**: Run the target app with the Collector as OTLP receiver; collect `evaluation/is/eval-traces.json`; run `node evaluation/is/score-is.js evaluation/is/eval-traces.json > evaluation/<target-name>/run-1/is-score.md`
+  3. **Output**: `evaluation/<target-name>/run-1/is-score.md` is written by the command above.
+  4. **Note for k8s repos**: IS scoring requires a running cluster; see `evaluation/is/README.md` for the Kind-based workflow
+  Produces: `evaluation/<target-name>/run-1/is-score.md`
 
 - [ ] **Actionable fix output**
 
