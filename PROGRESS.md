@@ -125,6 +125,7 @@ Entry format: `- (YYYY-MM-DD) Description of feature-level change (PRD #X, miles
 - (2026-04-12) Added IS_SCORING_RUN env var to commit-story-v2 instrumentation.js to enable metrics exporter during IS scoring runs (PRD #44, milestone 5)
 - (2026-04-12) Updated Type D step 9 placeholder in docs/language-extension-plan.md with full IS scoring instructions; cascaded to PRDs #50, #51, #52, #53 (replacing conditional placeholder) and added IS scoring step to PRD #55 (run-14) (PRD #44, milestone 6)
 
+- (2026-04-13) Moved eval infrastructure files out of commit-story source directories: OTel/Datadog bootstrap script relocated from src/ to evaluation/examples/, IS scoring test and fixtures relocated from tests/ to evaluation/is/. Updated spiny-orb.yaml to point to the new instrumentation file location. These files were accidentally mixed in with commit-story source code copied over at fork time (PRD #47, milestone 2)
 - (2026-04-13) Audited all tracked non-evaluation files (src/, tests/, semconv/, scripts/, package.json, etc.) against upstream/main — classified 72 files as safe-to-remove, 4 as eval-specific (must be preserved/moved), and 0 requiring upstream migration. Key finding: src/instrumentation.js is eval infrastructure (OTLP/Datadog setup for IS scoring runs), not commit-story application code — it must stay in the eval repo at a new path, not go upstream. Audit saved to docs/research/source-cleanup-audit.md (PRD #47, milestone 1)
 
 ### Changed

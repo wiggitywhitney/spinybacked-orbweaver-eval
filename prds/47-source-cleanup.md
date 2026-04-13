@@ -81,7 +81,7 @@ This repo was originally forked from commit-story-v2 and contains a tracked copy
 
   Success criteria: `docs/research/source-cleanup-audit.md` exists with a classification for every file listed above.
 
-- [ ] **Relocate eval-specific files within the repo before removal**
+- [x] **Relocate eval-specific files within the repo before removal**
 
   *(Updated per Decision 3: no upstream migration needed — all eval-specific files stay in this repo but must move out of src/ and tests/ before git rm.)*
 
