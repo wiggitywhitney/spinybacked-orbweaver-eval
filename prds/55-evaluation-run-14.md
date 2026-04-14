@@ -189,7 +189,7 @@ All P1 fixes (#435, #436, #437, #438, #447) are confirmed closed. The "no fixes 
 
 - **Quality**: 25/25 (100%) — checkpoint still catches errors before they commit
 - **Files**: 10-11 — smart rollback prevents cascade; some files still fail on first attempt
-- **After 50% discount**: 25/25, 10-11 files
+- **After 50% discount**: 25/25, 9-11 files
 
 ### Target (all fixes land cleanly)
 
