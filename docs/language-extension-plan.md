@@ -226,7 +226,7 @@ When spiny-orb adds a new language provider, add it to the eval framework in two
 
 ## Score Projection Methodology
 
-All run score projections use a **50% discount** to account for LLM variation: the expected score in any run is 50% between the ideal (all fixes landed, best case) and the worst case (all failures recur). "After 50% discount" means the midpoint between these two outcomes. This calibrates expectations without over-relying on whether a specific fix landed cleanly.
+Score projections use three named scenarios: **Conservative** (fixes land but LLM variation causes some failures), **Target** (all fixes land cleanly), and **Stretch** (all fixes plus cost reduction). Each scenario states its assumptions explicitly. Do not add an "after discount" row — the scenario labels carry that meaning.
 
 ---
 

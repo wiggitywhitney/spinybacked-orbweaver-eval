@@ -188,34 +188,28 @@ The key constraint: if the `if` body contains ONLY `span.*` calls, it is an inst
 
 ## §7. Score Projections for Run-13
 
-**Note on "50% discount"**: Evaluation methodology applies a 50% discount to score projections to account for LLM variation — meaning the expected score in any run is 50% between the ideal (all fixes landed, best case) and the worst case (all failures recur). Projections below show both the raw expected score and the discounted range.
-
-### Minimum (no fixes — P1/P2 not landed)
+### Conservative (fixes land but LLM variation causes some failures)
 
 - **Quality**: 23/25 (92%) — same failures likely to recur (LLM variation + NDS-003 truthy gap still active)
-- **Files**: 12-13 (summary-detector.js may fully commit if API load is normal)
+- **Files**: 11-13 (summary-detector.js may fully commit if API load is normal)
 - **Push/PR**: YES (fine-grained PAT stable)
-- **After 50% discount**: 22-23/25, 11-13 files
 
 ### Target (P1 fix: NDS-003 truthy-check allowlist)
 
 - **Quality**: 25/25 (100%) — CDQ-007 failure resolved, attribute completeness improves
 - **Files**: 13 (summary-manager.js may improve with correct COV-004 guidance)
 - **Cost**: Unclear — depends on journal-graph.js attempt count
-- **After 50% discount**: 24-25/25, 12-13 files
 
 ### Target + P2 (NDS-003 truthy fix + COV-004 guidance)
 
 - **Quality**: 25/25 (100%) — both run-12 failures addressed
 - **Files**: 13
-- **After 50% discount**: 25/25, 13 files, PR likely
 
 ### Stretch (all fixes + cost reduction)
 
 - **Quality**: 25/25, full attribute coverage
 - **Files**: 13
 - **Cost**: ≤$4.00 if journal-graph.js returns to 2 attempts
-- **After 50% discount**: 25/25, 13 files
 
 ---
 
