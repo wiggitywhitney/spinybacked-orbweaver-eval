@@ -181,27 +181,22 @@ The **evaluation execution branch** created by `/prd-start` from main **never me
 
 ## Score Projections for Run-14
 
-**Note on "50% discount"**: Projections discount 50% toward worst case to account for LLM variation.
-
-All P1 fixes (#435, #436, #437, #438, #447) are confirmed closed. The "no fixes land" floor no longer applies — projections start from the assumption that smart rollback and type-safety guidance are active.
+All P1 fixes (#435, #436, #437, #438, #447) are confirmed closed. Projections start from the assumption that smart rollback and type-safety guidance are active.
 
 ### Conservative (fixes land but LLM variation causes some failures)
 
 - **Quality**: 25/25 (100%) — checkpoint still catches errors before they commit
 - **Files**: 10-11 — smart rollback prevents cascade; some files still fail on first attempt
 - **Cost**: ~$4-6 — some retry cost remains without perfect LLM compliance
-- **After 50% discount**: 25/25, 9-11 files, cost ~$5-6
 
 ### Target (all fixes land cleanly)
 
 - **Quality**: 25/25 (100%)
 - **Files**: 13 — smart rollback saves cascade victims; summaryNode commits for the first time
 - **Cost**: ~$3-4 — sunk cost eliminated with smart rollback
-- **After 50% discount**: 25/25, 11-13 files, cost ~$4-5
 
 ### Stretch (all fixes + cost reduction)
 
 - **Quality**: 25/25, full attribute coverage
 - **Files**: 13+
 - **Cost**: ≤$4.00 if journal-graph.js returns to 2 attempts
-- **After 50% discount**: 25/25, 12-13 files
