@@ -1,6 +1,6 @@
 # PRD #14: JS Evaluation Run-14: commit-story-v2 — Smart Rollback + Type-Safety Verification
 
-**Status:** Draft
+**Status:** Ready
 **Created:** 2026-04-12
 **GitHub Issue:** #55
 **Depends on:** PRD #13 (run-13 complete, 3 findings documented, actionable fix output delivered to spiny-orb team)
@@ -58,7 +58,7 @@ Verify that three spiny-orb fixes land cleanly in run-14:
 | journal-graph.js summaryNode NDS-003 | RUN11-5 | 3 runs | P1 fix in RUN13-3 |
 | journal-graph.js 3 attempts | RUN12-4 | 2 runs | LLM variation, unknown root cause |
 | Cost above $4.00 | RUN11-4 | 3 runs | Regressed to ~$6.41 in run-13 |
-| Advisory contradiction rate | RUN11-1 | 3 runs | 67% in run-13 (worse) |
+| Advisory contradiction rate | RUN11-1 | 3 runs | SCH-004 fix landed (#440 closed) — run-14 verifies |
 | COV-004 on summary-manager.js | RUN12-1 | Unverified | Fix landed (PR #398) but file rolled back in run-13 |
 | RUN7-7 span count self-report | Run-7 | 8 runs | Structurally unchanged |
 | CJS require() in ESM projects | Run-2 | 13 runs | Open spec gap, not triggered |
@@ -120,15 +120,17 @@ The **evaluation execution branch** created by `/prd-start` from main **never me
 
 - [ ] **Pre-run verification** — Verify spiny-orb fixes and validate run prerequisites:
   1. **Handoff triage review**: Read the spiny-orb team's triage of `evaluation/commit-story-v2/run-13/actionable-fix-output.md`. Check which findings were filed as issues.
-  2. **Smart checkpoint rollback fix** (P1 — critical): Verify RUN13-1 is merged. Check that checkpoint failures now parse the test stack trace and roll back only the file(s) named in the failing test output, not the full window.
-  3. **Type-safety setAttribute guidance** (P1 — critical): Verify RUN13-2 is merged. Check that the agent instrumentation prompt includes guidance to use `!= null` over `!== undefined`, and `new Date(value).toISOString()` for timestamp fields.
-  4. **summaryNode NDS-003 fix** (P1): Verify RUN13-3 is merged. Check that either the NDS-003 allowlist or the agent prompt addresses template literal modification in summaryNode.
-  5. **Target repo readiness** (commit-story-v2): Verify on `main`, clean working tree, spiny-orb.yaml and semconv/ exist. **Before switching to main, check for uncommitted artifacts on the current instrument branch** (run `git status` in commit-story-v2) and commit any to that branch before switching.
-  6. **Push auth stability check**: Verify token still works (dry-run push).
-  7. **File inventory**: Count .js files in commit-story-v2's `src/` directory.
-  8. Rebuild spiny-orb from **current branch** (not necessarily main — rebuild from whatever branch it's on).
-  9. Record version and findings status.
-  10. Append observations to `evaluation/commit-story-v2/run-14/lessons-for-prd15.md`.
+  2. **Smart checkpoint rollback fix** (P1 — critical, #437 + #447 confirmed closed): Verify both issues merged. #437 — rollback parses the test stack trace and reverts only the failing file, not the full window. #447 — schema extensions from reverted files are cleaned up.
+  3. **Type-safety setAttribute guidance** (P1 — critical, #435 + #436 confirmed closed): Verify both issues merged. #435 — prompt guidance for `!= null` over `!== undefined`. #436 — prompt guidance against assuming string type when calling string methods on attribute values.
+  4. **summaryNode NDS-003 fix** (P1, #438 confirmed closed): Verify merged. Check that either the NDS-003 allowlist or the agent prompt addresses template literal modification in summaryNode.
+  5. **SCH-004 advisory contradiction fix** (#440 confirmed closed): Verify merged. Run-13 had 67% false-positive rate on SCH-004. This is the first run where the fix should be reflected in advisory findings.
+  6. **SCH-005 (new rule — LLM judge PRD #431)**: Verify SCH-005 (registry span deduplication via LLM judge) is merged to spiny-orb main. This is an advisory non-blocking rule. Advisory findings referencing SCH-005 in run-14 are expected and desirable — first-run signal, not a regression.
+  7. **Target repo readiness** (commit-story-v2): Verify on `main`, clean working tree, spiny-orb.yaml and semconv/ exist. **Before switching to main, check for uncommitted artifacts on the current instrument branch** (run `git status` in commit-story-v2) and commit any to that branch before switching.
+  8. **Push auth stability check**: Verify token still works (dry-run push).
+  9. **File inventory**: Count .js files in commit-story-v2's `src/` directory.
+  10. Rebuild spiny-orb from **main** (LLM judge and all prior fixes will be on main at run time).
+  11. Record version and findings status.
+  12. Append observations to `evaluation/commit-story-v2/run-14/lessons-for-prd15.md`.
 
 - [ ] **Evaluation run-14** — Whitney runs `spiny-orb instrument` in her own terminal. **Do NOT run the command yourself.** AI role in this milestone: (1) confirm readiness with Whitney, (2) once Whitney provides the log output, save it to `evaluation/commit-story-v2/run-14/spiny-orb-output.log` and write `evaluation/commit-story-v2/run-14/run-summary.md`.
 
@@ -181,18 +183,20 @@ The **evaluation execution branch** created by `/prd-start` from main **never me
 
 **Note on "50% discount"**: Projections discount 50% toward worst case to account for LLM variation.
 
-### Minimum (no fixes land)
+All P1 fixes (#435, #436, #437, #438, #447) are confirmed closed. The "no fixes land" floor no longer applies — projections start from the assumption that smart rollback and type-safety guidance are active.
 
-- **Quality**: 25/25 (100%) — checkpoint catches errors before they commit
-- **Files**: 7-10 — checkpoint cascade continues without smart rollback
-- **After 50% discount**: 25/25, 7-9 files
+### Conservative (fixes land but LLM variation causes some failures)
 
-### Target (all 3 P1 fixes land)
+- **Quality**: 25/25 (100%) — checkpoint still catches errors before they commit
+- **Files**: 10-11 — smart rollback prevents cascade; some files still fail on first attempt
+- **After 50% discount**: 25/25, 10-11 files
+
+### Target (all fixes land cleanly)
 
 - **Quality**: 25/25 (100%)
-- **Files**: 13 — smart rollback saves cascade victims; summaryNode commits
+- **Files**: 13 — smart rollback saves cascade victims; summaryNode commits for the first time
 - **Cost**: ~$3-4 — sunk cost eliminated with smart rollback
-- **After 50% discount**: 25/25, 10-13 files, cost ~$4-5
+- **After 50% discount**: 25/25, 11-13 files, cost ~$4-5
 
 ### Stretch (all fixes + cost reduction)
 
