@@ -58,7 +58,7 @@ Verify that three spiny-orb fixes land cleanly in run-14:
 | journal-graph.js summaryNode NDS-003 | RUN11-5 | 3 runs | P1 fix in RUN13-3 |
 | journal-graph.js 3 attempts | RUN12-4 | 2 runs | LLM variation, unknown root cause |
 | Cost above $4.00 | RUN11-4 | 3 runs | Regressed to ~$6.41 in run-13 |
-| Advisory contradiction rate | RUN11-1 | 3 runs | SCH-004 fix landed (#440 closed) — run-14 verifies |
+| Advisory contradiction rate | RUN11-1 | 3 runs | SCH-004 fix landed (#440 closed) — verification pending in run-14 |
 | COV-004 on summary-manager.js | RUN12-1 | Unverified | Fix landed (PR #398) but file rolled back in run-13 |
 | RUN7-7 span count self-report | Run-7 | 8 runs | Structurally unchanged |
 | CJS require() in ESM projects | Run-2 | 13 runs | Open spec gap, not triggered |
@@ -189,7 +189,8 @@ All P1 fixes (#435, #436, #437, #438, #447) are confirmed closed. The "no fixes 
 
 - **Quality**: 25/25 (100%) — checkpoint still catches errors before they commit
 - **Files**: 10-11 — smart rollback prevents cascade; some files still fail on first attempt
-- **After 50% discount**: 25/25, 9-11 files
+- **Cost**: ~$4-6 — some retry cost remains without perfect LLM compliance
+- **After 50% discount**: 25/25, 9-11 files, cost ~$5-6
 
 ### Target (all fixes land cleanly)
 
