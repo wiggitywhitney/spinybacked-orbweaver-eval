@@ -188,7 +188,11 @@ The key constraint: if the `if` body contains ONLY `span.*` calls, it is an inst
 
 ## §7. Score Projections for Run-13
 
-### Conservative (fixes land but LLM variation causes some failures)
+<!-- Note: this example predates the Conservative/Target/Stretch naming convention.
+     Current methodology uses: Conservative (fixes land, LLM varies), Target (all fixes land cleanly), Stretch (fixes + cost reduction).
+     The "Minimum" label below reflects run-13's original projection terminology. -->
+
+### Minimum (no fixes — P1/P2 not landed)
 
 - **Quality**: 23/25 (92%) — same failures likely to recur (LLM variation + NDS-003 truthy gap still active)
 - **Files**: 11-13 (summary-detector.js may fully commit if API load is normal)
