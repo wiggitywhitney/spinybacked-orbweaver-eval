@@ -181,7 +181,7 @@ The **evaluation execution branch** created by `/prd-start` from main **never me
 
 ## Score Projections for Run-14
 
-All P1 fixes (#435, #436, #437, #438, #447) are confirmed closed. Projections start from the assumption that smart rollback and type-safety guidance are active.
+All P1 fixes (#435, #436, #437, #438, #447) are reported closed. Projections start from the assumption that smart rollback and type-safety guidance are active.
 
 ### Conservative (fixes land but LLM variation causes some failures)
 
