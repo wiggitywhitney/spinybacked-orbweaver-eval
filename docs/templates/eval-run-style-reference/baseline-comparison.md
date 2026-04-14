@@ -68,16 +68,17 @@ PR #61 created. Token-swap mechanism continues to work. Fine-grained PAT stable.
 
 **Run-11 actionable fix output projected for run-12:**
 
+<!-- Note: this example predates the Conservative/Target/Stretch naming convention.
+     Current methodology uses: Conservative (fixes land, LLM varies), Target (all fixes land cleanly), Stretch (fixes + cost reduction).
+     The "Minimum" label below reflects run-12's original projection terminology. -->
+
 | Scenario | Projected | Actual | Verdict |
 |----------|-----------|--------|---------|
-| Minimum (no fixes) | 25/25, 13 files, PR YES | 23/25, 12+1p files, PR YES | **Not met** — 2 new failures |
+| Minimum (no fixes land) | 25/25, 13 files, PR YES | 23/25, 12+1p files, PR YES | **Not met** — 2 new failures |
 | Target (NDS-003 truthy fix) | 25/25, 13 files, ≤$4.00 | 23/25, 12+1p, $5.19 | **Not met** |
 | Stretch (all fixes) | 25/25, 13 files, ~$3.50 | 23/25, 12+1p, $5.19 | **Not met** |
-| After 50% discount | 24-25/25, 12-13 files, PR likely | 23/25, 12+1p, PR YES | **Partially met** |
 
 The minimum projection assumed "no known quality failures" and that NDS-003 truthy gap was the only outstanding issue. Run-12 found two new failures: COV-004 (span omission strategy) and CDQ-007 (unconditional setAttribute). Both are LLM variation outcomes — the agent made defensible but rubric-noncompliant decisions under the NDS-003 constraint.
-
-The 50% discount projection partially holds: quality was 92% (within range), files were 12+1p (within range), and PR was created. The quality shortfall is 2pp below the 50% discount floor.
 
 ---
 

@@ -124,7 +124,7 @@ The methodology and artifacts belong together because the methodology evolves fr
 spinybacked-orbweaver-eval/
   evaluation/
     commit-story-v2/          ← move current run-1 through run-N here
-      run-1/ ... run-13/
+      run-1/ ... run-N/
     cluster-whisperer/        ← TypeScript target (if validated)
       run-1/
     k8s-vectordb-sync/        ← Go target (if validated)
@@ -146,7 +146,7 @@ PRD numbering stays sequential (GitHub issue numbers). PRD titles include the ta
 - Update PRD titles and prior art references to include target names
 - Create `docs/ROADMAP.md`
 - Document "how to add a new language eval" as a rules/CLAUDE.md entry
-- Establish PRD template files for Type C and Type D in `docs/templates/` so future agents have a canonical starting point. Until `docs/templates/` exists, use the most recent JS eval run PRD (currently `prds/37-evaluation-run-13.md`) as the style reference for Type D, and this document's Type C description as the structure reference for Type C.
+- Establish PRD template files for Type C and Type D in `docs/templates/` so future agents have a canonical starting point. Style references live in `docs/templates/eval-run-style-reference/`. Use the most recent JS eval run PRD (currently `prds/55-evaluation-run-14.md`) as the milestone structure reference for Type D, and this document's Type C description as the structure reference for Type C.
 
 ---
 
@@ -226,7 +226,7 @@ When spiny-orb adds a new language provider, add it to the eval framework in two
 
 ## Score Projection Methodology
 
-All run score projections use a **50% discount** to account for LLM variation: the expected score in any run is 50% between the ideal (all fixes landed, best case) and the worst case (all failures recur). "After 50% discount" means the midpoint between these two outcomes. This calibrates expectations without over-relying on whether a specific fix landed cleanly.
+Score projections use three named scenarios: **Conservative** (fixes land but LLM variation causes some failures), **Target** (all fixes land cleanly), and **Stretch** (all fixes plus cost reduction). Each scenario states its assumptions explicitly. Do not add an "after discount" row — the scenario labels carry that meaning.
 
 ---
 
@@ -299,9 +299,9 @@ Prerequisites: none — can run in parallel with or after Steps 1–2. Produces 
 **Output**: writes findings to `docs/research/eval-target-criteria.md`. Steps 5–7 cannot proceed until this file exists.
 *Accomplishes: the system has an evidence-based scorecard for choosing targets. No longer guessing what "good" looks like.*
 
-**Step 4 — JS evaluation run-13** *(PRD #37, already created)*
-Gate: NDS-003 truthy-check fix merges in spiny-orb. Spawns an indefinite run chain: run-13 findings → run-14 PRD drafted at completion → run-14 picks up when fixes land → run-14 drafts run-15 → and so on.
-*Accomplishes: verifies the NDS-003 fix resolved run-12's regression. First run on the new repo structure after Step 1.*
+**Step 4 — JS evaluation run chain** *(run-13 complete; run-14 current — PRD #55)*
+Run-13 verified the NDS-003 fix (PRD #37, complete). Run-14 (PRD #55) is the current run — gates on LLM judge (spiny-orb PRD #431) and TypeScript provider (#372) merging to main. The run chain continues indefinitely: each run's findings → next run PRD drafted at completion.
+*Accomplishes: ongoing JS quality baseline on commit-story-v2; each run verifies spiny-orb fixes and surfaces new improvement opportunities.*
 
 **Step 5 — TypeScript eval setup + Run-1**
 Gates: TypeScript language provider lands in spiny-orb AND `docs/research/eval-target-criteria.md` exists with a TypeScript verdict. Read that file first to confirm the validated target before forking anything. Spawns an indefinite TypeScript run chain (same pattern as Step 4).
