@@ -116,9 +116,9 @@ The **evaluation execution branch** created by `/prd-start` from main **never me
 
 ## Milestones
 
-- [ ] **Collect skeleton documents** — Create `evaluation/commit-story-v2/run-14/` directory with `lessons-for-prd15.md` skeleton. Must run before pre-run verification step 9.
+- [x] **Collect skeleton documents** — Create `evaluation/commit-story-v2/run-14/` directory with `lessons-for-prd15.md` skeleton. Must run before pre-run verification step 9.
 
-- [ ] **Pre-run verification** — Verify spiny-orb fixes and validate run prerequisites:
+- [x] **Pre-run verification** — Verify spiny-orb fixes and validate run prerequisites:
   1. **Handoff triage review**: Read the spiny-orb team's triage of `evaluation/commit-story-v2/run-13/actionable-fix-output.md`. Check which findings were filed as issues.
   2. **Smart checkpoint rollback fix** (P1 — critical, #437 + #447 confirmed closed): Verify both issues merged. #437 — rollback parses the test stack trace and reverts only the failing file, not the full window. #447 — schema extensions from reverted files are cleaned up.
   3. **Type-safety setAttribute guidance** (P1 — critical, #435 + #436 confirmed closed): Verify both issues merged. #435 — prompt guidance for `!= null` over `!== undefined`. #436 — prompt guidance against assuming string type when calling string methods on attribute values.
@@ -132,50 +132,69 @@ The **evaluation execution branch** created by `/prd-start` from main **never me
   11. Record version and findings status.
   12. Append observations to `evaluation/commit-story-v2/run-14/lessons-for-prd15.md`.
 
-- [ ] **Evaluation run-14** — Whitney runs `spiny-orb instrument` in her own terminal. **Do NOT run the command yourself.** AI role in this milestone: (1) confirm readiness with Whitney, (2) once Whitney provides the log output, save it to `evaluation/commit-story-v2/run-14/spiny-orb-output.log` and write `evaluation/commit-story-v2/run-14/run-summary.md`.
+- [x] **Evaluation run-14** — Whitney runs `spiny-orb instrument` in her own terminal. **Do NOT run the command yourself.** AI role in this milestone: (1) confirm readiness with Whitney, (2) once Whitney provides the log output, save it to `evaluation/commit-story-v2/run-14/spiny-orb-output.log` and write `evaluation/commit-story-v2/run-14/run-summary.md`.
 
   **Exact command** (run from `~/Documents/Repositories/commit-story-v2`):
   ```bash
   caffeinate -s env -u ANTHROPIC_CUSTOM_HEADERS -u ANTHROPIC_BASE_URL vals exec -i -f .vals.yaml -- node ~/Documents/Repositories/spinybacked-orbweaver/bin/spiny-orb.js instrument src --verbose 2>&1 | tee ~/Documents/Repositories/spinybacked-orbweaver-eval/evaluation/commit-story-v2/run-14/spiny-orb-output.log
   ```
 
-- [ ] **Findings Discussion** *(user-facing checkpoint 1)* — After `run-summary.md` is written, before any evaluation documents are started: report to Whitney: (1) files committed / failed / partial, (2) whether checkpoint failures occurred and how many files were rolled back (signal for whether smart rollback fix worked), (3) quality score if visible in log, (4) cost, (5) push/PR status. Keep it conversational, under 10 lines. Wait for her acknowledgment before proceeding.
+- [x] **Findings Discussion** *(user-facing checkpoint 1)* — After `run-summary.md` is written, before any evaluation documents are started: report to Whitney: (1) files committed / failed / partial, (2) whether checkpoint failures occurred and how many files were rolled back (signal for whether smart rollback fix worked), (3) quality score if visible in log, (4) cost, (5) push/PR status. Keep it conversational, under 10 lines. Wait for her acknowledgment before proceeding.
 
-- [ ] **Failure deep-dives** — For each failed file AND run-level failure. Includes any partial files.
+- [x] **Failure deep-dives** — For each failed file AND run-level failure. Includes any partial files.
   Produces: `evaluation/commit-story-v2/run-14/failure-deep-dives.md`
   Style reference: `Read docs/templates/eval-run-style-reference/failure-deep-dives.md`
 
-- [ ] **Per-file evaluation** — Full rubric on ALL files (no spot-checking). Evaluate all 32 rules across all committed and partial files.
+- [x] **Per-file evaluation** — Full rubric on ALL files (no spot-checking). Evaluate all 32 rules across all committed and partial files.
   Produces: `evaluation/commit-story-v2/run-14/per-file-evaluation.md`
   Style reference: `Read docs/templates/eval-run-style-reference/per-file-evaluation.md`
 
-- [ ] **PR artifact evaluation** — Evaluate PR quality.
+- [x] **PR artifact evaluation** — Evaluate PR quality.
   Produces: `evaluation/commit-story-v2/run-14/pr-evaluation.md`
   Style reference: `Read docs/templates/eval-run-style-reference/pr-evaluation.md`
 
-- [ ] **Rubric scoring** — Synthesize dimension-level scores.
+- [x] **Rubric scoring** — Synthesize dimension-level scores.
   Produces: `evaluation/commit-story-v2/run-14/rubric-scores.md`
   Style reference: `Read docs/templates/eval-run-style-reference/rubric-scores.md`
 
-- [ ] **IS scoring run**
+- [x] **IS scoring run** (Decision 2: full workflow documented in `evaluation/is/README.md`)
 
-  1. **Prerequisites**: OTel Collector running with `evaluation/is/otelcol-config.yaml` (see `evaluation/is/README.md` for install and start instructions). No metrics-exporter override needed — MET rules are marked `not_applicable` by the scorer regardless.
-  2. **Action**: Run the target app with the Collector as OTLP receiver; collect `evaluation/is/eval-traces.json`; run `node evaluation/is/score-is.js evaluation/is/eval-traces.json > evaluation/commit-story-v2/run-14/is-score.md`
-  3. **Output**: `evaluation/commit-story-v2/run-14/is-score.md` is written by the command above.
-  4. **Note for k8s repos**: IS scoring requires a running cluster; see `evaluation/is/README.md` for the Kind-based workflow
+  1. **Whitney runs**: `sudo launchctl stop com.datadoghq.agent` (use `! sudo launchctl stop com.datadoghq.agent` in prompt — Claude cannot run sudo)
+  2. **Claude starts** the OTel Collector in the background:
+     ```bash
+     docker run --rm -d --name otelcol-is -p 4318:4318 -v /Users/whitney.lee/Documents/Repositories/spinybacked-orbweaver-eval/evaluation/is:/etc/otelcol otel/opentelemetry-collector-contrib:latest --config /etc/otelcol/otelcol-config.yaml
+     ```
+  3. **Claude runs** from `~/Documents/Repositories/commit-story-v2` (instrument files checked out via `git checkout spiny-orb/instrument-1776263984892 -- src/ examples/`):
+     ```bash
+     OTEL_EXPORTER_OTLP_TRACES_ENDPOINT=http://localhost:4318/v1/traces env -u ANTHROPIC_CUSTOM_HEADERS -u ANTHROPIC_BASE_URL vals exec -i -f .vals.yaml -- node --import ./examples/instrumentation.js src/index.js HEAD
+     ```
+     Note: omit `COMMIT_STORY_TRACELOOP=true` — installed traceloop version incompatibility crashes the process. Restore with `git checkout main -- src/ examples/` after.
+  4. **Claude stops** the Collector: `docker stop otelcol-is`
+  5. **Claude runs** the scorer: `node evaluation/is/score-is.js evaluation/is/eval-traces.json > evaluation/commit-story-v2/run-14/is-score.md`
+  6. **Whitney runs**: `sudo launchctl start com.datadoghq.agent`
   Produces: `evaluation/commit-story-v2/run-14/is-score.md`
 
-- [ ] **Baseline comparison** — Compare run-14 vs runs 2-13.
+- [x] **Baseline comparison** — Compare run-14 vs runs 2-13.
   Produces: `evaluation/commit-story-v2/run-14/baseline-comparison.md`
   Style reference: `Read docs/templates/eval-run-style-reference/baseline-comparison.md`
 
-- [ ] **Actionable fix output** — Primary handoff deliverable. At milestone completion:
+- [x] **Actionable fix output** — Primary handoff deliverable. At milestone completion:
   1. Run the cross-document audit agent to verify consistency across all run-14 evaluation artifacts.
   2. *(User-facing checkpoint 2)* Give Whitney an interpreted summary of key findings — failures, root causes, notable patterns, what to watch for in run-15.
-  3. Print the absolute file path of `evaluation/commit-story-v2/run-14/actionable-fix-output.md` (derive from current working directory).
-  4. **Pause.** Do not proceed to Draft PRD #15 until Whitney confirms she has handed the document off to the spiny-orb team.
+  3. **Advisory findings document for PRD #483** (Decision 1): Create `evaluation/commit-story-v2/run-14/advisory-findings-for-audit.md`. Tabulate every advisory finding from the run: rule ID, the exact finding text, and a TP/FP classification based on Whitney's domain knowledge of the codebase. No speculation about causes or effects — hard data only. This document is a cross-check resource for the spiny-orb team's advisory rules audit; it presents what the current implementation actually produces on a known target, not analysis of why.
+  4. Print the absolute file path of `evaluation/commit-story-v2/run-14/actionable-fix-output.md` (derive from current working directory).
+  5. **Pause.** Do not proceed to Draft PRD #15 until Whitney confirms she has handed the document off to the spiny-orb team.
 
-- [ ] **Draft PRD #15** — Create on a separate branch from main. Merge the PRD PR to main so `/prd-start` can pick it up. Carry forward both user-facing checkpoints (Findings Discussion + handoff pause) into PRD #15's milestone structure.
+- [ ] **Draft PRD #15** — Create on a separate branch from main. Merge the PRD PR to main so `/prd-start` can pick it up. Carry forward both user-facing checkpoints (Findings Discussion + handoff pause) into PRD #15's milestone structure. IS scoring milestone must use the updated step 9 format from `docs/language-extension-plan.md` (Decision 2) — include exact Docker and run commands from `evaluation/is/README.md` commit-story-v2 section, not the old vague placeholder.
+
+---
+
+## Decision Log
+
+| ID | Decision | Rationale | Date |
+|----|----------|-----------|------|
+| 1 | Produce a separate advisory findings document (`advisory-findings-for-audit.md`) as part of the actionable fix output, presenting run-14 advisory findings as hard data for the spiny-orb team's PRD #483 advisory rules audit. Hard data only — rule ID, finding text, TP/FP classification. No causal speculation. | Run-14 is the first run reflecting the current implementation state; unlike historical runs, its findings cannot be entangled with since-fixed bugs. This makes it useful as a contemporaneous cross-check for the audit's code inspection, not as a replacement for it. | 2026-04-15 |
+| 2 | Document the complete IS scoring workflow — including target-specific commands — in `evaluation/is/README.md`, and update the Type D template in `language-extension-plan.md` step 9 to reference it. The PRD IS scoring milestone must contain the exact commands rather than deferring to the README without specifics. Key findings: Docker is the Collector approach (binary not installed); the commit-story-v2 entry point is `src/index.js` not `src/cli.js`; `COMMIT_STORY_TRACELOOP=true` is required; `ANTHROPIC_CUSTOM_HEADERS` must be stripped via vals exec; Claude cannot run `sudo` so Whitney must run Datadog Agent stop/start herself. | The IS scoring milestone in run-14 had insufficient instructions — agents following it would not have known the correct run command. Documenting it now teaches all future instances (via language-extension-plan.md and the README) without repeating this discovery process each run. | 2026-04-15 |
 
 ---
 

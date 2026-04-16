@@ -154,12 +154,16 @@ If this PRD proceeds past milestone 0 (i.e., a new target is selected), the feat
   If this is a new JS target, compare against commit-story-v2's most recent run for cross-target context. Compare: overall rubric score, per-dimension scores (NDS/COV/RST/API/SCH/CDQ), file counts, skip rate, and cost. Highlight dimensions where the new target scores differ by more than 1 point.
   Produces: `evaluation/<target-name>/run-1/baseline-comparison.md`
 
-- [ ] **IS scoring run**
+- [ ] **IS scoring run** — follow `docs/language-extension-plan.md` step 9 (updated with exact workflow). Full protocol in `evaluation/is/README.md`.
 
-  1. **Prerequisites**: OTel Collector running with `evaluation/is/otelcol-config.yaml` (see `evaluation/is/README.md` for install and start instructions). No metrics-exporter override needed — MET rules are marked `not_applicable` by the scorer regardless.
-  2. **Action**: Run the target app with the Collector as OTLP receiver; collect `evaluation/is/eval-traces.json`; run `node evaluation/is/score-is.js evaluation/is/eval-traces.json > evaluation/<target-name>/run-1/is-score.md`
-  3. **Output**: `evaluation/<target-name>/run-1/is-score.md` is written by the command above.
-  4. **Note for k8s repos**: IS scoring requires a running cluster; see `evaluation/is/README.md` for the Kind-based workflow
+  **Before running**: Add a target-specific section to `evaluation/is/README.md` documenting the exact run command for this target (use the commit-story-v2 section as the pattern). Update this milestone with those commands before executing.
+
+  Workflow summary (see README for exact commands):
+  1. Whitney runs `sudo launchctl stop com.datadoghq.agent` (Claude cannot run sudo)
+  2. Claude starts OTel Collector via Docker
+  3. Whitney runs the target app against the Collector
+  4. Claude stops the Collector and runs the scorer
+  5. Whitney runs `sudo launchctl start com.datadoghq.agent`
   Produces: `evaluation/<target-name>/run-1/is-score.md`
 
 - [ ] **Actionable fix output**
