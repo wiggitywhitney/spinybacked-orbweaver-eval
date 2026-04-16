@@ -156,11 +156,11 @@ The feature branch for this PRD **never merges to main**. The PR exists for Code
   **Before running**: Add a target-specific section to `evaluation/is/README.md` documenting the exact run command for this target (use the commit-story-v2 section as the pattern). Update this milestone with those commands before executing.
 
   Workflow summary (see README for exact commands):
-  1. Whitney runs `sudo launchctl stop com.datadoghq.agent` (Claude cannot run sudo)
+  1. Whitney runs `datadog-agent stop` (Claude cannot run this directly)
   2. Claude starts OTel Collector via Docker
   3. Whitney runs the target app against the Collector
   4. Claude stops the Collector and runs the scorer
-  5. Whitney runs `sudo launchctl start com.datadoghq.agent`
+  5. Whitney runs `datadog-agent start`
   Produces: `evaluation/<target-name>/run-1/is-score.md`
 
 - [ ] **Actionable fix output**

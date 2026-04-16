@@ -28,7 +28,7 @@ Restart it after your IS scoring run is complete:
 datadog-agent start
 ```
 
-Note: `sudo` is not required — `datadog-agent stop/start` works as the current user. `sudo launchctl stop/start com.datadoghq.agent` also works but may report "Nothing to do" even when the agent is still running; use the `datadog-agent` CLI instead.
+Preferred: `datadog-agent stop/start` works as the current user without sudo. Alternative: `sudo launchctl stop/start com.datadoghq.agent` works but may report "Nothing to do" even when the agent is still running — use the `datadog-agent` CLI unless troubleshooting the system service.
 
 ## Running an IS Scoring Session
 
@@ -88,7 +88,7 @@ Output includes an overall weighted IS score (0–100) and per-rule pass/fail br
 
 ## Notes
 
-- **Claude cannot run `sudo` commands.** When Claude is assisting with IS scoring, it will prepare Docker and scoring steps but Whitney must run the `sudo launchctl stop/start` Datadog Agent commands herself (e.g., via `! sudo launchctl stop com.datadoghq.agent` in the Claude Code prompt). Claude will prompt when these steps are needed.
+- **Claude cannot run `datadog-agent` commands directly.** When Claude is assisting with IS scoring, it will handle Docker and scoring steps but Whitney must run `datadog-agent stop/start` herself (e.g., via `! datadog-agent stop` in the Claude Code prompt). Claude will prompt when these steps are needed.
 - `otelcol-contrib` binary is not installed on this machine. Always use the Docker approach.
 - `eval-traces.json` is gitignored — it contains captured trace data from local runs.
 - For k8s-dependent repos (e.g., Cluster Whisperer), a running Kind cluster is required to exercise the app and produce traces. Use the same Collector config; just ensure the cluster can route traffic to `localhost:4318`.

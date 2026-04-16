@@ -85,11 +85,11 @@ Identical in structure to the existing PRDs #3–13. Triggered by findings from 
 7. PR artifact evaluation
 8. Rubric scoring
 9. IS scoring run — full workflow in `evaluation/is/README.md`; target-specific commands are documented there per target. For commit-story-v2:
-   1. **Whitney runs** `sudo launchctl stop com.datadoghq.agent` (Claude cannot run sudo; use `! sudo launchctl stop com.datadoghq.agent` in the prompt)
+   1. **Whitney runs** `datadog-agent stop` (Claude cannot run this directly; use `! datadog-agent stop` in the prompt)
    2. **Claude starts** the OTel Collector via Docker: `docker run --rm -d -p 4318:4318 -v /absolute/path/to/spinybacked-orbweaver-eval/evaluation/is:/etc/otelcol otel/opentelemetry-collector-contrib:latest --config /etc/otelcol/otelcol-config.yaml`
    3. **Whitney runs** the target app against the Collector (exact command in README § commit-story-v2 — includes vals, ANTHROPIC gateway bypass, COMMIT_STORY_TRACELOOP)
    4. **Claude runs** `node evaluation/is/score-is.js evaluation/is/eval-traces.json > evaluation/[TARGET]/run-[N]/is-score.md`
-   5. **Whitney runs** `sudo launchctl start com.datadoghq.agent` to restore Datadog Agent
+   5. **Whitney runs** `datadog-agent start` to restore Datadog Agent
    - MET rules are `not_applicable` — commit-story-v2 produces no OTel metrics by design
    - **Note for k8s repos**: IS scoring requires a running cluster; see `evaluation/is/README.md` for the Kind-based workflow
 10. Baseline comparison
