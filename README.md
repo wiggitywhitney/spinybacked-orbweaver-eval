@@ -89,10 +89,10 @@ spinybacked-orbweaver-eval/
 | 10 | 23/25 (92%) | 5/5 | 12 | 28 | $4.36 | NO | — |
 | 11 | **25/25 (100%)** | 5/5 | 13 | 39 | $4.25 | YES | — |
 | 12 | 23/25 (92%) | 5/5 | 12+1p | 31 | $5.19 | YES | — |
-| 13 | **25/25 (100%)** | 5/5 | 7+1p | 16 | ~$6.41 | YES | — |
+| 13 | **25/25 (100%)** | 5/5 | 7+1p+11f | 16 | ~$6.41 | YES | — |
 | 14 | 22/25 (88%) | 5/5 | 12 | 32 | $5.59 | YES | **80/100** |
 
-Files column notation: plain count = committed files; `+Np` = N partial files (instrumentation started, not fully committed). Rollbacks from checkpoint failures are not counted as files — they show up implicitly as a lower committed count relative to the target's file inventory.
+Files column notation: plain count = committed files; `+Np` = N partial files (instrumentation started, not fully committed); `+Nf` = N files rolled back after a checkpoint test failure. Cost column: `~` prefix indicates an estimated/derived cost (early runs predating direct cost reporting in the tool); unprefixed values are directly reported by spiny-orb.
 
 **Run-15 is next** — verifying catch-block consistency in `journal-graph.js` (`summaryNode` error recording) and monitoring COV-004 disposition from the parallel advisory rules audit (spiny-orb PRD #483).
 

@@ -90,7 +90,7 @@ Identical in structure to the existing PRDs #3–13. Triggered by findings from 
    3. **Output**: `evaluation/[TARGET]/run-[N]/is-score.md` is written by the command above.
    4. **Note for k8s repos**: IS scoring requires a running cluster; see `evaluation/is/README.md` for the Kind-based workflow
 10. Baseline comparison
-10a. **Update root README** — After baseline comparison, update `README.md`: (1) add a row for this run to the run history table with quality score, gates, files, spans, cost, push/PR status, and IS score; (2) update the "next run" sentence at the bottom to reference the upcoming run number and its primary goals.
+10a. **Update root README** — After baseline comparison, update `README.md`: (1) add a row for this run to the run history table with quality score, gates, files, spans, cost, push/PR status, and IS score; (2) update the "next run" sentence (the bold paragraph immediately below the run history table, above the "Full run-by-run analysis" link) to reference the upcoming run number and its primary goals.
 11. Actionable fix output *(user-facing checkpoint 2: interpreted summary + handoff pause)*
 12. Draft next PRD
 
