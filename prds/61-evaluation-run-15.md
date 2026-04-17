@@ -124,7 +124,7 @@ The **evaluation execution branch** created by `/prd-start` from main **never me
   8. Record version and findings status.
   9. Append observations to `evaluation/commit-story-v2/run-15/lessons-for-prd16.md`.
 
-- [ ] **Evaluation run-15** — Whitney (or Claude) runs `spiny-orb instrument` in a terminal. AI role: (1) confirm readiness, (2) once log output is available, save it to `evaluation/commit-story-v2/run-15/spiny-orb-output.log` and write `evaluation/commit-story-v2/run-15/run-summary.md`.
+- [ ] **Evaluation run-15** — Whitney runs `spiny-orb instrument` in her own terminal. **Do NOT run the command yourself.** AI role: (1) confirm readiness with Whitney, (2) once Whitney provides the log output, save it to `evaluation/commit-story-v2/run-15/spiny-orb-output.log` and write `evaluation/commit-story-v2/run-15/run-summary.md`.
 
   **Exact command** (run from `~/Documents/Repositories/commit-story-v2`):
   ```bash
