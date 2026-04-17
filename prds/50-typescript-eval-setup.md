@@ -115,9 +115,9 @@ The feature branch for this PRD **never merges to main**. The PR exists for Code
 - [ ] **Evaluation run-1**
 
   Whitney runs `spiny-orb instrument` in her own terminal. **Do NOT run the command yourself.** Copy the command template from `docs/language-extension-plan.md` (line ~72). Replace `commit-story-v2` with the chosen target name, `run-N` with `run-1`, and `src` with the target's source directory.
-  AI role: (1) confirm readiness, (2) save log, (3) write run-summary.md.
+  AI role: (1) confirm readiness, (2) save log, (3) write run-summary.md, (4) **push the eval branch to origin immediately** (`git push -u origin feature/prd-50-typescript-eval-setup`) — the branch holds the only copy of run-1 artifacts until PRD #57's backfill lands.
 
-  Success criteria: Log saved; run-summary.md written.
+  Success criteria: Log saved; run-summary.md written; eval branch on origin.
 
 - [ ] **Findings Discussion** *(user-facing checkpoint 1)*
 

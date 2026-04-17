@@ -117,6 +117,8 @@ If this PRD proceeds past milestone 0 (i.e., a new target is selected), the feat
 
   Whitney runs `spiny-orb instrument` in her own terminal. **Do NOT run the command yourself.** Copy the command template from `docs/language-extension-plan.md` (line ~72). Replace `commit-story-v2` with the chosen target name, `run-N` with `run-1`, and `src` with the target's source directory (check the forked repo's structure — it may be `src/`, `lib/`, or `.`).
 
+  AI role: confirm readiness, save log, write run-summary.md, and **push the eval branch to origin immediately** (`git push -u origin feature/prd-53-javascript-eval-setup`) — the branch holds the only copy of run-1 artifacts until PRD #57's backfill lands.
+
   AI role: (1) confirm readiness, (2) save log output to `evaluation/<target-name>/run-1/spiny-orb-output.log`, (3) write `evaluation/<target-name>/run-1/run-summary.md`.
 
   Success criteria: Log saved; run-summary.md written with file counts, cost, timing, push/PR status.
