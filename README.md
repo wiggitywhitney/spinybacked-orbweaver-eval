@@ -1,198 +1,97 @@
-# Commit Story
+# spinybacked-orbweaver-eval
 
-**Your Engineering Journey, Remembered**
+Evaluation framework for [spiny-orb](https://github.com/wiggitywhitney/spinybacked-orbweaver) — an AI agent that automatically instruments codebases with OpenTelemetry spans.
 
-## What is Commit Story?
+---
 
-Commit Story transforms your git commits into rich journal entries by combining:
+## What is spiny-orb?
 
-- **Your actual code changes** — the diff, the commit message, what you built
-- **Conversations with your AI coding assistant** — the back-and-forth that led to decisions
-- **The technical decisions and trade-offs you made** — captured automatically, not manually documented
+spiny-orb reads a target codebase alongside an OpenTelemetry Weaver schema and uses an LLM to add OTel instrumentation (spans, attributes, error recording) to application source files. It creates a branch, opens a PR, and runs a checkpoint test suite after each file to catch instrumentation errors before they land.
 
-Every time you commit, Commit Story generates a journal entry that tells the story of what you worked on and why. No workflow interruption, no manual documentation — just commit like you always do, and your engineering journal writes itself.
+This repo does not contain application code. The target app being evaluated (commit-story-v2) lives at [wiggitywhitney/commit-story-v2](https://github.com/wiggitywhitney/commit-story-v2).
 
-## Why Use It?
+---
 
-### For Yourself
+## Evaluation target: commit-story-v2
 
-- **Remember why** you made certain choices and how you overcame obstacles
-- **See your growth** as a developer, not just a list of commits
-- **Boost learning through reflection** — research shows [15 minutes of daily reflection improves performance by 20-25%](https://larryferlazzo.edublogs.org/files/2013/08/reflection-1di0i76.pdf)
+commit-story-v2 is the current JavaScript evaluation target. It is a Node.js CLI that generates journal entries from git commits using LangGraph (LangChain's graph orchestration framework), the Anthropic API, and an MCP server — giving spiny-orb a codebase with LLM calls, async I/O, graph-based orchestration, and auto-instrumentation library interactions to navigate.
 
-### For Your Career
+Future evaluation targets are planned for TypeScript, Python, and Go. Candidate repos for each language are documented in [`docs/research/eval-target-criteria.md`](docs/research/eval-target-criteria.md).
 
-- **Evidence for performance reviews** and career advancement
-- **Material for conference talks** and blog posts
-- **Your engineering narrative**, documented as it happens
+---
 
-### For Your Team
+## How evaluation works
 
-- **Onboard new developers** with the actual story behind decisions
-- **Meaningful retrospectives** with concrete examples
-- **Preserve institutional knowledge** that usually gets lost
+Each evaluation run instruments commit-story-v2 with spiny-orb, then assesses the output against two scoring systems:
 
-## Sample Journal Entry
+### Code-level rubric (32 rules)
 
-Here's what a real journal entry looks like (from this repo):
+The rubric evaluates the source code diff across six dimensions:
 
-```text
-## 9:07:02 AM CST - Commit: 79a6c5a
+| Dimension | Prefix | Rules | What it checks |
+|-----------|--------|-------|----------------|
+| Non-Destructiveness | NDS | 6 | Agent preserved existing behavior; no business logic modified |
+| Coverage | COV | 6 | Right functions got spans; auto-instrumentation correctly deferred |
+| Restraint | RST | 5 | Agent didn't over-instrument utility functions, getters, or wrappers |
+| API-Only Dependency | API | 4 | Only `@opentelemetry/api` imported — no SDK, no vendor packages |
+| Schema Fidelity | SCH | 4 | Span names and attribute keys match the Weaver registry |
+| Code Quality | CDQ | 7 | Spans closed in all paths, correct error recording, consistent tracer naming |
 
-### Summary
-The developer implemented a new context formatting approach to improve journal entry
-summaries in the commit-story system. They created a `formatContextForSummary()`
-function in the journal-graph.js file that filters out AI assistant messages and
-uses JSON.stringify to clearly present development session data.
+Five of the 32 rules are **gates** — if any gate fails, quality scoring is skipped. The remaining 27 rules produce a score out of 25 (COV and RST exclude two advisory-only rules from the count).
 
-The primary goal was to fix issues with summary generation, particularly preventing
-the AI from echoing its own responses or including unnecessary process talk.
+### Instrumentation Score (IS)
 
-### Development Dialogue
-> **Human:** "I would love to delete the February 3rd journal file in the Cluster
-> Whisperer repo. And then recreate an entry for every commit, from today's oldest
-> and newest. And then evaluate the full journal file."
-> **Assistant:** "Great idea - that will give us a clean test of the fixes."
+The [Instrumentation Score](https://github.com/instrumentation-score/spec) evaluates the runtime OTLP telemetry the instrumented app actually emits. It checks resource attributes, span topology, cardinality, and semantic convention placement. Run-14 established the first IS baseline: **80/100**.
 
-> **Human:** "Can we think of another way to do this besides prompt sprawl and
-> harsh language? Would changing the role help? What's a more systematic way to
-> solve this?"
+---
 
-### Technical Decisions
-**DECISION: Implement V1-Style Context Formatting for Summaries** (Implemented)
-  - V2 implementation was echoing AI responses in summaries
-  - V1 used JSON-formatted context with self-documenting descriptions
-  - Created formatContextForSummary() to filter out assistant messages
-  - Used JSON.stringify to present context as clear DATA, not conversation
-
-### Commit Details
-- **Hash**: 79a6c5af84c0fc2e9b372271123358aec658c0c7
-- **Author**: Whitney Lee
-```
-
-## Summaries
-
-Commit Story can consolidate your per-commit journal entries into daily, weekly, and monthly summaries — the level most useful for standups, retrospectives, and personal reflection.
-
-### How It Works
-
-- **Daily summaries** read all journal entries for a given day and produce a standup-style narrative with sections for what was accomplished, key decisions, and open threads.
-- **Weekly summaries** consolidate daily summaries into a week-in-review with highlights and recurring patterns.
-- **Monthly summaries** consolidate weekly summaries into a retrospective with accomplishments, growth, and a look ahead.
-
-### Automatic Generation
-
-Summaries generate automatically on each commit:
-
-1. On the first commit of a new day, daily summaries are generated for all unsummarized previous days
-2. On the first commit after a week boundary, a weekly summary is generated
-3. On the first commit of a new month, a monthly summary is generated
-
-To disable automatic summaries:
-
-```bash
-export COMMIT_STORY_AUTO_SUMMARIZE=false
-```
-
-### Manual Generation
-
-Generate summaries on demand with the `summarize` subcommand:
-
-```bash
-# Daily summaries
-npx commit-story summarize 2026-02-22                     # Single day
-npx commit-story summarize 2026-02-01..2026-02-20         # Date range
-npx commit-story summarize 2026-02-22 --force             # Regenerate existing
-
-# Weekly summaries
-npx commit-story summarize --weekly 2026-W08              # Single week
-npx commit-story summarize --weekly 2026-W08 --force      # Regenerate existing
-
-# Monthly summaries
-npx commit-story summarize --monthly 2026-02              # Single month
-npx commit-story summarize --monthly 2026-02 --force      # Regenerate existing
-```
-
-### Configuration
-
-| Variable | Description | Default |
-|----------|-------------|---------|
-| `COMMIT_STORY_AUTO_SUMMARIZE` | Set to `false` to disable automatic summary generation | `true` (enabled) |
-| `COMMIT_STORY_TIMEZONE` | IANA timezone for day/week/month boundaries (e.g., `America/Chicago`) | System local time |
-| `ANTHROPIC_API_KEY` | Required for all AI generation | — |
-
-### Summary File Structure
-
-Summaries are stored alongside your journal entries:
+## Repository structure
 
 ```text
-journal/
-├── entries/              # Per-commit entries (existing)
-│   └── YYYY-MM/
-│       └── YYYY-MM-DD.md
-└── summaries/            # Consolidated summaries
-    ├── daily/
-    │   └── YYYY-MM-DD.md
-    ├── weekly/
-    │   └── YYYY-Www.md   # ISO week (e.g., 2026-W08)
-    └── monthly/
-        └── YYYY-MM.md
+spinybacked-orbweaver-eval/
+├── prds/                          # PRDs tracking each evaluation run
+│   ├── 61-evaluation-run-15.md   # Current open PRD (run-15)
+│   └── done/                     # Completed PRDs
+│
+├── evaluation/
+│   ├── commit-story-v2/           # Artifacts from each JS eval run
+│   │   ├── run-2/ … run-14/      # Per-run: rubric scores, per-file eval,
+│   │   │                         #   baseline comparison, actionable-fix-output,
+│   │   │                         #   spiny-orb-output.log, is-score.md
+│   │   └── run-log.md            # (planned, PRD #57)
+│   └── is/                       # IS scoring infrastructure
+│       ├── otelcol-config.yaml   # OTel Collector config (writes to eval-traces.json)
+│       ├── score-is.js           # IS scorer script
+│       └── README.md             # IS scoring setup and run instructions
+│
+└── docs/
+    ├── ROADMAP.md                 # Prioritized evaluation work queue
+    ├── language-extension-plan.md # How to add new language evaluation chains
+    ├── research/                  # Target selection research, eval criteria
+    └── templates/
+        └── eval-run-style-reference/  # Style references for evaluation documents
 ```
 
-Duplicate detection uses file existence — if a summary file already exists, it is skipped unless `--force` is passed.
+---
 
-## v2 Architecture
+## Run history: commit-story-v2
 
-This is a complete rebuild of [commit-story v1](https://github.com/wiggitywhitney/commit-story) with modern tooling:
+| Run | Quality | Gates | Files | Spans | Cost | Push/PR | IS |
+|-----|---------|-------|-------|-------|------|---------|-----|
+| 2 | 15/21 (71%) | 3/4 | 5 | 11 | — | NO | — |
+| 3 | 19/26 (73%) | 4/4 | 7 | 15 | — | NO | — |
+| 4 | 18/26 (69%) | 4/4 | 16 | 48 | $5.84 | NO | — |
+| 5 | 23/25 (92%) | 5/5 | 9 | 17 | $9.72 | NO | — |
+| 6 | 21/25 (84%) | 5/5 | 5 | 16 | $11.02 | NO | — |
+| 7 | 22/25 (88%) | 5/5 | 13 | 28 | $3.22 | NO | — |
+| 8 | 23/25 (92%) | 5/5 | 12 | 28 | $4.00 | NO | — |
+| 9 | **25/25 (100%)** | 5/5 | 12 | 26 | $3.97 | NO | — |
+| 10 | 23/25 (92%) | 5/5 | 12 | 28 | $4.36 | NO | — |
+| 11 | **25/25 (100%)** | 5/5 | 13 | 39 | $4.25 | YES | — |
+| 12 | 23/25 (92%) | 5/5 | 12+1p | 31 | $5.19 | YES | — |
+| 13 | **25/25 (100%)** | 5/5 | 7 | 16 | ~$6.41 | YES | — |
+| 14 | 22/25 (88%) | 5/5 | 12 | 32 | $5.59 | YES | **80/100** |
 
-| Component | v1 | v2 |
-|-----------|----|----|
-| AI Orchestration | Custom pipeline | **LangGraph** |
-| LLM Provider | OpenAI | **Anthropic (Claude)** |
-| Telemetry Schema | None | **OpenTelemetry Weaver** |
+**Run-15 is next** — verifying catch-block consistency in `journal-graph.js` (`summaryNode` error recording) and monitoring COV-004 disposition from the parallel advisory rules audit (spiny-orb PRD #483).
 
-### Why the Rebuild?
-
-v2 serves as a laboratory for exploring how AI automation reshapes telemetry practices. The codebase intentionally ships with **zero telemetry** — it's the "before" state for an AI instrumentation agent that will read OpenTelemetry conventions and instrument the code itself.
-
-## Telemetry Schema
-
-The `semconv/` directory contains an OpenTelemetry Weaver schema defining semantic conventions for commit-story. **No telemetry is implemented yet** — the schema exists so an AI agent can read it and instrument the codebase.
-
-The schema:
-
-- Imports official OTel semantic conventions v1.37.0 (GenAI, VCS, RPC)
-- Defines custom `commit_story.*` attributes for domain-specific telemetry
-
-See [`docs/telemetry/`](docs/telemetry/) for the generated attribute documentation.
-
-### Agent Configuration
-
-The [SpinybackedOrbWeaver](https://github.com/wiggitywhitney/spinybacked-orbweaver) telemetry agent reads `orb.yaml` in the project root to locate the schema and SDK init file:
-
-- **`semconv/`** — Weaver registry (attributes, manifest, OTel semconv dependency)
-- **`src/instrumentation.js`** — OTel SDK init file with an empty `instrumentations` array for the agent to populate
-- **`orb.yaml`** — Agent config pointing to the above paths (`schemaPath: semconv`, `sdkInitFile: src/instrumentation.js`)
-
-## Project Status
-
-### What's Built
-
-- Git post-commit hook trigger
-- Git diff and commit data collection
-- Claude Code chat history collection and filtering
-- AI-powered journal generation (summary, dialogue, technical decisions)
-- Journal file management (`journal/entries/YYYY-MM/YYYY-MM-DD.md`)
-- Daily, weekly, and monthly summary generation (automatic and manual)
-- MCP server for real-time context capture
-- OpenTelemetry Weaver telemetry schema
-
-### What's Next
-
-- [ ] CI/CD pipeline (PRD #23)
-- [ ] Telemetry Agent — AI that reads the Weaver schema and instruments this codebase
-- [ ] npm package distribution
-
-## License
-
-AGPL-3.0
+Full run-by-run analysis: [`evaluation/commit-story-v2/`](evaluation/commit-story-v2/)
