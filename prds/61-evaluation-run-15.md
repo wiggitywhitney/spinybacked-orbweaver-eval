@@ -201,7 +201,7 @@ The **evaluation execution branch** created by `/prd-start` from main **never me
 ### Target (RUN14-1 fix + COV-004 promoted or per-function validator)
 
 - **Quality**: 25/25 (100%)
-- **Files**: 12–13 — summary-manager.js may add 6 more spans; same file count
+- **Files**: 12–13 — if summary-manager.js commits all 9 exported async functions, file count stays at 12 but span count increases; 13 if one additional file commits
 - **Cost**: ~$4.50–5.00
 
 ### Stretch (all fixes + journal-graph.js reaches 2 attempts)
