@@ -115,7 +115,7 @@ If this PRD proceeds past milestone 0 (i.e., a new target is selected), the feat
 
   Success criteria: All prerequisites verified; file inventory recorded; spiny-orb built; push auth confirmed.
 
-- [ ] **Evaluation run-1**
+- [x] **Evaluation run-1**
 
   Whitney runs `spiny-orb instrument` in her own terminal. **Do NOT run the command yourself.** Copy the command template from `docs/language-extension-plan.md` (line ~72). Replace `commit-story-v2` with the chosen target name, `run-N` with `run-1`, and `src` with the target's source directory (check the forked repo's structure — it may be `src/`, `lib/`, or `.`).
 
@@ -210,3 +210,4 @@ If this PRD proceeds past milestone 0 (i.e., a new target is selected), the feat
 | 2026-04-18 | Deliberately incomplete Weaver schema created. schema-complete.yaml documents all 4 omitted attributes (release_it.git.tag_annotation, release_it.github.release_name, release_it.github.release_url, release_it.npm.publish_path). schema-omissions.md explains each omission with code citations. semconv/attributes.yaml in forked repo is confirmed incomplete. | In Progress | Verify test suite runs clean on unmodified target |
 | 2026-04-18 | Test suite baseline confirmed: 3/3 clean runs (262/264 pass, 0 fail, 2 consistently skipped). Skips: "should not roll back with risky config" and "should truncate long body" — stable, unrelated to instrumentation. | In Progress | Pre-run verification |
 | 2026-04-18 | Pre-run verification complete. 23 .js files in lib/. spiny-orb rebuilt from main (SHA a02004f, includes PR #506 KNOWN_FRAMEWORK_PACKAGES). GITHUB_TOKEN resolves via vals. Versions: Node v25.8.0, spiny-orb 1.0.0, release-it 20.0.0. .vals.yaml copied to release-it fork and .gitignored. File inventory and instrument command recorded in lessons-for-run2.md. | In Progress | Evaluation run-1 |
+| 2026-04-18 | Evaluation run-1 complete (partial — 5/23 files processed). Run halted at file 5 due to checkpoint test failure (gpgsign issue: spiny-orb runs `npm test` without GIT_CONFIG_GLOBAL override). 2 files failed LINT oscillation (config.js, index.js). PR creation failed (PAT lacks createPullRequest permission). Cost: $0.68. run-summary.md written. | In Progress | Findings Discussion → resolve 3 run-2 blockers |
