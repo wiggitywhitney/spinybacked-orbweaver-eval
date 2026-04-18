@@ -11,3 +11,4 @@ Column key: **N** = run number · **Q×F** = (quality/total) × files_committed 
 | 4 | 2026-03-16 | 15/26 | 16 | 9.2 | NO | NDS-002 gate failure (32 test failures); COV regression from per-file methodology |
 | 5 | 2026-03-17 | 23/25 | 9 | 8.3 | NO | First 5/5 gate pass; COV-001 + COV-005 failures; push broken (3rd consecutive) |
 | 6 | 2026-03-20 | 21/25 | 5 | 4.2 | NO | Quality + coverage both regressed from run-5; SCH-001 still blocking |
+| 7 | 2026-03-20 | 22/25 | 13 | 11.4 | NO | COV-006 span name collision unmasked; CDQ-005 count type mismatch unmasked |
