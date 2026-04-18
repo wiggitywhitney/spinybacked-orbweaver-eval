@@ -87,7 +87,7 @@ Same as runs 9–14.
 
 This PRD document (`prds/61-evaluation-run-15.md`) merges to `main` so `/prd-start` can pick it up.
 
-The **evaluation execution branch** created by `/prd-start` from main **never merges to main**. That branch holds eval artifacts and exists for CodeRabbit review only. When `/prd-done` runs at completion, close issue #61 without merging the eval execution branch.
+The **evaluation execution branch** created by `/prd-start` from main **never merges to main**. That branch holds eval artifacts and exists for CodeRabbit review only. Before closing with `/prd-done`, run the "Copy artifacts to main" milestone. When `/prd-done` runs at completion, close issue #61 without merging the eval execution branch.
 
 ---
 
@@ -131,7 +131,7 @@ The **evaluation execution branch** created by `/prd-start` from main **never me
   caffeinate -s env -u ANTHROPIC_CUSTOM_HEADERS -u ANTHROPIC_BASE_URL vals exec -i -f .vals.yaml -- node ~/Documents/Repositories/spinybacked-orbweaver/bin/spiny-orb.js instrument src --verbose 2>&1 | tee ~/Documents/Repositories/spinybacked-orbweaver-eval/evaluation/commit-story-v2/run-15/spiny-orb-output.log
   ```
 
-  **After saving artifacts and committing, push the eval branch to origin immediately** (`git push -u origin feature/prd-61-evaluation-run-15`). The branch holds the only copy of run-15 artifacts until PRD #57's backfill lands — do not leave it local-only.
+  **After saving artifacts and committing, push the eval branch to origin immediately** (`git push -u origin feature/prd-61-evaluation-run-15`). The branch holds the only copy of run-15 artifacts until the "Copy artifacts to main" milestone runs — do not leave it local-only.
 
 - [ ] **Findings Discussion** *(user-facing checkpoint 1)* — After `run-summary.md` is written, before any evaluation documents are started: report to Whitney: (1) files committed / failed / partial, (2) whether any checkpoint failures occurred, (3) whether summaryNode catch block looks consistent with the other nodes (signal for RUN14-1 fix), (4) quality score if visible, (5) cost, (6) push/PR status. Keep it conversational, under 10 lines. Wait for acknowledgment before proceeding.
 
@@ -184,6 +184,8 @@ The **evaluation execution branch** created by `/prd-start` from main **never me
   5. **Pause.** Do not proceed to Draft PRD #16 until Whitney confirms she has handed the document off to the spiny-orb team.
 
 - [ ] **Draft PRD #16** — Create on a separate branch from main. Merge the PRD PR to main so `/prd-start` can pick it up. Carry forward both user-facing checkpoints into PRD #16's milestone structure. IS scoring milestone must use the same format as this PRD's IS scoring milestone.
+
+- [ ] **Copy artifacts to main** — From main, run `git checkout feature/prd-61-evaluation-run-15 -- evaluation/commit-story-v2/run-15/` to copy all artifacts. Commit to main with message `eval: save run-15 artifacts to main [skip ci]`. Add one row to `evaluation/commit-story-v2/run-log.md` for run-15 and commit with `eval: update run-log for run-15 [skip ci]`. Push main. This step runs before `/prd-done` so the artifacts land on main while the eval branch is still reachable.
 
 ---
 

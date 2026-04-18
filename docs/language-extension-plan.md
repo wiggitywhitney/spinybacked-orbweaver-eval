@@ -93,14 +93,15 @@ Identical in structure to the existing PRDs #3–13. Triggered by findings from 
 10a. **Update root README** — After baseline comparison, update `README.md`: (1) add a row for this run to the run history table with quality score, gates, files, spans, cost, push/PR status, and IS score; (2) update the "next run" sentence (the bold paragraph immediately below the run history table, above the "Full run-by-run analysis" link) to reference the upcoming run number and its primary goals.
 11. Actionable fix output *(user-facing checkpoint 2: interpreted summary + handoff pause)*
 12. Draft next PRD
+13. **Copy artifacts to main** — From main, run `git checkout <eval-branch> -- evaluation/<target>/run-N/` to copy all artifacts. Commit to main with message `eval: save run-N artifacts to main [skip ci]`. Update `evaluation/<target>/run-log.md` with a new row for this run. Push. This step runs before `/prd-done` so the artifacts land on main while the eval branch is still reachable.
 
 Type D PRDs form the recurring evaluation chain for each language/target.
 
 ### Eval Branch Convention (all evaluation PRDs)
 
-All eval execution branches — Type D recurring runs (`feature/prd-N-evaluation-run-N`) and Type C setup branches (`feature/prd-N-LANG-eval-setup`) — **never merge to main and never get deleted**. PRs exist for CodeRabbit review only. When `/prd-done` runs at completion, close the issue without merging or deleting the eval branch. This applies to every Type C and Type D PRD.
+All eval execution branches — Type D recurring runs (`feature/prd-N-evaluation-run-N`) and Type C setup branches (`feature/prd-N-LANG-eval-setup`) — **never merge to main and never get deleted**. PRs exist for CodeRabbit review only. Before closing with `/prd-done`, run step 13 to copy artifacts to main. When `/prd-done` runs at completion, close the issue without merging or deleting the eval branch. This applies to every Type C and Type D PRD.
 
-**The branch is the canonical source for eval artifacts** until PRD #57's backfill lands them on main. Deleting the branch — even locally — risks orphaning commits that exist nowhere else. Before running any `git branch -D` or `git push origin --delete` on an eval branch, confirm the artifacts are on main first.
+**The branch is the canonical source for eval artifacts until step 13 copies them to main.** Deleting the branch — even locally — before step 13 runs risks orphaning commits that exist nowhere else. Before running any `git branch -D` or `git push origin --delete` on an eval branch, confirm the artifacts are on main first.
 
 ---
 
