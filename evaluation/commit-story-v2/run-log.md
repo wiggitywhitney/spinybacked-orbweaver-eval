@@ -18,3 +18,4 @@ Column key: **N** = run number · **Q×F** = (quality/total) × files_committed 
 | 11 | 2026-03-30 | 25/25 | 13 | 13.0 | YES (#60) | New Q×F record (13.0); first push/PR success; all-time-high file count |
 | 12 | 2026-04-09 | 23/25 | 12 | 11.0 | YES (#61) | COV-004 summary-manager.js 6 async functions (1st occurrence); CDQ-007 repeat |
 | 13 | 2026-04-12 | 25/25 | 7 | 7.0 | YES (#62) | Checkpoint rollbacks → 7 files only (quality restored, coverage dropped) |
+| 14 | 2026-04-15 | 22/25 | 12 | 10.6 | YES (#65) | COV-003 summaryNode catch missing error recording; COV-004 summary-manager.js (3rd run) |
