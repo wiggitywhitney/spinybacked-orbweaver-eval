@@ -10,6 +10,9 @@ Entry format: `- (YYYY-MM-DD) Description of feature-level change (PRD #X, miles
 - (2026-04-11) Fixed stale repo name references missed during PRD #43 generalization: updated Two-Repo Workflow tables in prd-32 and prd-33 to spinybacked-orbweaver-eval, removed commit-story-v2-eval/ prefix from prd-3 run-2 path, corrected self-contradictory grep patterns in prd-43 validation section (PRD #43, CodeRabbit review)
 
 ### Added
+- (2026-04-18) Backfilled all commit-story-v2 eval artifacts (runs 2–14) to main — each run now has its own directory at `evaluation/commit-story-v2/run-N/` with the full artifact set, accessible without branch-hopping (PRD #57, backfill milestone)
+- (2026-04-18) Added `evaluation/commit-story-v2/run-log.md` with one row per run (runs 2–14) — compact history table covering quality, file count, Q×F, push status, and top findings (PRD #57, backfill milestone)
+- (2026-04-18) Added artifact copy as step 13 in the Type D eval run template, so every future eval run automatically lands on main before `/prd-done` closes the branch (PRD #57, template update milestone)
 - (2026-03-13) Moved Weaver schema to canonical `semconv/` location on main (PRD #3, pre-run preparation)
 - (2026-03-13) Added `orb.yaml`, `src/instrumentation.js`, and OTel peerDependencies as permanent eval config on main (PRD #3, pre-run preparation)
 - (2026-03-13) Added graceful shutdown handling to OTel SDK init file (PRD #3, pre-run preparation)

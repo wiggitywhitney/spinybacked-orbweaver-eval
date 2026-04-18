@@ -55,7 +55,7 @@ This PRD adds a repeatable end-of-run step: copy all generated artifacts to main
 
   Success criteria: `docs/eval-artifacts-convention.md` exists and documents the five items above; `evaluation/commit-story-v2/run-log.md` exists with the header row.
 
-- [ ] **Backfill commit-story-v2 runs 2–14**
+- [x] **Backfill commit-story-v2 runs 2–14**
 
   For each run from 2 through 14, in order:
   1. On main: `git checkout <eval-branch> -- evaluation/commit-story-v2/run-N/`
@@ -69,7 +69,7 @@ This PRD adds a repeatable end-of-run step: copy all generated artifacts to main
 
   Success criteria: `evaluation/commit-story-v2/run-log.md` has one row per available run (runs where a branch existed); `evaluation/commit-story-v2/run-N/` directories exist on main for all those runs.
 
-- [ ] **Add artifact copy as the final step in the Type D milestone template**
+- [x] **Add artifact copy as the final step in the Type D milestone template**
 
   Open `docs/language-extension-plan.md` and find the Type D section. After "Draft next PRD" (step 12), add a new final step:
 
@@ -109,3 +109,4 @@ This PRD adds a repeatable end-of-run step: copy all generated artifacts to main
 | Date | Update | Status | Next Steps |
 |------|--------|--------|------------|
 | 2026-04-13 | PRD created | Draft | Start after run-14 completes |
+| 2026-04-18 | Milestones 2 and 3 complete — all runs 2–14 backfilled to main, run-log populated, Type D template updated | Complete | Run /prd-done |
