@@ -98,7 +98,7 @@ Type D PRDs form the recurring evaluation chain for each language/target.
 
 ### Eval Branch Convention (all evaluation PRDs)
 
-Evaluation feature branches (`feature/prd-N-evaluation-run-N`) **never merge to main and never get deleted**. PRs exist for CodeRabbit review only. When `/prd-done` runs at completion, close the issue without merging or deleting the eval branch. This applies to every Type D PRD.
+All eval execution branches — Type D recurring runs (`feature/prd-N-evaluation-run-N`) and Type C setup branches (`feature/prd-N-LANG-eval-setup`) — **never merge to main and never get deleted**. PRs exist for CodeRabbit review only. When `/prd-done` runs at completion, close the issue without merging or deleting the eval branch. This applies to every Type C and Type D PRD.
 
 **The branch is the canonical source for eval artifacts** until PRD #57's backfill lands them on main. Deleting the branch — even locally — risks orphaning commits that exist nowhere else. Before running any `git branch -D` or `git push origin --delete` on an eval branch, confirm the artifacts are on main first.
 
