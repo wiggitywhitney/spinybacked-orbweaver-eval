@@ -1,0 +1,257 @@
+{
+  "run": 6,
+  "branch": "spiny-orb/instrument-1773996478550",
+  "source": "evaluation/run-6/per-file-evaluation.json",
+  "timestamp": "2026-03-20T22:00:00Z",
+  "gates": {
+    "NDS-001": "pass",
+    "NDS-002": "pass",
+    "NDS-003": "pass",
+    "API-001": "pass",
+    "NDS-006": "pass",
+    "total": "5/5"
+  },
+  "dimensions": {
+    "NDS": {
+      "rules": {
+        "NDS-004": {
+          "result": "pass",
+          "instances": { "pass": 5, "fail": 0, "n/a": 0 },
+          "files_pass": ["claude-collector.js", "git-collector.js", "context-integrator.js", "summary-manager.js", "server.js"],
+          "files_fail": []
+        },
+        "NDS-005": {
+          "result": "pass",
+          "instances": { "pass": 5, "fail": 0, "n/a": 0 },
+          "files_pass": ["claude-collector.js", "git-collector.js", "context-integrator.js", "summary-manager.js", "server.js"],
+          "files_fail": []
+        }
+      },
+      "score": "2/2",
+      "percentage": 100
+    },
+    "COV": {
+      "rules": {
+        "COV-001": {
+          "result": "fail",
+          "classification": "persistent",
+          "persistent_since": "run-4",
+          "instances": { "pass": 1, "fail": 1, "n/a": 3 },
+          "files_pass": ["server.js"],
+          "files_fail": ["index.js"],
+          "evidence": "Main CLI entry point (index.js) has 0 spans — 3rd consecutive failure. MCP server entry point (server.js) has a span."
+        },
+        "COV-002": {
+          "result": "pass",
+          "instances": { "pass": 5, "fail": 0, "n/a": 0 },
+          "files_pass": ["claude-collector.js", "git-collector.js", "context-integrator.js", "summary-manager.js", "server.js"],
+          "files_fail": []
+        },
+        "COV-003": {
+          "result": "pass",
+          "instances": { "pass": 5, "fail": 0, "n/a": 0 },
+          "files_pass": ["claude-collector.js", "git-collector.js", "context-integrator.js", "summary-manager.js", "server.js"],
+          "files_fail": []
+        },
+        "COV-004": {
+          "result": "pass",
+          "instances": { "pass": 5, "fail": 0, "n/a": 0 },
+          "files_pass": ["claude-collector.js", "git-collector.js", "context-integrator.js", "summary-manager.js", "server.js"],
+          "files_fail": []
+        },
+        "COV-005": {
+          "result": "fail",
+          "classification": "persistent",
+          "persistent_since": "run-5",
+          "instances": { "pass": 4, "fail": 1, "n/a": 0 },
+          "files_pass": ["claude-collector.js", "git-collector.js", "context-integrator.js", "summary-manager.js"],
+          "files_fail": ["server.js"],
+          "evidence": "server.js has zero attributes on span. Other 4 files have good-to-excellent attribute coverage."
+        },
+        "COV-006": {
+          "result": "n/a",
+          "instances": { "pass": 0, "fail": 0, "n/a": 5 },
+          "evidence": "No auto-instrumentable operations in committed files."
+        }
+      },
+      "score": "3/5",
+      "percentage": 60
+    },
+    "RST": {
+      "rules": {
+        "RST-001": {
+          "result": "pass",
+          "instances": { "pass": 5, "fail": 0, "n/a": 0 },
+          "files_pass": ["claude-collector.js", "git-collector.js", "context-integrator.js", "summary-manager.js", "server.js"],
+          "files_fail": []
+        },
+        "RST-002": {
+          "result": "pass",
+          "instances": { "pass": 5, "fail": 0, "n/a": 0 },
+          "files_pass": ["claude-collector.js", "git-collector.js", "context-integrator.js", "summary-manager.js", "server.js"],
+          "files_fail": []
+        },
+        "RST-003": {
+          "result": "pass",
+          "instances": { "pass": 5, "fail": 0, "n/a": 0 },
+          "files_pass": ["claude-collector.js", "git-collector.js", "context-integrator.js", "summary-manager.js", "server.js"],
+          "files_fail": []
+        },
+        "RST-004": {
+          "result": "fail",
+          "classification": "new_regression",
+          "instances": { "pass": 4, "fail": 1, "n/a": 0 },
+          "files_pass": ["claude-collector.js", "context-integrator.js", "summary-manager.js", "server.js"],
+          "files_fail": ["git-collector.js"],
+          "evidence": "getCommitDiff and getMergeInfo are unexported internal functions (explicitly listed in rubric-codebase mapping as RST-004 violations). Agent instrumented internals instead of exported getCommitData."
+        },
+        "RST-005": {
+          "result": "n/a",
+          "instances": { "pass": 0, "fail": 0, "n/a": 5 },
+          "evidence": "No pre-existing OTel code in codebase."
+        }
+      },
+      "score": "3/4",
+      "percentage": 75
+    },
+    "API": {
+      "rules": {
+        "API-002": {
+          "result": "pass",
+          "evidence": "@opentelemetry/api in peerDependencies (correct for library)"
+        },
+        "API-003": {
+          "result": "pass",
+          "evidence": "No vendor-specific SDKs in package.json or source"
+        },
+        "API-004": {
+          "result": "pass",
+          "evidence": "No SDK-internal imports in source code"
+        }
+      },
+      "score": "3/3",
+      "percentage": 100
+    },
+    "SCH": {
+      "rules": {
+        "SCH-001": {
+          "result": "fail",
+          "classification": "systemic_new",
+          "systemic_bug": "SYS-RUN6-1",
+          "instances": { "pass": 1, "fail": 4, "n/a": 0 },
+          "files_pass": ["claude-collector.js"],
+          "files_fail": ["git-collector.js", "context-integrator.js", "summary-manager.js", "server.js"],
+          "evidence": "Single-span registry (1 definition) forced 4/5 files to misuse commit_story.context.collect_chat_messages. Only claude-collector.js has a semantically correct span name. Evaluated as quality guideline per rubric-codebase mapping.",
+          "root_cause": "Validator enforces strict registry conformance; registry has only 1 span definition. Agent chose compliance over accuracy for committed files."
+        },
+        "SCH-002": {
+          "result": "pass",
+          "instances": { "pass": 4, "fail": 0, "n/a": 1 },
+          "files_pass": ["claude-collector.js", "git-collector.js", "context-integrator.js", "summary-manager.js"],
+          "files_n_a": ["server.js"],
+          "evidence": "All attribute keys match registry definitions. server.js N/A (zero attributes)."
+        },
+        "SCH-003": {
+          "result": "pass",
+          "instances": { "pass": 4, "fail": 0, "n/a": 1 },
+          "files_pass": ["claude-collector.js", "git-collector.js", "context-integrator.js", "summary-manager.js"],
+          "files_n_a": ["server.js"]
+        },
+        "SCH-004": {
+          "result": "pass",
+          "instances": { "pass": 5, "fail": 0, "n/a": 0 }
+        }
+      },
+      "score": "3/4",
+      "percentage": 75
+    },
+    "CDQ": {
+      "rules": {
+        "CDQ-001": { "result": "pass", "instances": { "pass": 5, "fail": 0, "n/a": 0 } },
+        "CDQ-002": { "result": "pass", "instances": { "pass": 5, "fail": 0, "n/a": 0 } },
+        "CDQ-003": { "result": "pass", "instances": { "pass": 5, "fail": 0, "n/a": 0 } },
+        "CDQ-005": { "result": "pass", "instances": { "pass": 5, "fail": 0, "n/a": 0 } },
+        "CDQ-006": { "result": "pass", "instances": { "pass": 5, "fail": 0, "n/a": 0 } },
+        "CDQ-007": { "result": "pass", "instances": { "pass": 5, "fail": 0, "n/a": 0 } },
+        "CDQ-008": { "result": "pass", "evidence": "All files: trace.getTracer('commit-story')" }
+      },
+      "score": "7/7",
+      "percentage": 100
+    }
+  },
+  "canonical_score": {
+    "passed": 21,
+    "total": 25,
+    "percentage": 84,
+    "file_delivery": {
+      "committed_with_spans": 5,
+      "committed_without_spans_correct_skip": 14,
+      "debatable_skip": 3,
+      "soft_failure": 1,
+      "partial_not_committed": 6,
+      "total_files": 29
+    }
+  },
+  "schema_coverage_split": {
+    "covered": {
+      "files": ["claude-collector.js"],
+      "score_impact": "SCH-001 PASS — span name matches registry"
+    },
+    "uncovered": {
+      "files": ["git-collector.js", "context-integrator.js", "summary-manager.js", "server.js"],
+      "score_impact": "SCH-001 FAIL — all use mismatched registered name instead of inventing correct name. SCH-002 evaluated on attribute quality (PASS for all with attributes)."
+    }
+  },
+  "failure_classification": [
+    {
+      "rule": "COV-001",
+      "classification": "persistent",
+      "runs_open": 3,
+      "description": "index.js entry point has no span — blocked by COV-003 boundary gap + SCH-001 registry gap"
+    },
+    {
+      "rule": "COV-005",
+      "classification": "persistent",
+      "runs_open": 2,
+      "description": "server.js has zero attributes on span"
+    },
+    {
+      "rule": "RST-004",
+      "classification": "new_regression",
+      "runs_open": 1,
+      "description": "git-collector.js: 2 unexported internal functions instrumented"
+    },
+    {
+      "rule": "SCH-001",
+      "classification": "systemic_new",
+      "runs_open": 1,
+      "systemic_bug": "SYS-RUN6-1",
+      "description": "Single-span registry forces 4/5 files to misuse span name. Validator-evaluator conflict."
+    }
+  ],
+  "systemic_bugs": [
+    {
+      "id": "SYS-RUN6-1",
+      "name": "Single-span registry creates perverse incentive",
+      "rules_affected": ["SCH-001"],
+      "files_affected": ["git-collector.js", "context-integrator.js", "summary-manager.js", "server.js"],
+      "description": "Weaver registry has 1 span definition. Validator enforces strict SCH-001. Agent must choose: semantic accuracy (fails validator) or compliance (misleading names). All committed files except claude-collector chose compliance.",
+      "fix": "Expand Weaver registry with ~8 span definitions covering commit-story domain operations."
+    }
+  ],
+  "superficial_resolution_tracking": {
+    "summary_manager_js": {
+      "NDS-005": "genuinely_resolved",
+      "CDQ-003": "genuinely_resolved",
+      "RST-001": "genuinely_resolved"
+    },
+    "note": "Only 1 file recovered from partial→committed (summary-manager.js). All 3 superficial resolutions are now genuine."
+  },
+  "cross_run_comparison": {
+    "run_2": { "score": "15/21 (74%)", "files": "N/A", "gates": "3/5" },
+    "run_3": { "score": "19/26 (73%)", "files": "17", "gates": "4/5" },
+    "run_4": { "score": "15/26 (58%)", "files": "16", "gates": "4/5" },
+    "run_5": { "score": "23/25 (92%)", "files": "9", "gates": "5/5" },
+    "run_6": { "score": "21/25 (84%)", "files": "5", "gates": "5/5" }
+  }
+}
