@@ -103,7 +103,7 @@ If this PRD proceeds past milestone 0 (i.e., a new target is selected), the feat
 
   Success criteria: 3 consecutive clean test runs documented.
 
-- [ ] **Pre-run verification**
+- [x] **Pre-run verification**
 
   Verify spiny-orb JavaScript provider and validate all run prerequisites:
   1. Verify target repo has `spiny-orb.yaml` and `semconv/` configured correctly
@@ -209,3 +209,4 @@ If this PRD proceeds past milestone 0 (i.e., a new target is selected), the feat
 | 2026-04-18 | spiny-orb prerequisites added to wiggitywhitney/release-it: spiny-orb.yaml, semconv/ schema (attributes.yaml + registry_manifest.yaml), examples/instrumentation.js OTel init, @opentelemetry/api peerDependency. Tests: 262/264 pass, 0 failures. | In Progress | Create deliberately incomplete Weaver schema |
 | 2026-04-18 | Deliberately incomplete Weaver schema created. schema-complete.yaml documents all 4 omitted attributes (release_it.git.tag_annotation, release_it.github.release_name, release_it.github.release_url, release_it.npm.publish_path). schema-omissions.md explains each omission with code citations. semconv/attributes.yaml in forked repo is confirmed incomplete. | In Progress | Verify test suite runs clean on unmodified target |
 | 2026-04-18 | Test suite baseline confirmed: 3/3 clean runs (262/264 pass, 0 fail, 2 consistently skipped). Skips: "should not roll back with risky config" and "should truncate long body" — stable, unrelated to instrumentation. | In Progress | Pre-run verification |
+| 2026-04-18 | Pre-run verification complete. 23 .js files in lib/. spiny-orb rebuilt from main (SHA a02004f, includes PR #506 KNOWN_FRAMEWORK_PACKAGES). GITHUB_TOKEN resolves via vals. Versions: Node v25.8.0, spiny-orb 1.0.0, release-it 20.0.0. .vals.yaml copied to release-it fork and .gitignored. File inventory and instrument command recorded in lessons-for-run2.md. | In Progress | Evaluation run-1 |
