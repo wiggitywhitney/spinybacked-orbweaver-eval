@@ -42,7 +42,7 @@ This PRD adds a repeatable end-of-run step: copy all generated artifacts to main
 
 ## Implementation Milestones
 
-- [ ] **Define the artifact copy convention and create the run-log format**
+- [x] **Define the artifact copy convention and create the run-log format**
 
   Establish the exact convention before any code changes. Write the following to `docs/eval-artifacts-convention.md`:
   1. Which files get copied: all files in `evaluation/<target>/run-N/` on the eval branch (the glob is `evaluation/<target>/run-N/**`). No exclusions — copy everything including logs.
