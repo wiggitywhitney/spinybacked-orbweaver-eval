@@ -1,0 +1,452 @@
+diff --git a/src/managers/summary-manager.js b/src/managers/summary-manager.js
+index a2a0f2c..a1865ae 100644
+--- a/src/managers/summary-manager.js
++++ b/src/managers/summary-manager.js
+@@ -4,6 +4,9 @@
+ import { readFile, writeFile, access, readdir } from 'node:fs/promises';
+ import { join } from 'node:path';
+ import { generateDailySummary, generateWeeklySummary, generateMonthlySummary } from '../generators/summary-graph.js';
++import { SpanStatusCode, trace } from '@opentelemetry/api';
++
++const tracer = trace.getTracer('commit-story');
+ import {
+   getJournalEntryPath,
+   getSummaryPath,
+@@ -46,6 +49,12 @@ export async function readDayEntries(date, basePath = '.') {
+   return entries;
+ }
+ 
++/**
++ * Format daily summary sections into markdown output.
++ * @param {{ narrative: string, keyDecisions: string, openThreads: string }} sections - Summary sections
++ * @param {string} dateStr - Date string (YYYY-MM-DD) for the header
++ * @returns {string} Formatted markdown summary
++ */
+ /**
+  * Format daily summary sections into markdown output.
+  * @param {{ narrative: string, keyDecisions: string, openThreads: string }} sections - Summary sections
+@@ -102,6 +111,13 @@ export async function saveDailySummary(content, date, basePath = '.', options =
+   return summaryPath;
+ }
+ 
++/**
++ * Full pipeline: read entries for a date, generate summary, save to file.
++ * @param {Date} date - Date to generate summary for
++ * @param {string} basePath - Base path for journal (default: current directory)
++ * @param {{ force?: boolean }} options - Options
++ * @returns {Promise<{ saved: boolean, path?: string, reason?: string, entryCount?: number, errors?: string[] }>}
++ */
+ /**
+  * Full pipeline: read entries for a date, generate summary, save to file.
+  * @param {Date} date - Date to generate summary for
+@@ -110,50 +126,71 @@ export async function saveDailySummary(content, date, basePath = '.', options =
+  * @returns {Promise<{ saved: boolean, path?: string, reason?: string, entryCount?: number, errors?: string[] }>}
+  */
+ export async function generateAndSaveDailySummary(date, basePath = '.', options = {}) {
+-  const dateStr = getDateString(date);
+-
+-  // Check for existing summary first (avoid reading entries unnecessarily)
+-  if (!options.force) {
+-    const summaryPath = getSummaryPath('daily', date, basePath);
++  return tracer.startActiveSpan('commit_story.journal.generate_and_save_daily_summary', async (span) => {
+     try {
+-      await access(summaryPath);
+-      return { saved: false, reason: `Summary already exists for ${dateStr}` };
+-    } catch {
+-      // Doesn't exist, proceed
+-    }
+-  }
++      const dateStr = getDateString(date);
++      span.setAttribute('commit_story.journal.entry_date', dateStr);
++
++      // Check for existing summary first (avoid reading entries unnecessarily)
++      if (!options.force) {
++        const summaryPath = getSummaryPath('daily', date, basePath);
++        try {
++          await access(summaryPath);
++          span.setAttribute('commit_story.journal.file_path', summaryPath);
++          return { saved: false, reason: `Summary already exists for ${dateStr}` };
++        } catch (error) {
++          span.recordException(error);
++          span.setStatus({ code: SpanStatusCode.ERROR });
++          // Doesn't exist, proceed
++        }
++      }
+ 
+-  // Read entries for the date
+-  const entries = await readDayEntries(date, basePath);
+-  if (entries.length === 0) {
+-    return { saved: false, reason: `Skipped ${dateStr}: no entries found` };
+-  }
++      // Read entries for the date
++      const entries = await readDayEntries(date, basePath);
++      if (entries.length === 0) {
++        return { saved: false, reason: `Skipped ${dateStr}: no entries found` };
++      }
+ 
+-  // Generate summary via LangGraph
+-  const result = await generateDailySummary(entries, dateStr);
++      // Generate summary via LangGraph
++      const result = await generateDailySummary(entries, dateStr);
+ 
+-  // Format the output
+-  const formatted = formatDailySummary(result, dateStr);
++      // Format the output
++      const formatted = formatDailySummary(result, dateStr);
+ 
+-  // Save to file
+-  const path = await saveDailySummary(formatted, date, basePath, options);
++      // Save to file
++      const path = await saveDailySummary(formatted, date, basePath, options);
+ 
+-  if (!path) {
+-    return { saved: false, reason: `Summary already exists for ${dateStr}` };
+-  }
++      if (!path) {
++        return { saved: false, reason: `Summary already exists for ${dateStr}` };
++      }
+ 
+-  return {
+-    saved: true,
+-    path,
+-    entryCount: entries.length,
+-    errors: result.errors || [],
+-  };
++      span.setAttribute('commit_story.journal.file_path', path);
++
++      return {
++        saved: true,
++        path,
++        entryCount: entries.length,
++        errors: result.errors || [],
++      };
++    } catch (error) {
++      span.recordException(error);
++      span.setStatus({ code: SpanStatusCode.ERROR });
++      throw error;
++    } finally {
++      span.end();
++    }
++  });
+ }
+ 
+ // ---------------------------------------------------------------------------
+ // Weekly summary pipeline
+ // ---------------------------------------------------------------------------
+ 
++/**
++ * Get the Monday and Sunday dates for an ISO week.
++ * @param {string} weekStr - ISO week string like "2026-W09"
++ * @returns {{ monday: Date, sunday: Date }} Start and end dates of the week
++ */
+ /**
+  * Get the Monday and Sunday dates for an ISO week.
+  * @param {string} weekStr - ISO week string like "2026-W09"
+@@ -220,6 +257,12 @@ export async function readWeekDailySummaries(weekStr, basePath = '.') {
+   return summaries;
+ }
+ 
++/**
++ * Format weekly summary sections into markdown output.
++ * @param {{ weekInReview: string, highlights: string, patterns: string }} sections - Summary sections
++ * @param {string} weekStr - ISO week string for the header
++ * @returns {string} Formatted markdown summary
++ */
+ /**
+  * Format weekly summary sections into markdown output.
+  * @param {{ weekInReview: string, highlights: string, patterns: string }} sections - Summary sections
+@@ -277,6 +320,13 @@ export async function saveWeeklySummary(content, weekStr, basePath = '.', option
+   return summaryPath;
+ }
+ 
++/**
++ * Full pipeline: read daily summaries for a week, generate weekly summary, save to file.
++ * @param {string} weekStr - ISO week string like "2026-W09"
++ * @param {string} basePath - Base path for journal (default: current directory)
++ * @param {{ force?: boolean }} options - Options
++ * @returns {Promise<{ saved: boolean, path?: string, reason?: string, dayCount?: number, errors?: string[] }>}
++ */
+ /**
+  * Full pipeline: read daily summaries for a week, generate weekly summary, save to file.
+  * @param {string} weekStr - ISO week string like "2026-W09"
+@@ -285,49 +335,69 @@ export async function saveWeeklySummary(content, weekStr, basePath = '.', option
+  * @returns {Promise<{ saved: boolean, path?: string, reason?: string, dayCount?: number, errors?: string[] }>}
+  */
+ export async function generateAndSaveWeeklySummary(weekStr, basePath = '.', options = {}) {
+-  // Check for existing summary first
+-  if (!options.force) {
+-    const { monday } = getWeekBoundaries(weekStr);
+-    const summaryPath = getSummaryPath('weekly', monday, basePath);
++  return tracer.startActiveSpan('commit_story.journal.generate_weekly_summary', async (span) => {
+     try {
+-      await access(summaryPath);
+-      return { saved: false, reason: `Weekly summary already exists for ${weekStr}` };
+-    } catch {
+-      // Doesn't exist, proceed
+-    }
+-  }
++      span.setAttribute('commit_story.journal.entry_date', weekStr);
++
++      // Check for existing summary first
++      if (!options.force) {
++        const { monday } = getWeekBoundaries(weekStr);
++        const summaryPath = getSummaryPath('weekly', monday, basePath);
++        try {
++          await access(summaryPath);
++          return { saved: false, reason: `Weekly summary already exists for ${weekStr}` };
++        } catch (error) {
++          span.recordException(error);
++          span.setStatus({ code: SpanStatusCode.ERROR });
++          // Doesn't exist, proceed
++        }
++      }
+ 
+-  // Read daily summaries for the week
+-  const dailySummaries = await readWeekDailySummaries(weekStr, basePath);
+-  if (dailySummaries.length === 0) {
+-    return { saved: false, reason: `Skipped ${weekStr}: no daily summaries found` };
+-  }
++      // Read daily summaries for the week
++      const dailySummaries = await readWeekDailySummaries(weekStr, basePath);
++      if (dailySummaries.length === 0) {
++        return { saved: false, reason: `Skipped ${weekStr}: no daily summaries found` };
++      }
+ 
+-  // Generate weekly summary via LangGraph
+-  const result = await generateWeeklySummary(dailySummaries, weekStr);
++      // Generate weekly summary via LangGraph
++      const result = await generateWeeklySummary(dailySummaries, weekStr);
+ 
+-  // Format the output
+-  const formatted = formatWeeklySummary(result, weekStr);
++      // Format the output
++      const formatted = formatWeeklySummary(result, weekStr);
+ 
+-  // Save to file
+-  const path = await saveWeeklySummary(formatted, weekStr, basePath, options);
++      // Save to file
++      const path = await saveWeeklySummary(formatted, weekStr, basePath, options);
+ 
+-  if (!path) {
+-    return { saved: false, reason: `Weekly summary already exists for ${weekStr}` };
+-  }
++      if (!path) {
++        return { saved: false, reason: `Weekly summary already exists for ${weekStr}` };
++      }
+ 
+-  return {
+-    saved: true,
+-    path,
+-    dayCount: dailySummaries.length,
+-    errors: result.errors || [],
+-  };
++      span.setAttribute('commit_story.journal.file_path', path);
++      return {
++        saved: true,
++        path,
++        dayCount: dailySummaries.length,
++        errors: result.errors || [],
++      };
++    } catch (error) {
++      span.recordException(error);
++      span.setStatus({ code: SpanStatusCode.ERROR });
++      throw error;
++    } finally {
++      span.end();
++    }
++  });
+ }
+ 
+ // ---------------------------------------------------------------------------
+ // Monthly summary pipeline
+ // ---------------------------------------------------------------------------
+ 
++/**
++ * Get the first and last day of a month.
++ * @param {string} monthStr - Month string like "2026-02"
++ * @returns {{ firstDay: Date, lastDay: Date }} Start and end dates of the month
++ */
+ /**
+  * Get the first and last day of a month.
+  * @param {string} monthStr - Month string like "2026-02"
+@@ -354,6 +424,13 @@ export function getMonthBoundaries(monthStr) {
+   return { firstDay, lastDay };
+ }
+ 
++/**
++ * Read all weekly summaries that overlap with a given month.
++ * A week overlaps if any day of the week (Monday-Sunday) falls within the month.
++ * @param {string} monthStr - Month string like "2026-02"
++ * @param {string} basePath - Base path for journal (default: current directory)
++ * @returns {Promise<Array<{ weekLabel: string, content: string }>>} Weekly summaries sorted by week
++ */
+ /**
+  * Read all weekly summaries that overlap with a given month.
+  * A week overlaps if any day of the week (Monday-Sunday) falls within the month.
+@@ -362,45 +439,65 @@ export function getMonthBoundaries(monthStr) {
+  * @returns {Promise<Array<{ weekLabel: string, content: string }>>} Weekly summaries sorted by week
+  */
+ export async function readMonthWeeklySummaries(monthStr, basePath = '.') {
+-  const { firstDay, lastDay } = getMonthBoundaries(monthStr);
+-  const weeklyDir = getSummariesDirectory('weekly', basePath);
+-
+-  let files;
+-  try {
+-    files = await readdir(weeklyDir);
+-  } catch {
+-    return [];
+-  }
+-
+-  const weekPattern = /^(\d{4}-W\d{2})\.md$/;
+-  const summaries = [];
+-
+-  for (const file of files.sort()) {
+-    const match = file.match(weekPattern);
+-    if (!match) continue;
+-
+-    const weekLabel = match[1];
+-
+-    // Check if this week overlaps with the month
+-    // Import getWeekBoundaries locally to avoid circular dependency concerns
+-    const { monday, sunday } = getWeekBoundaries(weekLabel);
++  return tracer.startActiveSpan('commit_story.journal.read_month_weekly_summaries', async (span) => {
++    try {
++      const { firstDay, lastDay } = getMonthBoundaries(monthStr);
++      const weeklyDir = getSummariesDirectory('weekly', basePath);
+ 
+-    // Week overlaps with month if week's Sunday >= month's first day AND week's Monday <= month's last day
+-    if (sunday >= firstDay && monday <= lastDay) {
++      let files;
+       try {
+-        const content = await readFile(join(weeklyDir, file), 'utf-8');
+-        if (content && content.trim()) {
+-          summaries.push({ weekLabel, content: content.trim() });
++        files = await readdir(weeklyDir);
++      } catch (error) {
++        span.recordException(error);
++        span.setStatus({ code: SpanStatusCode.ERROR });
++        return [];
++      }
++
++      const weekPattern = /^(\d{4}-W\d{2})\.md$/;
++      const summaries = [];
++
++      for (const file of files.sort()) {
++        const match = file.match(weekPattern);
++        if (!match) continue;
++
++        const weekLabel = match[1];
++
++        // Check if this week overlaps with the month
++        // Import getWeekBoundaries locally to avoid circular dependency concerns
++        const { monday, sunday } = getWeekBoundaries(weekLabel);
++
++        // Week overlaps with month if week's Sunday >= month's first day AND week's Monday <= month's last day
++        if (sunday >= firstDay && monday <= lastDay) {
++          try {
++            const content = await readFile(join(weeklyDir, file), 'utf-8');
++            if (content && content.trim()) {
++              summaries.push({ weekLabel, content: content.trim() });
++            }
++          } catch (error) {
++            span.recordException(error);
++            span.setStatus({ code: SpanStatusCode.ERROR });
++            // Skip unreadable files
++          }
+         }
+-      } catch {
+-        // Skip unreadable files
+       }
+-    }
+-  }
+ 
+-  return summaries;
++      return summaries;
++    } catch (error) {
++      span.recordException(error);
++      span.setStatus({ code: SpanStatusCode.ERROR });
++      throw error;
++    } finally {
++      span.end();
++    }
++  });
+ }
+ 
++/**
++ * Format monthly summary sections into markdown output.
++ * @param {{ monthInReview: string, accomplishments: string, growth: string, lookingAhead: string }} sections
++ * @param {string} monthStr - Month string for the header
++ * @returns {string} Formatted markdown summary
++ */
+ /**
+  * Format monthly summary sections into markdown output.
+  * @param {{ monthInReview: string, accomplishments: string, growth: string, lookingAhead: string }} sections
+@@ -432,6 +529,15 @@ export function formatMonthlySummary(sections, monthStr) {
+   return lines.join('\n');
+ }
+ 
++/**
++ * Save a monthly summary to the summaries directory.
++ * Checks for existing file to prevent duplicates (DD-003).
++ * @param {string} content - Formatted markdown summary
++ * @param {string} monthStr - Month string like "2026-02"
++ * @param {string} basePath - Base path for journal (default: current directory)
++ * @param {{ force?: boolean }} options - Options
++ * @returns {Promise<string|null>} Path to saved file, or null if skipped
++ */
+ /**
+  * Save a monthly summary to the summaries directory.
+  * Checks for existing file to prevent duplicates (DD-003).
+@@ -442,23 +548,38 @@ export function formatMonthlySummary(sections, monthStr) {
+  * @returns {Promise<string|null>} Path to saved file, or null if skipped
+  */
+ export async function saveMonthlySummary(content, monthStr, basePath = '.', options = {}) {
+-  const { firstDay } = getMonthBoundaries(monthStr);
+-  const summaryPath = getSummaryPath('monthly', firstDay, basePath);
+-
+-  // Check for existing summary (DD-003)
+-  if (!options.force) {
++  return tracer.startActiveSpan('commit_story.journal.save_monthly_summary', async (span) => {
+     try {
+-      await access(summaryPath);
+-      return null;
+-    } catch {
+-      // Doesn't exist, proceed
+-    }
+-  }
++      const { firstDay } = getMonthBoundaries(monthStr);
++      const summaryPath = getSummaryPath('monthly', firstDay, basePath);
++
++      span.setAttribute('commit_story.journal.entry_date', firstDay);
++      span.setAttribute('commit_story.journal.file_path', summaryPath);
++
++      // Check for existing summary (DD-003)
++      if (!options.force) {
++        try {
++          await access(summaryPath);
++          return null;
++        } catch (accessError) {
++          span.recordException(accessError);
++          span.setStatus({ code: SpanStatusCode.ERROR });
++          // Doesn't exist, proceed
++        }
++      }
+ 
+-  await ensureDirectory(summaryPath);
+-  await writeFile(summaryPath, content, 'utf-8');
++      await ensureDirectory(summaryPath);
++      await writeFile(summaryPath, content, 'utf-8');
+ 
+-  return summaryPath;
++      return summaryPath;
++    } catch (error) {
++      span.recordException(error);
++      span.setStatus({ code: SpanStatusCode.ERROR });
++      throw error;
++    } finally {
++      span.end();
++    }
++  });
+ }
+ 
+ /**

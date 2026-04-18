@@ -1,0 +1,153 @@
+diff --git a/src/managers/journal-manager.js b/src/managers/journal-manager.js
+index 6377c84..948b650 100644
+--- a/src/managers/journal-manager.js
++++ b/src/managers/journal-manager.js
+@@ -7,6 +7,9 @@
+ 
+ import { readFile, appendFile, readdir } from 'node:fs/promises';
+ import { join } from 'node:path';
++import { SpanStatusCode, trace } from '@opentelemetry/api';
++
++const tracer = trace.getTracer('commit-story');
+ import {
+   getJournalEntryPath,
+   getReflectionsDirectory,
+@@ -94,6 +97,21 @@ function formatReflectionsSection(reflections) {
+   return lines.join('\n');
+ }
+ 
++/**
++ * Format a complete journal entry
++ * @param {Object} sections - Generated sections from AI
++ * @param {string} sections.summary - Narrative summary
++ * @param {string} sections.dialogue - Human quotes
++ * @param {string} sections.technicalDecisions - Technical decisions
++ * @param {Object} commit - Commit metadata
++ * @param {string} commit.shortHash - Short commit hash
++ * @param {string} commit.hash - Full commit hash
++ * @param {string} commit.author - Commit author name
++ * @param {Date} commit.timestamp - Commit timestamp
++ * @param {number} commit.filesChanged - Number of files changed
++ * @param {Array} reflections - Optional array of reflections
++ * @returns {string} Formatted markdown entry
++ */
+ /**
+  * Format a complete journal entry
+  * @param {Object} sections - Generated sections from AI
+@@ -164,6 +182,16 @@ export function formatJournalEntry(sections, commit, reflections = []) {
+   return lines.join('\n');
+ }
+ 
++/**
++ * Save a journal entry for a commit
++ * @param {Object} sections - Generated sections from AI
++ * @param {Object} commit - Commit metadata with timestamp
++ * @param {Array} reflections - Optional reflections to include
++ * @param {string} basePath - Base path for journal (default: current directory)
++ * @param {Object} [options] - Optional settings
++ * @param {Function} [options.debug] - Debug logging function
++ * @returns {Promise<string>} Path to saved file
++ */
+ /**
+  * Save a journal entry for a commit
+  * @param {Object} sections - Generated sections from AI
+@@ -175,48 +203,64 @@ export function formatJournalEntry(sections, commit, reflections = []) {
+  * @returns {Promise<string>} Path to saved file
+  */
+ export async function saveJournalEntry(sections, commit, reflections = [], basePath = '.', options = {}) {
+-  const log = options.debug || (() => {});
+-  const entryPath = getJournalEntryPath(commit.timestamp, basePath);
++  return tracer.startActiveSpan('commit_story.journal.save_journal_entry', async (span) => {
++    try {
++      const log = options.debug || (() => {});
++      const entryPath = getJournalEntryPath(commit.timestamp, basePath);
+ 
+-  // Ensure directory exists
+-  await ensureDirectory(entryPath);
++      span.setAttribute('commit_story.journal.file_path', entryPath);
++      span.setAttribute('commit_story.commit.timestamp', commit.timestamp);
++      span.setAttribute('commit_story.commit.message', commit.message);
+ 
+-  // Check for duplicate entry
+-  try {
+-    const existing = await readFile(entryPath, 'utf-8');
++      // Ensure directory exists
++      await ensureDirectory(entryPath);
+ 
+-    // Path 1: Exact hash match (catches re-runs of the same commit)
+-    if (existing.includes(`Commit: ${commit.shortHash}`)) {
+-      log(`Skipping duplicate entry: exact hash match (${commit.shortHash})`);
+-      return entryPath;
+-    }
++      // Check for duplicate entry
++      try {
++        const existing = await readFile(entryPath, 'utf-8');
+ 
+-    // Path 2: Semantic match (catches cherry-pick/rebase duplicates)
+-    // Cherry-picks and rebases preserve author timestamp and commit message
+-    // but produce a new commit hash. Match on both to avoid false positives.
+-    // Split into entry blocks so we check timestamp+message within the SAME entry,
+-    // avoiding false positives when different entries share one field each.
+-    const timeStr = formatTimestamp(commit.timestamp);
+-    const commitMessage = (commit.message || '').split('\n')[0];
+-    const entryBlocks = existing.split('═══════════════════════════════════════');
+-    const isSemanticDup = commitMessage && entryBlocks.some(
+-      block => block.includes(`## ${timeStr}`) && block.includes(`**Message**: "${commitMessage}"`)
+-    );
+-    if (isSemanticDup) {
+-      log(`Skipping duplicate entry: semantic match — same timestamp (${timeStr}) and message ("${commitMessage}"), likely cherry-pick/rebase of ${commit.shortHash}`);
+-      return entryPath;
+-    }
+-  } catch {
+-    // File doesn't exist yet, proceed
+-  }
++        // Path 1: Exact hash match (catches re-runs of the same commit)
++        if (existing.includes(`Commit: ${commit.shortHash}`)) {
++          log(`Skipping duplicate entry: exact hash match (${commit.shortHash})`);
++          return entryPath;
++        }
+ 
+-  // Format the entry
+-  const formattedEntry = formatJournalEntry(sections, commit, reflections);
++        // Path 2: Semantic match (catches cherry-pick/rebase duplicates)
++        // Cherry-picks and rebases preserve author timestamp and commit message
++        // but produce a new commit hash. Match on both to avoid false positives.
++        // Split into entry blocks so we check timestamp+message within the SAME entry,
++        // avoiding false positives when different entries share one field each.
++        const timeStr = formatTimestamp(commit.timestamp);
++        const commitMessage = (commit.message || '').split('\n')[0];
++        const entryBlocks = existing.split('═══════════════════════════════════════');
++        const isSemanticDup = commitMessage && entryBlocks.some(
++          block => block.includes(`## ${timeStr}`) && block.includes(`**Message**: "${commitMessage}"`)
++        );
++        if (isSemanticDup) {
++          log(`Skipping duplicate entry: semantic match — same timestamp (${timeStr}) and message ("${commitMessage}"), likely cherry-pick/rebase of ${commit.shortHash}`);
++          return entryPath;
++        }
++      } catch (e) {
++        span.recordException(e);
++        span.setStatus({ code: SpanStatusCode.ERROR });
++        // File doesn't exist yet, proceed
++      }
+ 
+-  // Append to file (creates if doesn't exist)
+-  await appendFile(entryPath, formattedEntry + '\n', 'utf-8');
++      // Format the entry
++      const formattedEntry = formatJournalEntry(sections, commit, reflections);
+ 
+-  return entryPath;
++      // Append to file (creates if doesn't exist)
++      await appendFile(entryPath, formattedEntry + '\n', 'utf-8');
++
++      return entryPath;
++    } catch (error) {
++      span.recordException(error);
++      span.setStatus({ code: SpanStatusCode.ERROR });
++      throw error;
++    } finally {
++      span.end();
++    }
++  });
+ }
+ 
+ /**

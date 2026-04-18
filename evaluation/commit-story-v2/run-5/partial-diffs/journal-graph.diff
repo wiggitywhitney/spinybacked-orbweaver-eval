@@ -1,0 +1,64 @@
+diff --git a/src/generators/journal-graph.js b/src/generators/journal-graph.js
+index eef83f2..25c54ab 100644
+--- a/src/generators/journal-graph.js
++++ b/src/generators/journal-graph.js
+@@ -17,6 +17,9 @@ import { getAllGuidelines } from './prompts/guidelines/index.js';
+ import { summaryPrompt } from './prompts/sections/summary-prompt.js';
+ import { dialoguePrompt } from './prompts/sections/dialogue-prompt.js';
+ import { technicalDecisionsPrompt } from './prompts/sections/technical-decisions-prompt.js';
++import { SpanStatusCode, trace } from '@opentelemetry/api';
++
++const tracer = trace.getTracer('commit-story');
+ 
+ /**
+  * Journal state definition using LangGraph Annotation API
+@@ -589,23 +592,38 @@ function getGraph() {
+   return compiledGraph;
+ }
+ 
++/**
++ * Generate all journal sections from context
++ * @param {Context} context - Gathered context from integrator
++ * @returns {Promise<JournalSections>} Generated journal sections
++ */
+ /**
+  * Generate all journal sections from context
+  * @param {Context} context - Gathered context from integrator
+  * @returns {Promise<JournalSections>} Generated journal sections
+  */
+ export async function generateJournalSections(context) {
+-  const graph = getGraph();
+-
+-  const result = await graph.invoke({ context });
+-
+-  return {
+-    summary: result.summary || '',
+-    dialogue: result.dialogue || '',
+-    technicalDecisions: result.technicalDecisions || '',
+-    errors: result.errors || [],
+-    generatedAt: new Date(),
+-  };
++  return tracer.startActiveSpan('commit_story.journal.generate_sections', async (span) => {
++    try {
++      const graph = getGraph();
++
++      const result = await graph.invoke({ context });
++
++      return {
++        summary: result.summary || '',
++        dialogue: result.dialogue || '',
++        technicalDecisions: result.technicalDecisions || '',
++        errors: result.errors || [],
++        generatedAt: new Date(),
++      };
++    } catch (error) {
++      span.recordException(error);
++      span.setStatus({ code: SpanStatusCode.ERROR });
++      throw error;
++    } finally {
++      span.end();
++    }
++  });
+ }
+ 
+ // Export node functions and helpers for testing
