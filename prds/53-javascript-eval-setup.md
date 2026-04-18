@@ -87,7 +87,7 @@ If this PRD proceeds past milestone 0 (i.e., a new target is selected), the feat
 
   Success criteria: spiny-orb.yaml, semconv/, OTel init file, and peerDependency all present. Forked repo builds and tests pass.
 
-- [ ] **Create deliberately incomplete Weaver schema**
+- [x] **Create deliberately incomplete Weaver schema**
 
   The `semconv/` schema created in the previous milestone should deliberately omit some spans and attributes that a human would include. This tests whether spiny-orb identifies missing attributes and proposes schema extensions (SCH extension capability). The process: (1) first draft a complete schema covering all domain concepts, (2) then remove items to create the deliberately incomplete version, (3) document both the complete and incomplete versions so the eval can compare.
 
@@ -207,3 +207,4 @@ If this PRD proceeds past milestone 0 (i.e., a new target is selected), the feat
 | 2026-04-18 | Step 0 and Milestone 0 complete; release-it selected | In Progress | Fork release-it, create eval directory structure |
 | 2026-04-18 | KNOWN_FRAMEWORK_PACKAGES expanded in spiny-orb (PR #506); release-it forked to wiggitywhitney/release-it; evaluation/release-it/run-1/ created with skeleton files | In Progress | Add spiny-orb prerequisites to release-it fork |
 | 2026-04-18 | spiny-orb prerequisites added to wiggitywhitney/release-it: spiny-orb.yaml, semconv/ schema (attributes.yaml + registry_manifest.yaml), examples/instrumentation.js OTel init, @opentelemetry/api peerDependency. Tests: 262/264 pass, 0 failures. | In Progress | Create deliberately incomplete Weaver schema |
+| 2026-04-18 | Deliberately incomplete Weaver schema created. schema-complete.yaml documents all 4 omitted attributes (release_it.git.tag_annotation, release_it.github.release_name, release_it.github.release_url, release_it.npm.publish_path). schema-omissions.md explains each omission with code citations. semconv/attributes.yaml in forked repo is confirmed incomplete. | In Progress | Verify test suite runs clean on unmodified target |
