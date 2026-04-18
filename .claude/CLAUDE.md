@@ -95,3 +95,13 @@ Use the immediately preceding eval run PRD as the structural model. The **first 
 Include both user-facing checkpoints (Findings Discussion and Handoff pause) in the milestone structure — exact wording is in the plan document under "Two User-Facing Checkpoints."
 
 See `docs/language-extension-plan.md` for full context: PRD taxonomy, language candidate table, score projection methodology, and process requirements.
+
+## Branch Safety — Never Orphan Commits
+
+Before deleting any local branch (`git branch -d` or especially `-D`), verify its commits exist on origin. Run:
+
+```bash
+git log --oneline <branch> ^origin/main ^origin/<branch>
+```
+
+If the output is non-empty, the branch has commits that exist nowhere else — push first, then delete. This applies especially to eval branches, which hold the canonical run artifacts until PRD #57 backfill lands. Do not assume `gh pr merge --delete-branch` handled cleanup for branches whose PRs didn't merge (eval branches never merge per convention, so their cleanup is manual and must preserve the remote).

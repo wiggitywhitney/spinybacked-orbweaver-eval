@@ -131,6 +131,8 @@ The **evaluation execution branch** created by `/prd-start` from main **never me
   caffeinate -s env -u ANTHROPIC_CUSTOM_HEADERS -u ANTHROPIC_BASE_URL vals exec -i -f .vals.yaml -- node ~/Documents/Repositories/spinybacked-orbweaver/bin/spiny-orb.js instrument src --verbose 2>&1 | tee ~/Documents/Repositories/spinybacked-orbweaver-eval/evaluation/commit-story-v2/run-15/spiny-orb-output.log
   ```
 
+  **After saving artifacts and committing, push the eval branch to origin immediately** (`git push -u origin feature/prd-61-evaluation-run-15`). The branch holds the only copy of run-15 artifacts until PRD #57's backfill lands — do not leave it local-only.
+
 - [ ] **Findings Discussion** *(user-facing checkpoint 1)* — After `run-summary.md` is written, before any evaluation documents are started: report to Whitney: (1) files committed / failed / partial, (2) whether any checkpoint failures occurred, (3) whether summaryNode catch block looks consistent with the other nodes (signal for RUN14-1 fix), (4) quality score if visible, (5) cost, (6) push/PR status. Keep it conversational, under 10 lines. Wait for acknowledgment before proceeding.
 
 - [ ] **Failure deep-dives** — For each failed file AND run-level failure. Includes any partial files.

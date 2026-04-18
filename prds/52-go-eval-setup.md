@@ -116,7 +116,8 @@ The feature branch for this PRD **never merges to main**. The PR exists for Code
 - [ ] **Evaluation run-1**
 
   Whitney runs `spiny-orb instrument`. **Do NOT run yourself.** Copy the command template from `docs/language-extension-plan.md` (line ~72). Replace `commit-story-v2` with the chosen target name, `run-N` with `run-1`, and `src` with the target's source directory (Go repos typically use `.`, `cmd/`, or `internal/` — check the forked repo's layout).
-  AI role: confirm readiness, save log, write run-summary.md.
+
+  AI role: confirm readiness, save log, write run-summary.md, and **push the eval branch to origin immediately** (`git push -u origin feature/prd-52-go-eval-setup`) — the branch holds the only copy of run-1 artifacts until PRD #57's backfill lands.
 
 - [ ] **Findings Discussion** *(user-facing checkpoint 1)*
 

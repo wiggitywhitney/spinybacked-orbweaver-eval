@@ -78,7 +78,7 @@ Note: update `run-N` to the current run number and `commit-story-v2` to the targ
 Identical in structure to the existing PRDs #3–13. Triggered by findings from the previous run. Follows the established milestone sequence:
 1. Collect skeleton documents
 2. Pre-run verification (verify prior findings fixed, check prerequisites)
-3. Evaluation run (Whitney runs `spiny-orb instrument` in her terminal — see exact command in Type C section above)
+3. Evaluation run (Whitney runs `spiny-orb instrument` in her terminal — see exact command in Type C section above). **After saving artifacts and committing, push the eval branch to origin immediately.** The branch holds the only copy of run artifacts until PRD #57's backfill lands — do not leave it local-only.
 4. Findings Discussion *(user-facing checkpoint 1: raw signal before analysis)*
 5. Failure deep-dives
 6. Per-file evaluation
@@ -98,7 +98,9 @@ Type D PRDs form the recurring evaluation chain for each language/target.
 
 ### Eval Branch Convention (all evaluation PRDs)
 
-Evaluation feature branches (`feature/prd-N-evaluation-run-N`) **never merge to main**. PRs exist for CodeRabbit review only. When `/prd-done` runs at completion, close the issue without merging the eval branch. This applies to every Type D PRD.
+All eval execution branches — Type D recurring runs (`feature/prd-N-evaluation-run-N`) and Type C setup branches (`feature/prd-N-LANG-eval-setup`) — **never merge to main and never get deleted**. PRs exist for CodeRabbit review only. When `/prd-done` runs at completion, close the issue without merging or deleting the eval branch. This applies to every Type C and Type D PRD.
+
+**The branch is the canonical source for eval artifacts** until PRD #57's backfill lands them on main. Deleting the branch — even locally — risks orphaning commits that exist nowhere else. Before running any `git branch -D` or `git push origin --delete` on an eval branch, confirm the artifacts are on main first.
 
 ---
 
