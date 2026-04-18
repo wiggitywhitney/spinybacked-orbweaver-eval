@@ -35,13 +35,13 @@ If this PRD proceeds past milestone 0 (i.e., a new target is selected), the feat
 
 ## Implementation Milestones
 
-- [ ] **Step 0: Read `docs/language-extension-plan.md` completely before proceeding with any other milestone**
+- [x] **Step 0: Read `docs/language-extension-plan.md` completely before proceeding with any other milestone**
 
   Read the full document, paying particular attention to: (1) "Type C: Setup + Run-1 PRD" section — required milestone structure, operational details, exact instrument command; (2) "Two User-Facing Checkpoints" section — exact wording for Findings Discussion and handoff pause; (3) eval branch convention (never merges to main). Also read `docs/research/eval-target-criteria.md` to understand the criteria scorecard and review the 3 JavaScript candidates.
 
   Success criteria: Can answer — what are the 3 JS candidates? What rubric rules does each exercise? What is the instrument command?
 
-- [ ] **Milestone 0: Evaluate 3 JavaScript candidates and choose target**
+- [x] **Milestone 0: Evaluate 3 JavaScript candidates and choose target**
 
   Read `docs/research/eval-target-criteria.md` Section 2.1 before cloning anything. The COV-006 overlap analysis and per-rule coverage table for all 3 JS candidates are already complete — do not redo them.
 
@@ -98,6 +98,8 @@ If this PRD proceeds past milestone 0 (i.e., a new target is selected), the feat
 - [ ] **Verify test suite runs clean on unmodified target**
 
   Run the test suite 3 times on the forked repo (after adding spiny-orb prerequisites but before any instrumentation). All tests must pass all 3 times.
+
+  **release-it caveat**: `tag.gpgsign=true` in the global git config causes tag-creation tests to fail. Run tests with: `GIT_CONFIG_GLOBAL=/tmp/release-it-test.gitconfig npm test` where that file contains only `[user] email = test@test.com` and `name = Test User`. This workaround must be used for all test runs on this target.
 
   Success criteria: 3 consecutive clean test runs documented.
 
@@ -195,9 +197,11 @@ If this PRD proceeds past milestone 0 (i.e., a new target is selected), the feat
 |------|----------|-----------|--------|
 | 2026-04-11 | JS gets its own Type C PRD with early exit | commit-story-v2 should be formally evaluated, not assumed correct. Early exit if it wins keeps this low-cost. | PRD created |
 | 2026-04-11 | commit-story-v2 must be one of the 3 candidates | 12 runs of history is valuable; it should compete on merit, not be excluded | Candidate shortlist includes it |
+| 2026-04-18 | release-it selected as new JS eval target | Local verification: release-it passes 3/3 test runs (262/264 tests, 0 failures) with GIT_CONFIG_GLOBAL override to disable tag.gpgsign. npm-check disqualified (util.isDate Node.js compat failure). commit-story-v2 also passes 3/3 runs. Both score 25 exercisable rubric rules. release-it preferred per research doc (best I/O diversity, different domain, ~31 min runtime vs ~40 min). Decision to run both as parallel JS eval chains — release-it as new target (this PRD), commit-story-v2 continuing its existing chain. | All remaining milestones proceed for release-it. Test caveat: run tests with GIT_CONFIG_GLOBAL pointing to a minimal config without tag.gpgsign. |
 
 ## Progress Log
 
 | Date | Update | Status | Next Steps |
 |------|--------|--------|------------|
 | 2026-04-11 | PRD created | Draft | Await Gate 2 (3 JS candidates in eval-target-criteria.md) |
+| 2026-04-18 | Step 0 and Milestone 0 complete; release-it selected | In Progress | Fork release-it, create eval directory structure |
