@@ -15,3 +15,4 @@ Column key: **N** = run number · **Q×F** = (quality/total) × files_committed 
 | 8 | 2026-03-21 | 23/25 | 12 | 11.0 | NO | SCH-003 boolean attrs typed as string; CDQ-007 optional chaining missing guard |
 | 9 | 2026-03-21 | 25/25 | 12 | 12.0 | NO | First perfect score (25/25); journal-graph.js still partial; push broken (7th) |
 | 10 | 2026-03-23 | 23/25 | 12 | 11.0 | NO | SCH-003 boolean + CDQ-007 optional chaining regressed; push broken (8th) |
+| 11 | 2026-03-30 | 25/25 | 13 | 13.0 | YES (#60) | New Q×F record (13.0); first push/PR success; all-time-high file count |
