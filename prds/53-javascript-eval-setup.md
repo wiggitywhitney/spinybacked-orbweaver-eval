@@ -65,13 +65,13 @@ If this PRD proceeds past milestone 0 (i.e., a new target is selected), the feat
 
   Success criteria: One candidate selected with documented rubric-coverage rationale. Either early exit confirmed or Whitney's approval to proceed with new target.
 
-- [ ] **Add JavaScript auto-instrumentation libraries to spiny-orb**
+- [x] **Add JavaScript auto-instrumentation libraries to spiny-orb**
 
   Work in `~/Documents/Repositories/spinybacked-orbweaver/` on a feature branch. Review and update `KNOWN_FRAMEWORK_PACKAGES` in `src/languages/javascript/ast.ts` (around line 124). Cross-reference against `@opentelemetry/auto-instrumentations-node` package list to ensure nothing major is missing. Run `npm test` to verify changes don't break anything. If new entries are needed, submit a PR to spiny-orb.
 
   Success criteria: KNOWN_FRAMEWORK_PACKAGES is current and complete for JavaScript. Any additions submitted as a PR with passing tests.
 
-- [ ] **Fork target repo and create eval directory structure**
+- [x] **Fork target repo and create eval directory structure**
 
   Fork the chosen candidate to Whitney's GitHub account. Create `evaluation/<target-name>/run-1/` directory in the eval repo with these skeleton files: `lessons-for-run2.md`, `spiny-orb-findings.md`. Reference `~/Documents/Repositories/commit-story-v2/spiny-orb.yaml` and `~/Documents/Repositories/commit-story-v2/semconv/` as the working examples for spiny-orb prerequisites.
 
@@ -205,3 +205,4 @@ If this PRD proceeds past milestone 0 (i.e., a new target is selected), the feat
 |------|--------|--------|------------|
 | 2026-04-11 | PRD created | Draft | Await Gate 2 (3 JS candidates in eval-target-criteria.md) |
 | 2026-04-18 | Step 0 and Milestone 0 complete; release-it selected | In Progress | Fork release-it, create eval directory structure |
+| 2026-04-18 | KNOWN_FRAMEWORK_PACKAGES expanded in spiny-orb (PR #506); release-it forked to wiggitywhitney/release-it; evaluation/release-it/run-1/ created with skeleton files | In Progress | Add spiny-orb prerequisites to release-it fork |
