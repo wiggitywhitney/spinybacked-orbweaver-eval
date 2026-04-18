@@ -13,3 +13,4 @@ Column key: **N** = run number · **Q×F** = (quality/total) × files_committed 
 | 6 | 2026-03-20 | 21/25 | 5 | 4.2 | NO | Quality + coverage both regressed from run-5; SCH-001 still blocking |
 | 7 | 2026-03-20 | 22/25 | 13 | 11.4 | NO | COV-006 span name collision unmasked; CDQ-005 count type mismatch unmasked |
 | 8 | 2026-03-21 | 23/25 | 12 | 11.0 | NO | SCH-003 boolean attrs typed as string; CDQ-007 optional chaining missing guard |
+| 9 | 2026-03-21 | 25/25 | 12 | 12.0 | NO | First perfect score (25/25); journal-graph.js still partial; push broken (7th) |
