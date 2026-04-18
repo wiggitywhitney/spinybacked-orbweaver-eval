@@ -15,9 +15,6 @@ Execution order within each tier matters. Items are listed in dependency order �
 5. TypeScript eval setup + Run-1: target selection from 3 candidates (PRD #50) — TS provider landing in spiny-orb (in progress)
 6. JavaScript eval setup + Run-1: target selection from 3 candidates (PRD #53) — JS provider already exists; sequenced after TypeScript eval
 
-## Post-run-14 (unblocked, sequenced after run-14)
-- Save all eval run artifacts to main with per-target run log (PRD #57) — backfill runs 2–14, wire into Type D template
-
 ## Long-term (blocked by language providers)
 7. Python eval setup + Run-1: target selection from 3 candidates (PRD #51) — depends on Python provider landing
 8. Go eval setup + Run-1: target selection from 3 candidates (PRD #52) — depends on Go provider landing
