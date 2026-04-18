@@ -77,7 +77,7 @@ If this PRD proceeds past milestone 0 (i.e., a new target is selected), the feat
 
   Success criteria: Forked repo exists; eval directory created with skeleton files.
 
-- [ ] **Add spiny-orb prerequisites to target repo**
+- [x] **Add spiny-orb prerequisites to target repo**
 
   In the forked target repo, add all required spiny-orb configuration:
   1. Create `spiny-orb.yaml` configuration (adapt from commit-story-v2 reference)
@@ -206,3 +206,4 @@ If this PRD proceeds past milestone 0 (i.e., a new target is selected), the feat
 | 2026-04-11 | PRD created | Draft | Await Gate 2 (3 JS candidates in eval-target-criteria.md) |
 | 2026-04-18 | Step 0 and Milestone 0 complete; release-it selected | In Progress | Fork release-it, create eval directory structure |
 | 2026-04-18 | KNOWN_FRAMEWORK_PACKAGES expanded in spiny-orb (PR #506); release-it forked to wiggitywhitney/release-it; evaluation/release-it/run-1/ created with skeleton files | In Progress | Add spiny-orb prerequisites to release-it fork |
+| 2026-04-18 | spiny-orb prerequisites added to wiggitywhitney/release-it: spiny-orb.yaml, semconv/ schema (attributes.yaml + registry_manifest.yaml), examples/instrumentation.js OTel init, @opentelemetry/api peerDependency. Tests: 262/264 pass, 0 failures. | In Progress | Create deliberately incomplete Weaver schema |
