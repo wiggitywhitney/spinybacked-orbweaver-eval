@@ -123,40 +123,40 @@ If this PRD proceeds past milestone 0 (i.e., a new target is selected), the feat
 
   Success criteria: Log saved; run-summary.md written with file counts, cost, timing, push/PR status.
 
-- [ ] **Findings Discussion** *(user-facing checkpoint 1)*
+- [x] **Findings Discussion** *(user-facing checkpoint 1)*
 
   After run-summary.md is written, before any evaluation documents: report to Whitney with a raw overview. Conversational, under 10 lines. Wait for acknowledgment.
 
   Success criteria: Whitney has acknowledged the findings overview.
 
-- [ ] **Failure deep-dives**
+- [x] **Failure deep-dives**
 
   Root cause analysis for each failed/partial file and run-level failures.
   Produces: `evaluation/<target-name>/run-1/failure-deep-dives.md`
   Style reference: `Read docs/templates/eval-run-style-reference/failure-deep-dives.md`
 
-- [ ] **Per-file evaluation**
+- [x] **Per-file evaluation**
 
   Full 32-rule rubric on ALL processed files.
   Produces: `evaluation/<target-name>/run-1/per-file-evaluation.md`
   Style reference: `Read docs/templates/eval-run-style-reference/per-file-evaluation.md`
 
-- [ ] **PR artifact evaluation**
+- [x] **PR artifact evaluation**
 
   Produces: `evaluation/<target-name>/run-1/pr-evaluation.md`
   Style reference: `Read docs/templates/eval-run-style-reference/pr-evaluation.md`
 
-- [ ] **Rubric scoring**
+- [x] **Rubric scoring**
 
   Produces: `evaluation/<target-name>/run-1/rubric-scores.md`
   Style reference: `Read docs/templates/eval-run-style-reference/rubric-scores.md`
 
-- [ ] **Baseline comparison**
+- [x] **Baseline comparison**
 
   If this is a new JS target, compare against commit-story-v2's most recent run for cross-target context. Compare: overall rubric score, per-dimension scores (NDS/COV/RST/API/SCH/CDQ), file counts, skip rate, and cost. Highlight dimensions where the new target scores differ by more than 1 point.
   Produces: `evaluation/<target-name>/run-1/baseline-comparison.md`
 
-- [ ] **IS scoring run**
+- [x] **IS scoring run**
 
   1. **Prerequisites**: OTel Collector running with `evaluation/is/otelcol-config.yaml` (see `evaluation/is/README.md` for install and start instructions). No metrics-exporter override needed — MET rules are marked `not_applicable` by the scorer regardless.
   2. **Action**: Run the target app with the Collector as OTLP receiver; collect `evaluation/is/eval-traces.json`; run `node evaluation/is/score-is.js evaluation/is/eval-traces.json > evaluation/<target-name>/run-1/is-score.md`
@@ -164,7 +164,7 @@ If this PRD proceeds past milestone 0 (i.e., a new target is selected), the feat
   4. **Note for k8s repos**: IS scoring requires a running cluster; see `evaluation/is/README.md` for the Kind-based workflow
   Produces: `evaluation/<target-name>/run-1/is-score.md`
 
-- [ ] **Actionable fix output**
+- [x] **Actionable fix output**
 
   1. Run cross-document audit agent: launch an Agent to verify consistency across all run-1 evaluation artifacts.
   2. *(User-facing checkpoint 2)* Interpreted summary for Whitney.
@@ -210,4 +210,5 @@ If this PRD proceeds past milestone 0 (i.e., a new target is selected), the feat
 | 2026-04-18 | Deliberately incomplete Weaver schema created. schema-complete.yaml documents all 4 omitted attributes (release_it.git.tag_annotation, release_it.github.release_name, release_it.github.release_url, release_it.npm.publish_path). schema-omissions.md explains each omission with code citations. semconv/attributes.yaml in forked repo is confirmed incomplete. | In Progress | Verify test suite runs clean on unmodified target |
 | 2026-04-18 | Test suite baseline confirmed: 3/3 clean runs (262/264 pass, 0 fail, 2 consistently skipped). Skips: "should not roll back with risky config" and "should truncate long body" — stable, unrelated to instrumentation. | In Progress | Pre-run verification |
 | 2026-04-18 | Pre-run verification complete. 23 .js files in lib/. spiny-orb rebuilt from main (SHA a02004f, includes PR #506 KNOWN_FRAMEWORK_PACKAGES). GITHUB_TOKEN resolves via vals. Versions: Node v25.8.0, spiny-orb 1.0.0, release-it 20.0.0. .vals.yaml copied to release-it fork and .gitignored. File inventory and instrument command recorded in lessons-for-run2.md. | In Progress | Evaluation run-1 |
-| 2026-04-18 | Evaluation run-1 complete (partial — 5/23 files processed). Run halted at file 5 due to checkpoint test failure (gpgsign issue: spiny-orb runs `npm test` without GIT_CONFIG_GLOBAL override). 2 files failed LINT oscillation (config.js, index.js). PR creation failed (PAT lacks createPullRequest permission). Cost: $0.68. run-summary.md written. | In Progress | Findings Discussion → resolve 3 run-2 blockers |
+| 2026-04-18 | Evaluation run-1 complete (partial — 5/23 files processed). Run halted at file 5 due to checkpoint test failure (gpgsign issue: spiny-orb runs `npm test` without GIT_CONFIG_GLOBAL override). 2 files failed LINT oscillation (config.js, index.js). PR creation failed (PAT lacks createPellRequest permission). Cost: $0.68. run-summary.md written. | In Progress | Findings Discussion → resolve 3 run-2 blockers |
+| 2026-04-20 | Full run-1 evaluation complete: failure-deep-dives, per-file-evaluation, pr-evaluation, rubric-scores, baseline-comparison, is-score, actionable-fix-output all written. Checkpoint 2 handoff confirmed. 8 spiny-orb findings filed (2 P1, 2 P2, 2 P3 + audit meta-recommendation). | In Progress | Draft Run-2 PRD |
