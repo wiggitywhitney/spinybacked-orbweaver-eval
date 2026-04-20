@@ -45,7 +45,9 @@ Establish the first complete quality baseline for release-it across all 23 `lib/
 | RUN1-3 | PAT missing pull_request:write | P2 | **Must resolve before run-2** |
 | RUN1-4 | Prettier diff not surfaced in fix loop | P2 (spiny-orb) | Tracked in spiny-orb-findings.md |
 | RUN1-5 | Test failure output not captured | P2 (spiny-orb) | Tracked in spiny-orb-findings.md |
-| RUN1-6–8 | Debuggability sweep (Weaver, live-check, audit) | P3 (spiny-orb) | Tracked in spiny-orb-findings.md |
+| RUN1-6 | Weaver shutdown message gives no reason ("fetch failed") | P3 (spiny-orb) | Tracked in spiny-orb-findings.md |
+| RUN1-7 | Live-check partial message doesn't say what to do with report | P3 (spiny-orb) | Tracked in spiny-orb-findings.md |
+| RUN1-8 | Audit debuggability of all check failure messages in console output | P3 (spiny-orb) | Tracked in spiny-orb-findings.md |
 
 ---
 
@@ -98,8 +100,8 @@ The feature branch for this PRD (`feature/prd-68-evaluation-run-2-release-it`) *
 
   Verify all three run-1 blockers are resolved and validate run prerequisites:
 
-  1. **RUN1-1 (gpgsign) — MUST PASS**: Confirm `tag.gpgsign` is disabled or a `GIT_CONFIG_GLOBAL` override is configured. Run `GIT_CONFIG_GLOBAL=/tmp/release-it-test.gitconfig npm test` from `~/Documents/Repositories/release-it/` and verify 262/264 tests pass.
-  2. **RUN1-3 (PAT) — MUST PASS**: Verify GITHUB_TOKEN has `pull_request:write` for wiggitywhitney/release-it. Test with `vals exec -i -f .vals.yaml -- gh auth status`.
+  1. **RUN1-1 (gpgsign) — MUST PASS**: Confirm `tag.gpgsign` is actually disabled in `~/.gitconfig`. Run `git config --global tag.gpgsign` — it must return empty or `false`. If it returns `true`, comment it out in `~/.gitconfig` before proceeding. Then confirm tests pass: `GIT_CONFIG_GLOBAL=/tmp/release-it-test.gitconfig npm test` from `~/Documents/Repositories/release-it/` should show 262/264 pass. Note: the instrument command itself does not use `GIT_CONFIG_GLOBAL`; spiny-orb's checkpoint test runner inherits the real `~/.gitconfig`, so the global config must be updated.
+  2. **RUN1-3 (PAT) — MUST PASS**: Verify GITHUB_TOKEN has `pull_request:write` for wiggitywhitney/release-it. Run `vals exec -i -f .vals.yaml -- gh auth status` and confirm the token's scopes include `pull_request:write`, or run a test PR creation dry-run if scope output is unclear.
   3. **RUN1-2 (LINT arrowParens)**: Check if spiny-orb has merged a fix for the Prettier diff surfacing issue. If landed, config.js and index.js should commit this run. If not landed, note it — they will likely fail again.
   4. **Target repo readiness**: Verify release-it fork is on `main`, working tree is clean, `spiny-orb.yaml` and `semconv/` exist.
   5. **File inventory**: Confirm 23 `.js` files in `lib/` (match run-1 inventory in `evaluation/release-it/run-1/lessons-for-run2.md`).
@@ -152,7 +154,14 @@ The feature branch for this PRD (`feature/prd-68-evaluation-run-2-release-it`) *
 
   Prerequisites: OTel Collector running with `evaluation/is/otelcol-config.yaml` (see `evaluation/is/README.md`). Stop Datadog Agent first: `sudo launchctl stop com.datadoghq.agent`.
 
-  Action: Run release-it in dry-run mode with the Collector as OTLP receiver (dry-run exercises all code paths without publishing). From `~/Documents/Repositories/release-it/`, run: `release-it --dry-run`. Collect `evaluation/is/eval-traces.json`. Run:
+  Action: Run release-it in dry-run mode with the Collector as OTLP receiver (dry-run exercises all code paths without publishing).
+
+  From `~/Documents/Repositories/release-it/`:
+  ```bash
+  release-it --dry-run
+  ```
+
+  Then from `~/Documents/Repositories/spinybacked-orbweaver-eval/`:
   ```bash
   node evaluation/is/score-is.js evaluation/is/eval-traces.json > evaluation/release-it/run-2/is-score.md
   ```
