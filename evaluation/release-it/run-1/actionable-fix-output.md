@@ -46,7 +46,7 @@ Self-contained handoff from evaluation run-1 on the release-it eval target.
 
 **Test config to create before run-2**:
 ```bash
-echo '[user]\n  email = test@test.com\n  name = Test User' > /tmp/release-it-test.gitconfig
+printf '[user]\n  email = test@test.com\n  name = Test User\n' > /tmp/release-it-test.gitconfig
 ```
 Then confirm `npm test` passes with: `GIT_CONFIG_GLOBAL=/tmp/release-it-test.gitconfig npm test`
 

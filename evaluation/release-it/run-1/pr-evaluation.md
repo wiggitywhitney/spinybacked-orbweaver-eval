@@ -49,7 +49,7 @@ With only 5 files processed and 0 committed, the PR summary serves primarily as 
 
 ## Instrumentation Branch Quality
 
-The `spiny-orb/instrument-1776550755270` branch contains 4 commits:
+The `spiny-orb/instrument-1776550755270` branch contains 5 commits:
 
 1. Spiny-orb prerequisites (from setup milestone)
 2. `instrument lib/args.js` — instrumentation report only (0 changes to source)
