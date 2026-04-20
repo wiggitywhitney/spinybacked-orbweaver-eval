@@ -1,10 +1,11 @@
 # JavaScript Eval Setup + Run-1: Target Selection and Baseline
 
 **Issue**: [#53](https://github.com/wiggitywhitney/spinybacked-orbweaver-eval/issues/53)
-**Status**: Draft
+**Status**: Complete
 **Owner**: Whitney Lee
 **Created**: 2026-04-11
-**Last Updated**: 2026-04-11
+**Last Updated**: 2026-04-20
+**Completed**: 2026-04-20
 **Type**: C (Setup + Run-1)
 
 ## Overview
