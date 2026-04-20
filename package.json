@@ -1,0 +1,11 @@
+{
+  "name": "spinybacked-orbweaver-eval",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "test": "vitest run"
+  },
+  "devDependencies": {
+    "vitest": "^3.1.0"
+  }
+}
