@@ -129,7 +129,7 @@ Even though no files were committed, the agent's reasoning on the 2 failed files
 | Null guards on reduceUntil returns correctly applied | SOUND | CDQ-007 |
 | `arrowParens: avoid` formatting not applied (likely cause of LINT failure) | **DEFICIENCY** | LINT |
 
-The agent's design quality is high — the LINT failure is a code-generation style issue, not an instrumentation logic failure. All quality signals from agent reasoning are positive.
+The agent's design quality is high — the LINT failure is a code-generation style issue, not an instrumentation logic failure. Design quality signals are positive, with one formatting deficiency (arrowParens: avoid not applied in generated code).
 
 ---
 

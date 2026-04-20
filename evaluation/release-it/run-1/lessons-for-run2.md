@@ -14,7 +14,7 @@ Observations collected during run-1 evaluation that should inform the next evalu
 | semconv/ | ✅ | `attributes.yaml` + `registry_manifest.yaml` present |
 | .js file inventory | ✅ | 23 files in `lib/` (see inventory below) |
 | spiny-orb build | ✅ | Built clean from main (SHA a02004f, includes PR #506 KNOWN_FRAMEWORK_PACKAGES expansion) |
-| GITHUB_TOKEN | ✅ | Resolves via vals (length 93) |
+| GITHUB_TOKEN | ✅ | Resolves via vals |
 | Node.js version | v25.8.0 | |
 | spiny-orb version | 1.0.0 (SHA a02004f) | |
 | release-it version | 20.0.0 | |

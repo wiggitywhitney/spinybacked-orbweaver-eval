@@ -125,6 +125,6 @@ Three blockers must be resolved before run-2:
 
 1. **Checkpoint test command** — Configure the test command so spiny-orb uses the GIT_CONFIG_GLOBAL override. Check if `spiny-orb.yaml` supports a `testCommand` field; if not, file a spiny-orb bug. Workaround: temporarily disable `tag.gpgsign` in global git config for the duration of the run.
 
-2. **LINT oscillation root cause** — Inspect the generated instrumentation for lib/config.js and lib/index.js to identify what lint rules are triggered. The agent's agent notes describe valid instrumentation decisions (spans, attributes, guard conditions) — the failure is in the generated code syntax/style, not the design.
+2. **LINT oscillation root cause** — Inspect the generated instrumentation for lib/config.js and lib/index.js to identify what lint rules are triggered. The agent notes describe valid instrumentation decisions (spans, attributes, guard conditions) — the failure is in the generated code syntax/style, not the design.
 
 3. **GitHub PAT permissions** — Add `pull_request: write` permission to the fine-grained PAT used for `GITHUB_TOKEN`, scoped to the wiggitywhitney/release-it fork.
