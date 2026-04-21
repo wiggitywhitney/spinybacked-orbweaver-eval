@@ -22,7 +22,7 @@ Observations collected during run-2 evaluation that should inform the next evalu
 
 **RUN1-1 (gpgsign) resolution**: Using `GIT_CONFIG_GLOBAL=/Users/whitney.lee/.config/spiny-orb-eval/gitconfig` in the instrument command prefix. The override file inherits all normal git identity/credential settings but sets `tag.gpgsign=false` and `commit.gpgsign=false`. Global `~/.gitconfig` has no gpgsign entries, confirming no conflict.
 
-**RUN1-2 (arrowParens LINT oscillation)**: **FIXED** in spiny-orb PR #532 (closes #516). The fix-loop now computes a context diff between agent output and Prettier-reformatted output and includes it in LINT failure feedback — showing exactly which lines need arrowParens changes. Before: "Run Prettier on the output." After: exact diff showing `(span) => ` → `span => `. `config.js` and `index.js` are now expected to commit cleanly this run.
+**RUN1-2 (arrowParens LINT oscillation)**: **FIXED** in spiny-orb PR #532 (closes #516). The fix-loop now computes a context diff between agent output and Prettier-reformatted output and includes it in LINT failure feedback — showing exactly which lines need arrowParens changes. Before: "Run Prettier on the output." After: exact diff showing `(span) =>` → `span =>`. `config.js` and `index.js` are now expected to commit cleanly this run.
 
 **RUN1-3 (PAT pull_request:write) resolution**: New fine-grained PAT scoped to `wiggitywhitney/release-it` with `pull_requests:write`. Stored as `github-token-release-it` in GCP Secret Manager, injected as `GITHUB_TOKEN_RELEASE_IT` via vals. Instrument command uses `bash -c 'GITHUB_TOKEN=$GITHUB_TOKEN_RELEASE_IT node ...'`.
 

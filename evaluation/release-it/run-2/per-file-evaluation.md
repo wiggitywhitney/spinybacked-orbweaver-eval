@@ -3,7 +3,7 @@
 **Date**: 2026-04-21
 **Branch**: spiny-orb/instrument-1776786399007
 **Rubric**: 32 rules (5 gates + 27 quality)
-**Files evaluated**: 23 (0 net committed + 8 failed validation + 12 checkpoint rollbacks + 3 correct skips)
+**Files evaluated**: 23 (13 instrumented + 10 correct skips). Run outcome breakdown: 0 net committed, 8 validation failures, 12 checkpoint rollbacks, 3 correct skips survived.
 
 **Evaluation basis**: No files survived to the target codebase (all rolled back). Evaluation uses the agent's last-attempt file state on the spiny-orb branch and instrumentation report files. LINT failures are treated as delivery failures, not quality failures — the instrumentation logic is assessed independently of formatting.
 
