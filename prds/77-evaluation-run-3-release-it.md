@@ -61,7 +61,7 @@ First non-zero Q×F on release-it: at least one instrumented file committed to t
 
 Same twelve-milestone structure as all Type D eval runs. Pre-run verification explicitly checks the two run-2 P1 blockers before proceeding.
 
-### Two-Repo Workflow
+### Three-Repo Workflow
 
 | Repo | Path | Role |
 |------|------|------|
