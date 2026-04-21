@@ -90,7 +90,7 @@ The feature branch for this PRD (`feature/prd-68-evaluation-run-2-release-it`) *
 
 ## Milestones
 
-- [ ] **Collect skeleton documents**
+- [x] **Collect skeleton documents**
 
   Create `evaluation/release-it/run-2/` directory in the eval repo with skeleton files:
   - `lessons-for-run3.md` (copy structure from `evaluation/release-it/run-1/lessons-for-run2.md`)
