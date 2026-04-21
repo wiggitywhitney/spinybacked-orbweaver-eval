@@ -13,16 +13,16 @@ Observations collected during run-2 evaluation that should inform the next evalu
 | spiny-orb.yaml | ✅ | `schemaPath: semconv`, `sdkInitFile: examples/instrumentation.js`, `dependencyStrategy: peerDependencies` |
 | semconv/ | ✅ | `attributes.yaml` present (updated in issue #67: replaced custom git attrs with semconv refs) |
 | .js file inventory | ✅ | 23 files in `lib/` (same as run-1 — fork is frozen) |
-| spiny-orb build | ✅ | Built from main (SHA 712a2b8) |
-| GITHUB_TOKEN_RELEASE_IT | ✅ | New fine-grained PAT with `pull_requests:write`, resolves via vals |
-| GIT_CONFIG_GLOBAL override | ✅ | `/Users/whitney.lee/.config/spiny-orb-eval/gitconfig` — disables `tag.gpgsign` |
-| Node.js version | | (fill in at run time) |
-| spiny-orb version | 1.0.0 (SHA 712a2b8) | |
+| GITHUB_TOKEN_RELEASE_IT | ✅ | Fine-grained PAT with `pull_requests:write`, resolves via vals |
+| GIT_CONFIG_GLOBAL override | ✅ | `/Users/whitney.lee/.config/spiny-orb-eval/gitconfig` — disables `tag.gpgsign` and `commit.gpgsign` |
+| .gitignore modification | ✅ (benign) | `+.vals.yaml` added — not a blocker |
+| Node.js version | v25.8.0 | |
+| spiny-orb version | 1.0.0 (SHA 942012e) | Branch `fix/issue-acceptance-gate-index-js-token-budget`: doubled TOKENS_PER_LINE, raised MAX_OUTPUT_TOKENS_PER_FILE |
 | release-it version | 20.0.0 | |
 
-**RUN1-1 (gpgsign) resolution**: Using `GIT_CONFIG_GLOBAL=/Users/whitney.lee/.config/spiny-orb-eval/gitconfig` in the instrument command prefix. The override file inherits all normal git identity/credential settings but sets `tag.gpgsign=false` and `commit.gpgsign=false`.
+**RUN1-1 (gpgsign) resolution**: Using `GIT_CONFIG_GLOBAL=/Users/whitney.lee/.config/spiny-orb-eval/gitconfig` in the instrument command prefix. The override file inherits all normal git identity/credential settings but sets `tag.gpgsign=false` and `commit.gpgsign=false`. Global `~/.gitconfig` has no gpgsign entries, confirming no conflict.
 
-**RUN1-2 (arrowParens LINT oscillation)**: Not confirmed fixed in spiny-orb SHA 712a2b8. `config.js` and `index.js` may fail again. Accepted — plugin files are the target of this run.
+**RUN1-2 (arrowParens LINT oscillation)**: **FIXED** in spiny-orb PR #532 (closes #516). The fix-loop now computes a context diff between agent output and Prettier-reformatted output and includes it in LINT failure feedback — showing exactly which lines need arrowParens changes. Before: "Run Prettier on the output." After: exact diff showing `(span) => ` → `span => `. `config.js` and `index.js` are now expected to commit cleanly this run.
 
 **RUN1-3 (PAT pull_request:write) resolution**: New fine-grained PAT scoped to `wiggitywhitney/release-it` with `pull_requests:write`. Stored as `github-token-release-it` in GCP Secret Manager, injected as `GITHUB_TOKEN_RELEASE_IT` via vals. Instrument command uses `bash -c 'GITHUB_TOKEN=$GITHUB_TOKEN_RELEASE_IT node ...'`.
 
@@ -44,7 +44,7 @@ lib/plugin/version/Version.js
 
 **Instrument command for run-2** (run from `~/Documents/Repositories/release-it/`):
 ```bash
-caffeinate -s GIT_CONFIG_GLOBAL=/Users/whitney.lee/.config/spiny-orb-eval/gitconfig env -u ANTHROPIC_CUSTOM_HEADERS -u ANTHROPIC_BASE_URL vals exec -i -f .vals.yaml -- bash -c 'GITHUB_TOKEN=$GITHUB_TOKEN_RELEASE_IT node ~/Documents/Repositories/spinybacked-orbweaver/bin/spiny-orb.js instrument lib --verbose 2>&1 | tee ~/Documents/Repositories/spinybacked-orbweaver-eval/evaluation/release-it/run-2/spiny-orb-output.log'
+caffeinate -s env -u ANTHROPIC_CUSTOM_HEADERS -u ANTHROPIC_BASE_URL GIT_CONFIG_GLOBAL=/Users/whitney.lee/.config/spiny-orb-eval/gitconfig vals exec -i -f .vals.yaml -- bash -c 'GITHUB_TOKEN=$GITHUB_TOKEN_RELEASE_IT node ~/Documents/Repositories/spinybacked-orbweaver/bin/spiny-orb.js instrument lib --verbose 2>&1 | tee ~/Documents/Repositories/spinybacked-orbweaver-eval/evaluation/release-it/run-2/spiny-orb-output.log'
 ```
 
 Note: source directory is `lib/` (not `src/`).

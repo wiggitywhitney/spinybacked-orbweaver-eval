@@ -96,7 +96,7 @@ The feature branch for this PRD (`feature/prd-68-evaluation-run-2-release-it`) *
   - `lessons-for-run3.md` (copy structure from `evaluation/release-it/run-1/lessons-for-run2.md`)
   - `spiny-orb-findings.md` (fresh skeleton with P1/P2/P3 sections)
 
-- [ ] **Pre-run verification**
+- [x] **Pre-run verification**
 
   Verify all three run-1 blockers are resolved and validate run prerequisites:
 
@@ -111,18 +111,18 @@ The feature branch for this PRD (`feature/prd-68-evaluation-run-2-release-it`) *
 
   **Do not proceed if RUN1-1 or RUN1-3 are unresolved.** The run will halt early or produce no PR.
 
-- [ ] **Evaluation run-2**
+- [x] **Evaluation run-2**
 
   Whitney runs `spiny-orb instrument` in her own terminal. **Do NOT run the command yourself.**
 
   **Instrument command** (run from `~/Documents/Repositories/release-it/`):
   ```bash
-  caffeinate -s env -u ANTHROPIC_CUSTOM_HEADERS -u ANTHROPIC_BASE_URL vals exec -i -f .vals.yaml -- node ~/Documents/Repositories/spinybacked-orbweaver/bin/spiny-orb.js instrument lib --verbose 2>&1 | tee ~/Documents/Repositories/spinybacked-orbweaver-eval/evaluation/release-it/run-2/spiny-orb-output.log
+  caffeinate -s env -u ANTHROPIC_CUSTOM_HEADERS -u ANTHROPIC_BASE_URL GIT_CONFIG_GLOBAL=/Users/whitney.lee/.config/spiny-orb-eval/gitconfig vals exec -i -f .vals.yaml -- bash -c 'GITHUB_TOKEN=$GITHUB_TOKEN_RELEASE_IT node ~/Documents/Repositories/spinybacked-orbweaver/bin/spiny-orb.js instrument lib --verbose 2>&1 | tee ~/Documents/Repositories/spinybacked-orbweaver-eval/evaluation/release-it/run-2/spiny-orb-output.log'
   ```
 
   AI role: (1) confirm readiness, (2) once Whitney provides the log output, save it and write `evaluation/release-it/run-2/run-summary.md`, (3) **push the eval branch to origin immediately** — the branch holds the only copy of run artifacts until step 13 copies them to main.
 
-- [ ] **Findings Discussion** *(user-facing checkpoint 1)*
+- [x] **Findings Discussion** *(user-facing checkpoint 1)*
 
   After `run-summary.md` is written, before any evaluation documents: report to Whitney with a raw overview — files committed/failed/partial, quality score if visible in log, cost, push/PR status, top 1-2 surprises. Conversational, under 10 lines. Wait for acknowledgment before proceeding.
 
