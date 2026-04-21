@@ -189,11 +189,11 @@ The feature branch for this PRD (`feature/prd-68-evaluation-run-2-release-it`) *
 
   Produces: `evaluation/release-it/run-2/actionable-fix-output.md`
 
-- [ ] **Draft Run-3 PRD**
+- [x] **Draft Run-3 PRD**
 
   Create on a separate branch from main. Use Type D structure from `docs/language-extension-plan.md` and this PRD as the milestone style reference. Carry forward both user-facing checkpoints. Merge the PRD-only PR to main so `/prd-start` can pick it up.
 
-- [ ] **Copy artifacts to main**
+- [x] **Copy artifacts to main**
 
   From main, run:
   ```bash
