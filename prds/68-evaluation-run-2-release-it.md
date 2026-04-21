@@ -128,29 +128,29 @@ The feature branch for this PRD (`feature/prd-68-evaluation-run-2-release-it`) *
 
   Success criteria: Whitney has acknowledged the findings overview.
 
-- [ ] **Failure deep-dives**
+- [x] **Failure deep-dives**
 
   Root cause analysis for each failed/partial file and run-level failures.
   Produces: `evaluation/release-it/run-2/failure-deep-dives.md`
   Style reference: `Read docs/templates/eval-run-style-reference/failure-deep-dives.md`
 
-- [ ] **Per-file evaluation**
+- [x] **Per-file evaluation**
 
   Full 32-rule rubric on ALL processed files.
   Produces: `evaluation/release-it/run-2/per-file-evaluation.md`
   Style reference: `Read docs/templates/eval-run-style-reference/per-file-evaluation.md`
 
-- [ ] **PR artifact evaluation**
+- [x] **PR artifact evaluation**
 
   Produces: `evaluation/release-it/run-2/pr-evaluation.md`
   Style reference: `Read docs/templates/eval-run-style-reference/pr-evaluation.md`
 
-- [ ] **Rubric scoring**
+- [x] **Rubric scoring**
 
   Produces: `evaluation/release-it/run-2/rubric-scores.md`
   Style reference: `Read docs/templates/eval-run-style-reference/rubric-scores.md`
 
-- [ ] **IS scoring run**
+- [x] **IS scoring run**
 
   Prerequisites: OTel Collector running with `evaluation/is/otelcol-config.yaml` (see `evaluation/is/README.md`). Stop Datadog Agent first: `sudo launchctl stop com.datadoghq.agent`.
 
@@ -170,13 +170,13 @@ The feature branch for this PRD (`feature/prd-68-evaluation-run-2-release-it`) *
 
   Produces: `evaluation/release-it/run-2/is-score.md`
 
-- [ ] **Baseline comparison**
+- [x] **Baseline comparison**
 
   Compare run-2 against commit-story-v2 run-13 (most recent cross-target reference) and against release-it run-1. Highlight dimensions that differ by more than 1 point from commit-story-v2.
   Produces: `evaluation/release-it/run-2/baseline-comparison.md`
   Style reference: `Read docs/templates/eval-run-style-reference/baseline-comparison.md`
 
-- [ ] **Update root README**
+- [x] **Update root README**
 
   After baseline comparison: (1) add a row for run-2 to the run history table in `README.md` with quality score, gates, files, spans, cost, push/PR status, and IS score; (2) update the "next run" sentence (bold paragraph below the run history table) to reference run-3 and its primary goals.
 

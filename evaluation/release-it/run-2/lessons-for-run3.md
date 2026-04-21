@@ -59,4 +59,12 @@ Note: source directory is `lib/` (not `src/`).
 
 ## Carry-Forward Items for Run 3
 
-*(fill in during actionable fix output milestone)*
+| # | Item | Priority | Type |
+|---|------|---------|------|
+| 1 | OTel module resolution at checkpoint — add @opentelemetry/api to devDependencies in release-it fork before run | P1 blocker | Eval config |
+| 2 | PAT lacks pull_requests:write — update github-token-release-it secret in GCP Secret Manager | P1 blocker | Eval config |
+| 3 | arrowParens + print-width LINT cascade (6 files) — spiny-orb Prettier post-pass would fix | P2 | spiny-orb |
+| 4 | NDS-003 on GitHub.js — omit release_id attribute or add return-value-capture exemption to NDS-003 validator | P2 | spiny-orb |
+| 5 | COV-003/NDS-007 conflict on GitLab.js — validator should exempt graceful-degradation catch blocks | P2 | spiny-orb |
+| 6 | GitBase.js span naming uses release-it.* (hyphen) vs release_it.* (underscore) elsewhere | P3 | Agent |
+| 7 | 18 span schema extensions not yet in registry — validate and register once stable | P3 | Schema |
