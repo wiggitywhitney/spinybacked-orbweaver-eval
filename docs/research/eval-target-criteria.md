@@ -3,6 +3,9 @@
 **Created:** 2026-04-11
 **Research basis:** [eval-target-selection-research.md](eval-target-selection-research.md)
 **Status:** Revised 2026-04-11 (second revision) — rubric-coverage-first scorecard with rule-to-target mapping; 12 candidates (3 per language) evaluated fresh against rubric
+**Last verified against spiny-orb main:** 2026-04-21 (post-PRD #483 advisory rules audit)
+
+> **Rule definitions and OTel spec alignment**: the canonical reference is [`docs/rules-reference.md`](https://github.com/wiggitywhitney/spinybacked-orbweaver/blob/main/docs/rules-reference.md) in the spiny-orb repo. This document (`eval-target-criteria.md`) focuses on target-selection criteria — which rules fire against which target-repo structures. For what each rule checks and its OTel spec relationship, consult the canonical reference.
 
 This document is the canonical reference for selecting target repositories for spiny-orb evaluation. All Type C PRDs (Setup + Run-1) must read this file before forking any target repo. The criteria are language-agnostic; the candidate verdicts are language-specific.
 
@@ -12,7 +15,7 @@ The prior candidates in this document were chosen using proxy metrics (file coun
 
 ## 1. Rubric-Coverage Scorecard
 
-**Primary framing: rubric coverage maximization.** A good target repo is one that maximally exercises spiny-orb's 32-rule rubric. File count and I/O diversity are filters, not goals — they are useful because they correlate with rubric coverage, not because they matter intrinsically.
+**Primary framing: rubric coverage maximization.** A good target repo is one that maximally exercises spiny-orb's 31-rule rubric. File count and I/O diversity are filters, not goals — they are useful because they correlate with rubric coverage, not because they matter intrinsically.
 
 ### Pass/Fail Filters
 
@@ -31,14 +34,16 @@ Candidates must pass ALL mandatory filters before rubric assessment.
 The table below maps each of the 32 code-level rubric rules to what a target repo needs for that rule to fire. Rules marked **(U) Universal** are met by any typical project — they pass or fail based on agent behavior, not target structure. Rules marked **(D) Differentiating** are where candidate characteristics affect how well the rule exercises the agent.
 
 **Universal rules — all projects satisfy the precondition; no per-rule entry needed:**
-NDS-001 (compilation), NDS-003 (non-instrumentation lines unchanged), API-001 (only api imports), API-002 (correct dependency declaration), API-003 (no vendor SDKs), API-004 (no SDK-internal imports), NDS-006 (module system consistency), CDQ-002 (tracer acquired correctly — fires on every instrumented file).
+NDS-001 (compilation), NDS-003 (non-instrumentation lines unchanged), API-001 (only api imports — **blocking** as of PRD #483 audit), API-002 (correct dependency declaration), API-004 (no SDK-internal imports — import-level check; **blocking** as of PRD #483 audit; manifest-level check moved into API-002), NDS-006 (module system consistency), CDQ-002 (tracer acquired correctly — fires on every instrumented file).
+
+Note: API-003 (no vendor SDKs) was deleted in the PRD #483 audit — it would never fire after the diff-based detection refactor, and API-001 covers the conceptual scope.
 
 | Rule | Type | What the target needs | Key differentiator |
 |------|------|-----------------------|--------------------|
 | **NDS-002** Tests pass | D | A passing test suite. Hard gate — no suite = behavioral verification absent (vacuous pass). Run 3× for deterministic reproducibility check. | Flaky tests disqualify. No suite = NDS-005 evidence absent. |
 | **NDS-004** Public API preserved | D | Exported functions. More interesting with a rich export surface (utility modules, library-style packages). | More exports = more verification surface. |
 | **NDS-005a** Error handling structure | D | Pre-existing `try/catch/finally` blocks with complex propagation: nested catch, rethrow patterns, error chaining. | Targets with diverse error handling test whether the agent restructures or wraps correctly. |
-| **NDS-005b** Expected-condition recording | D | "Silent catch" blocks — catch blocks that return defaults or fallback values without rethrowing. Agent may incorrectly record these as errors. | Targets with graceful fallback patterns generate this signal. |
+| **NDS-007** Expected Catch Unmodified | D | "Silent catch" blocks — catch blocks that return defaults or fallback values without rethrowing. Agent must not add `recordException()` or `setStatus(ERROR)` to these. Created as a blocking rule in PRD #483 audit; replaces the eval-only NDS-005b check. | Targets with graceful fallback patterns generate this signal. |
 | **COV-001** Entry points have spans | D | Clear entry points: CLI command handlers, HTTP route handlers, or server request handlers. | CLI tools have 1–3 entry points. More diverse commands = more COV-001 instances. |
 | **COV-002** Outbound calls have spans | D | Calls to HTTP clients, DB drivers, subprocess (exec/spawn), async file I/O, template rendering. More I/O types → more instances to evaluate. | More distinct outbound call types exercises this rule more thoroughly. |
 | **COV-003** Failable ops have error visibility | D | I/O operations inside existing `try/catch` blocks. Fires at intersection of outbound calls AND existing error handling. | Targets with error-guarded I/O operations provide more instances. |
@@ -53,13 +58,15 @@ NDS-001 (compilation), NDS-003 (non-instrumentation lines unchanged), API-001 (o
 | **SCH-001** Span names match registry | D | A Weaver `semconv/` directory with operation names defined. Without registry, falls back to naming quality judgment (semi-automatable). | Deliberately incomplete schema: omitting operations tests whether agent invents appropriate fallback names. |
 | **SCH-002** Attribute keys match registry | D | A Weaver `semconv/` with named attribute definitions. **Most affected by deliberately incomplete schema design.** | Omitting attributes tests whether agent proposes sensible keys. |
 | **SCH-003** Attribute values conform to types | D | A Weaver `semconv/` with typed or enum attribute constraints. Most diagnostic when schema defines enum attributes. | Targets with categorical domain concepts support enum attributes. |
-| **SCH-004** No redundant schema entries | D | A Weaver `semconv/` rich enough that naming duplication risk is real. | More schema richness = more opportunity for agent to invent duplicates. |
+| **SCH-004** No redundant schema entries | D | A Weaver `semconv/` rich enough that naming duplication risk is real. **Pending deletion** — [PRD #508](https://github.com/wiggitywhitney/spinybacked-orbweaver/issues/508) migrates SCH-004's patterns into SCH-002's extension acceptance path. Row stays until PRD #508 merges. | More schema richness = more opportunity for agent to invent duplicates. |
 | **CDQ-001** Spans closed in all paths | D | Functions with multiple execution paths: early returns, exception handlers, conditional branches where `span.end()` must fire in all branches. | Targets with complex control flow exercise this more. |
 | **CDQ-003** Standard error recording | D | `try/catch` blocks the agent instruments. Tests whether agent uses `span.recordException(error) + span.setStatus({code: SpanStatusCode.ERROR})` vs ad-hoc `span.setAttribute('error', ...)`. **Diversity of error types increases diagnostic value.** | Targets with diverse error categories (network, parse, validation, subprocess) test correctness across more scenarios. |
 | **CDQ-005** Async context maintained | D | Async functions where agent uses manual `startSpan()` pattern (requires `context.with()` wrapper). Primarily JS/TS. | More async functions = more CDQ-005 instances. |
 | **CDQ-006** Expensive attribute guarding | D | `setAttribute` calls computing complex values: `JSON.stringify`, array `.map`/`.reduce`/`.join`, object serialization. | Targets that serialize domain objects or compute aggregates for attributes. |
-| **CDQ-007** No PII/unbounded attributes | D | Code handling user-supplied data, request parameters, optional fields, or potentially sensitive values. | CLI tools accepting user path args; tools handling API responses with optional fields. |
-| **CDQ-008** Consistent tracer naming | D | 3+ source files that get instrumented. Tests whether agent uses consistent `getTracer()` naming convention across files. | More instrumented files = more cross-file naming consistency instances. |
+| **CDQ-007** Attribute data quality | D | Three sub-checks on `setAttribute` calls: (1) key is a known PII name; (2) value is a path-like identifier on a non-`file.*` attribute key; (3) value is a property access without a null guard in scope. Newly registered in PRD #483 audit. | CLI tools accepting user path args; tools handling API responses with optional fields. |
+| **CDQ-009** Null-safe guard | D | `setAttribute` calls where the value is a non-optional property access guarded by `!== undefined` rather than the more protective `!= null`. Newly registered in PRD #483 audit. | Any target with optional property attribute values. |
+| **CDQ-010** String method type safety | D | `setAttribute` value arguments where a string-only method (`.split()`, `.slice()`, `.trim()`, etc.) is called directly on a property access without type coercion via `String()`. Newly registered in PRD #483 audit. | Any target with property accesses used directly in `setAttribute`. |
+| **CDQ-008** Consistent tracer naming | D | Post-run cross-file check: consistent `getTracer()` naming across instrumented files. **Pending deletion** — [PRD #505](https://github.com/wiggitywhitney/spinybacked-orbweaver/issues/505) replaces post-hoc detection with canonical-name injection + per-file verification. Do not evaluate against this rule; remove from scoring once PRD #505 merges. | More instrumented files = more cross-file naming consistency instances. |
 
 ### Eval Design: Deliberately Incomplete Weaver Schemas
 
@@ -79,14 +86,14 @@ A complete schema only tests SCH compliance. An incomplete schema tests SCH *ext
 
 **Key:** ✓ confirmed fires (research-verified this session) · ✗ cannot fire · ≈ eval-design dependent · 🔍 needs local verification when cloning
 
-The 8 universal rules (NDS-001, NDS-003, API-001–004, NDS-006, CDQ-002) are excluded — they apply to all candidates equally. SCH rules (≈) depend entirely on the Weaver schema created in eval and are identical for all candidates. RST-005 passes vacuously for all (clean baselines, no pre-existing OTel) — listed ✓ but not a meaningful diagnostic.
+The 7 universal rules (NDS-001, NDS-003, API-001, API-002, API-004, NDS-006, CDQ-002) are excluded — they apply to all candidates equally. (API-003 was deleted in the PRD #483 audit.) SCH rules (≈) depend entirely on the Weaver schema created in eval and are identical for all candidates. RST-005 passes vacuously for all (clean baselines, no pre-existing OTel) — listed ✓ but not a meaningful diagnostic.
 
 | Rule | commit-story-v2 | release-it | npm-check |
 |------|-----------------|------------|-----------|
 | NDS-002 Tests pass | ✓ confirmed (12 runs) | ✓ vitest | ✓ |
 | NDS-004 Public API preserved | ✓ | ✓ Plugin exports | ✓ |
 | NDS-005a Error handling structure | ✓ LLM API chain | ✓ HTTP+git errors | ✓ npm errors |
-| NDS-005b Silent catch preserved | ✓ LangGraph fallbacks | ✓ dry-run graceful | 🔍 |
+| NDS-007 Expected catch unmodified | ✓ LangGraph fallbacks | ✓ dry-run graceful | 🔍 |
 | COV-001 Entry points | ✓ CLI summarize cmds | ✓ release lifecycle | ✓ interactive+static |
 | COV-002 Outbound calls | ✓ HTTP+file+git (3 types) | ✓ HTTP+git+file (3 types) | ✓ HTTP+npm+file (3 types) |
 | COV-003 Failable ops | ✓ | ✓ | ✓ |
@@ -106,14 +113,15 @@ The 8 universal rules (NDS-001, NDS-003, API-001–004, NDS-006, CDQ-002) are ex
 | CDQ-003 Standard error recording | ✓ LLM API errors | ✓ HTTP+git errors | ✓ npm errors |
 | CDQ-005 Async context maintained | ✓ LangGraph chain | ✓ plugin chain | ✓ |
 | CDQ-006 Expensive attr guarding | 🔍 | 🔍 | 🔍 |
-| CDQ-007 No PII/unbounded attrs | ✓ git msgs, paths | ✓ tokens, paths | ✓ pkg names, paths |
-| CDQ-008 Consistent tracer naming | ✓ 30 files | ✓ 23 files | ✓ 18 files |
-| **Confirmed ✓ (of 24 D-rules)** | **17** | **17** | **15** |
+| CDQ-007 Attribute data quality | ✓ git msgs, paths | ✓ tokens, paths | ✓ pkg names, paths |
+| CDQ-009 Null-safe guard | ✓ | ✓ | ✓ |
+| CDQ-010 String method type safety | ✓ | ✓ | ✓ |
+| **Confirmed ✓ (of 26 D-rules)** | **19** | **19** | **17** |
 | **Cannot fire ✗** | **0** | **0** | **1** |
 | **Needs verify 🔍** | **3** | **3** | **4** |
 | **Eval-design ≈** | **5** | **5** | **5** |
 
-**Total exercisable (✓ + 8 universal):** commit-story-v2 = 25 · release-it = 25 · npm-check = 23
+**Total exercisable (✓ + 7 universal):** commit-story-v2 = 26 · release-it = 26 · npm-check = 24
 
 ---
 
@@ -200,7 +208,7 @@ The 8 universal rules (NDS-001, NDS-003, API-001–004, NDS-006, CDQ-002) are ex
 | NDS-002 Tests pass | ✓ vitest (17 test files) | ✓ | ✓ |
 | NDS-004 Public API preserved | ✓ | ✓ | ✓ |
 | NDS-005a Error handling structure | ✓ HTTP+file errors | ✓ git+file errors | ✓ subprocess+file errors |
-| NDS-005b Silent catch preserved | 🔍 | 🔍 | 🔍 |
+| NDS-007 Expected catch unmodified | 🔍 | 🔍 | 🔍 |
 | COV-001 Entry points | ✓ check/list/interactive | ✓ add/version/publish/status | ✓ npx wireit |
 | COV-002 Outbound calls | ✓ HTTP+file+subprocess | ✓ subprocess+file+terminal | ✓ subprocess+file+filewatcher |
 | COV-003 Failable ops | ✓ | ✓ | ✓ |
@@ -220,14 +228,15 @@ The 8 universal rules (NDS-001, NDS-003, API-001–004, NDS-006, CDQ-002) are ex
 | CDQ-003 Standard error recording | ✓ HTTP+file errors | ✓ git+npm errors | ✓ subprocess+cache errors |
 | CDQ-005 Async context maintained | ✓ | ✓ | ✓ |
 | CDQ-006 Expensive attr guarding | 🔍 | 🔍 | 🔍 |
-| CDQ-007 No PII/unbounded attrs | ✓ pkg names, paths | ✓ pkg names, changelog | ✓ file paths, script names |
-| CDQ-008 Consistent tracer naming | ✓ 33 files | ✓ 25 files | ✓ 62 files |
-| **Confirmed ✓ (of 24 D-rules)** | **15** | **15** | **15** |
+| CDQ-007 Attribute data quality | ✓ pkg names, paths | ✓ pkg names, changelog | ✓ file paths, script names |
+| CDQ-009 Null-safe guard | ✓ | ✓ | ✓ |
+| CDQ-010 String method type safety | ✓ | ✓ | ✓ |
+| **Confirmed ✓ (of 26 D-rules)** | **17** | **17** | **17** |
 | **Cannot fire ✗** | **0** | **2** | **2** |
 | **Needs verify / conditional 🔍** | **5 (incl. COV-006)** | **4** | **4** |
 | **Eval-design ≈** | **5** | **5** | **5** |
 
-**Total exercisable (✓ + 8 universal):** taze = 23 (+ COV-006 if AUTO_INSTRUMENTED_OPERATIONS updated) · changesets = 23 · wireit = 23
+**Total exercisable (✓ + 7 universal):** taze = 24 (+ COV-006 if AUTO_INSTRUMENTED_OPERATIONS updated) · changesets = 24 · wireit = 24
 
 ---
 
@@ -318,7 +327,7 @@ The 8 universal rules (NDS-001, NDS-003, API-001–004, NDS-006, CDQ-002) are ex
 | NDS-002 Tests pass | ✓ | ✓ pytest | ✓ pytest |
 | NDS-004 Public API preserved | ✓ | ✓ | ✓ |
 | NDS-005a Error handling structure | ✓ DB+config errors | ✓ Redis+config errors | ✓ git+version+config errors |
-| NDS-005b Silent catch preserved | 🔍 | 🔍 | ✓ fallbacks in bump/changelog |
+| NDS-007 Expected catch unmodified | 🔍 | 🔍 | ✓ fallbacks in bump/changelog |
 | COV-001 Entry points | ✓ mycli CLI | ✓ iredis CLI | ✓ cz bump/changelog/commit |
 | COV-002 Outbound calls | ✓ DB+file+terminal | ✓ Redis+file+terminal | ✓ subprocess+file+template |
 | COV-003 Failable ops | ✓ | ✓ | ✓ |
@@ -338,14 +347,15 @@ The 8 universal rules (NDS-001, NDS-003, API-001–004, NDS-006, CDQ-002) are ex
 | CDQ-003 Standard error recording | ✓ DB+auth+config | ✓ Redis+auth+cmd | ✓ git+version+file |
 | CDQ-005 Async context maintained | ✓ | ✓ | ✓ |
 | CDQ-006 Expensive attr guarding | 🔍 | 🔍 | 🔍 |
-| CDQ-007 No PII/unbounded attrs | ✓ queries, conn strings | ✓ Redis keys, conn strings | ✓ commit msgs, version strings |
-| CDQ-008 Consistent tracer naming | ✓ 15 files | ✓ 17 files | ✓ 51 files |
-| **Confirmed ✓ (of 24 D-rules)** | **16** | **16** | **17** |
+| CDQ-007 Attribute data quality | ✓ queries, conn strings | ✓ Redis keys, conn strings | ✓ commit msgs, version strings |
+| CDQ-009 Null-safe guard | ✓ | ✓ | ✓ |
+| CDQ-010 String method type safety | ✓ | ✓ | ✓ |
+| **Confirmed ✓ (of 26 D-rules)** | **18** | **18** | **19** |
 | **Cannot fire ✗** | **0** | **0** | **0** |
 | **Needs verify 🔍** | **4** | **4** | **3** |
 | **Eval-design ≈** | **5** | **5** | **5** |
 
-**Total exercisable (✓ + 8 universal):** mycli = 24 · iredis = 24 (strongest: 2 COV-006 overlaps) · commitizen = 25
+**Total exercisable (✓ + 7 universal):** mycli = 25 · iredis = 25 (strongest: 2 COV-006 overlaps) · commitizen = 26
 
 ---
 
@@ -435,7 +445,7 @@ The 8 universal rules (NDS-001, NDS-003, API-001–004, NDS-006, CDQ-002) are ex
 | NDS-002 Tests pass | ✓ testing.go present | ✓ dbtest/ package | ✓ |
 | NDS-004 Public API preserved | ✓ | ✓ DB interface/driver | ✓ RemoteRepo/LocalRepo |
 | NDS-005a Error handling structure | ✓ AI+DB+subprocess | ✓ SQL+migration errors | ✓ HTTP+git+VCS errors |
-| NDS-005b Silent catch preserved | ✓ API key fallback | 🔍 | 🔍 |
+| NDS-007 Expected catch unmodified | ✓ API key fallback | 🔍 | 🔍 |
 | COV-001 Entry points | ✓ mods CLI | ✓ up/down/status/migrate | ✓ get/list/create/rm |
 | COV-002 Outbound calls | ✓ HTTP+DB+subprocess+stdin | ✓ DB+file (4 DB drivers) | ✓ HTTP+git+file |
 | COV-003 Failable ops | ✓ | ✓ | ✓ |
@@ -455,14 +465,15 @@ The 8 universal rules (NDS-001, NDS-003, API-001–004, NDS-006, CDQ-002) are ex
 | CDQ-003 Standard error recording | ✓ AI+DB+subprocess errors | ✓ SQL+migration+conn errors | ✓ HTTP+git+VCS errors |
 | CDQ-005 Async context maintained | ✓ net/http context | ✓ DB context | ✓ net/http context |
 | CDQ-006 Expensive attr guarding | 🔍 | 🔍 | 🔍 |
-| CDQ-007 No PII/unbounded attrs | ✓ conv content, API keys | ✓ conn strings, SQL text | ✓ repo URLs, git config |
-| CDQ-008 Consistent tracer naming | ✓ 32 files | ✓ 14 files | ✓ 19 files |
-| **Confirmed ✓ (of 24 D-rules)** | **17** | **15** | **16** |
+| CDQ-007 Attribute data quality | ✓ conv content, API keys | ✓ conn strings, SQL text | ✓ repo URLs, git config |
+| CDQ-009 Null-safe guard | ✓ | ✓ | ✓ |
+| CDQ-010 String method type safety | ✓ | ✓ | ✓ |
+| **Confirmed ✓ (of 26 D-rules)** | **19** | **17** | **18** |
 | **Cannot fire ✗** | **0** | **0** | **0** |
 | **Needs verify / conditional 🔍** | **3** | **5 (incl. COV-006)** | **4** |
 | **Eval-design ≈** | **5** | **5** | **5** |
 
-**Total exercisable (✓ + 8 universal):** mods = 25 · dbmate = 23 (+ COV-006 if otelsql added) · ghq = 24
+**Total exercisable (✓ + 7 universal):** mods = 26 · dbmate = 24 (+ COV-006 if otelsql added) · ghq = 25
 
 ---
 
