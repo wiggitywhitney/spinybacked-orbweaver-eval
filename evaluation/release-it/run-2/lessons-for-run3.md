@@ -42,12 +42,12 @@ lib/plugin/npm/prompts.js        lib/plugin/gitlab/prompts.js
 lib/plugin/version/Version.js
 ```
 
-**Instrument command for run-2** (run from `~/Documents/Repositories/spinybacked-orbweaver-eval/`):
+**Instrument command for run-2** (run from `~/Documents/Repositories/release-it/`):
 ```bash
 caffeinate -s GIT_CONFIG_GLOBAL=/Users/whitney.lee/.config/spiny-orb-eval/gitconfig env -u ANTHROPIC_CUSTOM_HEADERS -u ANTHROPIC_BASE_URL vals exec -i -f .vals.yaml -- bash -c 'GITHUB_TOKEN=$GITHUB_TOKEN_RELEASE_IT node ~/Documents/Repositories/spinybacked-orbweaver/bin/spiny-orb.js instrument lib --verbose 2>&1 | tee ~/Documents/Repositories/spinybacked-orbweaver-eval/evaluation/release-it/run-2/spiny-orb-output.log'
 ```
 
-Note: source directory is `lib/` (not `src/`). Command must be run from the release-it repo directory (`~/Documents/Repositories/release-it/`).
+Note: source directory is `lib/` (not `src/`).
 
 ---
 
