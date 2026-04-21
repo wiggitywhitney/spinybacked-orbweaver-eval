@@ -24,7 +24,7 @@ Future evaluation targets are planned for TypeScript, Python, and Go. Candidate 
 
 Each evaluation run instruments commit-story-v2 with spiny-orb, then assesses the output against two scoring systems:
 
-### Code-level rubric (32 rules)
+### Code-level rubric (31 rules)
 
 The rubric evaluates the source code diff across six dimensions:
 
@@ -33,11 +33,13 @@ The rubric evaluates the source code diff across six dimensions:
 | Non-Destructiveness | NDS | 6 | Agent preserved existing behavior; no business logic modified |
 | Coverage | COV | 6 | Right functions got spans; auto-instrumentation correctly deferred |
 | Restraint | RST | 5 | Agent didn't over-instrument utility functions, getters, or wrappers |
-| API-Only Dependency | API | 4 | Only `@opentelemetry/api` imported — no SDK, no vendor packages |
+| API-Only Dependency | API | 3 | Only `@opentelemetry/api` imported — no SDK, no vendor packages |
 | Schema Fidelity | SCH | 4 | Span names and attribute keys match the Weaver registry |
-| Code Quality | CDQ | 7 | Spans closed in all paths, correct error recording, consistent tracer naming |
+| Code Quality | CDQ | 8 | Spans closed in all paths, correct error recording, attribute data quality |
 
-Five of the 32 rules are **gates** — if any gate fails, quality scoring is skipped. The remaining 27 rules produce a score out of 25 (COV and RST exclude two advisory-only rules from the count).
+Five of the 31 rules are **gates** — if any gate fails, quality scoring is skipped. The remaining 26 rules produce a score out of 25 (COV and RST exclude two advisory-only rules from the count).
+
+For full rule specifications, audit decisions, and OTel spec alignment, see [`docs/rules-reference.md`](https://github.com/wiggitywhitney/spinybacked-orbweaver/blob/main/docs/rules-reference.md) in the spiny-orb repo.
 
 ### Instrumentation Score (IS)
 
