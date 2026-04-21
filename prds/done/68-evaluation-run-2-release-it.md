@@ -1,6 +1,7 @@
 # PRD #68: JavaScript Evaluation Run-2: release-it — First Complete Baseline Run
 
-**Status:** Draft
+**Status:** Complete
+**Completed:** 2026-04-21
 **Created:** 2026-04-20
 **GitHub Issue:** #68
 **Depends on:** PRD #53 (run-1 complete, 3 blockers documented, actionable fix output delivered)
