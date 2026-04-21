@@ -10,6 +10,9 @@
 
 ANTHROPIC_API_KEY: ref+gcpsecrets://demoo-ooclock/anthropic-api-key
 GITHUB_TOKEN: ref+gcpsecrets://demoo-ooclock/github-token
+# Fine-grained PAT scoped to wiggitywhitney/release-it with pull_requests:write.
+# Use for release-it eval runs: prepend GITHUB_TOKEN=$GITHUB_TOKEN_RELEASE_IT to the instrument command.
+GITHUB_TOKEN_RELEASE_IT: ref+gcpsecrets://demoo-ooclock/github-token-release-it
 
 # Datadog credentials for OTLP export (Phase 2/3 - telemetry agent)
 DD_API_KEY: ref+gcpsecrets://demoo-ooclock/datadog-commit-story-dev

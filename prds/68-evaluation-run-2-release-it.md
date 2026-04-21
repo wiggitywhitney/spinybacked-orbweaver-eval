@@ -90,13 +90,13 @@ The feature branch for this PRD (`feature/prd-68-evaluation-run-2-release-it`) *
 
 ## Milestones
 
-- [ ] **Collect skeleton documents**
+- [x] **Collect skeleton documents**
 
   Create `evaluation/release-it/run-2/` directory in the eval repo with skeleton files:
   - `lessons-for-run3.md` (copy structure from `evaluation/release-it/run-1/lessons-for-run2.md`)
   - `spiny-orb-findings.md` (fresh skeleton with P1/P2/P3 sections)
 
-- [ ] **Pre-run verification**
+- [x] **Pre-run verification**
 
   Verify all three run-1 blockers are resolved and validate run prerequisites:
 
@@ -111,46 +111,46 @@ The feature branch for this PRD (`feature/prd-68-evaluation-run-2-release-it`) *
 
   **Do not proceed if RUN1-1 or RUN1-3 are unresolved.** The run will halt early or produce no PR.
 
-- [ ] **Evaluation run-2**
+- [x] **Evaluation run-2**
 
   Whitney runs `spiny-orb instrument` in her own terminal. **Do NOT run the command yourself.**
 
   **Instrument command** (run from `~/Documents/Repositories/release-it/`):
   ```bash
-  caffeinate -s env -u ANTHROPIC_CUSTOM_HEADERS -u ANTHROPIC_BASE_URL vals exec -i -f .vals.yaml -- node ~/Documents/Repositories/spinybacked-orbweaver/bin/spiny-orb.js instrument lib --verbose 2>&1 | tee ~/Documents/Repositories/spinybacked-orbweaver-eval/evaluation/release-it/run-2/spiny-orb-output.log
+  caffeinate -s env -u ANTHROPIC_CUSTOM_HEADERS -u ANTHROPIC_BASE_URL GIT_CONFIG_GLOBAL=/Users/whitney.lee/.config/spiny-orb-eval/gitconfig vals exec -i -f .vals.yaml -- bash -c 'GITHUB_TOKEN=$GITHUB_TOKEN_RELEASE_IT node ~/Documents/Repositories/spinybacked-orbweaver/bin/spiny-orb.js instrument lib --verbose 2>&1 | tee ~/Documents/Repositories/spinybacked-orbweaver-eval/evaluation/release-it/run-2/spiny-orb-output.log'
   ```
 
   AI role: (1) confirm readiness, (2) once Whitney provides the log output, save it and write `evaluation/release-it/run-2/run-summary.md`, (3) **push the eval branch to origin immediately** — the branch holds the only copy of run artifacts until step 13 copies them to main.
 
-- [ ] **Findings Discussion** *(user-facing checkpoint 1)*
+- [x] **Findings Discussion** *(user-facing checkpoint 1)*
 
   After `run-summary.md` is written, before any evaluation documents: report to Whitney with a raw overview — files committed/failed/partial, quality score if visible in log, cost, push/PR status, top 1-2 surprises. Conversational, under 10 lines. Wait for acknowledgment before proceeding.
 
   Success criteria: Whitney has acknowledged the findings overview.
 
-- [ ] **Failure deep-dives**
+- [x] **Failure deep-dives**
 
   Root cause analysis for each failed/partial file and run-level failures.
   Produces: `evaluation/release-it/run-2/failure-deep-dives.md`
   Style reference: `Read docs/templates/eval-run-style-reference/failure-deep-dives.md`
 
-- [ ] **Per-file evaluation**
+- [x] **Per-file evaluation**
 
   Full 32-rule rubric on ALL processed files.
   Produces: `evaluation/release-it/run-2/per-file-evaluation.md`
   Style reference: `Read docs/templates/eval-run-style-reference/per-file-evaluation.md`
 
-- [ ] **PR artifact evaluation**
+- [x] **PR artifact evaluation**
 
   Produces: `evaluation/release-it/run-2/pr-evaluation.md`
   Style reference: `Read docs/templates/eval-run-style-reference/pr-evaluation.md`
 
-- [ ] **Rubric scoring**
+- [x] **Rubric scoring**
 
   Produces: `evaluation/release-it/run-2/rubric-scores.md`
   Style reference: `Read docs/templates/eval-run-style-reference/rubric-scores.md`
 
-- [ ] **IS scoring run**
+- [x] **IS scoring run**
 
   Prerequisites: OTel Collector running with `evaluation/is/otelcol-config.yaml` (see `evaluation/is/README.md`). Stop Datadog Agent first: `sudo launchctl stop com.datadoghq.agent`.
 
@@ -170,17 +170,17 @@ The feature branch for this PRD (`feature/prd-68-evaluation-run-2-release-it`) *
 
   Produces: `evaluation/release-it/run-2/is-score.md`
 
-- [ ] **Baseline comparison**
+- [x] **Baseline comparison**
 
   Compare run-2 against commit-story-v2 run-13 (most recent cross-target reference) and against release-it run-1. Highlight dimensions that differ by more than 1 point from commit-story-v2.
   Produces: `evaluation/release-it/run-2/baseline-comparison.md`
   Style reference: `Read docs/templates/eval-run-style-reference/baseline-comparison.md`
 
-- [ ] **Update root README**
+- [x] **Update root README**
 
   After baseline comparison: (1) add a row for run-2 to the run history table in `README.md` with quality score, gates, files, spans, cost, push/PR status, and IS score; (2) update the "next run" sentence (bold paragraph below the run history table) to reference run-3 and its primary goals.
 
-- [ ] **Actionable fix output** *(user-facing checkpoint 2)*
+- [x] **Actionable fix output** *(user-facing checkpoint 2)*
 
   1. Run the cross-document audit agent to verify consistency across all run-2 evaluation artifacts.
   2. Give Whitney an interpreted summary of key findings — failures, root causes, notable patterns, what to watch for in run-3.
@@ -189,11 +189,11 @@ The feature branch for this PRD (`feature/prd-68-evaluation-run-2-release-it`) *
 
   Produces: `evaluation/release-it/run-2/actionable-fix-output.md`
 
-- [ ] **Draft Run-3 PRD**
+- [x] **Draft Run-3 PRD**
 
   Create on a separate branch from main. Use Type D structure from `docs/language-extension-plan.md` and this PRD as the milestone style reference. Carry forward both user-facing checkpoints. Merge the PRD-only PR to main so `/prd-start` can pick it up.
 
-- [ ] **Copy artifacts to main**
+- [x] **Copy artifacts to main**
 
   From main, run:
   ```bash
