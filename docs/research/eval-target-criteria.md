@@ -31,7 +31,7 @@ Candidates must pass ALL mandatory filters before rubric assessment.
 
 ### Rule-to-Target Mapping
 
-The table below maps each of the 32 code-level rubric rules to what a target repo needs for that rule to fire. Rules marked **(U) Universal** are met by any typical project — they pass or fail based on agent behavior, not target structure. Rules marked **(D) Differentiating** are where candidate characteristics affect how well the rule exercises the agent.
+The table below maps each of the 31 code-level rubric rules to what a target repo needs for that rule to fire. Rules marked **(U) Universal** are met by any typical project — they pass or fail based on agent behavior, not target structure. Rules marked **(D) Differentiating** are where candidate characteristics affect how well the rule exercises the agent.
 
 **Universal rules — all projects satisfy the precondition; no per-rule entry needed:**
 NDS-001 (compilation), NDS-003 (non-instrumentation lines unchanged), API-001 (only api imports — **blocking** as of PRD #483 audit), API-002 (correct dependency declaration), API-004 (no SDK-internal imports — import-level check; **blocking** as of PRD #483 audit; manifest-level check moved into API-002), NDS-006 (module system consistency), CDQ-002 (tracer acquired correctly — fires on every instrumented file).
