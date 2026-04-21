@@ -23,7 +23,7 @@
 | Total tokens (input) | 225.9K |
 | Total tokens (output) | 257.7K |
 | Cached tokens | 269.9K |
-| Estimated cost | ~$4.62 |
+| Actual cost | $5.69 |
 | Live-check | PARTIAL (17 files failed) |
 | Push | YES (branch spiny-orb/instrument-1776786399007) |
 | PR | FAILED — GraphQL: Resource not accessible by personal access token (createPullRequest) |
