@@ -6,19 +6,19 @@ Observations collected during run-1 evaluation that should inform the next evalu
 
 ## Pre-Run Observations
 
-### Pre-run verification — (fill in at run time)
+### Pre-run verification — 2026-04-24
 
 | Item | Status | Detail |
 |------|--------|--------|
-| spiny-orb.yaml | | |
-| semconv/ | | |
-| .ts file inventory | | |
-| spiny-orb build | | Branch: `feature/prd-372-typescript-provider`, SHA: (fill in) |
-| GITHUB_TOKEN_TAZE | | Fine-grained PAT with contents:write + pull_requests:write for wiggitywhitney/taze |
-| GIT_CONFIG_GLOBAL override | | `/Users/whitney.lee/.config/spiny-orb-eval/gitconfig` — disables tag.gpgsign |
-| Node.js version | | (fill in at run time) |
-| spiny-orb version | | (fill in at run time) |
-| taze version | | |
+| spiny-orb.yaml | ✅ | Present at `~/Documents/Repositories/taze/spiny-orb.yaml` |
+| semconv/ | ✅ | `attributes.yaml` + `registry_manifest.yaml` + `SCHEMA_DESIGN.md` present |
+| .ts file inventory | ✅ | 33 files confirmed (see inventory below) |
+| spiny-orb build | ✅ | Branch: `feature/prd-372-typescript-provider`, SHA: `b0a818b` |
+| GITHUB_TOKEN_TAZE | ✅ | Dry-run push `HEAD:refs/heads/spiny-orb/auth-test` succeeded — `[new branch] HEAD -> spiny-orb/auth-test` |
+| GIT_CONFIG_GLOBAL override | ✅ | `~/.config/spiny-orb-eval/gitconfig` exists — `tag.gpgsign = false`, `commit.gpgsign = false` |
+| Node.js version | ✅ | v25.8.0 |
+| spiny-orb version | ✅ | 1.0.0 |
+| taze version | ✅ | 19.11.0 |
 
 **Target**: wiggitywhitney/taze (fork of antfu-collective/taze)
 **Source directory**: `src/` (33 TypeScript files)
@@ -34,7 +34,41 @@ caffeinate -s env -u ANTHROPIC_CUSTOM_HEADERS -u ANTHROPIC_BASE_URL GIT_CONFIG_G
 Command: `pnpm test` from `~/Documents/Repositories/taze/`
 
 **Source file inventory (33 .ts files in `src/`):**
-*(fill in after confirming from fork — run `find src -name "*.ts" | grep -v "\.d\.ts" | sort`)*
+```text
+src/addons/index.ts
+src/addons/vscode.ts
+src/api/check.ts
+src/cli.ts
+src/commands/check/checkGlobal.ts
+src/commands/check/index.ts
+src/commands/check/interactive.ts
+src/commands/check/render.ts
+src/config.ts
+src/constants.ts
+src/filters/diff-sorter.ts
+src/index.ts
+src/io/bunWorkspaces.ts
+src/io/dependencies.ts
+src/io/packageJson.ts
+src/io/packages.ts
+src/io/packageYaml.ts
+src/io/pnpmWorkspaces.ts
+src/io/resolves.ts
+src/io/yarnWorkspaces.ts
+src/log.ts
+src/render.ts
+src/types.ts
+src/utils/config.ts
+src/utils/context.ts
+src/utils/dependenciesFilter.ts
+src/utils/diff.ts
+src/utils/package.ts
+src/utils/packument.ts
+src/utils/sha.ts
+src/utils/sort.ts
+src/utils/time.ts
+src/utils/versions.ts
+```
 
 ---
 

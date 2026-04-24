@@ -109,7 +109,7 @@ The feature branch for this PRD **never merges to main**. The PR exists for Code
 
   Success criteria: 1 clean test run documented.
 
-- [ ] **Pre-run verification**
+- [x] **Pre-run verification**
 
   1. Verify TypeScript language provider is available: confirm `feature/prd-372-typescript-provider` is checked out in `~/Documents/Repositories/spinybacked-orbweaver/` and record the SHA. (Gate 1 waived — running from feature branch per 2026-04-24 decision.)
   2. Verify target repo has spiny-orb.yaml and semconv/ configured
