@@ -109,7 +109,7 @@ The feature branch for this PRD **never merges to main**. The PR exists for Code
   2. Verify spiny-orb.yaml and semconv/
   3. Count .go files (excluding _test.go) — record inventory
   4. Rebuild spiny-orb
-  5. Verify push auth: confirm `GITHUB_TOKEN` resolves to a fine-grained PAT with Contents + Pull requests write access for the fork. Run: `git push --dry-run https://x-access-token:$GITHUB_TOKEN@github.com/wiggitywhitney/<target>.git HEAD:main` — must succeed. See `~/.claude/rules/eval-github-pat.md` for setup pattern.
+  5. Verify push auth: confirm `GITHUB_TOKEN` resolves to a fine-grained PAT with Contents + Pull requests write access for the fork. Push to a non-existent branch to avoid false "fetch first" rejections: `git -C ~/Documents/Repositories/<target> push --dry-run https://x-access-token:$GITHUB_TOKEN@github.com/wiggitywhitney/<target>.git HEAD:refs/heads/spiny-orb/auth-test` — expect `[new branch] HEAD -> spiny-orb/auth-test`. See `~/.claude/rules/eval-github-pat.md` for setup pattern.
   6. Record version info
   7. Append to lessons-for-run2.md
 

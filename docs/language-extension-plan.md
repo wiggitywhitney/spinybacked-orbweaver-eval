@@ -67,7 +67,7 @@ This PRD type exists exactly once per target. It is the "onboarding" for that la
 - Whitney runs `spiny-orb instrument` herself in her own terminal — the AI does not run this command
 - `GITHUB_TOKEN` must be a **fine-grained PAT** scoped to the fork (`wiggitywhitney/<target>`) with **Contents: Read and write** and **Pull requests: Read and write**:
   - Classic/OAuth tokens and stored passwords cause "Password authentication is not supported" at push time
-  - Verify write access before running: `git push --dry-run https://x-access-token:$GITHUB_TOKEN@github.com/wiggitywhitney/<target>.git HEAD:main` (`git ls-remote` only tests read and is insufficient)
+  - Verify write access before running — push to a non-existent branch (avoids "fetch first" ambiguity if local is behind main): `git -C ~/Documents/Repositories/<target> push --dry-run https://x-access-token:$GITHUB_TOKEN@github.com/wiggitywhitney/<target>.git HEAD:refs/heads/spiny-orb/auth-test` — expect `[new branch] HEAD -> spiny-orb/auth-test`; any authentication error means wrong token
   - Full setup pattern: `@~/.claude/rules/eval-github-pat.md` — see spiny-orb issue #583 for the team's setup guide action item
 - The Run-1 evaluation follows the full Type D milestone structure, including both user-facing checkpoints (Findings Discussion and handoff pause)
 
