@@ -83,7 +83,7 @@ The feature branch for this PRD **never merges to main**. The PR exists for Code
 
   Success criteria: Forked repo exists with test fix and OTel devDep committed; eval directory created with skeleton files.
 
-- [ ] **Add spiny-orb prerequisites to target repo**
+- [x] **Add spiny-orb prerequisites to target repo**
 
   In the forked target repo:
   1. Create `spiny-orb.yaml` configuration (adapt from commit-story-v2 reference, adjusting for TypeScript)
