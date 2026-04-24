@@ -93,7 +93,7 @@ The feature branch for this PRD **never merges to main**. The PR exists for Code
 
   Success criteria: All prerequisites present. Forked repo builds and tests pass.
 
-- [ ] **Create deliberately incomplete Weaver schema**
+- [x] **Create deliberately incomplete Weaver schema**
 
   The `semconv/` schema should deliberately omit some spans and attributes that a human would include. Tests whether spiny-orb identifies missing attributes and proposes schema extensions (SCH extension capability). The process: (1) first draft a complete schema covering all domain concepts, (2) then remove items to create the deliberately incomplete version, (3) document both versions so the eval can compare.
 
@@ -101,7 +101,7 @@ The feature branch for this PRD **never merges to main**. The PR exists for Code
 
   Success criteria: Complete schema drafted first. At least 3 semantically meaningful omissions documented with rationale.
 
-- [ ] **Verify test suite runs clean on unmodified target**
+- [x] **Verify test suite runs clean on unmodified target**
 
   Run test suite once after adding prerequisites but before instrumentation. It must pass.
 
@@ -206,3 +206,4 @@ The feature branch for this PRD **never merges to main**. The PR exists for Code
 | Date | Update | Status | Next Steps |
 |------|--------|--------|------------|
 | 2026-04-11 | PRD created (revised from initial Cluster Whisperer-assumed version) | Draft | Await Gates 1 and 2 |
+| 2026-04-24 | Weaver schema expanded (fetch/write groups, 3 deliberate omissions); taze test suite verified clean (16 files, 73 tests) | In Progress | Pre-run verification |

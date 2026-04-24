@@ -29,6 +29,10 @@ Observations collected during run-1 evaluation that should inform the next evalu
 caffeinate -s env -u ANTHROPIC_CUSTOM_HEADERS -u ANTHROPIC_BASE_URL GIT_CONFIG_GLOBAL=/Users/whitney.lee/.config/spiny-orb-eval/gitconfig vals exec -i -f .vals.yaml -- bash -c 'GITHUB_TOKEN=$GITHUB_TOKEN_TAZE node ~/Documents/Repositories/spinybacked-orbweaver/bin/spiny-orb.js instrument src --verbose 2>&1 | tee ~/Documents/Repositories/spinybacked-orbweaver-eval/evaluation/taze/run-1/spiny-orb-output.log'
 ```
 
+**Pre-schema test run (unmodified target, post-prerequisites):**
+2026-04-24 — 16 test files, 73 tests, all passing. Duration ~6.5s. Build clean.
+Command: `pnpm test` from `~/Documents/Repositories/taze/`
+
 **Source file inventory (33 .ts files in `src/`):**
 *(fill in after confirming from fork — run `find src -name "*.ts" | grep -v "\.d\.ts" | sort`)*
 
