@@ -65,6 +65,10 @@ This PRD type exists exactly once per target. It is the "onboarding" for that la
 
 **Seed schema: check semconv before defining custom attributes**: Before finalizing the initial `semconv/` schema, check each intended attribute against OTel semantic conventions v1.40.0 and prefer a semconv attribute where the mapping is clean. Only define a custom attribute when no semconv equivalent exists. Git/VCS operations are a frequent overlap — attributes such as `vcs.repository.url.full` and `vcs.ref.head.name` are already defined in semconv and should be used directly rather than reinvented under a target-specific namespace (e.g., `mytarget.git.branch`). Incubating semconv attributes may be used, but mark them as incubating in the registry file so future readers know they carry no stability guarantee. This prevents divergence from the standard and keeps custom attributes limited to genuinely target-specific concerns.
 
+**`spiny-orb.yaml` required fields for non-JavaScript targets**: Two fields must be set explicitly or the run will fail silently:
+- `language: <id>` — activates the correct language provider for file discovery and validation. Without it, `coordinate()` defaults to `JavaScriptProvider` and exits with "No JavaScript files found" on TypeScript/Python/Go repos. Use the provider's `id` string: `typescript`, `python`, `go`, `javascript`.
+- `targetType: short-lived` — required for CLI tools that exit after doing work (the default `long-lived` selects a BatchSpanProcessor that may not flush before exit). Use `short-lived` for any tool that calls `process.exit()` or equivalent after completing. Discovered during taze Run-1 first attempt (2026-04-24).
+
 **Operational details for Type C PRDs**:
 - Whitney runs `spiny-orb instrument` herself in her own terminal — the AI does not run this command
 - `GITHUB_TOKEN` must be a **fine-grained PAT** scoped to the fork (`wiggitywhitney/<target>`) with **Contents: Read and write** and **Pull requests: Read and write**:

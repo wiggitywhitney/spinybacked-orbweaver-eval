@@ -121,12 +121,14 @@ The feature branch for this PRD **never merges to main**. The PR exists for Code
 
   Success criteria: All prerequisites verified; file inventory recorded.
 
-- [ ] **Evaluation run-1**
+- [x] **Evaluation run-1**
 
   Whitney runs `spiny-orb instrument` in her own terminal. **Do NOT run the command yourself.** Copy the command template from `docs/language-extension-plan.md` (line ~72). Replace `commit-story-v2` with the chosen target name, `run-N` with `run-1`, and `src` with the target's source directory.
   AI role: (1) confirm readiness, (2) save log, (3) write run-summary.md, (4) **push the eval branch to origin immediately** (`git push -u origin feature/prd-50-typescript-eval-setup`) — the branch holds the only copy of run-1 artifacts until PRD #57's backfill lands.
 
   Success criteria: Log saved; run-summary.md written; eval branch on origin.
+
+  **Run-1 result (2026-04-24)**: Run aborted at file 3/33. All 3 processed files failed NDS-001 (TypeScript compilation errors). Two distinct root causes: (1) no-function files (re-exports, pure sync utilities) routed through agent instead of skipped pre-agent; (2) `startActiveSpan()` return type incompatible with void synchronous methods. A third cause was cross-file optional property access rejected by tsc. Consecutive-failure abort threshold stopped the run before the remaining 30 files were reached. 0 files committed, no PR created. Artifacts: `spiny-orb-output.log`, `run-summary.md`. See `spiny-orb-findings.md` for P1 findings filed against the TS provider.
 
 - [ ] **Findings Discussion** *(user-facing checkpoint 1)*
 
@@ -203,6 +205,7 @@ The feature branch for this PRD **never merges to main**. The PR exists for Code
 | 2026-04-24 | taze (antfu-collective/taze) selected as TypeScript eval target | Best I/O diversity of the 3 candidates: HTTP (ofetch to npm/JSR registry) + file (package.json, yaml, lockfiles) + subprocess (package manager commands). 33 source files. Runner-up: changesets (25 files, subprocess+file only, no HTTP). wireit not evaluated (62 files, too long a runtime). | Fork, prerequisites, schema, and eval run all target `wiggitywhitney/taze`. |
 | 2026-04-24 | Fix taze's live-registry test in the fork rather than excluding it | `test/versions.test.ts > getMaxSatisfying` fails because the 'newest' mode assertions compare `tags.next` to `getMaxSatisfying()` but the function's implementation has diverged from what `tags.next` returns on live npm. Fix: relax 'newest' assertions from strict equality (`expect(newest).toBe(...)`) to existence checks (`expect(...).toBeTruthy()`). pnpm (required by taze) installed globally via `npm install -g pnpm@10`. | Fork milestone must apply this test fix before verifying clean test run. |
 | 2026-04-24 | Schema design documentation goes in `semconv/SCHEMA_DESIGN.md` in the fork, with explicit pointers in the PRD milestone and in `spiny-orb-findings.md` | Eval reviewers scoring SCH rules need to know what was deliberately omitted. PROGRESS.md alone is insufficient — reviewers read the PRD and the run-1 findings file, not PROGRESS.md. Without pointers in those two places, the comparison is effectively undiscoverable. | All Type C PRDs (#51, #52, #53) and `docs/language-extension-plan.md` updated with the same pointer pattern. |
+| 2026-04-24 | `spiny-orb.yaml` requires an explicit `language: <id>` field to activate the correct provider | Without it, `coordinate()` defaults to `JavaScriptProvider` for file discovery regardless of target language — surfaced during Run-1 first attempt (exited immediately with "No JavaScript files found in .../taze/src"). Also: `targetType: short-lived` is required for CLI tools that exit after running; without it the default `long-lived` may select the wrong span processor. | `language: typescript` and `targetType: short-lived` added to `~/Documents/Repositories/taze/spiny-orb.yaml`. All Type C PRDs (#51, #52, #53) and `docs/language-extension-plan.md` updated to include these fields in the spiny-orb.yaml setup step. |
 
 ## Progress Log
 
@@ -210,3 +213,4 @@ The feature branch for this PRD **never merges to main**. The PR exists for Code
 |------|--------|--------|------------|
 | 2026-04-11 | PRD created (revised from initial Cluster Whisperer-assumed version) | Draft | Await Gates 1 and 2 |
 | 2026-04-24 | Weaver schema expanded (fetch/write groups, 3 deliberate omissions); taze test suite verified clean (16 files, 73 tests) | In Progress | Pre-run verification |
+| 2026-04-24 | Run-1 attempted — aborted at 3/33 files (NDS-001 TypeScript failures). Key findings: language: field required in spiny-orb.yaml; no-function pre-agent detection missing; startActiveSpan void type incompatibility; consecutive-failure abort too aggressive. | In Progress | Findings Discussion — run findings surfaced even without committed output |

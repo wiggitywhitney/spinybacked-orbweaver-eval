@@ -82,7 +82,7 @@ The feature branch for this PRD **never merges to main**. The PR exists for Code
 - [ ] **Add spiny-orb prerequisites to target repo**
 
   In the forked target repo:
-  1. Create `spiny-orb.yaml` configuration (adapt from commit-story-v2 reference for Python)
+  1. Create `spiny-orb.yaml` configuration (adapt from commit-story-v2 reference for Python). **Required fields**: `language: python` (without it, discovery defaults to JavaScript provider and finds no files); `targetType: short-lived` for CLI tools that exit after running, or `long-lived` for servers/daemons. (Updated per 2026-04-24 decision in PRD #50.)
   2. Create initial `semconv/` Weaver schema directory for the target's domain
   3. Create Python OTel bootstrap module — use `opentelemetry-instrument` wrapper OR manual bootstrap with `opentelemetry-sdk` and `opentelemetry-exporter-otlp-proto-http`. Include atexit hook AND explicit SIGTERM/SIGINT signal handlers to flush spans
   4. Add OTel dependencies to the project's dependency management (pyproject.toml or requirements.txt): `opentelemetry-api`

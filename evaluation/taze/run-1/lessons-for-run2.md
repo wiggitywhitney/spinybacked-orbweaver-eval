@@ -74,10 +74,31 @@ src/utils/versions.ts
 
 ## Run-1 Observations
 
-*(fill in during and after the run)*
+### Run-1 attempt — 2026-04-24 — BLOCKED before instrumentation
+
+Blocker surfaced on first run attempt. `spiny-orb instrument src` exited after 3.9s with:
+
+```text
+File discovery failed: No JavaScript files found in .../taze/src.
+```
+
+Root cause: `coordinate()` doesn't pass a language provider to `discoverFiles()`, so it defaults to `JavaScriptProvider` regardless of the target language. The TypeScript provider is registered but never selected. Fix: add `language: typescript` to `spiny-orb.yaml`. Applied before second attempt.
+
+### Run-1 result — 2026-04-24 — ABORTED at file 3/33
+
+Second attempt (with `language: typescript` in `spiny-orb.yaml`) reached the agent but aborted after 3 consecutive NDS-001 failures:
+
+- **src/addons/index.ts** — re-export only, no functions. Cycled 3 attempts before failing.
+- **src/addons/vscode.ts** — one pure synchronous void method, nothing to instrument. `startActiveSpan()` return type incompatible with `void`.
+- **src/api/check.ts** — real instrumentation attempted, schema reasoning surfaced, but TypeScript optional property access (`CheckOptions.mode`) caused compilation failure.
+
+Consecutive-failure abort triggered after file 3. 30/33 files never reached. 0 files committed, no PR created.
 
 ---
 
 ## Carry-Forward Items for Run 2
 
-*(fill in during actionable fix output milestone)*
+- **NDS-001 / TypeScript type compatibility** must be fixed in spiny-orb before Run-2 is useful. Three distinct failure modes: (1) no-function files routed through agent, (2) `startActiveSpan()` incompatible with void sync methods, (3) cross-file optional property access rejected by tsc.
+- **Consecutive-failure abort threshold** may need to be raised or made configurable for TypeScript runs, where early files often have nothing to instrument.
+- **Re-run the full 33 files** once NDS-001 root causes are addressed — Run-1 produced no usable rubric baseline.
+- **Schema reasoning in check.ts** was promising despite the failure — `taze.check.packages_total`, `taze.check.packages_outdated`, `taze.check.write_mode` were correctly identified. These attributes should appear again in Run-2.
