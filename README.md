@@ -99,3 +99,38 @@ Files column notation: plain count = committed files; `+Np` = N partial files (i
 **Run-15 is next** — verifying catch-block consistency in `journal-graph.js` (`summaryNode` error recording) and monitoring COV-004 disposition from the parallel advisory rules audit (spiny-orb PRD #483).
 
 Full run-by-run analysis: [`evaluation/commit-story-v2/`](evaluation/commit-story-v2/)
+
+---
+
+## Run history: release-it
+
+release-it is the JavaScript evaluation target for testing spiny-orb on a foreign (non-primary) codebase. It is a release automation CLI for Node.js — no LangGraph, no LLM calls, no MCP server. The async I/O is primarily git operations, GitHub/GitLab REST API calls, and npm registry checks, giving spiny-orb a structurally different challenge than commit-story-v2.
+
+| Run | Quality | Gates | Files | Spans | Cost | Push/PR | IS |
+|-----|---------|-------|-------|-------|------|---------|-----|
+| 1 | N/A (halted) | N/A | 0+5f | 0 | $0.68 | NO | — |
+| 2 | 24/25 (96%) | 4/5† | 0+13f | 0 | $5.69 | branch YES / PR FAILED | N/E |
+
+Files column: `+Nf` = N files rolled back by checkpoint or end-of-run test failure. Run-1 halted at file 5/23. Run-2 processed all 23 files; 0 committed net due to OTel module resolution failures at every checkpoint.
+† Gates: 4 pass + 1 NOT EVALUABLE (NDS-002 — checkpoint tests fail for infrastructure reasons, not agent error). NDS-003 gate fails for GitHub.js.
+IS column: N/E = Not Evaluable (no instrumented files survived to the working tree).
+
+**Run-3 is next** — two P1 blockers must be resolved before running: (1) OTel module resolution at checkpoint (`@opentelemetry/api` not resolvable under peerDependencies strategy — needs devDependency or install step before checkpoint tests); (2) PAT scope in GCP Secret Manager (`github-token-release-it` lacks `pull_requests:write`).
+
+Full run-by-run analysis: [`evaluation/release-it/`](evaluation/release-it/)
+
+---
+
+## Adding a new evaluation target
+
+The complete process is in [`docs/language-extension-plan.md`](docs/language-extension-plan.md). The step most likely to cause silent failures:
+
+**GitHub PAT setup** — spiny-orb needs a fine-grained PAT to push the instrument branch and open a PR. The PAT must be scoped to the fork (`wiggitywhitney/<target>`) with **Contents: Read and write** + **Pull requests: Read and write**. Store it as `GITHUB_TOKEN_<TARGET>` in GCP Secret Manager and add it to both `.vals.yaml` files. Before running, verify with:
+
+```bash
+vals exec -i -f .vals.yaml -- bash -c 'git push --dry-run https://x-access-token:$GITHUB_TOKEN_<TARGET>@github.com/wiggitywhitney/<target>.git HEAD:main'
+```
+
+This is the check that was missing across 8 consecutive push failures on commit-story-v2 (runs 3–10). "Password authentication is not supported" means the token is wrong — stop and regenerate. Full setup pattern in `~/.claude/rules/eval-github-pat.md`.
+
+**Note for spiny-orb team**: this PAT setup pattern should be included in the TypeScript (and future language) setup guides so end users know how to configure GitHub push auth before running spiny-orb.
