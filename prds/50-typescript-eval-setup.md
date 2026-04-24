@@ -64,13 +64,13 @@ The feature branch for this PRD **never merges to main**. The PR exists for Code
 
   Success criteria: One candidate selected with documented rubric-coverage rationale. Whitney's approval obtained.
 
-- [ ] **Add TypeScript auto-instrumentation libraries to spiny-orb**
+- [x] **Add TypeScript auto-instrumentation libraries to spiny-orb**
 
   Work in `~/Documents/Repositories/spinybacked-orbweaver/` on a feature branch. The TypeScript provider reuses the JavaScript `KNOWN_FRAMEWORK_PACKAGES` list in `src/languages/javascript/ast.ts` (around line 124) via the shared `detectOTelImports` import. Review whether any TypeScript-specific packages need to be added. Cross-reference against `@opentelemetry/auto-instrumentations-node` for coverage. Run `npm test` to verify. If new entries are needed, submit a PR to spiny-orb.
 
   Success criteria: KNOWN_FRAMEWORK_PACKAGES is current and complete for TypeScript usage. Any additions submitted as a PR with passing tests.
 
-- [ ] **Fork target repo and create eval directory structure**
+- [x] **Fork target repo and create eval directory structure**
 
   Fork taze (`antfu-collective/taze`) to `wiggitywhitney/taze`. Then:
   0. Confirm pnpm is installed: `pnpm --version`. If missing: `npm install -g pnpm@10` (taze requires pnpm; without it, install and test commands fail).
