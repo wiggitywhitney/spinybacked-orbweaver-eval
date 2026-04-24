@@ -95,6 +95,8 @@ If this PRD proceeds past milestone 0 (i.e., a new target is selected), the feat
 
   Success criteria: Complete schema drafted first. At least 3 semantically meaningful omissions documented with rationale for why spiny-orb should be able to infer each one.
 
+  **Schema design reference**: Create `semconv/SCHEMA_DESIGN.md` in the fork documenting (1) each omitted attribute with its code location and rationale, and (2) complete YAML snippets for the full schema. Then add a pointer note at the top of `evaluation/<target>/run-1/spiny-orb-findings.md` naming this file and its purpose. Without these two pointers, eval reviewers scoring SCH rules have no way to find the comparison. (Updated per 2026-04-24 decision in PRD #50.)
+
 - [ ] **Verify test suite runs clean on unmodified target**
 
   Run the test suite 3 times on the forked repo (after adding spiny-orb prerequisites but before any instrumentation). All tests must pass all 3 times.

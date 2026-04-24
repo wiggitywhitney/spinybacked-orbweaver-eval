@@ -97,6 +97,8 @@ The feature branch for this PRD **never merges to main**. The PR exists for Code
 
   Success criteria: Complete schema drafted first. At least 3 semantically meaningful omissions documented with rationale.
 
+  **Schema design reference**: Create `semconv/SCHEMA_DESIGN.md` in the fork documenting (1) each omitted attribute with its code location and rationale, and (2) complete YAML snippets for the full schema. Then add a pointer note at the top of `evaluation/<target>/run-1/spiny-orb-findings.md` naming this file and its purpose. Without these two pointers, eval reviewers scoring SCH rules have no way to find the comparison. (Updated per 2026-04-24 decision in PRD #50.)
+
 - [ ] **Verify test suite runs clean on unmodified target**
 
   Run test suite once after adding prerequisites. If tests require infrastructure (k8s), provision it. It must pass.
