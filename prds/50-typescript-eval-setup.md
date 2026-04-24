@@ -101,6 +101,8 @@ The feature branch for this PRD **never merges to main**. The PR exists for Code
 
   Success criteria: Complete schema drafted first. At least 3 semantically meaningful omissions documented with rationale.
 
+  **Schema design reference**: `~/Documents/Repositories/taze/semconv/SCHEMA_DESIGN.md` — lists all 3 omitted attributes with the code location that makes each omission obvious to a human, and includes the complete YAML snippets that would appear in a full schema. Eval reviewers scoring SCH rules should read this file before interpreting spiny-orb's schema extension proposals.
+
 - [x] **Verify test suite runs clean on unmodified target**
 
   Run test suite once after adding prerequisites but before instrumentation. It must pass.
