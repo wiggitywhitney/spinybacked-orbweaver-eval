@@ -54,7 +54,7 @@ The feature branch for this PRD **never merges to main**. The PR exists for Code
 
   **What still requires local verification (do these for all 3 candidates):**
   1. Clone the repo
-  2. Run the test suite 3 times — flaky tests disqualify; this cannot be pre-researched
+  2. Run the test suite once — must pass; this cannot be pre-researched
   3. Confirm source file count from local clone matches the research doc's count
   4. Confirm no existing OTel instrumentation (grep for `go.opentelemetry.io` imports)
   5. Note any caveats discovered during cloning that differ from the research
@@ -99,9 +99,9 @@ The feature branch for this PRD **never merges to main**. The PR exists for Code
 
 - [ ] **Verify test suite runs clean on unmodified target**
 
-  Run test suite 3 times after adding prerequisites. If tests require infrastructure (k8s), provision it. All must pass.
+  Run test suite once after adding prerequisites. If tests require infrastructure (k8s), provision it. It must pass.
 
-  Success criteria: 3 consecutive clean test runs documented.
+  Success criteria: 1 clean test run documented.
 
 - [ ] **Pre-run verification**
 

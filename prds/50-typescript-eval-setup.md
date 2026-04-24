@@ -53,7 +53,7 @@ The feature branch for this PRD **never merges to main**. The PR exists for Code
 
   **What still requires local verification (do these for all 3 candidates):**
   1. Clone the repo
-  2. Run the test suite 3 times — flaky tests disqualify; this cannot be pre-researched
+  2. Run the test suite once — must pass; this cannot be pre-researched
   3. Confirm source file count from local clone matches the research doc's count
   4. Confirm no existing OTel instrumentation (grep for `@opentelemetry` and `startActiveSpan`)
   5. Note any caveats discovered during cloning that differ from the research
@@ -96,13 +96,13 @@ The feature branch for this PRD **never merges to main**. The PR exists for Code
 
 - [ ] **Verify test suite runs clean on unmodified target**
 
-  Run test suite 3 times after adding prerequisites but before instrumentation. All must pass.
+  Run test suite once after adding prerequisites but before instrumentation. It must pass.
 
-  Success criteria: 3 consecutive clean test runs documented.
+  Success criteria: 1 clean test run documented.
 
 - [ ] **Pre-run verification**
 
-  1. Verify TypeScript language provider is on spiny-orb main
+  1. Verify TypeScript language provider is available: confirm `feature/prd-372-typescript-provider` is checked out in `~/Documents/Repositories/spinybacked-orbweaver/` and record the SHA. (Gate 1 waived — running from feature branch per 2026-04-24 decision.)
   2. Verify target repo has spiny-orb.yaml and semconv/ configured
   3. Count .ts files — record file inventory
   4. Rebuild spiny-orb from current branch
@@ -189,6 +189,8 @@ The feature branch for this PRD **never merges to main**. The PR exists for Code
 |------|----------|-----------|--------|
 | 2026-04-11 | 3 candidates evaluated in milestone 0, not pre-selected | Target selection happens during implementation with hands-on validation | Milestone 0 added |
 | 2026-04-11 | Auto-instrumentation library expansion is a milestone | TS reuses JS KNOWN_FRAMEWORK_PACKAGES; verify completeness | Contribution to spiny-orb |
+| 2026-04-24 | Build from `feature/prd-372-typescript-provider` (not main) | Spiny-orb team needs eval results to close C7 before merging to main — chicken-and-egg. Document branch SHA in pre-run verification. | Gate 1 ("provider merged to main") waived for this run; update gate wording for future PRDs once pattern is established. |
+| 2026-04-24 | 1 passing test suite run is sufficient for candidate validation | 3× reproducibility check is a methodology default; for known-stable CLI tools with vitest suites, 1× is sufficient to confirm no infrastructure failures | Milestone 0 test validation step updated to 1 run. |
 
 ## Progress Log
 
