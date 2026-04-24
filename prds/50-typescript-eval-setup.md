@@ -73,6 +73,7 @@ The feature branch for this PRD **never merges to main**. The PR exists for Code
 - [ ] **Fork target repo and create eval directory structure**
 
   Fork taze (`antfu-collective/taze`) to `wiggitywhitney/taze`. Then:
+  0. Confirm pnpm is installed: `pnpm --version`. If missing: `npm install -g pnpm@10` (taze requires pnpm; without it, install and test commands fail).
   1. Apply the test fix from the 2026-04-24 Decision Log: in `test/versions.test.ts`, relax the 'newest' mode assertions (lines ~71–75) from `expect(newest).toBe(getMaxSatisfying(...))` to `expect(getMaxSatisfying(...)).toBeTruthy()`. This eliminates the pre-existing live-registry test failure that would confuse checkpoint interpretation.
   2. Also add `@opentelemetry/api` to `devDependencies` (needed for checkpoint tests to pass after instrumentation, same as release-it fix): `pnpm add -D @opentelemetry/api`
   3. Commit both changes to fork main and push.
