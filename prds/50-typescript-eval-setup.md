@@ -130,6 +130,8 @@ The feature branch for this PRD **never merges to main**. The PR exists for Code
 
   **Run-1 result (2026-04-24)**: Run aborted at file 3/33. All 3 processed files failed NDS-001 (TypeScript compilation errors). Two distinct root causes: (1) no-function files (re-exports, pure sync utilities) routed through agent instead of skipped pre-agent; (2) `startActiveSpan()` return type incompatible with void synchronous methods. A third cause was cross-file optional property access rejected by tsc. Consecutive-failure abort threshold stopped the run before the remaining 30 files were reached. 0 files committed, no PR created. Artifacts: `spiny-orb-output.log`, `run-summary.md`. See `spiny-orb-findings.md` for P1 findings filed against the TS provider.
 
+  **Run-3 result (2026-04-28)**: Run aborted at file 3/33. All 3 processed files failed NDS-001. Root cause is new and fully diagnosed: spiny-orb's `checkSyntax()` hardcodes `--module NodeNext --moduleResolution NodeNext` for per-file tsc invocation, but taze uses `"moduleResolution": "Bundler"`. Every taze file has extensionless relative imports (valid under Bundler, invalid under NodeNext), causing NDS-001 on the original unmodified source. `npx tsc --noEmit` from the project root passes with zero errors. Instrumentation quality in file 3 (`src/api/check.ts`) was good — correct RST-004 skip, null guards, schema reasoning — but blocked at the validator. Debug dump captured at `evaluation/taze/run-3/debug/`. See `evaluation/taze/run-3/spiny-orb-findings.md` for the new P1.
+
 - [x] **Pre-run verification (run-3+)**
 
   **Verified 2026-04-28**: All gates cleared.
@@ -142,9 +144,9 @@ The feature branch for this PRD **never merges to main**. The PR exists for Code
 
   Details and instrument command: `evaluation/taze/run-2/lessons-for-run3.md`
 
-  **Diagnostic protocol for run-3**: When a file fails, examine all five dimensions before diagnosing: (1) run history (`gh run list --workflow=acceptance-gate.yml`); (2) actual instrumented code (spiny-orb writes attempted output to `/tmp/spiny-orb-debug-{label}` during test runs — copy before cleanup); (3) `lastError` in diagnostic JSON for full validator messages including block previews; (4) agent notes in `result.notes`; (5) agent thinking in `thinkingBlocksByAttempt`. Do NOT diagnose from errorProgression summaries alone.
+  **Diagnostic protocol**: When a file fails, examine available dimensions before diagnosing — do NOT diagnose from errorProgression summaries alone. Available in CLI eval runs (in `spiny-orb-output.log`): **(3) full validator error messages** (complete tsc error text, NDS-005 block previews — appears via `--verbose` since PRD #582 M8); **(4) agent notes** (always in `--verbose`). Also available: **(2) actual instrumented code** written to `<debug-dump-dir>/` when `--debug-dump-dir` is in the command — create that dir before running and read it after a failure. Not available in CLI runs: **(1) run history** and **(5) agent thinking** — those require the spiny-orb test harness.
 
-  **Output path convention**: remaining milestones reference `<first-successful-run>` — the run number of the first run that produces at least 1 committed file. Based on runs 1 and 2, this will be run-3 or later. Update paths when the run number is known.
+  **Output path convention**: remaining milestones reference `<first-successful-run>` — the run number of the first run that produces at least 1 committed file. Based on runs 1, 2, and 3, this will be run-4 or later. Update paths when the run number is known.
 
 - [ ] **Findings Discussion** *(user-facing checkpoint 1)*
 
@@ -152,6 +154,7 @@ The feature branch for this PRD **never merges to main**. The PR exists for Code
 
 - [ ] **Failure deep-dives**
 
+  When analyzing each failed file: check `spiny-orb-output.log` for full validator error text and tsc error codes (dimension 3, via `--verbose`); read `evaluation/taze/<first-successful-run>/debug-dumps/<filename>` for the actual instrumented code the agent produced (dimension 2, via `--debug-dump-dir`). Both available since PRD #582 M8 — do not diagnose from rule IDs alone. (Updated per 2026-04-28 decision.)
   Produces: `evaluation/taze/<first-successful-run>/failure-deep-dives.md`
   Style reference: `Read docs/templates/eval-run-style-reference/failure-deep-dives.md`
 
@@ -194,7 +197,9 @@ The feature branch for this PRD **never merges to main**. The PR exists for Code
 
 - [ ] **Draft next run PRD**
 
-  Create on separate branch from main (eval branches never merge). Use Type D structure from `docs/language-extension-plan.md` and `prds/37-evaluation-run-13.md` as the milestone style reference. First Type D PRD for TypeScript chain. Carry forward both checkpoints. PRD number is `<first-successful-run> + 1` (e.g., if first successful run is run-3, draft PRD covers run-4). Merge the PRD-only PR to main.
+  Create on separate branch from main (eval branches never merge). Use Type D structure from `docs/language-extension-plan.md` and `prds/37-evaluation-run-13.md` as the milestone style reference. First Type D PRD for TypeScript chain. Carry forward both checkpoints. PRD number is `<first-successful-run> + 1` (e.g., if first successful run is run-4, draft PRD covers run-5). Merge the PRD-only PR to main.
+
+  **Gate to include in the Type D PRD's pre-run verification checklist**: Confirm `checkSyntax()` in spiny-orb reads the project's `tsconfig.json` moduleResolution (not hardcoded NodeNext) before running. See 2026-04-28 Decision Log entry.
 
 ## Dependencies and Constraints
 
@@ -224,6 +229,8 @@ The feature branch for this PRD **never merges to main**. The PR exists for Code
 | 2026-04-24 | `spiny-orb.yaml` requires an explicit `language: <id>` field to activate the correct provider | Without it, `coordinate()` defaults to `JavaScriptProvider` for file discovery regardless of target language — surfaced during Run-1 first attempt (exited immediately with "No JavaScript files found in .../taze/src"). Also: `targetType: short-lived` is required for CLI tools that exit after running; without it the default `long-lived` may select the wrong span processor. | `language: typescript` and `targetType: short-lived` added to `~/Documents/Repositories/taze/spiny-orb.yaml`. All Type C PRDs (#51, #52, #53) and `docs/language-extension-plan.md` updated to include these fields in the spiny-orb.yaml setup step. |
 | 2026-04-27 | Add `testCommand: pnpm test` to taze `spiny-orb.yaml` before run-3 | Default `npm test` checkpoint caused 3 test failures from live npm/JSR registry timeouts on uninstrumented code (run-2). The failures are pre-existing flaky tests unrelated to instrumentation, but they appear as checkpoint failures in spiny-orb's output. `pnpm test` is the canonical command for taze. | Added to run-3 readiness checklist in Pre-run verification (run-3+) milestone. |
 | 2026-04-27 | `error as Error` cast in catch blocks fails strict-mode tsc | `span.recordException(error as Error)` rejected by tsc when `error` is `unknown` (strict mode). Root cause of NDS-001 on `src/api/check.ts` in runs 1 and 2. Correct pattern: `span.recordException(error instanceof Error ? error : new Error(String(error)))`. Spiny-orb team adding this to TypeScript prompt. | Added to run-3 readiness checklist — confirm fix is in prompt before running. |
+| 2026-04-28 | spiny-orb `checkSyntax()` hardcodes `--moduleResolution NodeNext`, breaking all Bundler-resolution TypeScript projects | Diagnosed in run-3: every taze file fails NDS-001 on original unmodified source because taze uses `"moduleResolution": "Bundler"` but spiny-orb's per-file tsc check requires `.js` extensions (NodeNext). `npx tsc --noEmit` from project root passes with zero errors. Fix: spiny-orb must read the project's `tsconfig.json` moduleResolution and use it (or pass `--project tsconfig.json`). | Pre-run verification (run-4+) must confirm this fix is merged before running. All Type C and Type D TypeScript PRDs affected — add confirmation step to their pre-run checklists. |
+| 2026-04-28 | `--debug-dump-dir` added to all eval instrument commands; diagnostic protocol updated for CLI context | PRD #582 M8 merged (`[eval-flag]`): dimension 3 (full validator error messages, including tsc codes and NDS-005 block previews) and dimension 4 (agent notes) now appear in `spiny-orb-output.log` automatically via `--verbose`. Dimension 2 (actual instrumented code) available via `--debug-dump-dir <path>`. Dimensions 1 (run history) and 5 (agent thinking) remain test-harness/CI only. | Instrument command template in `docs/language-extension-plan.md` updated. Diagnostic protocol in Pre-run verification milestones updated. Propagated to open Type C PRDs (#51, #52, #53). |
 
 ## Progress Log
 
@@ -234,3 +241,4 @@ The feature branch for this PRD **never merges to main**. The PR exists for Code
 | 2026-04-24 | Run-1 attempted — aborted at 3/33 files (NDS-001 TypeScript failures). Key findings: language: field required in spiny-orb.yaml; no-function pre-agent detection missing; startActiveSpan void type incompatibility; consecutive-failure abort too aggressive. | In Progress | Findings Discussion — run findings surfaced even without committed output |
 | 2026-04-24 | Run-2 attempted (SHA 14a2fb0, includes void-callback prompt fix) — aborted identically at 3/33 files. Prompt fix insufficient; early-exit in PRD #582 M2 is the required fix. New finding: checkpoint test failures from live-registry timeouts (pre-existing, unrelated to instrumentation). Spiny-orb handoff written at `evaluation/taze/spiny-orb-handoff.md`. | Blocked | Waiting for PRD #582 M2 (early-exit), CLI verbose error messages, and error-as-Error prompt fix from spiny-orb team |
 | 2026-04-28 | All three gate fixes confirmed on spiny-orb main (SHA 0fce097). TypeScript provider merged to main. testCommand: pnpm test added to taze spiny-orb.yaml. GITHUB_TOKEN_TAZE verified. Run-3 directory created. Pre-run verification complete. | In Progress | Run-3 |
+| 2026-04-28 | Run-3 attempted (SHA 0fce097, includes hasInstrumentableFunctions early-exit, instanceof Error fix, CLI verbose) — aborted at 3/33. New root cause diagnosed: checkSyntax() hardcodes --moduleResolution NodeNext but taze uses Bundler. Every file fails NDS-001 on original unmodified source. Instrumentation quality in check.ts was good. Debug dump captured. New P1 filed. | Blocked | Waiting for spiny-orb checkSyntax() moduleResolution fix |

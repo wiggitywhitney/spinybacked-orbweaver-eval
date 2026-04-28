@@ -66,6 +66,12 @@ Note: `run-3/` directory will need to be created before running.
 
 ---
 
-## Carry-Forward Items for Run 3
+## Carry-Forward Items for Run 4
 
-*(fill in during actionable fix output milestone)*
+### New P1 (discovered run-3): NodeNext vs Bundler module resolution mismatch
+
+`checkSyntax()` in spiny-orb hardcodes `--module NodeNext --moduleResolution NodeNext` for per-file tsc invocation. Taze uses `"moduleResolution": "Bundler"` in `tsconfig.json`. Under NodeNext, extensionless relative imports (e.g., `from '../types'`) are invalid — they require `.js` suffixes. Every taze file fails NDS-001 on the **original, unmodified source** as a result.
+
+**Do not rerun until spiny-orb's `checkSyntax()` reads the project's tsconfig moduleResolution setting (or passes `--project tsconfig.json`).**
+
+Details: `evaluation/taze/run-3/spiny-orb-findings.md`

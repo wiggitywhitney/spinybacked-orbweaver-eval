@@ -96,6 +96,15 @@ Include both user-facing checkpoints (Findings Discussion and Handoff pause) in 
 
 See `docs/language-extension-plan.md` for full context: PRD taxonomy, language candidate table, score projection methodology, and process requirements.
 
+## Analyzing Eval Failures
+
+When diagnosing a failed file in a spiny-orb eval run, check all three sources before drawing conclusions:
+- `spiny-orb-output.log` — full validator error messages and agent notes (via `--verbose`)
+- `evaluation/<target>/run-N/debug-dumps/<filename>` — the actual instrumented code the agent produced (written by `--debug-dump-dir` in the instrument command)
+- Full diagnostic protocol (all 5 dimensions, CLI availability notes): `docs/language-extension-plan.md`
+
+Do not diagnose from rule IDs in the log alone.
+
 ## Branch Safety — Never Orphan Commits
 
 Before deleting any local branch (`git branch -d` or especially `-D`), verify its commits exist on origin. Run:
