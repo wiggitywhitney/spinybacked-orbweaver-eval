@@ -1,10 +1,10 @@
-# Spiny-orb Handoff — taze TypeScript Eval (Runs 1–4)
+# Spiny-orb Handoff — taze TypeScript Eval (Runs 1–5)
 
 **Last updated**: 2026-04-28
 **Eval target**: wiggitywhitney/taze (fork of antfu-collective/taze)
-**Runs attempted**: 4 (all aborted at 3/33 files)
-**Files committed**: 0
-**PRs created**: 0
+**Runs attempted**: 5
+**First completed run**: Run-5 (PR #1 created)
+**Files committed**: 0 (2 correct skips, 6 NDS-001 failures)
 
 ---
 
@@ -16,22 +16,22 @@ All five diagnostic dimensions are available for every run in this eval repo (`w
 |-----------|-----------------|------------------|
 | 1 — Run history | CI acceptance gate results | `gh run list --workflow=acceptance-gate.yml` on `wiggitywhitney/taze` |
 | 2 — Instrumented code | Exact code the agent produced for each file | `evaluation/taze/run-N/debug/` (mirrors `src/` structure) |
-| 3 — Validator messages | Full tsc error text, NDS-005 block previews | `evaluation/taze/run-N/spiny-orb-output.log` (requires `--verbose` in instrument command) |
+| 3 — Validator messages | Full tsc error text, NDS-005 block previews | `evaluation/taze/run-N/spiny-orb-output.log` (requires `--verbose`) |
 | 4 — Agent notes | Agent's reasoning per file | `evaluation/taze/run-N/spiny-orb-output.log` (requires `--verbose`) |
-| 5 — Agent thinking | `thinkingBlocksByAttempt` | Being added to CLI mode — check spiny-orb release notes for flag/output path |
+| 5 — Agent thinking | `thinkingBlocksByAttempt` | Now available in CLI `--verbose` output (shipped run-5) |
 
-Replace `run-N` with the run number (e.g., `run-4`). The `debug/` directory is only present when `--debug-dump-dir` was passed to the instrument command — all runs from run-3 onward include it.
+Replace `run-N` with the run number. The `debug/` directory is present when `--debug-dump-dir` was passed to the instrument command (runs 3–5 and all future runs).
 
 ---
 
 ## TL;DR
 
-Four runs, all aborted at file 3/33 with NDS-001. Each run has surfaced a new validator environment issue rather than an instrumentation quality problem. The agent's reasoning and code generation are working correctly — the blockers are all in `checkSyntax()`.
+Run-5 was the first completed run — a branch was pushed and PR #1 was created. The agent is working correctly. Two more `checkSyntax()` fixes are needed before run-6 can process the majority of taze's files.
 
-**Current blocker**: Two fixes needed in `checkSyntax()` before run-5:
+**Current blockers**: Two fixes in `src/languages/typescript/validation.ts` `checkSyntax()`:
 
-1. Add `--ignoreConfig` to the tsc invocation (suppresses TS5112 — see below)
-2. Capture `stdout` in addition to `stderr` in the error handler so failures are never silent
+1. Read `target` from tsconfig.json — `Array.fromAsync` is not in ES2022 but IS in ESNext (taze's actual target)
+2. Read `lib`/`types` from tsconfig.json — `node:*` protocol imports need `@types/node` which isn't loaded in per-file mode
 
 ---
 
@@ -40,93 +40,87 @@ Four runs, all aborted at file 3/33 with NDS-001. Each run has surfaced a new va
 | Finding | Status |
 |---------|--------|
 | F1 — NDS-001 on uninstrumentable files (PRD #582 M2 early-exit) | ✅ Fixed |
-| F2 — Consecutive-failure abort threshold | ✅ Moot — see F1 |
+| F2 — Consecutive-failure abort threshold | ✅ Resolved (6 consecutive abort seen in run-5; files 1–2 correct skips reset counter) |
 | F3 — `error as Error` cast fails strict tsc | ✅ Fixed |
-| F4 — Checkpoint test failures / `testCommand: pnpm test` | ✅ Mitigated |
+| F4 — Checkpoint test failures / `testCommand: pnpm test` | ⚠️ Mitigated — pre-existing flaky tests still fire (live-registry) |
 | F5 — `language:` field required in spiny-orb.yaml | ✅ Resolved |
-| F6 — NodeNext vs Bundler moduleResolution mismatch (run-3) | ✅ Fixed — `checkSyntax()` now reads tsconfig `module`/`moduleResolution` |
+| F6 — NodeNext vs Bundler moduleResolution (run-3) | ✅ Fixed |
+| F7 — TS5112 `--ignoreConfig` missing (run-4) | ✅ Fixed |
+| F8 — Silent NDS-001: stdout not captured (run-4) | ✅ Fixed |
 
 ---
 
-## New Finding A — TS5112: `--ignoreConfig` required (P1, run-4)
+## New Finding A — `Array.fromAsync` not in ES2022 target (P1, run-5)
 
-**Blocks all evaluation. Affects all TypeScript projects with a tsconfig.json.**
+**Blocks most of taze's 33 files.**
 
-Newer versions of TypeScript (the version bundled in taze's `node_modules`) now emit **TS5112** when files are specified on the CLI and a `tsconfig.json` exists in the project:
+`src/io/packages.ts` line 137 uses `Array.fromAsync()`, which is an ES2024 feature. `checkSyntax()` passes `--target ES2022`, but taze's tsconfig uses `"target": "ESNext"` which includes it. Every file that transitively imports `packages.ts` fails NDS-001 with:
 
 ```text
-error TS5112: tsconfig.json is present but will not be loaded if files are specified on commandline. Use '--ignoreConfig' to skip this error.
+error TS2550: Property 'fromAsync' does not exist on type 'ArrayConstructor'.
+Do you need to change your target library? Try changing the 'lib' compiler option to 'esnext' or later.
 ```
 
-This is a new enforcement of existing behavior — tsc has always ignored tsconfig when individual files are passed on the CLI. Newer tsc now errors instead of silently proceeding.
+**Required fix**: Read `target` from `tsconfig.json` (same pattern already established for `module`/`moduleResolution`) and pass it as `--target <value>`. The `readTsConfigModuleOptions()` function already walks the tsconfig — extend it to also return `target`.
 
-**Required fix**: Add `--ignoreConfig` to the `execFileSync` args array in `checkSyntax()`:
-
-```typescript
-execFileSync(tsc, [
-  '--noEmit',
-  '--strict',
-  '--skipLibCheck',
-  '--allowImportingTsExtensions',
-  '--ignoreConfig',            // ← add this
-  '--module', moduleFlag,
-  '--moduleResolution', moduleResolutionFlag,
-  '--target', 'ES2022',
-  '--jsx', 'preserve',
-  filePath,
-], ...)
-```
-
-**Repro**: Run the tsc binary from taze's `node_modules/.bin/tsc` with any file + explicit flags against a project that has a `tsconfig.json`. TS5112 fires immediately.
+**Affected files in run-5**: `src/api/check.ts`, `src/cli.ts`, `src/commands/check/index.ts`. Likely affects the majority of the remaining 25 unprocessed files.
 
 ---
 
-## New Finding B — NDS-001 failures are silent (P1, run-4)
+## New Finding B — `node:` protocol imports need `@types/node` (P1, run-5)
 
-**The actual tsc error text is not surfaced in the NDS-001 message.**
+**Blocks all files with Node.js built-in imports.**
 
-The error message in runs 1–4 reads:
+`checkSyntax()` per-file mode doesn't load `@types/node`, so `node:process`, `node:readline`, `node:fs`, `node:os`, `node:async_hooks`, `node:util` all produce:
+
 ```text
-NDS-001 check failed: tsc --noEmit returned a non-zero exit code.  Fix the TypeScript error...
+error TS2591: Cannot find name 'node:process'. Do you need to install type definitions for node?
 ```
-(Note the double space — `${stderr.trim()}` is empty.)
 
-**Root cause**: `checkSyntax()` only captures `error.stderr`, but TS5112 (and potentially other tsc diagnostics) writes to **stdout**, not stderr. The error handler in `checkSyntax()` needs to capture both:
+These imports work fine under `npx tsc --noEmit` from the project root because the project tsconfig auto-discovers `@types/node` from `node_modules/@types/`.
+
+**Required fix**: One of (in preference order):
+1. Read `lib` and `types` from tsconfig.json and pass them as `--lib <value> --types <value>` — most correct, generalizes to all projects
+2. Add `--types node` unconditionally — simpler but less portable
+
+**Affected files in run-5**: `src/commands/check/interactive.ts`, `src/commands/check/render.ts`. Also expected to affect `src/io/resolves.ts`, `src/utils/context.ts`, `src/utils/packument.ts`, `src/render.ts`, and others.
+
+---
+
+## New Finding C — NDS-003 flags intermediate variables for span attributes (P2, run-5)
+
+**Validator calibration issue — not a blocker but affects coverage.**
+
+In `src/commands/check/checkGlobal.ts`, the agent added:
 
 ```typescript
-// current — misses stdout
-const stderr = error?.stderr instanceof Buffer ? error.stderr.toString() : ...
-
-// fix — capture both
-const stdout = error?.stdout instanceof Buffer ? error.stdout.toString() : '';
-const stderr = error?.stderr instanceof Buffer ? error.stderr.toString() : ...
-const combined = [stdout, stderr].filter(Boolean).join('\n');
-// use combined in the message
+const packagesTotal = resolvePkgs.reduce((acc, pkg) => acc + pkg.deps.length, 0)
+span.setAttribute('taze.check.packages_total', packagesTotal)
 ```
 
-Without this fix, any tsc error that writes to stdout is invisible in the NDS-001 output. We only discovered TS5112 by reproducing the tsc invocation manually.
+NDS-003 flagged `packagesTotal` as a non-instrumentation line. The TypeScript prompt explicitly permits "return-value capture" (`const result = computeResult(); span.setAttribute(..., result)`). Aggregation variables computed solely to feed `setAttribute` are semantically identical.
+
+**Suggested fix**: Extend the NDS-003 allowlist to permit `const <name> = <expression>` that is immediately consumed by a `span.setAttribute()` call with no other uses.
 
 ---
 
-## Instrumentation Quality (consistent across all runs)
+## Instrumentation Quality (run-5)
 
-Despite four aborts, `src/api/check.ts` has produced quality instrumentation every time:
+The agent is reasoning correctly despite the validator failures:
 
-- `CheckPackages` correctly wrapped in `tracer.startActiveSpan('taze.check', ...)`
-- `CheckSingleProject` (unexported) correctly skipped per RST-004
-- `options.*` fields guarded with optional chaining / null checks
-- Schema extension `span.taze.check` correctly identified and reported
-- Debug dump: `evaluation/taze/run-4/debug/src/api/check.ts`
-
-The agent is ready. The validator environment is not.
+- Correctly applied RST-004 (skip unexported helpers), RST-001 (skip sync utilities), COV-001 (entry points need spans)
+- Correctly resolved COV-001 vs RST-006 conflict in `cli.ts` (COV-001 wins — entry point gets span even with `process.exit()`)
+- Null guards on all optional options fields
+- Schema extension span names well-chosen (`taze.check`, `taze.check.global`, `taze.cli.action`, `taze.check.interactive`)
+- Agent thinking now available in CLI mode
 
 ---
 
-## What's Needed for Run-5
+## What's Needed for Run-6
 
-**Fixes in `src/languages/typescript/validation.ts` `checkSyntax()`:**
+Both fixes are in `src/languages/typescript/validation.ts` `checkSyntax()`, and both follow the established pattern of reading from tsconfig.json:
 
-1. **Add `--ignoreConfig`** to the tsc args array
-2. **Capture stdout** alongside stderr in the error handler
+1. **Read `target` from tsconfig** — extend `readTsConfigModuleOptions()` to return `target`; pass as `--target <value>`
+2. **Read `lib`/`types` from tsconfig** — pass as `--lib <value>` and/or `--types <value>` to make `@types/node` available
 
-After merging: rebuild spiny-orb and update the SHA in the pre-run verification table.
+After merging: rebuild spiny-orb, update SHA in pre-run verification, create `evaluation/taze/run-6/` directory.
