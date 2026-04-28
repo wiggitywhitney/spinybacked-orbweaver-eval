@@ -265,6 +265,24 @@ After `run-summary.md` is written, before any analysis begins, give Whitney a ra
 **Moment 2 — Handoff pause** (at the end of Actionable fix output):
 After full analysis, give Whitney an interpreted summary of key findings: failures, root causes, notable patterns, what to watch for in the next run. Then print the absolute file path of `actionable-fix-output.md` and pause until Whitney confirms she has handed the document off to the spiny-orb team. Do not proceed to the next PRD until confirmed.
 
+**All handoff documents (`evaluation/<target>/spiny-orb-handoff.md`) must include a "Finding the Diagnostic Artifacts" section** so the spiny-orb team can locate all five diagnostic dimensions without asking. Standard section template:
+
+```markdown
+## Finding the Diagnostic Artifacts
+
+All five diagnostic dimensions are available for every run in this eval repo (`wiggitywhitney/spinybacked-orbweaver-eval`, branch `feature/prd-<N>-<target>`):
+
+| Dimension | What it contains | Where to find it |
+|-----------|-----------------|------------------|
+| 1 — Run history | CI acceptance gate results | `gh run list --workflow=acceptance-gate.yml` on `wiggitywhitney/<target>` |
+| 2 — Instrumented code | Exact code the agent produced for each file | `evaluation/<target>/run-N/debug/` (mirrors source structure) |
+| 3 — Validator messages | Full tsc/compiler error text, block previews | `evaluation/<target>/run-N/spiny-orb-output.log` (requires `--verbose`) |
+| 4 — Agent notes | Agent's reasoning per file | `evaluation/<target>/run-N/spiny-orb-output.log` (requires `--verbose`) |
+| 5 — Agent thinking | `thinkingBlocksByAttempt` | ❌ Not yet available in CLI mode |
+
+Replace `run-N` with the run number. The `debug/` directory is only present when `--debug-dump-dir` was passed to the instrument command.
+```
+
 ---
 
 ## ROADMAP.md Shape (once generalization is done)

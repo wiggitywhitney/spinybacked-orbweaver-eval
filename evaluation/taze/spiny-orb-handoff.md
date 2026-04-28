@@ -8,6 +8,22 @@
 
 ---
 
+## Finding the Diagnostic Artifacts
+
+All five diagnostic dimensions are available for every run in this eval repo (`wiggitywhitney/spinybacked-orbweaver-eval`, branch `feature/prd-50-typescript-eval-setup`):
+
+| Dimension | What it contains | Where to find it |
+|-----------|-----------------|------------------|
+| 1 — Run history | CI acceptance gate results | `gh run list --workflow=acceptance-gate.yml` on `wiggitywhitney/taze` |
+| 2 — Instrumented code | Exact code the agent produced for each file | `evaluation/taze/run-N/debug/` (mirrors `src/` structure) |
+| 3 — Validator messages | Full tsc error text, NDS-005 block previews | `evaluation/taze/run-N/spiny-orb-output.log` (requires `--verbose` in instrument command) |
+| 4 — Agent notes | Agent's reasoning per file | `evaluation/taze/run-N/spiny-orb-output.log` (requires `--verbose`) |
+| 5 — Agent thinking | `thinkingBlocksByAttempt` | ❌ Not yet available in CLI mode — feature request in "What's Needed" below |
+
+Replace `run-N` with the run number (e.g., `run-4`). The `debug/` directory is only present when `--debug-dump-dir` was passed to the instrument command — all runs from run-3 onward include it.
+
+---
+
 ## TL;DR
 
 Four runs, all aborted at file 3/33 with NDS-001. Each run has surfaced a new validator environment issue rather than an instrumentation quality problem. The agent's reasoning and code generation are working correctly — the blockers are all in `checkSyntax()`.
