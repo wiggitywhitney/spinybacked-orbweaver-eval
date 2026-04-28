@@ -82,7 +82,7 @@ The feature branch for this PRD **never merges to main**. The PR exists for Code
 - [ ] **Add spiny-orb prerequisites to target repo**
 
   In the forked target repo:
-  1. Create `spiny-orb.yaml` configuration (adapt for Go)
+  1. Create `spiny-orb.yaml` configuration (adapt for Go). **Required fields**: `language: go` (without it, discovery defaults to JavaScript provider and finds no files); `targetType: short-lived` for CLI tools that exit after running, or `long-lived` for servers/daemons. (Updated per 2026-04-24 decision in PRD #50.)
   2. Create initial `semconv/` Weaver schema directory for the target's domain
   3. Create Go OTel bootstrap function — `setupOTelSDK()` using `go.opentelemetry.io/otel/sdk/trace` and OTLP exporter. Must include `defer shutdown(ctx)` AND explicit `os/signal.Notify` for SIGTERM/SIGINT
   4. Add OTel dependencies to `go.mod`: the API (`go.opentelemetry.io/otel`), the SDK (`go.opentelemetry.io/otel/sdk/trace`), and the OTLP exporter module. Note: the API-only rule applies to libraries; this bootstrap executable requires the full SDK and exporter to compile and export traces.
@@ -97,6 +97,8 @@ The feature branch for this PRD **never merges to main**. The PR exists for Code
 
   Success criteria: Complete schema drafted first. At least 3 semantically meaningful omissions documented with rationale.
 
+  **Schema design reference**: Create `semconv/SCHEMA_DESIGN.md` in the fork documenting (1) each omitted attribute with its code location and rationale, and (2) complete YAML snippets for the full schema. Then add a pointer note at the top of `evaluation/<target>/run-1/spiny-orb-findings.md` naming this file and its purpose. Without these two pointers, eval reviewers scoring SCH rules have no way to find the comparison. (Updated per 2026-04-24 decision in PRD #50.)
+
 - [ ] **Verify test suite runs clean on unmodified target**
 
   Run test suite once after adding prerequisites. If tests require infrastructure (k8s), provision it. It must pass.
@@ -109,15 +111,17 @@ The feature branch for this PRD **never merges to main**. The PR exists for Code
   2. Verify spiny-orb.yaml and semconv/
   3. Count .go files (excluding _test.go) — record inventory
   4. Rebuild spiny-orb
-  5. Verify push auth: confirm `GITHUB_TOKEN` resolves to a fine-grained PAT with Contents + Pull requests write access for the fork. Run: `git push --dry-run https://x-access-token:$GITHUB_TOKEN@github.com/wiggitywhitney/<target>.git HEAD:main` — must succeed. See `~/.claude/rules/eval-github-pat.md` for setup pattern.
+  5. Verify push auth: confirm `GITHUB_TOKEN` resolves to a fine-grained PAT with Contents + Pull requests write access for the fork. Push to a non-existent branch to avoid false "fetch first" rejections: `git -C ~/Documents/Repositories/<target> push --dry-run https://x-access-token:$GITHUB_TOKEN@github.com/wiggitywhitney/<target>.git HEAD:refs/heads/spiny-orb/auth-test` — expect `[new branch] HEAD -> spiny-orb/auth-test`. See `~/.claude/rules/eval-github-pat.md` for setup pattern.
   6. Record version info
   7. Append to lessons-for-run2.md
 
 - [ ] **Evaluation run-1**
 
-  Whitney runs `spiny-orb instrument`. **Do NOT run yourself.** Copy the command template from `docs/language-extension-plan.md` (line ~72). Replace `commit-story-v2` with the chosen target name, `run-N` with `run-1`, and `src` with the target's source directory (Go repos typically use `.`, `cmd/`, or `internal/` — check the forked repo's layout).
+  Whitney runs `spiny-orb instrument`. **Do NOT run yourself.** Copy the command template from `docs/language-extension-plan.md` (line ~72). Replace `commit-story-v2` with the chosen target name, `run-N` with `run-1`, and `src` with the target's source directory (Go repos typically use `.`, `cmd/`, or `internal/` — check the forked repo's layout). Create `evaluation/<target>/run-1/debug-dumps/` before running.
 
   AI role: confirm readiness, save log, write run-summary.md, and **push the eval branch to origin immediately** (`git push -u origin feature/prd-52-go-eval-setup`) — the branch holds the only copy of run-1 artifacts until PRD #57's backfill lands.
+
+  **Diagnostic protocol**: When a file fails, check `spiny-orb-output.log` for full validator error messages (dimension 3, in `--verbose` output) and `debug-dumps/<filename>` for the actual instrumented code (dimension 2, via `--debug-dump-dir`). Do not diagnose from rule IDs alone. (Per 2026-04-28 decision in PRD #50.)
 
 - [ ] **Findings Discussion** *(user-facing checkpoint 1)*
 

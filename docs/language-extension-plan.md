@@ -61,23 +61,31 @@ This PRD type exists exactly once per target. It is the "onboarding" for that la
 
 **Language-specific prerequisites reference**: Use the commit-story-v2 JavaScript setup as the current working reference for what each prerequisite looks like, then adapt for the target language. This choice is provisional — the research spike (Step 3) will validate or replace commit-story-v2 as the JS reference target. If the spike recommends switching, update this reference accordingly. For JavaScript/TypeScript, `traceloop-init.js` handles OTel auto-instrumentation registration; for Python/Go, use the language-appropriate SDK initialization equivalent. The initial `semconv/` schema should mirror the structure in `commit-story-v2/semconv/` adapted to the target's domain.
 
+**Schema design documentation (required for SCH eval)**: When implementing the "Create deliberately incomplete Weaver schema" milestone, create `semconv/SCHEMA_DESIGN.md` in the fork alongside `attributes.yaml`. This file must document: (1) each deliberately omitted attribute with the exact code location (file + function) that makes the omission obvious to a human, and (2) complete YAML snippets showing what the full schema would contain. After creating the file, add a pointer note at the top of `evaluation/<target>/run-1/spiny-orb-findings.md` — the natural first document a reviewer opens — naming the file and its purpose ("read before scoring SCH rules"). Without these two pointers, eval reviewers have no way to find the comparison when scoring SCH-001 through SCH-004.
+
 **Seed schema: check semconv before defining custom attributes**: Before finalizing the initial `semconv/` schema, check each intended attribute against OTel semantic conventions v1.40.0 and prefer a semconv attribute where the mapping is clean. Only define a custom attribute when no semconv equivalent exists. Git/VCS operations are a frequent overlap — attributes such as `vcs.repository.url.full` and `vcs.ref.head.name` are already defined in semconv and should be used directly rather than reinvented under a target-specific namespace (e.g., `mytarget.git.branch`). Incubating semconv attributes may be used, but mark them as incubating in the registry file so future readers know they carry no stability guarantee. This prevents divergence from the standard and keeps custom attributes limited to genuinely target-specific concerns.
+
+**`spiny-orb.yaml` required fields for non-JavaScript targets**: Two fields must be set explicitly or the run will fail silently:
+- `language: <id>` — activates the correct language provider for file discovery and validation. Without it, `coordinate()` defaults to `JavaScriptProvider` and exits with "No JavaScript files found" on TypeScript/Python/Go repos. Use the provider's `id` string: `typescript`, `python`, `go`, `javascript`.
+- `targetType: short-lived` — required for CLI tools that exit after doing work (the default `long-lived` selects a BatchSpanProcessor that may not flush before exit). Use `short-lived` for any tool that calls `process.exit()` or equivalent after completing. Discovered during taze Run-1 first attempt (2026-04-24).
 
 **Operational details for Type C PRDs**:
 - Whitney runs `spiny-orb instrument` herself in her own terminal — the AI does not run this command
 - `GITHUB_TOKEN` must be a **fine-grained PAT** scoped to the fork (`wiggitywhitney/<target>`) with **Contents: Read and write** and **Pull requests: Read and write**:
   - Classic/OAuth tokens and stored passwords cause "Password authentication is not supported" at push time
-  - Verify write access before running: `git push --dry-run https://x-access-token:$GITHUB_TOKEN@github.com/wiggitywhitney/<target>.git HEAD:main` (`git ls-remote` only tests read and is insufficient)
+  - Verify write access before running — push to a non-existent branch (avoids "fetch first" ambiguity if local is behind main): `git -C ~/Documents/Repositories/<target> push --dry-run https://x-access-token:$GITHUB_TOKEN@github.com/wiggitywhitney/<target>.git HEAD:refs/heads/spiny-orb/auth-test` — expect `[new branch] HEAD -> spiny-orb/auth-test`; any authentication error means wrong token
   - Full setup pattern: `@~/.claude/rules/eval-github-pat.md` — see spiny-orb issue #583 for the team's setup guide action item
 - The Run-1 evaluation follows the full Type D milestone structure, including both user-facing checkpoints (Findings Discussion and handoff pause)
 
 **Exact instrument command** (run from the target repo directory, update `run-N` to current run number):
 
 ```bash
-caffeinate -s env -u ANTHROPIC_CUSTOM_HEADERS -u ANTHROPIC_BASE_URL vals exec -i -f .vals.yaml -- node ~/Documents/Repositories/spinybacked-orbweaver/bin/spiny-orb.js instrument src --verbose 2>&1 | tee ~/Documents/Repositories/spinybacked-orbweaver-eval/evaluation/commit-story-v2/run-N/spiny-orb-output.log
+caffeinate -s env -u ANTHROPIC_CUSTOM_HEADERS -u ANTHROPIC_BASE_URL vals exec -i -f .vals.yaml -- node ~/Documents/Repositories/spinybacked-orbweaver/bin/spiny-orb.js instrument src --verbose --debug-dump-dir ~/Documents/Repositories/spinybacked-orbweaver-eval/evaluation/commit-story-v2/run-N/debug-dumps 2>&1 | tee ~/Documents/Repositories/spinybacked-orbweaver-eval/evaluation/commit-story-v2/run-N/spiny-orb-output.log
 ```
 
-Note: update `run-N` to the current run number and `commit-story-v2` to the target repo name (e.g., `taze`, `commitizen`, `k8s-vectordb-sync`) before each run. The `src` argument is the directory to instrument — adapt if the target uses a different source directory.
+Note: update `run-N` to the current run number and `commit-story-v2` to the target repo name (e.g., `taze`, `commitizen`, `k8s-vectordb-sync`) before each run. The `src` argument is the directory to instrument — adapt if the target uses a different source directory. Create the `debug-dumps/` subdirectory before running: `mkdir -p ~/Documents/Repositories/spinybacked-orbweaver-eval/evaluation/<target>/run-N/debug-dumps`.
+
+**Diagnostic protocol** (for all eval runs): Do not diagnose failures from errorProgression rule IDs alone. Check all available dimensions in `spiny-orb-output.log`: **(3) full validator error messages** (complete tsc error codes, NDS-005 block previews — in `--verbose` output since PRD #582 M8) and **(4) agent notes** (always in `--verbose`). Also check **(2) actual instrumented code** in `debug-dumps/<filename>` after any failed file. Dimensions (1) run history and (5) agent thinking are test-harness only and not available in CLI eval runs.
 
 ### Type D: Run-N PRD (recurring, indefinitely)
 Identical in structure to the existing PRDs #3–13. Triggered by findings from the previous run. Follows the established milestone sequence:

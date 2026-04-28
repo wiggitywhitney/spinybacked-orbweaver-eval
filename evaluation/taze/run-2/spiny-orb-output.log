@@ -1,0 +1,111 @@
+Loading config from /Users/whitney.lee/Documents/Repositories/taze/spiny-orb.yaml
+Config loaded from /Users/whitney.lee/Documents/Repositories/taze/spiny-orb.yaml
+Started: 2026-04-24T16:01:35.980Z
+validateCredentials: GITHUB_TOKEN present=true
+Cost ceiling: 33 files, 3300000 max tokens, estimated max cost $77.22
+Proceed? [y/N] Processing file 1 of 33: src/addons/index.ts
+  ❌ FAILED — Oscillation detected during fresh regeneration: Duplicate errors across consecutive attempts: NDS-001 (×1), 3 attempts
+  Tokens: 0.8K output
+
+  Agent notes
+  ────────────────────────────────────────────────────────────
+
+  • This file contains no functions — only a module-level array declaration that re-exports a built-in addon. There are no async operations, I/O, or entry points to instrument. No spans were added (RST-001 (No Utility Spans): no spans on pure synchronous data declarations with no I/O).
+
+Processing file 2 of 33: src/addons/vscode.ts
+  ❌ FAILED — Oscillation detected during fresh regeneration: Duplicate errors across consecutive attempts: NDS-001 (×1), 3 attempts
+  Tokens: 3.7K output
+
+  Agent notes
+  ────────────────────────────────────────────────────────────
+
+  • The only function in this file is `beforeWrite`, a synchronous method on the `addonVSCode` addon object. It performs purely in-memory data manipulation — reading package fields, comparing semver versions, and conditionally updating a field. There is no async I/O, no network access, and no external calls. No span was added (RST-001 (No Utility Spans): no spans on pure synchronous data transformations with no I/O). The previous instrumentation attempt failed with a TypeScript compile error (NDS-001 (Syntax Valid)) because it likely tried to add OpenTelemetry imports or span wrappers that conflicted with the TypeScript type system in this file.
+
+Processing file 3 of 33: src/api/check.ts
+  ❌ FAILED — Oscillation detected during fresh regeneration: Duplicate errors across consecutive attempts: NDS-001 (×1), 3 attempts
+  Tokens: 12.9K output
+
+  Schema extensions
+  ────────────────────────────────────────────────────────────
+  • span.taze.check
+
+  Agent notes
+  ────────────────────────────────────────────────────────────
+
+  • CheckPackages is the exported entry point and receives a span named 'taze.check'. All four schema-defined check attributes are set: taze.check.packages_total from packages.length (always available after loadPackages), taze.check.write_mode/recursive/mode from options fields guarded with != null to avoid passing undefined to setAttribute.
+
+  • CheckSingleProject is an unexported internal function — it was skipped per RST-004 (No Internal Detail Spans). Its I/O operations (resolvePackage, writePackage) run within the context propagated from the CheckPackages span, so they appear as child operations automatically.
+
+  • The span name 'taze.check' is reported as a schema extension (span.taze.check) because the schema defines attribute groups for the check operation but does not define a span entity with a runtime name. The name derives directly from the schema namespace and operation category.
+
+  • error as Error cast is used in span.recordException() because TypeScript's strict mode types catch variables as unknown — the @opentelemetry/api Exception type requires a string, Error, or object with a code property, so the cast is necessary to avoid a compile error (this was the likely cause of the previous NDS-001 (Syntax Valid) failure).
+
+
+Run complete: 0 committed, 3 failed, 0 partial, 0 correct skips, 0 skipped
+  Total tokens: 10.3K input, 17.3K output (93.2K cached)
+Completed in 8m 37.9s
+3 files processed: 0 committed, 3 failed, 0 partial, 0 correct skips, 0 skipped
+Live-check: DEGRADED — OK
+Warning: File failed: /Users/whitney.lee/Documents/Repositories/taze/src/addons/index.ts — Oscillation detected during fresh regeneration: Duplicate errors across consecutive attempts: NDS-001 (×1)
+Warning: File failed: /Users/whitney.lee/Documents/Repositories/taze/src/addons/vscode.ts — Oscillation detected during fresh regeneration: Duplicate errors across consecutive attempts: NDS-001 (×1)
+Warning: File failed: /Users/whitney.lee/Documents/Repositories/taze/src/api/check.ts — Oscillation detected during fresh regeneration: Duplicate errors across consecutive attempts: NDS-001 (×1)
+Warning: End-of-run test suite failed: Command failed: sh -c npm test
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 3 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m test/cli.test.ts[2m > [22mtaze cli should just works
+[31m[1mAssertionError[22m: expected '\u001b[7m\u001b[31m\u001b[1m ERROR \u…' to be '' // Object.is equality[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[31m+ [7m[31m[1m ERROR [22m[31m[27m[39m
+[31m+[39m
+[31m+ [31m> [4mtypescript[24m unknown error[31m[39m
+[31m+ [31mError: Timeout requesting "typescript"[31m[39m
+[31m+[39m
+[31m+[39m
+
+[36m [2m❯[22m test/cli.test.ts:[2m10:23[22m[39m
+    [90m  8|[39m   const proc = await exec(process.execPath, [binPath], { throwOnError:…
+    [90m  9|[39m
+    [90m 10|[39m   [34mexpect[39m(proc[33m.[39mstderr)[33m.[39m[34mtoBe[39m([32m''[39m)
+    [90m   |[39m                       [31m^[39m
+    [90m 11|[39m   [34mexpect[39m(proc[33m.[39mexitCode)[33m.[39m[34mtoBe[39m([34m0[39m)
+    [90m 12|[39m })
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/3]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m test/packageConfig.test.ts[2m > [22mcheck package[2m > [22mdefined in config file / optionMode:default
+[31m[1mAssertionError[22m: expected false to be true // Object.is equality[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- true[39m
+[31m+ false[39m
+
+[36m [2m❯[22m test/packageConfig.test.ts:[2m58:53[22m[39m
+    [90m 56|[39m
+    [90m 57|[39m   [34mit[39m([32m'defined in config file / optionMode:default'[39m[33m,[39m () [33m=>[39m {
+    [90m 58|[39m     [34mexpect[39m([34mgetPkgInfo[39m([32m'typescript'[39m[33m,[39m result)[33m.[39mupdate)[33m.[39m[34mtoBe[39m([35mtrue[39m)
+    [90m   |[39m                                                     [31m^[39m
+    [90m 59|[39m     [34mexpect[39m([34mgetPkgInfo[39m([32m'typescript'[39m[33m,[39m result)[33m.[39mdiff)[33m.[39m[34mtoBe[39m([32m'major'[39m)
+    [90m 60|[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/3]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m test/versions.test.ts[2m > [22mgetMaxSatisfying
+[31m[1mAssertionError[22m: expected undefined not to be undefined[39m
+[36m [2m❯[22m test/versions.test.ts:[2m44:61[22m[39m
+    [90m 42|[39m
+    [90m 43|[39m   [90m// major[39m
+    [90m 44|[39m   expect(getMaxSatisfying(versions, '', 'major', tags)).not.toBeUndefi…
+    [90m   |[39m                                                             [31m^[39m
+    [90m 45|[39m   expect(getMaxSatisfying(versions, '*', 'major', tags)).not.toBeUndef…
+    [90m 46|[39m   expect(getMaxSatisfying(versions, '6.0.0', 'major', tags)).not.toBeU…
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/3]⎯[22m[39m
+
+
+Warning: Live-check degraded: no files were successfully instrumented. Compliance report reflects uninstrumented code (no spans emitted).

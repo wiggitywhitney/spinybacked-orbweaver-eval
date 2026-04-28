@@ -80,7 +80,7 @@ If this PRD proceeds past milestone 0 (i.e., a new target is selected), the feat
 - [ ] **Add spiny-orb prerequisites to target repo**
 
   In the forked target repo, add all required spiny-orb configuration:
-  1. Create `spiny-orb.yaml` configuration (adapt from commit-story-v2 reference)
+  1. Create `spiny-orb.yaml` configuration (adapt from commit-story-v2 reference). **Required fields**: `language: javascript` (set explicitly even though JavaScript is currently the default — required for forward compatibility as new providers are added); `targetType: short-lived` for CLI tools that exit after running, or `long-lived` for servers/daemons. (Updated per 2026-04-24 decision in PRD #50.)
   2. Create initial `semconv/` Weaver schema directory for the target's domain
   3. Create JavaScript OTel init file (`--import` flag with SDK setup using `@opentelemetry/sdk-node`). Add graceful shutdown: register `SIGTERM` and `SIGINT` handlers that call `sdk.shutdown()` and then `process.exit(0)` — do not intercept `process.exit()` directly
   4. Add OTel `@opentelemetry/api` as a peerDependency in package.json
@@ -94,6 +94,8 @@ If this PRD proceeds past milestone 0 (i.e., a new target is selected), the feat
   **What to omit**: Domain-specific attributes that spiny-orb should be able to infer from reading the code — not trivial metadata like `service.version`. Good omissions: attributes for function parameters that appear in the code, span names for operations the code clearly performs, semantic attributes for external calls the code makes. Bad omissions: generic OTel attributes that don't require code understanding.
 
   Success criteria: Complete schema drafted first. At least 3 semantically meaningful omissions documented with rationale for why spiny-orb should be able to infer each one.
+
+  **Schema design reference**: Create `semconv/SCHEMA_DESIGN.md` in the fork documenting (1) each omitted attribute with its code location and rationale, and (2) complete YAML snippets for the full schema. Then add a pointer note at the top of `evaluation/<target>/run-1/spiny-orb-findings.md` naming this file and its purpose. Without these two pointers, eval reviewers scoring SCH rules have no way to find the comparison. (Updated per 2026-04-24 decision in PRD #50.)
 
 - [ ] **Verify test suite runs clean on unmodified target**
 
@@ -115,9 +117,11 @@ If this PRD proceeds past milestone 0 (i.e., a new target is selected), the feat
 
 - [ ] **Evaluation run-1**
 
-  Whitney runs `spiny-orb instrument` in her own terminal. **Do NOT run the command yourself.** Copy the command template from `docs/language-extension-plan.md` (line ~72). Replace `commit-story-v2` with the chosen target name, `run-N` with `run-1`, and `src` with the target's source directory (check the forked repo's structure — it may be `src/`, `lib/`, or `.`).
+  Whitney runs `spiny-orb instrument` in her own terminal. **Do NOT run the command yourself.** Copy the command template from `docs/language-extension-plan.md` (line ~72). Replace `commit-story-v2` with the chosen target name, `run-N` with `run-1`, and `src` with the target's source directory (check the forked repo's structure — it may be `src/`, `lib/`, or `.`). Create `evaluation/<target-name>/run-1/debug-dumps/` before running.
 
   AI role: (1) confirm readiness, (2) save log output to `evaluation/<target-name>/run-1/spiny-orb-output.log`, (3) write `evaluation/<target-name>/run-1/run-summary.md`, (4) **push the eval branch to origin immediately** (`git push -u origin feature/prd-53-javascript-eval-setup`) — the branch holds the only copy of run-1 artifacts until PRD #57's backfill lands.
+
+  **Diagnostic protocol**: When a file fails, check `spiny-orb-output.log` for full validator error messages (dimension 3, in `--verbose` output) and `debug-dumps/<filename>` for the actual instrumented code (dimension 2, via `--debug-dump-dir`). Do not diagnose from rule IDs alone. (Per 2026-04-28 decision in PRD #50.)
 
   Success criteria: Log saved; run-summary.md written with file counts, cost, timing, push/PR status.
 
