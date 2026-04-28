@@ -41,6 +41,31 @@ Consecutive-failure abort confirmed twice. Do not rerun until PRD #582 M2 (early
 
 ---
 
+## Pre-run state for run-3
+
+### Pre-run verification — 2026-04-28
+
+| Item | Status | Detail |
+|------|--------|--------|
+| spiny-orb build | ✅ | Branch: `main`, SHA: `0fce097f9ff027fb52ee786fc72e0a9d4899589e` |
+| `feature/prd-372-typescript-provider` | ✅ | Merged to main — TypeScript provider now on main, branch deleted |
+| PRD #582 M2 early-exit | ✅ | `hasInstrumentableFunctions: false` → skip before LLM call, merged in `feat(pre-instrumentation): deterministic AST analysis pass before LLM call` |
+| CLI verbose error messages | ✅ | PRD #582 M8 merged — full tsc error lines surfaced in `--verbose` output |
+| `error as Error` prompt fix | ✅ | `instanceof Error` ternary form is now the standard in `src/languages/typescript/prompt.ts`; `error as Error` is a HARD CONSTRAINT violation |
+| spiny-orb.yaml | ✅ | `language: typescript`, `targetType: short-lived`, `testCommand: pnpm test` (added 2026-04-28, pushed to fork) |
+| semconv/ | ✅ | attributes.yaml + registry_manifest.yaml + SCHEMA_DESIGN.md present |
+| .ts file inventory | ✅ | 33 files (same as runs 1 and 2) |
+| GITHUB_TOKEN_TAZE | ✅ | Dry-run push `HEAD:refs/heads/spiny-orb/auth-test` succeeded — `[new branch] HEAD -> spiny-orb/auth-test` |
+
+**Instrument command for run-3** (run from `~/Documents/Repositories/taze/`):
+```bash
+caffeinate -s env -u ANTHROPIC_CUSTOM_HEADERS -u ANTHROPIC_BASE_URL GIT_CONFIG_GLOBAL=/Users/whitney.lee/.config/spiny-orb-eval/gitconfig vals exec -i -f .vals.yaml -- bash -c 'GITHUB_TOKEN=$GITHUB_TOKEN_TAZE node ~/Documents/Repositories/spinybacked-orbweaver/bin/spiny-orb.js instrument src --verbose 2>&1 | tee ~/Documents/Repositories/spinybacked-orbweaver-eval/evaluation/taze/run-3/spiny-orb-output.log'
+```
+
+Note: `run-3/` directory will need to be created before running.
+
+---
+
 ## Carry-Forward Items for Run 3
 
 *(fill in during actionable fix output milestone)*

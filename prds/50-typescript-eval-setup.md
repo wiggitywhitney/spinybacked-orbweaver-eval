@@ -130,55 +130,71 @@ The feature branch for this PRD **never merges to main**. The PR exists for Code
 
   **Run-1 result (2026-04-24)**: Run aborted at file 3/33. All 3 processed files failed NDS-001 (TypeScript compilation errors). Two distinct root causes: (1) no-function files (re-exports, pure sync utilities) routed through agent instead of skipped pre-agent; (2) `startActiveSpan()` return type incompatible with void synchronous methods. A third cause was cross-file optional property access rejected by tsc. Consecutive-failure abort threshold stopped the run before the remaining 30 files were reached. 0 files committed, no PR created. Artifacts: `spiny-orb-output.log`, `run-summary.md`. See `spiny-orb-findings.md` for P1 findings filed against the TS provider.
 
+- [x] **Pre-run verification (run-3+)**
+
+  **Verified 2026-04-28**: All gates cleared.
+  - PRD #582 M2 early-exit (`hasInstrumentableFunctions`) merged to spiny-orb main (SHA `0fce097`)
+  - CLI verbose error messages merged (PRD #582 M8)
+  - `error as Error` prompt fix confirmed in `src/languages/typescript/prompt.ts`
+  - spiny-orb rebuilt clean
+  - `testCommand: pnpm test` added to `~/Documents/Repositories/taze/spiny-orb.yaml` and pushed to fork
+  - GITHUB_TOKEN_TAZE push auth verified
+
+  Details and instrument command: `evaluation/taze/run-2/lessons-for-run3.md`
+
+  **Diagnostic protocol for run-3**: When a file fails, examine all five dimensions before diagnosing: (1) run history (`gh run list --workflow=acceptance-gate.yml`); (2) actual instrumented code (spiny-orb writes attempted output to `/tmp/spiny-orb-debug-{label}` during test runs — copy before cleanup); (3) `lastError` in diagnostic JSON for full validator messages including block previews; (4) agent notes in `result.notes`; (5) agent thinking in `thinkingBlocksByAttempt`. Do NOT diagnose from errorProgression summaries alone.
+
+  **Output path convention**: remaining milestones reference `<first-successful-run>` — the run number of the first run that produces at least 1 committed file. Based on runs 1 and 2, this will be run-3 or later. Update paths when the run number is known.
+
 - [ ] **Findings Discussion** *(user-facing checkpoint 1)*
 
   Raw overview for Whitney. Under 10 lines. Wait for acknowledgment.
 
 - [ ] **Failure deep-dives**
 
-  Produces: `evaluation/<target-name>/run-1/failure-deep-dives.md`
+  Produces: `evaluation/taze/<first-successful-run>/failure-deep-dives.md`
   Style reference: `Read docs/templates/eval-run-style-reference/failure-deep-dives.md`
 
 - [ ] **Per-file evaluation**
 
   Full 32-rule rubric on ALL processed files.
-  Produces: `evaluation/<target-name>/run-1/per-file-evaluation.md`
+  Produces: `evaluation/taze/<first-successful-run>/per-file-evaluation.md`
   Style reference: `Read docs/templates/eval-run-style-reference/per-file-evaluation.md`
 
 - [ ] **PR artifact evaluation**
 
-  Produces: `evaluation/<target-name>/run-1/pr-evaluation.md`
+  Produces: `evaluation/taze/<first-successful-run>/pr-evaluation.md`
   Style reference: `Read docs/templates/eval-run-style-reference/pr-evaluation.md`
 
 - [ ] **Rubric scoring**
 
   First TypeScript run — establish baseline.
-  Produces: `evaluation/<target-name>/run-1/rubric-scores.md`
+  Produces: `evaluation/taze/<first-successful-run>/rubric-scores.md`
   Style reference: `Read docs/templates/eval-run-style-reference/rubric-scores.md`
 
 - [ ] **Baseline comparison**
 
   No prior TypeScript baseline. Compare against most recent JS run for cross-language context. Compare: overall rubric score, per-dimension scores (NDS/COV/RST/API/SCH/CDQ), file counts, skip rate, and cost. Highlight dimensions where scores differ.
-  Produces: `evaluation/<target-name>/run-1/baseline-comparison.md`
+  Produces: `evaluation/taze/<first-successful-run>/baseline-comparison.md`
 
 - [ ] **IS scoring run**
 
   1. **Prerequisites**: OTel Collector running with `evaluation/is/otelcol-config.yaml` (see `evaluation/is/README.md` for install and start instructions). No metrics-exporter override needed — MET rules are marked `not_applicable` by the scorer regardless.
-  2. **Action**: Run the target app with the Collector as OTLP receiver; collect `evaluation/is/eval-traces.json`; run `node evaluation/is/score-is.js evaluation/is/eval-traces.json > evaluation/<target-name>/run-1/is-score.md`
-  3. **Output**: `evaluation/<target-name>/run-1/is-score.md` is written by the command above.
+  2. **Action**: Run the target app with the Collector as OTLP receiver; collect `evaluation/is/eval-traces.json`; run `node evaluation/is/score-is.js evaluation/is/eval-traces.json > evaluation/taze/<first-successful-run>/is-score.md`
+  3. **Output**: `evaluation/taze/<first-successful-run>/is-score.md` is written by the command above.
   4. **Note for k8s repos**: IS scoring requires a running cluster; see `evaluation/is/README.md` for the Kind-based workflow
-  Produces: `evaluation/<target-name>/run-1/is-score.md`
+  Produces: `evaluation/taze/<first-successful-run>/is-score.md`
 
 - [ ] **Actionable fix output**
 
   1. Run cross-document audit agent.
   2. *(User-facing checkpoint 2)* Interpreted summary for Whitney.
   3. Print absolute path. **Pause** until Whitney confirms handoff.
-  Produces: `evaluation/<target-name>/run-1/actionable-fix-output.md`
+  Produces: `evaluation/taze/<first-successful-run>/actionable-fix-output.md`
 
-- [ ] **Draft Run-2 PRD**
+- [ ] **Draft next run PRD**
 
-  Create on separate branch from main (eval branches never merge). Use Type D structure from `docs/language-extension-plan.md` and `prds/37-evaluation-run-13.md` as the milestone style reference. First Type D PRD for TypeScript chain. Carry forward both checkpoints. Merge the PRD-only PR to main.
+  Create on separate branch from main (eval branches never merge). Use Type D structure from `docs/language-extension-plan.md` and `prds/37-evaluation-run-13.md` as the milestone style reference. First Type D PRD for TypeScript chain. Carry forward both checkpoints. PRD number is `<first-successful-run> + 1` (e.g., if first successful run is run-3, draft PRD covers run-4). Merge the PRD-only PR to main.
 
 ## Dependencies and Constraints
 
@@ -206,6 +222,8 @@ The feature branch for this PRD **never merges to main**. The PR exists for Code
 | 2026-04-24 | Fix taze's live-registry test in the fork rather than excluding it | `test/versions.test.ts > getMaxSatisfying` fails because the 'newest' mode assertions compare `tags.next` to `getMaxSatisfying()` but the function's implementation has diverged from what `tags.next` returns on live npm. Fix: relax 'newest' assertions from strict equality (`expect(newest).toBe(...)`) to existence checks (`expect(...).toBeTruthy()`). pnpm (required by taze) installed globally via `npm install -g pnpm@10`. | Fork milestone must apply this test fix before verifying clean test run. |
 | 2026-04-24 | Schema design documentation goes in `semconv/SCHEMA_DESIGN.md` in the fork, with explicit pointers in the PRD milestone and in `spiny-orb-findings.md` | Eval reviewers scoring SCH rules need to know what was deliberately omitted. PROGRESS.md alone is insufficient — reviewers read the PRD and the run-1 findings file, not PROGRESS.md. Without pointers in those two places, the comparison is effectively undiscoverable. | All Type C PRDs (#51, #52, #53) and `docs/language-extension-plan.md` updated with the same pointer pattern. |
 | 2026-04-24 | `spiny-orb.yaml` requires an explicit `language: <id>` field to activate the correct provider | Without it, `coordinate()` defaults to `JavaScriptProvider` for file discovery regardless of target language — surfaced during Run-1 first attempt (exited immediately with "No JavaScript files found in .../taze/src"). Also: `targetType: short-lived` is required for CLI tools that exit after running; without it the default `long-lived` may select the wrong span processor. | `language: typescript` and `targetType: short-lived` added to `~/Documents/Repositories/taze/spiny-orb.yaml`. All Type C PRDs (#51, #52, #53) and `docs/language-extension-plan.md` updated to include these fields in the spiny-orb.yaml setup step. |
+| 2026-04-27 | Add `testCommand: pnpm test` to taze `spiny-orb.yaml` before run-3 | Default `npm test` checkpoint caused 3 test failures from live npm/JSR registry timeouts on uninstrumented code (run-2). The failures are pre-existing flaky tests unrelated to instrumentation, but they appear as checkpoint failures in spiny-orb's output. `pnpm test` is the canonical command for taze. | Added to run-3 readiness checklist in Pre-run verification (run-3+) milestone. |
+| 2026-04-27 | `error as Error` cast in catch blocks fails strict-mode tsc | `span.recordException(error as Error)` rejected by tsc when `error` is `unknown` (strict mode). Root cause of NDS-001 on `src/api/check.ts` in runs 1 and 2. Correct pattern: `span.recordException(error instanceof Error ? error : new Error(String(error)))`. Spiny-orb team adding this to TypeScript prompt. | Added to run-3 readiness checklist — confirm fix is in prompt before running. |
 
 ## Progress Log
 
@@ -214,3 +232,5 @@ The feature branch for this PRD **never merges to main**. The PR exists for Code
 | 2026-04-11 | PRD created (revised from initial Cluster Whisperer-assumed version) | Draft | Await Gates 1 and 2 |
 | 2026-04-24 | Weaver schema expanded (fetch/write groups, 3 deliberate omissions); taze test suite verified clean (16 files, 73 tests) | In Progress | Pre-run verification |
 | 2026-04-24 | Run-1 attempted — aborted at 3/33 files (NDS-001 TypeScript failures). Key findings: language: field required in spiny-orb.yaml; no-function pre-agent detection missing; startActiveSpan void type incompatibility; consecutive-failure abort too aggressive. | In Progress | Findings Discussion — run findings surfaced even without committed output |
+| 2026-04-24 | Run-2 attempted (SHA 14a2fb0, includes void-callback prompt fix) — aborted identically at 3/33 files. Prompt fix insufficient; early-exit in PRD #582 M2 is the required fix. New finding: checkpoint test failures from live-registry timeouts (pre-existing, unrelated to instrumentation). Spiny-orb handoff written at `evaluation/taze/spiny-orb-handoff.md`. | Blocked | Waiting for PRD #582 M2 (early-exit), CLI verbose error messages, and error-as-Error prompt fix from spiny-orb team |
+| 2026-04-28 | All three gate fixes confirmed on spiny-orb main (SHA 0fce097). TypeScript provider merged to main. testCommand: pnpm test added to taze spiny-orb.yaml. GITHUB_TOKEN_TAZE verified. Run-3 directory created. Pre-run verification complete. | In Progress | Run-3 |
