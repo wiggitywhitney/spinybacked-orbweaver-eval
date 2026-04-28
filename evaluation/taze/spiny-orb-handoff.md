@@ -1,8 +1,8 @@
-# Spiny-orb Handoff — taze TypeScript Eval (Runs 1–3)
+# Spiny-orb Handoff — taze TypeScript Eval (Runs 1–4)
 
 **Last updated**: 2026-04-28
 **Eval target**: wiggitywhitney/taze (fork of antfu-collective/taze)
-**Runs attempted**: 3 (all aborted at 3/33 files)
+**Runs attempted**: 4 (all aborted at 3/33 files)
 **Files committed**: 0
 **PRs created**: 0
 
@@ -10,68 +10,107 @@
 
 ## TL;DR
 
-Three runs, all aborted at file 3/33. Each run surfaced a different root cause. The fixes from the previous handoff (PRD #582 M2 early-exit, `instanceof Error` prompt fix) are confirmed working — but run-3 uncovered a new systemic blocker: `checkSyntax()` hardcodes `--moduleResolution NodeNext`, which fails on every file in any project using `moduleResolution: Bundler`. Taze uses Bundler. NDS-001 fires on the **original unmodified source**.
+Four runs, all aborted at file 3/33 with NDS-001. Each run has surfaced a new validator environment issue rather than an instrumentation quality problem. The agent's reasoning and code generation are working correctly — the blockers are all in `checkSyntax()`.
 
-**Current blocker**: `checkSyntax()` must read the project's `tsconfig.json` moduleResolution instead of hardcoding NodeNext.
+**Current blocker**: Two fixes needed in `checkSyntax()` before run-5:
+
+1. Add `--ignoreConfig` to the tsc invocation (suppresses TS5112 — see below)
+2. Capture `stdout` in addition to `stderr` in the error handler so failures are never silent
 
 ---
 
-## Status of Previous Findings
+## Status of All Previous Findings
 
 | Finding | Status |
 |---------|--------|
-| F1 — NDS-001 on uninstrumentable files (PRD #582 M2 early-exit) | ✅ Fixed — `hasInstrumentableFunctions` early-exit merged to main |
-| F2 — Consecutive-failure abort threshold | ✅ Moot — files 1 and 2 now correctly identified as "nothing to instrument"; they still fail NDS-001 but for the new reason below |
-| F3 — `error as Error` cast fails strict tsc | ✅ Fixed — `instanceof Error` ternary form added to TypeScript prompt as HARD CONSTRAINT |
-| F4 — Checkpoint test failures from live-registry dependency | ⚠️ Partially mitigated — `testCommand: pnpm test` added to `spiny-orb.yaml`; pre-existing flaky tests still fire but are unrelated to instrumentation |
-| F5 — `language:` field required in spiny-orb.yaml | ✅ Resolved in run-1 |
+| F1 — NDS-001 on uninstrumentable files (PRD #582 M2 early-exit) | ✅ Fixed |
+| F2 — Consecutive-failure abort threshold | ✅ Moot — see F1 |
+| F3 — `error as Error` cast fails strict tsc | ✅ Fixed |
+| F4 — Checkpoint test failures / `testCommand: pnpm test` | ✅ Mitigated |
+| F5 — `language:` field required in spiny-orb.yaml | ✅ Resolved |
+| F6 — NodeNext vs Bundler moduleResolution mismatch (run-3) | ✅ Fixed — `checkSyntax()` now reads tsconfig `module`/`moduleResolution` |
 
 ---
 
-## New Finding — NDS-001 on original unmodified source (P1)
+## New Finding A — TS5112: `--ignoreConfig` required (P1, run-4)
 
-**Run-3 (2026-04-28). Blocks all evaluation.**
+**Blocks all evaluation. Affects all TypeScript projects with a tsconfig.json.**
 
-`checkSyntax()` in `src/languages/typescript/validation.ts` runs tsc with hardcoded flags:
+Newer versions of TypeScript (the version bundled in taze's `node_modules`) now emit **TS5112** when files are specified on the CLI and a `tsconfig.json` exists in the project:
 
 ```text
-tsc --noEmit --strict --skipLibCheck --allowImportingTsExtensions
-    --module NodeNext --moduleResolution NodeNext --target ES2022 --jsx preserve
-    <filePath>
+error TS5112: tsconfig.json is present but will not be loaded if files are specified on commandline. Use '--ignoreConfig' to skip this error.
 ```
 
-Taze uses `"moduleResolution": "Bundler"` in `tsconfig.json`. Under NodeNext, **all relative imports require `.js` extensions** — e.g., `import { ... } from '../types'` is invalid; it must be `'../types.js'`. Taze uses extensionless imports throughout (valid under Bundler, standard for bundler-based tools).
+This is a new enforcement of existing behavior — tsc has always ignored tsconfig when individual files are passed on the CLI. Newer tsc now errors instead of silently proceeding.
 
-**Evidence**:
-- `npx tsc --noEmit` from the taze project root → exits 0, zero errors
-- Per-file check with `--moduleResolution NodeNext` → fails on every file including `src/addons/index.ts`, which the agent returned **completely unchanged**
-- `cat ~/Documents/Repositories/taze/tsconfig.json` → `"moduleResolution": "Bundler"`
-- Debug dumps at `evaluation/taze/run-3/debug/` confirm the agent's output for files 1 and 2 is byte-for-byte identical to the original source
+**Required fix**: Add `--ignoreConfig` to the `execFileSync` args array in `checkSyntax()`:
 
-**Impact**: 100% of taze files fail NDS-001 before any instrumentation quality can be assessed. Affects all TypeScript projects using `moduleResolution: Bundler` — common for tools built with Vite, esbuild, tsx, or similar bundlers.
+```typescript
+execFileSync(tsc, [
+  '--noEmit',
+  '--strict',
+  '--skipLibCheck',
+  '--allowImportingTsExtensions',
+  '--ignoreConfig',            // ← add this
+  '--module', moduleFlag,
+  '--moduleResolution', moduleResolutionFlag,
+  '--target', 'ES2022',
+  '--jsx', 'preserve',
+  filePath,
+], ...)
+```
 
-**Required fix**: `checkSyntax()` should use the project's actual tsconfig settings. Options in preference order:
-1. Pass `--project <tsconfig-path>` instead of per-flag invocation (reads the actual config)
-2. Walk up from `filePath` to find `tsconfig.json`, read its `moduleResolution`, substitute for the hardcoded `NodeNext`
-3. Default to `Bundler` (most permissive for modern TS projects) with NodeNext as an explicit opt-in
-
----
-
-## Instrumentation Quality Signal (run-3, src/api/check.ts)
-
-Despite the NDS-001 failure, the agent produced quality instrumentation for `check.ts` (debug dump at `evaluation/taze/run-3/debug/src/api/check.ts`):
-
-- **Entry point**: `CheckPackages` correctly wrapped in `tracer.startActiveSpan('taze.check', ...)`
-- **RST-004**: `CheckSingleProject` (unexported) correctly skipped
-- **CDQ-007**: `options.mode`, `options.recursive`, `options.write` all guarded with `!= null`
-- **Schema reasoning**: `taze.check.packages_total` set after `loadPackages`; `taze.check.packages_outdated` via reduce post-resolution
-- **Schema extension surfaced**: `span.taze.check` not in registry — correctly reported
-
-The semantic understanding and code generation are working. The blocker is entirely in the validator environment.
+**Repro**: Run the tsc binary from taze's `node_modules/.bin/tsc` with any file + explicit flags against a project that has a `tsconfig.json`. TS5112 fires immediately.
 
 ---
 
-## What's Needed for Run-4
+## New Finding B — NDS-001 failures are silent (P1, run-4)
 
-1. **Fix `checkSyntax()` moduleResolution** — this is the gate. Without it, every taze file fails NDS-001 on the original source regardless of instrumentation quality.
-2. **Rebuild spiny-orb** after the fix and record the new SHA in the pre-run verification table.
+**The actual tsc error text is not surfaced in the NDS-001 message.**
+
+The error message in runs 1–4 reads:
+```text
+NDS-001 check failed: tsc --noEmit returned a non-zero exit code.  Fix the TypeScript error...
+```
+(Note the double space — `${stderr.trim()}` is empty.)
+
+**Root cause**: `checkSyntax()` only captures `error.stderr`, but TS5112 (and potentially other tsc diagnostics) writes to **stdout**, not stderr. The error handler in `checkSyntax()` needs to capture both:
+
+```typescript
+// current — misses stdout
+const stderr = error?.stderr instanceof Buffer ? error.stderr.toString() : ...
+
+// fix — capture both
+const stdout = error?.stdout instanceof Buffer ? error.stdout.toString() : '';
+const stderr = error?.stderr instanceof Buffer ? error.stderr.toString() : ...
+const combined = [stdout, stderr].filter(Boolean).join('\n');
+// use combined in the message
+```
+
+Without this fix, any tsc error that writes to stdout is invisible in the NDS-001 output. We only discovered TS5112 by reproducing the tsc invocation manually.
+
+---
+
+## Instrumentation Quality (consistent across all runs)
+
+Despite four aborts, `src/api/check.ts` has produced quality instrumentation every time:
+
+- `CheckPackages` correctly wrapped in `tracer.startActiveSpan('taze.check', ...)`
+- `CheckSingleProject` (unexported) correctly skipped per RST-004
+- `options.*` fields guarded with optional chaining / null checks
+- Schema extension `span.taze.check` correctly identified and reported
+- Debug dump: `evaluation/taze/run-4/debug/src/api/check.ts`
+
+The agent is ready. The validator environment is not.
+
+---
+
+## What's Needed for Run-5
+
+Both fixes are in `src/languages/typescript/validation.ts` `checkSyntax()`:
+
+1. **Add `--ignoreConfig`** to the tsc args array
+2. **Capture stdout** alongside stderr in the error handler
+
+After merging: rebuild spiny-orb and update the SHA in the pre-run verification table.
