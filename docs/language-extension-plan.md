@@ -278,7 +278,7 @@ All five diagnostic dimensions are available for every run in this eval repo (`w
 | 2 — Instrumented code | Exact code the agent produced for each file | `evaluation/<target>/run-N/debug/` (mirrors source structure) |
 | 3 — Validator messages | Full tsc/compiler error text, block previews | `evaluation/<target>/run-N/spiny-orb-output.log` (requires `--verbose`) |
 | 4 — Agent notes | Agent's reasoning per file | `evaluation/<target>/run-N/spiny-orb-output.log` (requires `--verbose`) |
-| 5 — Agent thinking | `thinkingBlocksByAttempt` | ❌ Not yet available in CLI mode |
+| 5 — Agent thinking | `thinkingBlocksByAttempt` | Check spiny-orb release notes for flag/output path |
 
 Replace `run-N` with the run number. The `debug/` directory is only present when `--debug-dump-dir` was passed to the instrument command.
 ```

@@ -18,7 +18,7 @@ All five diagnostic dimensions are available for every run in this eval repo (`w
 | 2 — Instrumented code | Exact code the agent produced for each file | `evaluation/taze/run-N/debug/` (mirrors `src/` structure) |
 | 3 — Validator messages | Full tsc error text, NDS-005 block previews | `evaluation/taze/run-N/spiny-orb-output.log` (requires `--verbose` in instrument command) |
 | 4 — Agent notes | Agent's reasoning per file | `evaluation/taze/run-N/spiny-orb-output.log` (requires `--verbose`) |
-| 5 — Agent thinking | `thinkingBlocksByAttempt` | ❌ Not yet available in CLI mode — feature request in "What's Needed" below |
+| 5 — Agent thinking | `thinkingBlocksByAttempt` | Being added to CLI mode — check spiny-orb release notes for flag/output path |
 
 Replace `run-N` with the run number (e.g., `run-4`). The `debug/` directory is only present when `--debug-dump-dir` was passed to the instrument command — all runs from run-3 onward include it.
 
@@ -128,9 +128,5 @@ The agent is ready. The validator environment is not.
 
 1. **Add `--ignoreConfig`** to the tsc args array
 2. **Capture stdout** alongside stderr in the error handler
-
-**Feature request — agent thinking in CLI mode:**
-
-Agent thinking (`thinkingBlocksByAttempt`) is currently only available via the test harness. The eval team needs it available during CLI `instrument` runs (via `--verbose` or a dedicated flag) to diagnose agent reasoning on real targets. Without it, dimension 5 is a blind spot for every eval run.
 
 After merging: rebuild spiny-orb and update the SHA in the pre-run verification table.
