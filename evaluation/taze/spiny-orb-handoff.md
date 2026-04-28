@@ -108,9 +108,13 @@ The agent is ready. The validator environment is not.
 
 ## What's Needed for Run-5
 
-Both fixes are in `src/languages/typescript/validation.ts` `checkSyntax()`:
+**Fixes in `src/languages/typescript/validation.ts` `checkSyntax()`:**
 
 1. **Add `--ignoreConfig`** to the tsc args array
 2. **Capture stdout** alongside stderr in the error handler
+
+**Feature request — agent thinking in CLI mode:**
+
+Agent thinking (`thinkingBlocksByAttempt`) is currently only available via the test harness. The eval team needs it available during CLI `instrument` runs (via `--verbose` or a dedicated flag) to diagnose agent reasoning on real targets. Without it, dimension 5 is a blind spot for every eval run.
 
 After merging: rebuild spiny-orb and update the SHA in the pre-run verification table.
