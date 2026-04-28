@@ -1,9 +1,8 @@
-# Spiny-orb Handoff — taze TypeScript Eval (Runs 1 & 2)
+# Spiny-orb Handoff — taze TypeScript Eval (Runs 1–3)
 
-**Date**: 2026-04-24
+**Last updated**: 2026-04-28
 **Eval target**: wiggitywhitney/taze (fork of antfu-collective/taze)
-**Spiny-orb branch**: feature/prd-372-typescript-provider
-**Runs attempted**: 2 (both aborted at 3/33 files)
+**Runs attempted**: 3 (all aborted at 3/33 files)
 **Files committed**: 0
 **PRs created**: 0
 
@@ -11,107 +10,68 @@
 
 ## TL;DR
 
-Two runs, same abort. The first 3 files alphabetically in taze's `src/` are uninstrumentable (re-export, void sync method, type-error-prone entry point). All 3 fail NDS-001, consecutive-failure threshold fires, run stops. 30/33 files never reached. Prompt guidance added between run-1 and run-2 didn't prevent the first-attempt tsc failure — the fix needs to be earlier in the pipeline.
+Three runs, all aborted at file 3/33. Each run surfaced a different root cause. The fixes from the previous handoff (PRD #582 M2 early-exit, `instanceof Error` prompt fix) are confirmed working — but run-3 uncovered a new systemic blocker: `checkSyntax()` hardcodes `--moduleResolution NodeNext`, which fails on every file in any project using `moduleResolution: Bundler`. Taze uses Bundler. NDS-001 fires on the **original unmodified source**.
 
-**Blocker**: `hasInstrumentableFunctions` early-exit in PRD #582 M2. Without it, every taze run will abort before reaching any interesting files.
-
----
-
-## Finding 1 — NDS-001 on uninstrumentable files (P1)
-
-**Both runs. Blocks all further evaluation.**
-
-Files with no instrumentable functions still go through the agent loop. On the first attempt the agent adds imports/spans; tsc catches a type error; oscillation starts. Even after the run-2 prompt fix (void-callback guidance, re-export guidance), the first attempt still fails — the agent correctly identifies "nothing to instrument" on retries, but NDS-001 already fired and the oscillation cycle is underway.
-
-**Affected files**:
-
-| File | Reason uninstrumentable | NDS-001 cause |
-|------|------------------------|---------------|
-| `src/addons/index.ts` | Re-export only — no function definitions | Agent adds imports; tsc fails |
-| `src/addons/vscode.ts` | One void synchronous method — RST-001 | `startActiveSpan()` return type incompatible with `void` |
-| `src/api/check.ts` | Has a real entry point, but `catch (error)` requires `error as Error` cast for `span.recordException()` | Strict-mode tsc rejects `as Error` cast in some contexts |
-
-**Required fix**: PRD #582 M2 early-exit. When `preInstrumentationAnalysis()` returns `hasInstrumentableFunctions: false`, classify the file as `correct skip` without calling the LLM. This eliminates NDS-001 for files 1 and 2. File 3 (`check.ts`) has a real entry point and will still need the `error as Error` cast issue resolved separately — see Finding 3.
+**Current blocker**: `checkSyntax()` must read the project's `tsconfig.json` moduleResolution instead of hardcoding NodeNext.
 
 ---
 
-## Finding 2 — Consecutive-failure abort threshold too aggressive (P1)
+## Status of Previous Findings
 
-**Both runs. Fires identically.**
-
-3 consecutive failures → abort. In taze, the first 3 files alphabetically happen to all be uninstrumentable. The threshold fires before any substantive file is processed.
-
-**Note**: If the early-exit fix (Finding 1) lands first, files 1 and 2 will be classified as correct skips (not failures) and won't count toward the abort threshold. File 3 (`check.ts`) failing alone would not trigger the threshold. So the threshold issue *may resolve automatically* once PRD #582 M2 lands — evaluate after that. If run-3 still aborts, file a standalone issue at that point.
-
----
-
-## Finding 3 — `error as Error` cast fails strict tsc (P1, TypeScript-specific)
-
-**File**: `src/api/check.ts`
-
-In TypeScript strict mode (`useUnknownInCatchVariables: true`), catch clause variables are `unknown`. Calling `span.recordException(error as Error)` fails tsc because the `as` cast is rejected in some contexts. The agent identified this correctly in its notes but couldn't resolve it.
-
-**Required pattern** (TypeScript-safe):
-```typescript
-span.recordException(error instanceof Error ? error : new Error(String(error)));
-```
-
-Or using the OTel `Exception` type directly:
-```typescript
-import type { Exception } from '@opentelemetry/api';
-span.recordException(error as Exception);
-```
-
-This should be added to the TypeScript prompt as an explicit pattern for error recording in catch blocks. It may also affect other taze files with catch clauses.
+| Finding | Status |
+|---------|--------|
+| F1 — NDS-001 on uninstrumentable files (PRD #582 M2 early-exit) | ✅ Fixed — `hasInstrumentableFunctions` early-exit merged to main |
+| F2 — Consecutive-failure abort threshold | ✅ Moot — files 1 and 2 now correctly identified as "nothing to instrument"; they still fail NDS-001 but for the new reason below |
+| F3 — `error as Error` cast fails strict tsc | ✅ Fixed — `instanceof Error` ternary form added to TypeScript prompt as HARD CONSTRAINT |
+| F4 — Checkpoint test failures from live-registry dependency | ⚠️ Partially mitigated — `testCommand: pnpm test` added to `spiny-orb.yaml`; pre-existing flaky tests still fire but are unrelated to instrumentation |
+| F5 — `language:` field required in spiny-orb.yaml | ✅ Resolved in run-1 |
 
 ---
 
-## Finding 4 — Checkpoint test failures from live-registry dependency (P2)
+## New Finding — NDS-001 on original unmodified source (P1)
 
-**Run-2 only** (run-1 aborted before checkpoint ran).
+**Run-3 (2026-04-28). Blocks all evaluation.**
 
-3 tests failed at end-of-run on **uninstrumented code** — the failures are pre-existing and not caused by spiny-orb:
+`checkSyntax()` in `src/languages/typescript/validation.ts` runs tsc with hardcoded flags:
 
 ```text
-FAIL test/cli.test.ts — "Timeout requesting typescript" (live npm registry timeout)
-FAIL test/packageConfig.test.ts — typescript version check returns unexpected result
-FAIL test/versions.test.ts:44 — getMaxSatisfying('major') returns undefined (live tags)
+tsc --noEmit --strict --skipLibCheck --allowImportingTsExtensions
+    --module NodeNext --moduleResolution NodeNext --target ES2022 --jsx preserve
+    <filePath>
 ```
 
-These tests hit the live npm/JSR registry. They passed in pre-run manual verification (`pnpm test`) but timed out under spiny-orb's checkpoint environment. This is a taze test design issue (flaky live-network tests), but spiny-orb's checkpoint reporting surfaced it clearly.
+Taze uses `"moduleResolution": "Bundler"` in `tsconfig.json`. Under NodeNext, **all relative imports require `.js` extensions** — e.g., `import { ... } from '../types'` is invalid; it must be `'../types.js'`. Taze uses extensionless imports throughout (valid under Bundler, standard for bundler-based tools).
 
-**Recommendation**: Consider whether the checkpoint should treat pre-existing test failures differently from instrumentation-induced failures. If the test suite was already failing before any files were modified, the checkpoint result should not be attributed to spiny-orb's output.
+**Evidence**:
+- `npx tsc --noEmit` from the taze project root → exits 0, zero errors
+- Per-file check with `--moduleResolution NodeNext` → fails on every file including `src/addons/index.ts`, which the agent returned **completely unchanged**
+- `cat ~/Documents/Repositories/taze/tsconfig.json` → `"moduleResolution": "Bundler"`
+- Debug dumps at `evaluation/taze/run-3/debug/` confirm the agent's output for files 1 and 2 is byte-for-byte identical to the original source
 
-**Also**: `spiny-orb.yaml` currently uses the default `testCommand: npm test`. Add `testCommand: pnpm test` to match taze's canonical package manager.
+**Impact**: 100% of taze files fail NDS-001 before any instrumentation quality can be assessed. Affects all TypeScript projects using `moduleResolution: Bundler` — common for tools built with Vite, esbuild, tsx, or similar bundlers.
 
----
-
-## Finding 5 — `language:` field required in spiny-orb.yaml (resolved)
-
-**Run-1 attempt 1 only. Already fixed.**
-
-Without `language: typescript` in `spiny-orb.yaml`, `coordinate()` defaults to `JavaScriptProvider` for file discovery, which finds no `.ts` files. The run exited immediately with "No JavaScript files found in .../taze/src."
-
-**Resolution**: Added `language: typescript` and `targetType: short-lived` to `spiny-orb.yaml` before run-1. The `language:` field requirement has been propagated to all Type C eval PRDs and the language extension plan.
-
----
-
-## Recommended Next Steps (eval team's view)
-
-1. **PRD #582 M2 early-exit** — this is the gate. Without it, run-3 will produce a third identical abort.
-2. **TypeScript prompt: `error as Error` pattern** — add explicit safe catch-block pattern for `span.recordException()`. This is needed for `check.ts` and likely other taze files.
-3. **`testCommand: pnpm test`** — add to `spiny-orb.yaml` before run-3.
-4. **Abort threshold** — watch in run-3. If the early-exit fix means files 1 and 2 are correct skips, the threshold may not fire. File a standalone issue only if run-3 still aborts on consecutive failures.
+**Required fix**: `checkSyntax()` should use the project's actual tsconfig settings. Options in preference order:
+1. Pass `--project <tsconfig-path>` instead of per-flag invocation (reads the actual config)
+2. Walk up from `filePath` to find `tsconfig.json`, read its `moduleResolution`, substitute for the hardcoded `NodeNext`
+3. Default to `Bundler` (most permissive for modern TS projects) with NodeNext as an explicit opt-in
 
 ---
 
-## Schema signal (despite no committed output)
+## Instrumentation Quality Signal (run-3, src/api/check.ts)
 
-`src/api/check.ts` produced schema reasoning across both runs before failing:
+Despite the NDS-001 failure, the agent produced quality instrumentation for `check.ts` (debug dump at `evaluation/taze/run-3/debug/src/api/check.ts`):
 
-- **Proposed span**: `span.taze.check` / `span.taze.check.packages`
-- **Attributes correctly identified**: `taze.check.packages_total`, `taze.check.packages_outdated`, `taze.check.write_mode`, `taze.check.recursive`, `taze.check.mode`
-- **Correctly skipped**: `CheckSingleProject` (unexported, RST-004)
-- **Schema gap identified**: no span entity defined in registry — only attribute groups. Agent invented span name from namespace.
+- **Entry point**: `CheckPackages` correctly wrapped in `tracer.startActiveSpan('taze.check', ...)`
+- **RST-004**: `CheckSingleProject` (unexported) correctly skipped
+- **CDQ-007**: `options.mode`, `options.recursive`, `options.write` all guarded with `!= null`
+- **Schema reasoning**: `taze.check.packages_total` set after `loadPackages`; `taze.check.packages_outdated` via reduce post-resolution
+- **Schema extension surfaced**: `span.taze.check` not in registry — correctly reported
 
-This is encouraging signal: the schema reasoning is working even on the file that fails compilation. The TypeScript type issues are in the *generated code*, not the *semantic understanding*.
+The semantic understanding and code generation are working. The blocker is entirely in the validator environment.
+
+---
+
+## What's Needed for Run-4
+
+1. **Fix `checkSyntax()` moduleResolution** — this is the gate. Without it, every taze file fails NDS-001 on the original source regardless of instrumentation quality.
+2. **Rebuild spiny-orb** after the fix and record the new SHA in the pre-run verification table.
