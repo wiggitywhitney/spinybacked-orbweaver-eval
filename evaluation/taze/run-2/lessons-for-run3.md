@@ -62,7 +62,7 @@ Consecutive-failure abort confirmed twice. Do not rerun until PRD #582 M2 (early
 caffeinate -s env -u ANTHROPIC_CUSTOM_HEADERS -u ANTHROPIC_BASE_URL GIT_CONFIG_GLOBAL=/Users/whitney.lee/.config/spiny-orb-eval/gitconfig vals exec -i -f .vals.yaml -- bash -c 'GITHUB_TOKEN=$GITHUB_TOKEN_TAZE node ~/Documents/Repositories/spinybacked-orbweaver/bin/spiny-orb.js instrument src --verbose --debug-dump-dir ~/Documents/Repositories/spinybacked-orbweaver-eval/evaluation/taze/run-3/debug-dumps 2>&1 | tee ~/Documents/Repositories/spinybacked-orbweaver-eval/evaluation/taze/run-3/spiny-orb-output.log'
 ```
 
-Note: create `run-3/` and `run-3/debug-dumps/` before running. **Run-3 was actually executed without `--debug-dump-dir`** — the `debug/` directory in `evaluation/taze/run-3/` was created separately. Future runs should use the command above.
+Note: create `run-3/` and `run-3/debug-dumps/` before running. **Run-3 was actually executed without `--debug-dump-dir`** — the `debug/` directory in `evaluation/taze/run-3/` was created separately. Future runs should use the same flags, but replace all `run-3` paths with the current `run-N` paths.
 
 ---
 
