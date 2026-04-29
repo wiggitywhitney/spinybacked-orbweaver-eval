@@ -1,5 +1,8 @@
 # Spiny-orb Handoff — taze TypeScript Eval (Runs 1–5)
 
+**File location**: `/Users/whitney.lee/Documents/Repositories/spinybacked-orbweaver-eval/evaluation/taze/spiny-orb-handoff.md`
+**GitHub**: `https://github.com/wiggitywhitney/spinybacked-orbweaver-eval/blob/feature/prd-50-typescript-eval-setup/evaluation/taze/spiny-orb-handoff.md`
+
 **Last updated**: 2026-04-28
 **Eval target**: wiggitywhitney/taze (fork of antfu-collective/taze)
 **Runs attempted**: 5

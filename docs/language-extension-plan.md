@@ -265,7 +265,17 @@ After `run-summary.md` is written, before any analysis begins, give Whitney a ra
 **Moment 2 — Handoff pause** (at the end of Actionable fix output):
 After full analysis, give Whitney an interpreted summary of key findings: failures, root causes, notable patterns, what to watch for in the next run. Then print the absolute file path of `actionable-fix-output.md` and pause until Whitney confirms she has handed the document off to the spiny-orb team. Do not proceed to the next PRD until confirmed.
 
-**All handoff documents (`evaluation/<target>/spiny-orb-handoff.md`) must include a "Finding the Diagnostic Artifacts" section** so the spiny-orb team can locate all five diagnostic dimensions without asking. Standard section template:
+**All handoff documents (`evaluation/<target>/spiny-orb-handoff.md`) must include:**
+1. Their own absolute local path and GitHub URL in the header (so the spiny-orb team can find the file without asking)
+2. A "Finding the Diagnostic Artifacts" section with the five diagnostic dimensions
+
+**Header template** (place immediately after the document title):
+```markdown
+**File location**: `/Users/whitney.lee/Documents/Repositories/spinybacked-orbweaver-eval/evaluation/<target>/spiny-orb-handoff.md`
+**GitHub**: `https://github.com/wiggitywhitney/spinybacked-orbweaver-eval/blob/<branch>/evaluation/<target>/spiny-orb-handoff.md`
+```
+
+**Diagnostic artifacts section template:**
 
 ```markdown
 ## Finding the Diagnostic Artifacts
