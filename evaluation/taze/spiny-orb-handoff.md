@@ -1,12 +1,12 @@
-# Spiny-orb Handoff — taze TypeScript Eval (Runs 1–6)
+# Spiny-orb Handoff — taze TypeScript Eval (Runs 1–7)
 
 **File location**: `/Users/whitney.lee/Documents/Repositories/spinybacked-orbweaver-eval/evaluation/taze/spiny-orb-handoff.md`
 **GitHub**: `https://github.com/wiggitywhitney/spinybacked-orbweaver-eval/blob/feature/prd-50-typescript-eval-setup/evaluation/taze/spiny-orb-handoff.md`
 
 **Last updated**: 2026-04-29
 **Eval target**: wiggitywhitney/taze (fork of antfu-collective/taze)
-**Runs attempted**: 6
-**First completed run**: Run-5 (PR #1 created)
+**Runs attempted**: 7
+**Completed runs**: Run-5 (PR #1), Run-7 (PR #2)
 **Files committed**: 0 across all runs
 
 ---
@@ -52,7 +52,9 @@ Run-5 was the first completed run — a branch was pushed and PR #1 was created.
 | F8 — Silent NDS-001: stdout not captured (run-4) | ✅ Fixed |
 | FA — `Array.fromAsync` not in ES2022 target (run-5) | ✅ Fixed — `target` now read from tsconfig |
 | FB — `node:` protocol imports / `@types/node` (run-5) | ⚠️ Partially fixed — `lib`/`types` read from tsconfig, but taze has no `types` field so `@types/node` still not loaded. See Finding D. |
-| FC — NDS-003 flags intermediate variables for `setAttribute` (run-5) | 🔄 Open — see Finding E (now confirmed as a blocker, not just P2) |
+| FC — NDS-003 flags intermediate variables for `setAttribute` (run-5) | ✅ Fixed — agent workaround: inline `reduce()` directly in `setAttribute` call |
+| FD — `console` not found / @types/node auto-detection (run-6) | ✅ Fixed |
+| FE — NDS-003 null guard catch-22 (run-6) | ✅ Fixed — null guards now allowed |
 
 ---
 
@@ -183,11 +185,43 @@ This is a validator calibration issue. Null guards of the form `if (x != null) {
 
 ---
 
-## What's Needed for Run-7
+---
 
-Both fixes are in `src/languages/typescript/validation.ts`:
+## New Finding F — NDS-003 blocks span lifecycle catch/finally pattern (P1, run-7)
 
-1. **Auto-detect `@types/node`** — in `checkSyntax()`, check for `node_modules/@types/node/` and add `node` to the `--types` list if present (Finding D)
-2. **Allow null guards in NDS-003** — extend the allowlist to permit `if (x != null) { span.setAttribute(...) }` patterns (Finding E)
+**Confirmed blocker. Affects all files requiring error recording.**
 
-After merging: rebuild spiny-orb, update SHA in pre-run verification, create `evaluation/taze/run-7/` directory.
+NDS-003 flags `catch (error) {`, `throw error`, and `finally {` as non-instrumentation lines when added to functions that didn't originally have them. These lines are required for the standard span lifecycle pattern:
+
+```typescript
+} catch (error) {             // ← NDS-003 flags this
+  span.recordException(...);
+  span.setStatus({ code: SpanStatusCode.ERROR });
+  throw error;                // ← NDS-003 flags this
+} finally {                   // ← NDS-003 flags this
+  span.end();
+}
+```
+
+The agent has no workaround for functions needing full error recording. It found a partial workaround in `cli.ts` (placing `setAttribute` inside an existing `if (mode)` block, using `?? false` for booleans) but this doesn't help for `check.ts` and `checkGlobal.ts`.
+
+**Required fix (contextual, not blanket)**: Extend NDS-003 to allow:
+- `catch (error) {` — **only when** the catch block contains `span.recordException`
+- `throw error` — **only when** inside a catch block containing `span.recordException`
+- `finally {` — **only when** the finally block contains `span.end()`
+
+The contextual approach prevents an agent from using the allowlist to add behavior-changing catch blocks that don't contain span calls.
+
+**Implementation**: `src/languages/javascript/rules/nds003.ts` (and TypeScript equivalent if separate).
+
+**Affected in run-7**: `src/api/check.ts`, `src/cli.ts`, `src/commands/check/checkGlobal.ts`. Expected to affect most taze files with I/O.
+
+---
+
+## What's Needed for Run-8
+
+One fix in `src/languages/javascript/rules/nds003.ts`:
+
+**Allow span lifecycle catch/finally contextually** — `catch (error) {` when catch contains `span.recordException`; `throw error` inside that catch; `finally {` when finally contains `span.end()`.
+
+After merging: rebuild spiny-orb, update SHA in pre-run verification, create `evaluation/taze/run-8/` directory.
