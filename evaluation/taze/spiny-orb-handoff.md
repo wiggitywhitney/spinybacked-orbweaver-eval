@@ -1,13 +1,13 @@
-# Spiny-orb Handoff — taze TypeScript Eval (Runs 1–5)
+# Spiny-orb Handoff — taze TypeScript Eval (Runs 1–6)
 
 **File location**: `/Users/whitney.lee/Documents/Repositories/spinybacked-orbweaver-eval/evaluation/taze/spiny-orb-handoff.md`
 **GitHub**: `https://github.com/wiggitywhitney/spinybacked-orbweaver-eval/blob/feature/prd-50-typescript-eval-setup/evaluation/taze/spiny-orb-handoff.md`
 
-**Last updated**: 2026-04-28
+**Last updated**: 2026-04-29
 **Eval target**: wiggitywhitney/taze (fork of antfu-collective/taze)
-**Runs attempted**: 5
+**Runs attempted**: 6
 **First completed run**: Run-5 (PR #1 created)
-**Files committed**: 0 (2 correct skips, 6 NDS-001 failures)
+**Files committed**: 0 across all runs
 
 ---
 
@@ -50,6 +50,9 @@ Run-5 was the first completed run — a branch was pushed and PR #1 was created.
 | F6 — NodeNext vs Bundler moduleResolution (run-3) | ✅ Fixed |
 | F7 — TS5112 `--ignoreConfig` missing (run-4) | ✅ Fixed |
 | F8 — Silent NDS-001: stdout not captured (run-4) | ✅ Fixed |
+| FA — `Array.fromAsync` not in ES2022 target (run-5) | ✅ Fixed — `target` now read from tsconfig |
+| FB — `node:` protocol imports / `@types/node` (run-5) | ⚠️ Partially fixed — `lib`/`types` read from tsconfig, but taze has no `types` field so `@types/node` still not loaded. See Finding D. |
+| FC — NDS-003 flags intermediate variables for `setAttribute` (run-5) | 🔄 Open — see Finding E (now confirmed as a blocker, not just P2) |
 
 ---
 
@@ -119,11 +122,72 @@ The agent is reasoning correctly despite the validator failures:
 
 ---
 
-## What's Needed for Run-6
+---
 
-Both fixes are in `src/languages/typescript/validation.ts` `checkSyntax()`, and both follow the established pattern of reading from tsconfig.json:
+## New Finding D — `console` not found (TS2584) — `@types/node` needs auto-detection (P1, run-6)
 
-1. **Read `target` from tsconfig** — extend `readTsConfigModuleOptions()` to return `target`; pass as `--target <value>`
-2. **Read `lib`/`types` from tsconfig** — pass as `--lib <value>` and/or `--types <value>` to make `@types/node` available
+**Blocks files 1 and 2 (and likely many others).**
 
-After merging: rebuild spiny-orb, update SHA in pre-run verification, create `evaluation/taze/run-6/` directory.
+After the `lib`/`types` fix from run-5, `checkSyntax()` now reads `lib` and `types` from tsconfig.json. But taze's tsconfig has no `types` field:
+
+```json
+{ "compilerOptions": { "lib": ["ESNext"], ...no "types" field } }
+```
+
+Without `--types`, `@types/node` is not included in the per-file check. Node.js globals like `console` are defined in `@types/node`, not in the standard ES libs. Result:
+
+```text
+src/addons/vscode.ts(31,7): error TS2584: Cannot find name 'console'.
+Do you need to change your target library? Try changing the 'lib' compiler option to include 'dom'.
+```
+
+(tsc suggests 'dom' because that's the other common source of console, but the correct fix is `@types/node`.)
+
+**Root cause**: The fix reads `types` from tsconfig, but many Node.js projects don't declare `types` explicitly — TypeScript auto-discovers `@types/*` packages from `node_modules/@types/` by default.
+
+**Required fix**: In `checkSyntax()`, after reading tsconfig `types`, also check for `@types/node` in the project's `node_modules/@types/node/` directory. If it exists and `types` doesn't already include `"node"`, add it automatically. Pattern:
+
+```typescript
+const typesFlag = moduleOpts.types ?? [];
+const nodeTypesPath = join(projectRoot, 'node_modules', '@types', 'node');
+if (existsSync(nodeTypesPath) && !typesFlag.includes('node')) {
+  typesFlag.push('node');
+}
+// then: ...typesFlag.length ? ['--types', typesFlag.join(',')] : []
+```
+
+**Affected in run-6**: `src/addons/index.ts`, `src/addons/vscode.ts` (and expected for any file in a project with `@types/node` installed but not declared in tsconfig).
+
+---
+
+## New Finding E — NDS-003 blocks null guards required for `setAttribute` (P1, run-6)
+
+**Confirmed blocker — previously P2, now P1.**
+
+In `src/api/check.ts`, `options.mode` is typed as `RangeMode | undefined`. Calling `span.setAttribute('taze.check.mode', options.mode)` fails tsc:
+
+```text
+error TS2345: Argument of type '"default" | ... | undefined' is not assignable to parameter of type 'AttributeValue'.
+  Type 'undefined' is not assignable to type 'AttributeValue'.
+```
+
+The fix is to guard: `if (options.mode != null) { span.setAttribute(...) }`. But NDS-003 flags this `if` statement as a non-instrumentation line.
+
+**The catch-22**: The agent is explicitly stuck — attempting the null guard triggers NDS-003; omitting it triggers NDS-001 (TypeScript type error). The agent's thinking in run-6 attempt 3 documents this conflict directly.
+
+This is a validator calibration issue. Null guards of the form `if (x != null) { span.setAttribute(key, x) }` are instrumentation, not business logic. The TypeScript prompt explicitly permits "return-value capture" (`const result = fn(); span.setAttribute(key, result)`) — null guards before `setAttribute` are semantically equivalent.
+
+**Required fix**: Extend the NDS-003 allowlist to permit `if (<variable> != null) { span.setAttribute(<key>, <variable>) }` patterns where the guarded variable is only used inside the `span.setAttribute` call.
+
+**Affected**: Any file where the instrumented function's options/parameters have optional typed fields — which is common. `src/api/check.ts` is blocked by this.
+
+---
+
+## What's Needed for Run-7
+
+Both fixes are in `src/languages/typescript/validation.ts`:
+
+1. **Auto-detect `@types/node`** — in `checkSyntax()`, check for `node_modules/@types/node/` and add `node` to the `--types` list if present (Finding D)
+2. **Allow null guards in NDS-003** — extend the allowlist to permit `if (x != null) { span.setAttribute(...) }` patterns (Finding E)
+
+After merging: rebuild spiny-orb, update SHA in pre-run verification, create `evaluation/taze/run-7/` directory.
