@@ -1,13 +1,13 @@
-# Spiny-orb Handoff — taze TypeScript Eval (Runs 1–8)
+# Spiny-orb Handoff — taze TypeScript Eval (Runs 1–9)
 
 **File location**: `/Users/whitney.lee/Documents/Repositories/spinybacked-orbweaver-eval/evaluation/taze/spiny-orb-handoff.md`
 **GitHub**: `https://github.com/wiggitywhitney/spinybacked-orbweaver-eval/blob/feature/prd-50-typescript-eval-setup/evaluation/taze/spiny-orb-handoff.md`
 
 **Last updated**: 2026-04-29
 **Eval target**: wiggitywhitney/taze (fork of antfu-collective/taze)
-**Runs attempted**: 8
-**Completed runs**: Run-5 (PR #1), Run-7 (PR #2), Run-8 (PR #3 — first with committed files)
-**Files committed**: 6 (run-8)
+**Runs attempted**: 9
+**Completed runs**: Run-5 (PR #1), Run-7 (PR #2), Run-8 (PR #3), Run-9 (PR #4 — first complete run)
+**Files committed**: 11 (run-9, first complete run of all 33 files)
 
 ---
 
@@ -29,11 +29,9 @@ Replace `run-N` with the run number. The `debug/` directory is present when `--d
 
 ## TL;DR
 
-Run-8 is the first run with committed files — **6 files instrumented, 0 failures, PR #3 created**. All known blockers are resolved. No action needed from the spiny-orb team.
+Run-9 is the first complete run — **all 33 files processed, 11 committed, PR #4 created**. Two new spiny-orb fixes needed before run-10 can achieve full coverage.
 
-The checkpoint test failure that stopped the run at file 10/33 was on the eval side (live-registry flaky tests in the taze fork) — fixed by excluding those tests from `testCommand` in `spiny-orb.yaml`. Not a spiny-orb issue.
-
-**Current blockers**: None.
+**Current blockers**: Two fixes needed — see Findings G and H below.
 
 1. Read `target` from tsconfig.json — `Array.fromAsync` is not in ES2022 but IS in ESNext (taze's actual target)
 2. Read `lib`/`types` from tsconfig.json — `node:*` protocol imports need `@types/node` which isn't loaded in per-file mode
@@ -221,8 +219,45 @@ The contextual approach prevents an agent from using the allowlist to add behavi
 
 ---
 
-## What's Needed for Run-9
+---
 
-No spiny-orb changes required. Run-8 completed successfully.
+## New Finding G — NDS-001: `startActiveSpan` causes literal type widening on discriminant fields (P1, run-9)
 
-The eval team will run the remaining 23 files (files 11–33) to complete the first full evaluation cycle. If new spiny-orb issues surface, this document will be updated.
+**Blocks `src/io/packageJson.ts` and `src/io/packageYaml.ts`.**
+
+When a function returns an object literal with a string discriminant field in a discriminated union (e.g., `type: 'package.json'` matching `PackageMeta`), TypeScript infers the literal type in a direct return. Inside a `startActiveSpan` async callback, the type widens to `string`, breaking the discriminated union assignment:
+
+```text
+TS2322: Type 'string' is not assignable to type '"package.yaml"'.
+```
+
+**Required fix**: Add guidance to `src/languages/typescript/prompt.ts` — when wrapping a function that returns an object literal in a discriminated union, cast the return with `as const` on string literal fields, or cast the whole array: `return [...] as PackageMeta[]`. This is analogous to the `instanceof Error` guidance already in the prompt.
+
+**Fix owner**: spiny-orb team (TypeScript prompt).
+
+---
+
+## New Finding H — NDS-003 blocks `if (span.isRecording()) {` guard (P1, run-9)
+
+**Blocks `src/io/resolves.ts`.**
+
+The CDQ-006 rule recommends wrapping expensive span attribute computations in `if (span.isRecording()) {`. NDS-003 blocks this as a non-instrumentation line.
+
+**Required fix**: Add to `INSTRUMENTATION_PATTERNS` in `src/languages/javascript/rules/nds003.ts`:
+
+```javascript
+/^\s*if\s*\(\s*(?:span|otelSpan)\.isRecording\(\)\s*\)\s*\{?\s*$/,
+```
+
+**Fix owner**: spiny-orb team.
+
+---
+
+## What's Needed for Run-10
+
+Two fixes in spiny-orb:
+
+1. **TypeScript prompt** — add `as const` / discriminated union cast guidance (Finding G)
+2. **NDS-003 allowlist** — add `if (span.isRecording()) {` pattern (Finding H)
+
+After merging: rebuild spiny-orb, update SHA, create `evaluation/taze/run-10/` directory.
