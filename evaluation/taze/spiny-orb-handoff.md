@@ -1,13 +1,13 @@
-# Spiny-orb Handoff — taze TypeScript Eval (Runs 1–9)
+# Spiny-orb Handoff — taze TypeScript Eval (Runs 1–10)
 
 **File location**: `/Users/whitney.lee/Documents/Repositories/spinybacked-orbweaver-eval/evaluation/taze/spiny-orb-handoff.md`
 **GitHub**: `https://github.com/wiggitywhitney/spinybacked-orbweaver-eval/blob/feature/prd-50-typescript-eval-setup/evaluation/taze/spiny-orb-handoff.md`
 
-**Last updated**: 2026-04-29
+**Last updated**: 2026-04-30
 **Eval target**: wiggitywhitney/taze (fork of antfu-collective/taze)
-**Runs attempted**: 9
-**Completed runs**: Run-5 (PR #1), Run-7 (PR #2), Run-8 (PR #3), Run-9 (PR #4 — first complete run)
-**Files committed**: 11 (run-9, first complete run of all 33 files)
+**Runs attempted**: 10
+**Completed runs**: Run-5–8 (PRs #1–3), Run-9 (PR #4 — first complete run), Run-10 (PR #5)
+**Files committed**: 12 total (11 run-9 + 1 run-10)
 
 ---
 
@@ -29,9 +29,9 @@ Replace `run-N` with the run number. The `debug/` directory is present when `--d
 
 ## TL;DR
 
-Run-9 is the first complete run — **all 33 files processed, 11 committed, PR #4 created**. Two new spiny-orb fixes needed before run-10 can achieve full coverage.
+Run-10 committed `resolves.ts` (6 spans). Findings G (`if (span.isRecording())`) and H (NDS-003 null guards) are fixed. Two new blockers remain for run-11.
 
-**Current blockers**: Two fixes needed — see Findings G and H below.
+**Current blockers**: Two fixes needed — see Findings I and J below.
 
 1. Read `target` from tsconfig.json — `Array.fromAsync` is not in ES2022 but IS in ESNext (taze's actual target)
 2. Read `lib`/`types` from tsconfig.json — `node:*` protocol imports need `@types/node` which isn't loaded in per-file mode
@@ -56,6 +56,8 @@ Run-9 is the first complete run — **all 33 files processed, 11 committed, PR #
 | FD — `console` not found / @types/node auto-detection (run-6) | ✅ Fixed |
 | FE — NDS-003 null guard catch-22 (run-6) | ✅ Fixed — null guards now allowed |
 | FF — NDS-003 catch/finally pattern (run-7) | ✅ Fixed — standalone `catch (error) {`, `finally {`, `throw error` added to allowlist |
+| FG — `if (span.isRecording()) {` blocked by NDS-003 (run-9) | ✅ Fixed |
+| FH — NDS-003 null guard catch-22 (run-9) | ✅ Fixed |
 
 ---
 
@@ -253,11 +255,49 @@ The CDQ-006 rule recommends wrapping expensive span attribute computations in `i
 
 ---
 
-## What's Needed for Run-10
+---
 
-Two fixes in spiny-orb:
+## New Finding I — NDS-003 flags `as const` on discriminant fields — catch-22 (P1, run-10)
 
-1. **TypeScript prompt** — add `as const` / discriminated union cast guidance (Finding G)
-2. **NDS-003 allowlist** — add `if (span.isRecording()) {` pattern (Finding H)
+**Blocks `src/io/packageJson.ts` and `src/io/packageYaml.ts`.**
 
-After merging: rebuild spiny-orb, update SHA, create `evaluation/taze/run-10/` directory.
+The prompt now correctly tells agents to add `as const` to string literal discriminant fields. But NDS-003 sees `type: 'package.json' as const,` as a modification of the original `type: 'package.json',`. `as const` is a TypeScript annotation with zero runtime effect — the compiled JS output is identical.
+
+**Required fix**: Extend `normalizeLine()` in `nds003.ts` to strip `as const` before comparison:
+
+```typescript
+.replace(/\s+as\s+const\s*([,;]?)$/, '$1')  // normalize "x as const," → "x,"
+```
+
+This is the same pattern as the existing catch-variable-binding normalization.
+
+**Fix owner**: spiny-orb team — `normalizeLine()` in `src/languages/javascript/rules/nds003.ts`.
+
+---
+
+## New Finding J — Agent rewrites semconv schema file, removing prior definitions (P2, run-10)
+
+End-of-run warnings showed 4 previously-committed schema attributes removed:
+
+```text
+Schema integrity violation: "taze.bun_workspace.catalogs_count" was removed
+Schema integrity violation: "taze.pnpm_workspace.catalogs_count" was removed
+Schema integrity violation: "taze.config.sources_count" was removed
+Schema integrity violation: "taze.yarn_workspace.catalogs_count" was removed
+```
+
+The run-10 agent regenerated `attributes.yaml` from scratch instead of reading and appending to the existing file. The schema integrity check caught the removals.
+
+**Required fix**: Ensure agents read existing schema definitions before writing new ones — merge/append, not replace.
+
+**Fix owner**: spiny-orb team.
+
+---
+
+## What's Needed for Run-11
+
+1. **NDS-003 `as const` normalization** — extend `normalizeLine()` (Finding I)
+2. **Schema append-only writes** — prevent agents from removing existing schema definitions (Finding J)
+3. **Start run-11 from taze `main`** — not from the previous instrument branch
+
+After merging: rebuild spiny-orb, `git checkout main` in taze, create `evaluation/taze/run-11/` directory.
