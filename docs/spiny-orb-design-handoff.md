@@ -134,6 +134,27 @@ The core problem: end-of-run rollback doesn't distinguish "we caused this" from 
 
 ---
 
+## Issue (medium): SCH-001 should be advisory, not blocking — pending OTel research
+
+**Found in**: run-12 (`src/cli.ts`, `src/commands/check/checkGlobal.ts`)
+
+**Problem**: SCH-001 currently blocks a file if the LLM judge determines the proposed span name is semantically similar to an existing registry operation. In run-12, this created an unresolvable deadlock:
+
+1. `check.ts` committed span `taze.check.run`
+2. `cli.ts` proposed `taze.cli.run` — SCH-001 ruled it a "semantic duplicate" and said use `taze.check.run` instead
+3. But `taze.check.run` is already in use by a different function
+4. Both options fail — the agent has no valid move
+
+The judge's rulings in this run were arguably wrong. `taze.cli.run` is a CLI dispatcher that sits *above* the check operation — it parses args, resolves config, and delegates to either `check` or `checkGlobal`. Similarly, `taze.check.global` checks global npm/pnpm packages via a distinct resolution pathway. These are hierarchically-distinct operations that would appear as parent/child spans in a real trace. Forcing them to share a name loses that trace hierarchy.
+
+**Proposed change**: Make SCH-001 advisory rather than blocking. Surface the potential duplicate to the agent — "this may be a semantic duplicate of `taze.check.run` — consider reusing it if these operations are truly equivalent" — and let the agent decide with full function context. The agent has more information than the judge.
+
+**Prerequisite research first**: Before making this change, verify OTel good practice on span naming for hierarchically-distinct operations. The key question: does OTel recommend that a CLI entry point and its child check operation share a span name (grouping by operation type, lower cardinality) or have distinct names (preserving trace hierarchy)? If OTel recommends shared names for related operations, the blocking behavior may be correct and the fix is different. If OTel recommends distinct names for distinct hierarchy levels, Advisory is clearly right. Research this before implementing.
+
+**ROADMAP.md**: Medium-term, alongside PRD 4 (independent).
+
+---
+
 ## Industry practices research spike (do first, informs all PRDs)
 
 Before committing to the designs above, run a research spike: how do other instrumentation and code-transformation tools handle live API calls in test suites, rollback decisions, and diagnostic tooling? There may be established patterns worth incorporating rather than inventing from scratch.
