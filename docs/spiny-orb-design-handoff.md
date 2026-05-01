@@ -14,7 +14,7 @@ This is the most important fact in this document. During the spiny-orb checkpoin
 
 **Consequence 2**: The live-check compliance report saying "OK" means "Weaver received nothing and nothing failed" — not "emitted telemetry passed compliance." Every "Live-check: OK" in every PR summary to date is a false positive. The live-check is currently inert.
 
-Verified against taze's `vitest.config.ts` (has a `setupFiles` entry, which only creates a temp dir — no OTel init), `package.json` (`testCommand` has no `--import` flag), and the `@opentelemetry/api` design specification.
+Verified against taze's `vitest.config.ts` (has a `setupFiles` entry, which only creates a temp dir — no OTel init), `package.json` (`testCommand` has no `--import` flag), and the `@opentelemetry/api` design specification. This verification is specific to taze. Other projects whose `testCommand` happens to load the SDK init file would be an exception — but most don't, so the claim likely holds broadly.
 
 ---
 
@@ -23,6 +23,8 @@ Verified against taze's `vitest.config.ts` (has a `setupFiles` entry, which only
 **Problem**: The PR summary section shows "OK" when Weaver received zero spans. Readers reasonably interpret this as "telemetry passed compliance." It actually means "nothing was evaluated."
 
 **Fix**: Change the output to distinguish the two states. Until PRD 1 lands, at minimum show: `OK (no spans received — live-check did not validate any telemetry)`.
+
+**Implementation note**: Spiny-orb currently reads Weaver's response body verbatim and doesn't know whether spans were received. Detecting "no spans received" requires either parsing Weaver's default ANSI output for a span count, or using the `--format=json` approach from PRD 1. This is tractable but not a one-liner — scope accordingly.
 
 **ROADMAP.md**: Short-term, alongside the TypeScript eval entry.
 
@@ -56,12 +58,13 @@ Verified against taze's `vitest.config.ts` (has a `setupFiles` entry, which only
 
 **What to build**:
 - Pass `--format=json` to the Weaver `live-check` command so the compliance report is structured
-- Inject SDK initialization into the test environment (likely `NODE_OPTIONS=--import {sdkInitFile}`) so spans actually reach Weaver during the test run — note: the dual-import-in-the-middle problem from PRD #309 may interact here; research this first
+- Inject SDK initialization into the test environment so spans actually reach Weaver during the test run — the right injection approach needs research (see below); the dual-import-in-the-middle problem from PRD #309 may interact
 - Parse the JSON compliance report rather than dumping raw text
 - Distinguish "OK because spans passed compliance" from "OK because nothing was received" in the PR summary
 - Handle projects whose test commands already initialize the SDK (detect and skip double-init)
+- Surface live-check output in `--verbose` mode so users can see what Weaver actually evaluated
 
-**Research milestones** (do before designing): How does `NODE_OPTIONS=--import` interact with vitest specifically (the current eval framework)? What does the JSON compliance report schema look like — run `weaver registry live-check --format=json` against the taze fixture and capture the output.
+**Research milestones** (do before designing): What is the right SDK injection approach — evaluate at minimum: `NODE_OPTIONS=--import {sdkInitFile}` (most universal), test-runner-native `setupFiles` (vitest/jest specific), and wrapping the testCommand itself. Pick based on portability across runners and conflict surface. Separately: what does the JSON compliance report schema look like — run `weaver registry live-check --format=json` against the taze fixture and capture the output.
 
 **Note on language-specific research**: Framework interaction questions for jest, mocha, pytest, etc. belong in downstream language PRDs, not here.
 
@@ -90,6 +93,10 @@ The core problem: end-of-run rollback doesn't distinguish "we caused this" from 
 - `resolves.ts` failed NDS-003, was never committed  
 - Three committed files (`yarnWorkspaces.ts`, `pnpmWorkspaces.ts`, `packument.ts`) were rolled back despite having nothing to do with the failure  
 - npm registry was healthy (`registry.npmjs.org/-/ping` returns `{}`)
+
+**Design question for the PRD**: Consider whether smart-rollback (step 3) should run first as a cheap deterministic gate, with health-check and retry as the more expensive fallback for cases where the call path does include committed files. In run-11 specifically, smart-rollback alone — the failing test's stack trace points to `resolves.ts`, which was never committed — would have prevented the bad rollback without any external calls or delays. The ordering above (health-check → retry → smart-rollback) may be backwards.
+
+**Out of scope for this PRD**: Run-11 also surfaced an unrelated agent-quality issue — `src/io/resolves.ts` failed NDS-003 due to non-instrumentation line additions (braceless `if` style, `await` in return capture, renamed catch variable). This is an NDS-003 calibration issue, not a test infrastructure issue. Will be filed separately.
 
 **Research milestones**: Which test failure types are amenable to retry vs. deterministic instrumentation breakage? How do we identify "the external API this test depends on" generically when it's not npm? Is the `parseFailingSourceFiles` logic in `dispatch.ts` lift-and-shift to `coordinate.ts`, or are there checkpoint-vs-end-of-run differences?
 
@@ -129,7 +136,9 @@ The core problem: end-of-run rollback doesn't distinguish "we caused this" from 
 
 ## Industry practices research spike (do first, informs all PRDs)
 
-Before committing to the designs above, run a research spike: how do other instrumentation and code-transformation tools handle live API calls in test suites, rollback decisions, and diagnostic tooling? There may be established patterns for the health-check-then-retry flow, and for diagnostic agents on test failures, that we'd want to incorporate rather than invent from scratch.
+Before committing to the designs above, run a research spike: how do other instrumentation and code-transformation tools handle live API calls in test suites, rollback decisions, and diagnostic tooling? There may be established patterns worth incorporating rather than inventing from scratch.
+
+Starting categories to investigate: flaky test handling in CI tooling (CircleCI's flaky detection, Buildkite test analytics); rollback patterns in code-transformation tools (codemod, jscodeshift); live telemetry validation tooling and any analogs to Weaver in other ecosystems.
 
 This is a single spike, not distributed research milestones inside each PRD.
 
