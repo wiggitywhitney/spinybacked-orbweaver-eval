@@ -6,6 +6,11 @@ Entry format: `- (YYYY-MM-DD) Description of feature-level change (PRD #X, miles
 
 ## [Unreleased]
 
+### Added
+- (2026-05-01) Ran taze Run-11 — 13 files committed (most yet in a single run), PR #6. Confirmed all `as const` and schema append-only fixes are working. Deep investigation of checkpoint test failures revealed that the OTel SDK never initializes during spiny-orb's `vitest run` checkpoint, making it impossible for our instrumentation to cause timeout failures — timeout failures are always environmental. This insight invalidates the previous approach of adding `--exclude` flags for flaky tests; those exclusions were reverted. `src/io/resolves.ts` remains the last uncommitted file due to three NDS-003 patterns (braceless `if`, `await` in return capture, renamed catch variable), filed as spiny-orb issue #675.
+- (2026-05-01) Created `docs/spiny-orb-design-handoff.md` — a comprehensive design brief for the spiny-orb team covering four infrastructure improvements surfaced by taze runs 8–11: making the live-check actually validate telemetry (currently always returns "OK" because the SDK never initializes during tests), smarter end-of-run rollback that uses API health checks and call-graph analysis before reverting committed files, a diagnostic agent for persistent failures with user-facing rollback decisions, and dependency-aware file instrumentation ordering. Filed spiny-orb issue #675 documenting the three NDS-003 patterns needed for `resolves.ts`.
+- (2026-05-01) Prepared run-12: spiny-orb issue #675 fixed (PR #676), SHA 5610e4a. taze `testCommand` restored to `pnpm test` (no exclusions). taze main confirmed clean. Run-12 expected to commit all 33 files cleanly.
+
 ### Fixed
 - (2026-04-11) Fixed stale repo name references missed during PRD #43 generalization: updated Two-Repo Workflow tables in prd-32 and prd-33 to spinybacked-orbweaver-eval, removed commit-story-v2-eval/ prefix from prd-3 run-2 path, corrected self-contradictory grep patterns in prd-43 validation section (PRD #43, CodeRabbit review)
 
