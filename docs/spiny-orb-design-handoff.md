@@ -42,7 +42,7 @@ Verified against taze's `vitest.config.ts` (has a `setupFiles` entry, which only
 
 ## Issue 3 (small): Document the SDK initialization boundary
 
-**Problem**: Users debugging unexpected behavior (timeout failures not causing test rollback, live-check always passing) need to understand that the checkpoint test suite and the live-check are two different execution contexts with different SDK initialization.
+**Problem**: Per the foundational insight above, users debugging unexpected behavior (timeout failures not causing test rollback, live-check always passing) need to understand that the checkpoint test suite and the live-check are two different execution contexts with different SDK initialization.
 
 **Fix**: Docs addition explaining: checkpoint tests run with no SDK init (spans are no-ops, instrumentation cannot cause timeouts); live-check (post PRD 1) runs with SDK init (spans actually fire, compliance is real). This distinction drives different rollback logic.
 
@@ -52,7 +52,7 @@ Verified against taze's `vitest.config.ts` (has a `setupFiles` entry, which only
 
 ## PRD 1 (medium-term): Make live-check actually validate something
 
-**Problem**: The live-check is a false-positive machine. `OTEL_EXPORTER_OTLP_ENDPOINT` is set in the test environment, but the SDK init file is never loaded, so no spans reach Weaver. Weaver's response is trivially "OK." Until this is fixed, every other diagnostic improvement operates without real telemetry signal.
+**Problem**: Per the foundational insight above, the live-check is a false-positive machine. `OTEL_EXPORTER_OTLP_ENDPOINT` is set in the test environment, but the SDK init file is never loaded, so no spans reach Weaver. Weaver's response is trivially "OK." Until this is fixed, every other diagnostic improvement operates without real telemetry signal.
 
 **Evidence**: Confirmed by tracing `runLiveCheck` in `src/coordinator/live-check.ts` — the spawn arguments don't include `--format=json`, the test command doesn't inject `NODE_OPTIONS=--import {sdkInitFile}`, and the compliance report is read as raw text without parsing. The live-check has never produced real compliance data.
 
@@ -76,11 +76,11 @@ Verified against taze's `vitest.config.ts` (has a `setupFiles` entry, which only
 
 **Problem**: When the end-of-run test suite fails, spiny-orb rolls back all recently committed files. This is often incorrect. Run-11 is the proof case: `resolves.test.ts:136` failed with an npm timeout. The test calls `resolveDependency` in `src/io/resolves.ts` — a file that failed NDS-003 and was **never committed**. Three correctly-instrumented files were rolled back for a failure in code we didn't touch.
 
-The core problem: end-of-run rollback doesn't distinguish "we caused this" from "something external failed." Given the OTel SDK no-init fact, timeout failures during the test suite **cannot** be caused by our instrumentation. But the current logic rolls back anyway.
+The core problem: end-of-run rollback doesn't distinguish "we caused this" from "something external failed." Per the foundational insight above, timeout failures during the test suite **cannot** be caused by our instrumentation — spans are no-ops. But the current logic rolls back anyway.
 
 **Design principle**: The default assumption when a test fails is that we caused it. The only permitted exception is if the external API is verifiably down. Health checks are not a courtesy — they are the narrow gate through which environmental failures escape the "we caused it" default. Do not add `--exclude` flags for specific failing tests as a workaround; that hides real signal and is explicitly rejected as a design approach.
 
-**What to build** (three connected fixes that should ship together):
+**What to build** (three connected fixes that should ship together — see Design question below for ordering consideration):
 
 1. **API health check before rollback**: When a test fails with a timeout error, check the health endpoint of the external API involved (npm: `registry.npmjs.org/-/ping`; jsr: `jsr.io`). If the API is unhealthy, report that and suspend rollback — it's environmental. If healthy, proceed to retry.
 
@@ -96,7 +96,7 @@ The core problem: end-of-run rollback doesn't distinguish "we caused this" from 
 
 **Design question for the PRD**: Consider whether smart-rollback (step 3) should run first as a cheap deterministic gate, with health-check and retry as the more expensive fallback for cases where the call path does include committed files. In run-11 specifically, smart-rollback alone — the failing test's stack trace points to `resolves.ts`, which was never committed — would have prevented the bad rollback without any external calls or delays. The ordering above (health-check → retry → smart-rollback) may be backwards.
 
-**Out of scope for this PRD**: Run-11 also surfaced an unrelated agent-quality issue — `src/io/resolves.ts` failed NDS-003 due to non-instrumentation line additions (braceless `if` style, `await` in return capture, renamed catch variable). This is an NDS-003 calibration issue, not a test infrastructure issue. Will be filed separately.
+**Out of scope for this PRD**: Run-11 also surfaced an unrelated agent-quality issue — `src/io/resolves.ts` failed NDS-003 due to non-instrumentation line additions (braceless `if` style, `await` in return capture, renamed catch variable). This is an NDS-003 calibration issue, not a test infrastructure issue. Filed as [issue #675](https://github.com/wiggitywhitney/spinybacked-orbweaver/issues/675).
 
 **Research milestones**: Which test failure types are amenable to retry vs. deterministic instrumentation breakage? How do we identify "the external API this test depends on" generically when it's not npm? Is the `parseFailingSourceFiles` logic in `dispatch.ts` lift-and-shift to `coordinate.ts`, or are there checkpoint-vs-end-of-run differences?
 
@@ -157,7 +157,11 @@ Open `docs/ROADMAP.md` and add entries in this order:
 
 **Medium-term section** (add near top, before existing entries — the ordering here expresses the dependency):
 1. PRD 1: Live-check actually validates something — prerequisite for PRD 3
-2. PRD 3: Diagnostic agent for persistent failures — depends on PRDs 1 and 2
+2. PRD 3: Diagnostic agent for persistent failures — depends on PRDs 1 **and 2** (both must be complete)
 3. PRD 4: Dependency-aware file ordering — independent, can run in parallel
 
-The sequencing dependency (PRD 3 depends on PRDs 1 and 2) is expressed by their order in ROADMAP.md and should also be stated explicitly in PRD 3's description when it's created.
+The sequencing dependencies are:
+- PRD 3 depends on PRD 1 (needs real telemetry signal) AND PRD 2 (needs false rollbacks eliminated)
+- PRD 1 and PRD 2 are independent and can be worked in parallel
+
+Express both dependencies explicitly in PRD 3's description when it is created.
