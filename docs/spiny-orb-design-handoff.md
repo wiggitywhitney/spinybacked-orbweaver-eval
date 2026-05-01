@@ -75,6 +75,8 @@ Verified against taze's `vitest.config.ts` (has a `setupFiles` entry, which only
 
 The core problem: end-of-run rollback doesn't distinguish "we caused this" from "something external failed." Given the OTel SDK no-init fact, timeout failures during the test suite **cannot** be caused by our instrumentation. But the current logic rolls back anyway.
 
+**Design principle**: The default assumption when a test fails is that we caused it. The only permitted exception is if the external API is verifiably down. Health checks are not a courtesy — they are the narrow gate through which environmental failures escape the "we caused it" default. Do not add `--exclude` flags for specific failing tests as a workaround; that hides real signal and is explicitly rejected as a design approach.
+
 **What to build** (three connected fixes that should ship together):
 
 1. **API health check before rollback**: When a test fails with a timeout error, check the health endpoint of the external API involved (npm: `registry.npmjs.org/-/ping`; jsr: `jsr.io`). If the API is unhealthy, report that and suspend rollback — it's environmental. If healthy, proceed to retry.
