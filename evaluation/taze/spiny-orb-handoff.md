@@ -1,13 +1,13 @@
-# Spiny-orb Handoff — taze TypeScript Eval (Runs 1–10)
+# Spiny-orb Handoff — taze TypeScript Eval (Runs 1–12)
 
 **File location**: `/Users/whitney.lee/Documents/Repositories/spinybacked-orbweaver-eval/evaluation/taze/spiny-orb-handoff.md`
 **GitHub**: `https://github.com/wiggitywhitney/spinybacked-orbweaver-eval/blob/feature/prd-50-typescript-eval-setup/evaluation/taze/spiny-orb-handoff.md`
 
-**Last updated**: 2026-04-30
+**Last updated**: 2026-05-01
 **Eval target**: wiggitywhitney/taze (fork of antfu-collective/taze)
-**Runs attempted**: 10
-**Completed runs**: Run-5–8 (PRs #1–3), Run-9 (PR #4 — first complete run), Run-10 (PR #5)
-**Files committed**: 12 total (11 run-9 + 1 run-10)
+**Runs attempted**: 12
+**Completed runs**: Run-5–8 (PRs #1–3), Run-9 (PR #4), Run-10 (PR #5), Run-11 (PR #6), Run-12 (PR #7)
+**Files committed**: ~6 net (run-12 net after rollbacks; see findings below)
 
 ---
 
@@ -296,8 +296,47 @@ The run-10 agent regenerated `attributes.yaml` from scratch instead of reading a
 
 ## What's Needed for Run-11
 
-1. **NDS-003 `as const` normalization** — extend `normalizeLine()` (Finding I)
-2. **Schema append-only writes** — prevent agents from removing existing schema definitions (Finding J)
-3. **Start run-11 from taze `main`** — not from the previous instrument branch
+1. **NDS-003 `as const` normalization** — extend `normalizeLine()` (Finding I) ✅ Done (PR #676)
+2. **Schema append-only writes** — prevent agents from removing existing schema definitions (Finding J) ✅ Done (PR #669)
+3. **Start run-11 from taze `main`** — not from the previous instrument branch ✅ Done
 
-After merging: rebuild spiny-orb, `git checkout main` in taze, create `evaluation/taze/run-11/` directory.
+---
+
+## New Finding K — SCH-001 blocking causes cascade deadlock and span name collisions (P1, run-12)
+
+**Evidence from run-12** (the clearest yet):
+
+`check.ts` (file 3) committed span extension `taze.check.run`. The SCH-001 LLM judge then blocked every subsequent file:
+- `cli.ts` → `taze.cli.run` rejected as duplicate of `taze.check.run`
+- `checkGlobal.ts` → `taze.check.global` rejected as duplicate of `taze.check.run`
+- `packageYaml.ts` → all 4 YAML span names rejected as duplicates of existing ones
+- `packages.ts` → `taze.io.load_package` rejected as duplicate of `taze.io.read_package_json`
+- `resolves.ts` → `taze.io.load_cache` rejected as duplicate of `taze.io.read_package_json`
+- `packument.ts` → `taze.fetch.package` rejected as duplicate of `taze.io.read_package_json`
+
+Forced to use `taze.check.run`, multiple files committed with the **same span name for different operations**, producing collision warnings:
+```text
+Warning: Span name "taze.check.run" collision: declared by both src/api/check.ts and src/commands/check/index.ts
+Warning: Span name "taze.check.run" collision: declared by both src/api/check.ts and src/commands/check/interactive.ts
+Warning: Span name "taze.check.run" collision: declared by both src/api/check.ts and src/config.ts
+Warning: Span name "taze.check.run" collision: declared by both src/api/check.ts and src/io/bunWorkspaces.ts
+```
+
+**This is the strongest evidence yet that SCH-001 must be advisory, not blocking.** The current blocking behavior forces identical span names on semantically distinct operations, which is objectively worse than allowing distinct span names. Also see `docs/spiny-orb-design-handoff.md` for the full design proposal (research OTel best practices first, then make SCH-001 advisory).
+
+---
+
+## New Finding L — NDS-003 does not catch regex literal modifications (P2, run-12)
+
+`yarnWorkspaces.ts` failed NDS-003 because the agent changed `/\./g` to `/\.\g/` — it swapped the backslash position in a regex literal, corrupting the pattern. The NDS-003 diff correctly detected the line was modified (`const paths = pkg.name.replace('yarn-workspace:', '').split(/\./g)` → `.split(/\.\g/)`), but the root issue is that regex literal modifications should also be explicitly blocked by the allowlist logic. The current approach catches the line-change but doesn't distinguish intentional regex normalization from accidental corruption.
+
+**Required fix**: No code change needed — NDS-003 already catches this as a missing/modified original line. But it's worth adding a test case covering regex literal preservation so regressions are caught.
+
+---
+
+## What's Needed for Run-13
+
+1. **SCH-001: make advisory, not blocking** — research OTel span naming best practices first (see `docs/spiny-orb-design-handoff.md`). This is the highest-priority fix: without it, every run will have span name collisions and cascading failures.
+2. **Checkpoint rollback**: `versions.test.ts` and `packageConfig.test.ts` failed again at file 25 — same pre-existing live-registry flakiness. The smart-rollback PRD (PRD 2 in design handoff) is needed to prevent this.
+
+After merging: rebuild spiny-orb, `git checkout main` in taze, create `evaluation/taze/run-13/` directory.
