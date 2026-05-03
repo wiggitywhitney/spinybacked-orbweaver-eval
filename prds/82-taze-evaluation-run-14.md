@@ -9,7 +9,7 @@
 
 ## Problem Statement
 
-Run-13 scored 27/29 (93%) with 14 committed files and 0 failures — the first perfect TypeScript run. Two canonical failures remain:
+Run-13 scored 27/29 (93%) quality with 14 committed files, 0 run failures (no NDS-001/NDS-002 blocks, no rollbacks), and 19 correct skips — the first perfect TypeScript eval run. Two quality-rule failures remain in the rubric score:
 
 1. **CDQ-006 FAIL** (5 files, 8 instances): Inline O(n) computations (`reduce()`, `filter()`, `Object.keys()`) passed directly to `span.setAttribute()` without `span.isRecording()` guards. The CDQ-006 validator catches all of these; the advisory pass failed to result in fixes. Spiny-orb issue #728 addresses the advisory pass gap.
 
@@ -74,7 +74,7 @@ Same four-phase structure as run-13:
 
 ### Eval Branch Convention
 
-The feature branch for this PRD (`feature/prd-82-taze-evaluation-run-14`) **never merges to main**. The PR exists for CodeRabbit review only. When `/prd-done` runs at completion, close issue #82 without merging or deleting the eval branch. Copy artifacts to main in step 13 before closing.
+The eval execution branch (`feature/prd-82-taze-evaluation-run-14`) **never has its eval-run changes merged to main**. The PR to main is docs-only (landing the PRD file); after that PR merges, the branch continues as the eval execution branch. Eval artifacts are copied to main separately via `git checkout` in step 13. When `/prd-done` runs at completion, close issue #82 without merging or deleting the eval branch.
 
 ### Key Inputs
 
@@ -231,4 +231,4 @@ The feature branch for this PRD (`feature/prd-82-taze-evaluation-run-14`) **neve
 |------|----------|-----------|
 | 2026-05-03 | Apply schema type fix (TAZE-RUN1-1) in pre-run, not as a spiny-orb issue | The agent inferred correct types; the schema YAML was authored incorrectly. Fix the schema before run-14 so SCH-003 doesn't recur and CDQ-006 is the clean primary variable. |
 | 2026-05-03 | Apply IS RES-001 fix (service.instance.id) in pre-run | One-line SDK bootstrap fix; no instrumentation impact; makes IS score more meaningful for run-14 comparison. |
-| 2026-05-03 | create evaluation/taze/run-log.md in this PRD's milestone 2 | First Type D taze PRD — the file does not yet exist. Use commit-story-v2/run-log.md column format. |
+| 2026-05-03 | Create evaluation/taze/run-log.md in this PRD's milestone 2 | First Type D taze PRD — the file does not yet exist. Use commit-story-v2/run-log.md column format. |
