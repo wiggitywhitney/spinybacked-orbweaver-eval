@@ -1,10 +1,10 @@
 # TypeScript Eval Setup + Run-1: Target Selection and Baseline
 
 **Issue**: [#50](https://github.com/wiggitywhitney/spinybacked-orbweaver-eval/issues/50)
-**Status**: Draft
+**Status**: Complete
 **Owner**: Whitney Lee
 **Created**: 2026-04-11
-**Last Updated**: 2026-04-11
+**Last Updated**: 2026-05-03
 **Type**: C (Setup + Run-1)
 
 ## Overview
