@@ -175,7 +175,7 @@ The feature branch for this PRD **never merges to main**. The PR exists for Code
   Produces: `evaluation/taze/run-13/rubric-scores.md`
   Style reference: `Read docs/templates/eval-run-style-reference/rubric-scores.md`
 
-- [ ] **Baseline comparison**
+- [x] **Baseline comparison**
 
   No prior TypeScript baseline. Compare against most recent JS run for cross-language context. Compare: overall rubric score, per-dimension scores (NDS/COV/RST/API/SCH/CDQ), file counts, skip rate, and cost. Highlight dimensions where scores differ.
   Produces: `evaluation/taze/run-13/baseline-comparison.md`
