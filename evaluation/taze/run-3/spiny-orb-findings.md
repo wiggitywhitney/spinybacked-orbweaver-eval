@@ -2,7 +2,7 @@
 
 Issues and observations surfaced by spiny-orb during run-3 that warrant filing as GitHub issues or PRD items.
 
-**Schema design reference (read before scoring SCH rules)**: `~/Documents/Repositories/taze/semconv/SCHEMA_DESIGN.md` documents the 3 attributes deliberately omitted from the Weaver schema — `taze.check.concurrency`, `taze.package.diff_type`, `taze.fetch.cache_hit` — with code locations and rationale. Use this to evaluate whether spiny-orb correctly identified the gaps.
+**Schema design reference (read before scoring SCH rules)**: `semconv/SCHEMA_DESIGN.md` in the wiggitywhitney/taze fork documents the 3 attributes deliberately omitted from the Weaver schema — `taze.check.concurrency`, `taze.package.diff_type`, `taze.fetch.cache_hit` — with code locations and rationale. Use this to evaluate whether spiny-orb correctly identified the gaps.
 
 ---
 
@@ -26,7 +26,7 @@ Taze uses `"moduleResolution": "Bundler"` in `tsconfig.json`. Under NodeNext, al
 The code comment in `checkSyntax()` acknowledges this: "Passing a specific file path to tsc bypasses tsconfig.json project settings."
 
 **Evidence**:
-- `cat ~/Documents/Repositories/taze/tsconfig.json` → `"moduleResolution": "Bundler"`
+- `cat tsconfig.json` (from taze root) → `"moduleResolution": "Bundler"`
 - `npx tsc --noEmit` from taze root → exits 0, no errors
 - Per-file check with NodeNext → fails on every file, including unchanged originals
 - Debug dump: `evaluation/taze/run-3/debug/src/addons/index.ts` is byte-for-byte identical to the original source
@@ -54,9 +54,9 @@ The abort threshold (3 consecutive failures) prevents the remaining 30 files fro
 
 ### [P2] Checkpoint test failures from live-registry dependency
 
-**Confirmed in**: run-2, expected in run-3 (run aborted before checkpoint ran)
+**Confirmed in**: run-2; warning also appeared in run-3 pre-instrumentation baseline check (run aborted before the post-instrumentation checkpoint phase ran)
 
-End-of-run summary still shows: "Baseline test suite has pre-existing failures — checkpoint test rollback disabled." This appeared in run-3 even with `testCommand: pnpm test` configured, suggesting the baseline check runs before the `testCommand` setting takes effect, or the pre-existing flaky tests still fire regardless of the command.
+End-of-run summary still shows: "Baseline test suite has pre-existing failures — checkpoint test rollback disabled." This appeared in run-3's pre-instrumentation baseline phase (which runs before file processing begins) even with `testCommand: pnpm test` configured, suggesting the baseline check either runs before the `testCommand` setting takes effect or has a separate default command path. Note: run-3 aborted during instrumentation at file 3/33 — the post-instrumentation checkpoint phase never ran.
 
 **Note**: `pnpm test` is now set in `spiny-orb.yaml`. If the warning persists in run-4, investigate whether the baseline test check reads `testCommand` or uses a different default.
 

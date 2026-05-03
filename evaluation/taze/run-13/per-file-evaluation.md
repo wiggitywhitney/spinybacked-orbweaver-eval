@@ -588,7 +588,7 @@ All 19 files were correctly identified as uninstrumentable before or during the 
 | src/io/bunWorkspaces.ts | CDQ-006 | Code Quality | Inline `reduce()` and `Object.keys()` in two `setAttribute` calls without `isRecording()` guard |
 | src/io/yarnWorkspaces.ts | CDQ-006 | Code Quality | Inline `Object.keys()` in `setAttribute('taze.write.changes_count', ...)` without `isRecording()` guard |
 
-**Total canonical failures**: 9 across 5 files (3 SCH-003, 6 CDQ-006)
+**Total canonical failures**: 8 across 5 files (3 SCH-003, 5 CDQ-006)
 
 **CDQ-001 runtime advisory (non-canonical)**: `src/cli.ts` — `process.exit(exitCode)` on the normal success path bypasses the `finally` block, so the span is never closed after a successful run. Static analysis PASS (span.end() is in finally); runtime behavior is incorrect. Same issue found in run-5 debug dumps by CodeRabbit CLI.
 
