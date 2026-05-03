@@ -146,7 +146,7 @@ The feature branch for this PRD **never merges to main**. The PR exists for Code
 
   **Diagnostic protocol**: When a file fails, examine available dimensions before diagnosing — do NOT diagnose from errorProgression summaries alone. Available in CLI eval runs (in `spiny-orb-output.log`): **(3) full validator error messages** (complete tsc error text, NDS-005 block previews — appears via `--verbose` since PRD #582 M8); **(4) agent notes** (always in `--verbose`). Also available: **(2) actual instrumented code** written to `<debug-dump-dir>/` when `--debug-dump-dir` is in the command — create that dir before running and read it after a failure. Not available in CLI runs: **(1) run history** and **(5) agent thinking** — those require the spiny-orb test harness.
 
-  **Output path convention**: remaining milestones reference `<first-successful-run>` — the run number of the first run that produces at least 1 committed file. Based on runs 1, 2, and 3, this will be run-4 or later. Update paths when the run number is known.
+  **Output path convention**: remaining milestones reference `<first-successful-run>` = **run-13** — the first complete run with all 33 files processed, 0 failures, and 0 rollbacks (2026-05-03). All analysis milestone output paths below use `evaluation/taze/run-13/`.
 
 - [x] **Findings Discussion** *(user-facing checkpoint 1)*
 
@@ -154,52 +154,50 @@ The feature branch for this PRD **never merges to main**. The PR exists for Code
 
   **Completed after run-9 (2026-04-29)**: 33/33 files processed, 11 committed, 19 correct skips, 3 failed. PR #4 created. Live-check: OK. Whitney acknowledged. Subsequent runs (10, 11) continued improving coverage — run-11 reached 13 committed. Run-12 (with NDS-003 fix for resolves.ts via issue #675) expected to commit all 33.
 
-- [ ] **Failure deep-dives**
+- [x] **Failure deep-dives**
 
-  When analyzing each failed file: check `spiny-orb-output.log` for full validator error text and tsc error codes (dimension 3, via `--verbose`); read `evaluation/taze/<first-successful-run>/debug-dumps/<filename>` for the actual instrumented code the agent produced (dimension 2, via `--debug-dump-dir`). Both available since PRD #582 M8 — do not diagnose from rule IDs alone. (Updated per 2026-04-28 decision.)
-  Produces: `evaluation/taze/<first-successful-run>/failure-deep-dives.md`
-  Style reference: `Read docs/templates/eval-run-style-reference/failure-deep-dives.md`
+  Run-13 had 0 failures — no deep-dives required. File created: `evaluation/taze/run-13/failure-deep-dives.md`
 
 - [ ] **Per-file evaluation**
 
   Full 32-rule rubric on ALL processed files.
-  Produces: `evaluation/taze/<first-successful-run>/per-file-evaluation.md`
+  Produces: `evaluation/taze/run-13/per-file-evaluation.md`
   Style reference: `Read docs/templates/eval-run-style-reference/per-file-evaluation.md`
 
 - [ ] **PR artifact evaluation**
 
-  Produces: `evaluation/taze/<first-successful-run>/pr-evaluation.md`
+  Produces: `evaluation/taze/run-13/pr-evaluation.md`
   Style reference: `Read docs/templates/eval-run-style-reference/pr-evaluation.md`
 
 - [ ] **Rubric scoring**
 
   First TypeScript run — establish baseline.
-  Produces: `evaluation/taze/<first-successful-run>/rubric-scores.md`
+  Produces: `evaluation/taze/run-13/rubric-scores.md`
   Style reference: `Read docs/templates/eval-run-style-reference/rubric-scores.md`
 
 - [ ] **Baseline comparison**
 
   No prior TypeScript baseline. Compare against most recent JS run for cross-language context. Compare: overall rubric score, per-dimension scores (NDS/COV/RST/API/SCH/CDQ), file counts, skip rate, and cost. Highlight dimensions where scores differ.
-  Produces: `evaluation/taze/<first-successful-run>/baseline-comparison.md`
+  Produces: `evaluation/taze/run-13/baseline-comparison.md`
 
 - [ ] **IS scoring run**
 
   1. **Prerequisites**: OTel Collector running with `evaluation/is/otelcol-config.yaml` (see `evaluation/is/README.md` for install and start instructions). No metrics-exporter override needed — MET rules are marked `not_applicable` by the scorer regardless.
-  2. **Action**: Run the target app with the Collector as OTLP receiver; collect `evaluation/is/eval-traces.json`; run `node evaluation/is/score-is.js evaluation/is/eval-traces.json > evaluation/taze/<first-successful-run>/is-score.md`
-  3. **Output**: `evaluation/taze/<first-successful-run>/is-score.md` is written by the command above.
+  2. **Action**: Run the target app with the Collector as OTLP receiver; collect `evaluation/is/eval-traces.json`; run `node evaluation/is/score-is.js evaluation/is/eval-traces.json > evaluation/taze/run-13/is-score.md`
+  3. **Output**: `evaluation/taze/run-13/is-score.md` is written by the command above.
   4. **Note for k8s repos**: IS scoring requires a running cluster; see `evaluation/is/README.md` for the Kind-based workflow
-  Produces: `evaluation/taze/<first-successful-run>/is-score.md`
+  Produces: `evaluation/taze/run-13/is-score.md`
 
 - [ ] **Actionable fix output**
 
   1. Run cross-document audit agent.
   2. *(User-facing checkpoint 2)* Interpreted summary for Whitney.
   3. Print absolute path. **Pause** until Whitney confirms handoff.
-  Produces: `evaluation/taze/<first-successful-run>/actionable-fix-output.md`
+  Produces: `evaluation/taze/run-13/actionable-fix-output.md`
 
 - [ ] **Draft next run PRD**
 
-  Create on separate branch from main (eval branches never merge). Use Type D structure from `docs/language-extension-plan.md` and `prds/37-evaluation-run-13.md` as the milestone style reference. First Type D PRD for TypeScript chain. Carry forward both checkpoints. PRD number is `<first-successful-run> + 1` (e.g., if first successful run is run-4, draft PRD covers run-5). Merge the PRD-only PR to main.
+  Create on separate branch from main (eval branches never merge). Use Type D structure from `docs/language-extension-plan.md` and `prds/37-evaluation-run-13.md` as the milestone style reference. First Type D PRD for TypeScript chain. Carry forward both checkpoints. **first-successful-run = run-13**, so this PRD covers run-14. Merge the PRD-only PR to main.
 
   **Gate to include in the Type D PRD's pre-run verification checklist**: Confirm `checkSyntax()` in spiny-orb reads the project's `tsconfig.json` moduleResolution (not hardcoded NodeNext) before running. See 2026-04-28 Decision Log entry.
 
