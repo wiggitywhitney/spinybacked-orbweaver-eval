@@ -12,7 +12,7 @@ Execution order within each tier matters. Items are listed in dependency order �
 2. ~~Source cleanup: remove commit-story source code from eval repo (PRD #47)~~ ✅ Complete
 3. ~~IS integration: scoring script, OTel Collector config, Type D template update (PRD #44)~~ ✅ Complete
 4. ~~Research spike: eval target criteria — redo scorecard + find 12 candidates (PRD #45)~~ ✅ Complete
-5. TypeScript eval setup + Run-1: target selection from 3 candidates (PRD #50) — TS provider landing in spiny-orb (in progress)
+5. ~~TypeScript eval setup + Run-1: taze — first TypeScript baseline (PRD #50)~~ ✅ Complete — 27/29 (93%), 14 files, Q×F 13.0, IS 60/100; run-14 PRD #82 queued
 6. JavaScript eval setup + Run-1: target selection from 3 candidates (PRD #53) — JS provider already exists; sequenced after TypeScript eval
 
 ## Long-term (blocked by language providers)
