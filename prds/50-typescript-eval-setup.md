@@ -193,7 +193,13 @@ The feature branch for this PRD **never merges to main**. The PR exists for Code
 
 - [ ] **Actionable fix output**
 
-  1. Run cross-document audit agent.
+  Read style reference first: `docs/templates/eval-run-style-reference/actionable-fix-output.md`. Also read `evaluation/commit-story-v2/run-14/actionable-fix-output.md` as a prior example. Source documents to synthesize (all in `evaluation/taze/run-13/`): `run-summary.md`, `per-file-evaluation.md`, `pr-evaluation.md`, `rubric-scores.md`, `baseline-comparison.md`, `is-score.md`, `spiny-orb-findings.md`, `lessons-for-run14.md`. This is the first TypeScript baseline run — no prior TS run findings to assess; produce only a new-findings table.
+
+  **IS SPA-001 context (important for §§ about IS score)**: The 164 INTERNAL spans in trace 009cfb90 are all from the `taze` scope — our manual instrumentation, not auto-instrumentation noise. Taze checked ~38 npm packages; each package fires `taze.fetch.package_data` + `taze.fetch.npm_package` + multiple `taze.check.resolve_dependency` spans. This is legitimate fine-grained instrumentation. The IS failure is real signal about span granularity — worth documenting as a discussion point for the spiny-orb team about whether per-dependency spans are the right abstraction.
+
+  **SCH-003 context**: The 3 type mismatches (`taze.config.sources_found`, `taze.cache.hit`, `taze.cache.changed`) are schema documentation errors — the agent inferred semantically correct types (int, boolean) but the agent-extensions.yaml was written with incorrect `type: string` declarations. The fix path is updating the schema file, not the instrumentation code.
+
+  1. Write `evaluation/taze/run-13/actionable-fix-output.md` by synthesizing all run-13 artifacts.
   2. *(User-facing checkpoint 2)* Interpreted summary for Whitney.
   3. Print absolute path. **Pause** until Whitney confirms handoff.
   Produces: `evaluation/taze/run-13/actionable-fix-output.md`
