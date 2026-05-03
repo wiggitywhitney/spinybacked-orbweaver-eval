@@ -93,14 +93,14 @@ Note: run-summary reports 2 spans for this file; source review finds 1 `startAct
 | SCH-002 | PASS |
 | SCH-003 | PASS — `options.recursive` (boolean, null-guarded) matches schema type; `options.write` (boolean, null-guarded) matches schema type; `mode` is a CLI-validated string matching enum members |
 | SCH-004 | PASS |
-| CDQ-001 | PASS — `span.end()` in `finally` |
+| CDQ-001 | PASS (static) / **advisory (runtime)** — `span.end()` is in the `finally` block (static analysis PASS); however, `process.exit(exitCode)` is called inside the try block on the normal success path, bypassing `finally` at runtime. The span is never closed on successful completion. This is the same pattern CodeRabbit flagged in run-5 debug dumps. Fix: call `span.end()` explicitly before `process.exit()`, or return `exitCode` and call `process.exit()` outside the span callback. |
 | CDQ-002 | PASS |
 | CDQ-003 | PASS |
 | CDQ-005 | PASS |
 | CDQ-006 | PASS — all `setAttribute` values are simple variable or property references |
 | CDQ-007 | PASS |
 
-**Failures**: None
+**Failures**: None. CDQ-001 runtime advisory noted: `process.exit()` on the success path bypasses `finally`, so the span is never closed after a normal run.
 
 ---
 
@@ -589,6 +589,8 @@ All 19 files were correctly identified as uninstrumentable before or during the 
 | src/io/yarnWorkspaces.ts | CDQ-006 | Code Quality | Inline `Object.keys()` in `setAttribute('taze.write.changes_count', ...)` without `isRecording()` guard |
 
 **Total canonical failures**: 9 across 5 files (3 SCH-003, 6 CDQ-006)
+
+**CDQ-001 runtime advisory (non-canonical)**: `src/cli.ts` — `process.exit(exitCode)` on the normal success path bypasses the `finally` block, so the span is never closed after a successful run. Static analysis PASS (span.end() is in finally); runtime behavior is incorrect. Same issue found in run-5 debug dumps by CodeRabbit CLI.
 
 **Schema documentation note**: The 3 SCH-003 failures stem from type mismatches between code behavior and agent-extensions.yaml declarations. The code uses semantically appropriate types (int for counts, boolean for flags); the schema documentation was recorded with incorrect types. Future schema authoring should declare `taze.config.sources_found: int`, `taze.cache.hit: boolean`, `taze.cache.changed: boolean`.
 

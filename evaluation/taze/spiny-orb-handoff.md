@@ -33,8 +33,8 @@ Replace `run-N` with the run number. The `debug/` directory is present when `--d
 
 **No current blockers.** The TypeScript baseline is established. The eval team is proceeding to the analysis phase.
 
-1. SCH-001 cascade — first committed span name (`taze.check.run`) poisoned all downstream files via judge "semantic duplicate" rulings, forcing span name collisions across unrelated operations; requires OTel research then advisory mode change
-2. NDS-003 misses regex literal modifications — agent corrupted `/\./g` to `/\.\g/` in `yarnWorkspaces.ts`
+1. SCH-001 cascade — first committed span name (`taze.check.run`) poisoned all downstream files via judge "semantic duplicate" rulings, forcing span name collisions across unrelated operations; **resolved by switching SCH-001 to advisory mode (PR #711), confirmed in run-13**
+2. NDS-003 misses regex literal modifications — agent corrupted `/\./g` to `/\.\g/` in `yarnWorkspaces.ts`; **resolved in PR #711, confirmed in run-13**
 
 ---
 
@@ -306,16 +306,17 @@ The run-10 agent regenerated `attributes.yaml` from scratch instead of reading a
 
 ---
 
-## Issue (medium): SCH-001 should be advisory, not blocking — pending OTel research
+## Finding FK — SCH-001 blocking causes span name cascade deadlock (P1, run-12) — ✅ Resolved
 
 **Found in**: run-12 (`src/cli.ts`, `src/commands/check/checkGlobal.ts`)
+**Status**: Fixed in PR #711 (SCH-001 changed to advisory); confirmed in run-13 (0 failures, 0 span name collisions).
 
-**Problem**: SCH-001 currently blocks a file if the LLM judge determines the proposed span name is semantically similar to an existing registry operation. In run-12, this created an unresolvable deadlock:
+**Problem**: SCH-001 blocked a file if the LLM judge determined the proposed span name was semantically similar to an existing registry operation. In run-12, this created an unresolvable deadlock:
 
 1. `check.ts` committed span `taze.check.run`
 2. `cli.ts` proposed `taze.cli.run` — SCH-001 ruled it a "semantic duplicate" and said use `taze.check.run` instead
-3. But `taze.check.run` is already in use by a different function
-4. Both options fail — the agent has no valid move
+3. But `taze.check.run` was already in use by a different function
+4. Both options failed — the agent had no valid move
 
 The cascade poisoned every subsequent file. `taze.check.global`, `taze.io.load_cache`, `taze.io.load_package`, `taze.fetch.package` were all rejected as duplicates. Multiple files were then forced to commit `taze.check.run` for completely different operations, producing collision warnings:
 
@@ -326,11 +327,11 @@ Warning: Span name "taze.check.run" collision: declared by both src/api/check.ts
 Warning: Span name "taze.check.run" collision: declared by both src/api/check.ts and src/io/bunWorkspaces.ts
 ```
 
-The judge's rulings in this run were arguably wrong. `taze.cli.run` is a CLI dispatcher that sits *above* the check operation — it parses args, resolves config, and delegates to either `check` or `checkGlobal`. Similarly, `taze.check.global` checks global npm/pnpm packages via a distinct resolution pathway. These are hierarchically-distinct operations that would appear as parent/child spans in a real trace. Forcing them to share a name loses that trace hierarchy.
+The judge's rulings were arguable. `taze.cli.run` is a CLI dispatcher that sits *above* the check operation — it parses args, resolves config, and delegates to either `check` or `checkGlobal`. These are hierarchically-distinct operations that appear as parent/child spans in a real trace. Forcing them to share a name loses that trace hierarchy.
 
-**Proposed change**: Make SCH-001 advisory rather than blocking. Surface the potential duplicate to the agent — "this may be a semantic duplicate of `taze.check.run` — consider reusing it if these operations are truly equivalent" — and let the agent decide with full function context. The agent has more information than the judge.
+**Resolution**: SCH-001 was changed to advisory mode in PR #711. The agent now receives the potential duplicate as a suggestion and decides with full function context. In run-13, multiple files received SCH-001 advisory suggestions and correctly evaluated them — `pnpmWorkspaces.ts` kept `taze.pnpm_workspace.load` over the suggested `taze.io.load_package`, and `packument.ts` chose distinct names because `taze.fetch.package_data` was already claimed. Zero span collisions resulted.
 
-**Prerequisite research first**: Before making this change, verify OTel good practice on span naming for hierarchically-distinct operations. The key question: does OTel recommend that a CLI entry point and its child check operation share a span name (grouping by operation type, lower cardinality) or have distinct names (preserving trace hierarchy)? If OTel recommends shared names for related operations, the blocking behavior may be correct and the fix is different. If OTel recommends distinct names for distinct hierarchy levels, Advisory is clearly right. Research this before implementing.
+**Open question (not a blocker)**: OTel best practice on span naming for hierarchically-distinct operations — does OTel recommend shared names for related operations (lower cardinality) or distinct names for distinct hierarchy levels? Advisory mode sidesteps this question by letting the agent decide with context, but it's worth researching for future spec guidance.
 
 ---
 
