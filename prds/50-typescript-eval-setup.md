@@ -191,7 +191,7 @@ The feature branch for this PRD **never merges to main**. The PR exists for Code
 
   **Result (2026-05-03)**: IS score 60/100. Passes: RES-005 (Critical — service.name present), RES-004, SPA-003, SPA-004. Fails: RES-001 (service.instance.id absent from resource), SPA-001 (164 INTERNAL spans across 4 runs, exceeds per-trace limit of 10), SPA-002 (1 orphan span), SPA-005 (42 spans < 5ms). Docker not available (Datadog MDM policy); used otelcol-contrib binary download instead. OTel SDK packages (`sdk-node`, `exporter-trace-otlp-http`, etc.) are not in taze devDependencies — must be temporarily installed via `pnpm add -D` for IS scoring runs and reverted after. taze CLI modes: `default | major | minor | patch | latest | newest | next` (no "check" subcommand).
 
-- [ ] **Actionable fix output**
+- [x] **Actionable fix output**
 
   Read style reference first: `docs/templates/eval-run-style-reference/actionable-fix-output.md`. Also read `evaluation/commit-story-v2/run-14/actionable-fix-output.md` as a prior example. Source documents to synthesize (all in `evaluation/taze/run-13/`): `run-summary.md`, `per-file-evaluation.md`, `pr-evaluation.md`, `rubric-scores.md`, `baseline-comparison.md`, `is-score.md`, `spiny-orb-findings.md`, `lessons-for-run14.md`. This is the first TypeScript baseline run — no prior TS run findings to assess; produce only a new-findings table.
 
@@ -208,7 +208,18 @@ The feature branch for this PRD **never merges to main**. The PR exists for Code
 
   Create on separate branch from main (eval branches never merge). Use Type D structure from `docs/language-extension-plan.md` and `prds/37-evaluation-run-13.md` as the milestone style reference. First Type D PRD for TypeScript chain. Carry forward both checkpoints. **first-successful-run = run-13**, so this PRD covers run-14. Merge the PRD-only PR to main.
 
-  **Gate to include in the Type D PRD's pre-run verification checklist**: Confirm `checkSyntax()` in spiny-orb reads the project's `tsconfig.json` moduleResolution (not hardcoded NodeNext) before running. See 2026-04-28 Decision Log entry.
+  **Findings to carry forward** (from `evaluation/taze/run-13/actionable-fix-output.md`):
+  - **TAZE-RUN1-1** (SCH-003): Schema type fix — update `semconv/agent-extensions.yaml` in taze fork: `sources_found` → int, `cache.hit` → boolean, `cache.changed` → boolean. This is an eval team fix, not a spiny-orb issue.
+  - **TAZE-RUN1-2** (CDQ-006): spiny-orb issue #728 — diagnose advisory pass gap, then expand prompt pattern list
+  - **TAZE-RUN1-3** (advisory): spiny-orb issues #729 (CDQ-007 TS null check) and #730 (SCH-001 namespace prefix) — both gated on 2+ runs
+  - **TAZE-RUN1-4** (pre-scan): spiny-orb issue #714 — deterministic skip for pure re-export files
+  - **TAZE-RUN1-5** (IS RES-001): Add `service.instance.id: randomUUID()` to `examples/instrumentation.js` in taze fork — eval team fix
+  - **TAZE-RUN1-6** (IS SPA-001): spiny-orb issue #731 — span granularity design discussion, gated on 2+ CLI runs
+
+  **Gates to include in the Type D PRD's pre-run verification checklist**:
+  1. Confirm `checkSyntax()` in spiny-orb reads the project's `tsconfig.json` moduleResolution (not hardcoded NodeNext). See 2026-04-28 Decision Log entry.
+  2. Confirm schema type fix applied to taze fork (TAZE-RUN1-1 above) — can be done as part of pre-run setup.
+  3. Check whether spiny-orb #728 (CDQ-006 advisory pass) has landed; record SHA if so.
 
 ## Dependencies and Constraints
 
