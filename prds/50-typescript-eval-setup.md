@@ -204,7 +204,7 @@ The feature branch for this PRD **never merges to main**. The PR exists for Code
   3. Print absolute path. **Pause** until Whitney confirms handoff.
   Produces: `evaluation/taze/run-13/actionable-fix-output.md`
 
-- [ ] **Draft next run PRD**
+- [x] **Draft next run PRD**
 
   Create on separate branch from main (eval branches never merge). Use Type D structure from `docs/language-extension-plan.md` and `prds/37-evaluation-run-13.md` as the milestone style reference. First Type D PRD for TypeScript chain. Carry forward both checkpoints. **first-successful-run = run-13**, so this PRD covers run-14. Merge the PRD-only PR to main.
 
