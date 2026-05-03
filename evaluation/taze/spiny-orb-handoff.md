@@ -1,13 +1,13 @@
-# Spiny-orb Handoff — taze TypeScript Eval (Runs 1–12)
+# Spiny-orb Handoff — taze TypeScript Eval (Runs 1–13)
 
 **File location**: `/Users/whitney.lee/Documents/Repositories/spinybacked-orbweaver-eval/evaluation/taze/spiny-orb-handoff.md`
 **GitHub**: `https://github.com/wiggitywhitney/spinybacked-orbweaver-eval/blob/feature/prd-50-typescript-eval-setup/evaluation/taze/spiny-orb-handoff.md`
 
-**Last updated**: 2026-05-01
+**Last updated**: 2026-05-03
 **Eval target**: wiggitywhitney/taze (fork of antfu-collective/taze)
-**Runs attempted**: 12
-**Completed runs**: Run-5–8 (PRs #1–3), Run-9 (PR #4), Run-10 (PR #5), Run-11 (PR #6), Run-12 (PR #7)
-**Files committed**: ~6 net (run-12 net after rollbacks; see findings below)
+**Runs attempted**: 13
+**Completed runs**: Run-5–12 (PRs #1–7), **Run-13 (PR #8 — first perfect run)**
+**Files committed**: 14 (run-13, 0 failures, 0 rollbacks)
 
 ---
 
@@ -29,12 +29,12 @@ Replace `run-N` with the run number. The `debug/` directory is present when `--d
 
 ## TL;DR
 
-Run-10 committed `resolves.ts` (6 spans). Findings G (`if (span.isRecording())`) and H (NDS-003 null guards) are fixed. Two new blockers remain for run-11.
+**Run-13 was the first perfect run**: 33/33 files processed, 14 committed, 19 correct skips, 0 failures, 0 rollbacks. Live-check: OK. PR #8 created.
 
-**Current blockers**: Two fixes needed — see Findings I and J below.
+**No current blockers.** The TypeScript baseline is established. The eval team is proceeding to the analysis phase.
 
-1. Read `target` from tsconfig.json — `Array.fromAsync` is not in ES2022 but IS in ESNext (taze's actual target)
-2. Read `lib`/`types` from tsconfig.json — `node:*` protocol imports need `@types/node` which isn't loaded in per-file mode
+1. SCH-001 cascade — first committed span name (`taze.check.run`) poisoned all downstream files via judge "semantic duplicate" rulings, forcing span name collisions across unrelated operations; requires OTel research then advisory mode change
+2. NDS-003 misses regex literal modifications — agent corrupted `/\./g` to `/\.\g/` in `yarnWorkspaces.ts`
 
 ---
 
@@ -58,6 +58,10 @@ Run-10 committed `resolves.ts` (6 spans). Findings G (`if (span.isRecording())`)
 | FF — NDS-003 catch/finally pattern (run-7) | ✅ Fixed — standalone `catch (error) {`, `finally {`, `throw error` added to allowlist |
 | FG — `if (span.isRecording()) {` blocked by NDS-003 (run-9) | ✅ Fixed |
 | FH — NDS-003 null guard catch-22 (run-9) | ✅ Fixed |
+| FI — NDS-003 flags `as const` on discriminant fields (run-10) | ✅ Fixed |
+| FJ — Agent rewrites semconv schema file, removing prior definitions (run-10) | ✅ Fixed |
+| FK — SCH-001 blocking causes span name cascade deadlock (run-12) | 🔴 Open |
+| FL — NDS-003 misses regex literal modifications (run-12) | 🔴 Open |
 
 ---
 
@@ -302,19 +306,19 @@ The run-10 agent regenerated `attributes.yaml` from scratch instead of reading a
 
 ---
 
-## New Finding K — SCH-001 blocking causes cascade deadlock and span name collisions (P1, run-12)
+## Issue (medium): SCH-001 should be advisory, not blocking — pending OTel research
 
-**Evidence from run-12** (the clearest yet):
+**Found in**: run-12 (`src/cli.ts`, `src/commands/check/checkGlobal.ts`)
 
-`check.ts` (file 3) committed span extension `taze.check.run`. The SCH-001 LLM judge then blocked every subsequent file:
-- `cli.ts` → `taze.cli.run` rejected as duplicate of `taze.check.run`
-- `checkGlobal.ts` → `taze.check.global` rejected as duplicate of `taze.check.run`
-- `packageYaml.ts` → all 4 YAML span names rejected as duplicates of existing ones
-- `packages.ts` → `taze.io.load_package` rejected as duplicate of `taze.io.read_package_json`
-- `resolves.ts` → `taze.io.load_cache` rejected as duplicate of `taze.io.read_package_json`
-- `packument.ts` → `taze.fetch.package` rejected as duplicate of `taze.io.read_package_json`
+**Problem**: SCH-001 currently blocks a file if the LLM judge determines the proposed span name is semantically similar to an existing registry operation. In run-12, this created an unresolvable deadlock:
 
-Forced to use `taze.check.run`, multiple files committed with the **same span name for different operations**, producing collision warnings:
+1. `check.ts` committed span `taze.check.run`
+2. `cli.ts` proposed `taze.cli.run` — SCH-001 ruled it a "semantic duplicate" and said use `taze.check.run` instead
+3. But `taze.check.run` is already in use by a different function
+4. Both options fail — the agent has no valid move
+
+The cascade poisoned every subsequent file. `taze.check.global`, `taze.io.load_cache`, `taze.io.load_package`, `taze.fetch.package` were all rejected as duplicates. Multiple files were then forced to commit `taze.check.run` for completely different operations, producing collision warnings:
+
 ```text
 Warning: Span name "taze.check.run" collision: declared by both src/api/check.ts and src/commands/check/index.ts
 Warning: Span name "taze.check.run" collision: declared by both src/api/check.ts and src/commands/check/interactive.ts
@@ -322,7 +326,11 @@ Warning: Span name "taze.check.run" collision: declared by both src/api/check.ts
 Warning: Span name "taze.check.run" collision: declared by both src/api/check.ts and src/io/bunWorkspaces.ts
 ```
 
-**This is the strongest evidence yet that SCH-001 must be advisory, not blocking.** The current blocking behavior forces identical span names on semantically distinct operations, which is objectively worse than allowing distinct span names. Also see `docs/spiny-orb-design-handoff.md` for the full design proposal (research OTel best practices first, then make SCH-001 advisory).
+The judge's rulings in this run were arguably wrong. `taze.cli.run` is a CLI dispatcher that sits *above* the check operation — it parses args, resolves config, and delegates to either `check` or `checkGlobal`. Similarly, `taze.check.global` checks global npm/pnpm packages via a distinct resolution pathway. These are hierarchically-distinct operations that would appear as parent/child spans in a real trace. Forcing them to share a name loses that trace hierarchy.
+
+**Proposed change**: Make SCH-001 advisory rather than blocking. Surface the potential duplicate to the agent — "this may be a semantic duplicate of `taze.check.run` — consider reusing it if these operations are truly equivalent" — and let the agent decide with full function context. The agent has more information than the judge.
+
+**Prerequisite research first**: Before making this change, verify OTel good practice on span naming for hierarchically-distinct operations. The key question: does OTel recommend that a CLI entry point and its child check operation share a span name (grouping by operation type, lower cardinality) or have distinct names (preserving trace hierarchy)? If OTel recommends shared names for related operations, the blocking behavior may be correct and the fix is different. If OTel recommends distinct names for distinct hierarchy levels, Advisory is clearly right. Research this before implementing.
 
 ---
 
