@@ -158,7 +158,7 @@ The feature branch for this PRD **never merges to main**. The PR exists for Code
 
   Run-13 had 0 failures — no deep-dives required. File created: `evaluation/taze/run-13/failure-deep-dives.md`
 
-- [ ] **Per-file evaluation**
+- [x] **Per-file evaluation**
 
   Full 32-rule rubric on ALL processed files.
   Produces: `evaluation/taze/run-13/per-file-evaluation.md`
