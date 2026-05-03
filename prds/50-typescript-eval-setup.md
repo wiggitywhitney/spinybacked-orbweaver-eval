@@ -169,7 +169,7 @@ The feature branch for this PRD **never merges to main**. The PR exists for Code
   Produces: `evaluation/taze/run-13/pr-evaluation.md`
   Style reference: `Read docs/templates/eval-run-style-reference/pr-evaluation.md`
 
-- [ ] **Rubric scoring**
+- [x] **Rubric scoring**
 
   First TypeScript run — establish baseline.
   Produces: `evaluation/taze/run-13/rubric-scores.md`
