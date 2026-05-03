@@ -180,7 +180,7 @@ The feature branch for this PRD **never merges to main**. The PR exists for Code
   No prior TypeScript baseline. Compare against most recent JS run for cross-language context. Compare: overall rubric score, per-dimension scores (NDS/COV/RST/API/SCH/CDQ), file counts, skip rate, and cost. Highlight dimensions where scores differ.
   Produces: `evaluation/taze/run-13/baseline-comparison.md`
 
-- [ ] **IS scoring run**
+- [x] **IS scoring run**
 
   1. **Prerequisites**: OTel Collector running with `evaluation/is/otelcol-config.yaml` (see `evaluation/is/README.md` for install and start instructions). No metrics-exporter override needed — MET rules are marked `not_applicable` by the scorer regardless.
   2. **Setup**: In `~/Documents/Repositories/taze`, check out the instrumented branch: `git checkout spiny-orb/instrument-1777809261652`. Build the project: `pnpm build`. The OTel init file is `examples/instrumentation.js` (sdkInitFile in spiny-orb.yaml). The CLI entry point is `bin/taze.mjs`.
@@ -188,6 +188,8 @@ The feature branch for this PRD **never merges to main**. The PR exists for Code
   4. **Output**: `evaluation/taze/run-13/is-score.md` is written by the command above.
   5. **Restore**: After scoring, `git checkout main` in the taze fork. Restart the Datadog Agent.
   Produces: `evaluation/taze/run-13/is-score.md`
+
+  **Result (2026-05-03)**: IS score 60/100. Passes: RES-005 (Critical — service.name present), RES-004, SPA-003, SPA-004. Fails: RES-001 (service.instance.id absent from resource), SPA-001 (164 INTERNAL spans across 4 runs, exceeds per-trace limit of 10), SPA-002 (1 orphan span), SPA-005 (42 spans < 5ms). Docker not available (Datadog MDM policy); used otelcol-contrib binary download instead. OTel SDK packages (`sdk-node`, `exporter-trace-otlp-http`, etc.) are not in taze devDependencies — must be temporarily installed via `pnpm add -D` for IS scoring runs and reverted after. taze CLI modes: `default | major | minor | patch | latest | newest | next` (no "check" subcommand).
 
 - [ ] **Actionable fix output**
 
