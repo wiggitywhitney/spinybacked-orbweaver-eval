@@ -183,9 +183,10 @@ The feature branch for this PRD **never merges to main**. The PR exists for Code
 - [ ] **IS scoring run**
 
   1. **Prerequisites**: OTel Collector running with `evaluation/is/otelcol-config.yaml` (see `evaluation/is/README.md` for install and start instructions). No metrics-exporter override needed — MET rules are marked `not_applicable` by the scorer regardless.
-  2. **Action**: Run the target app with the Collector as OTLP receiver; collect `evaluation/is/eval-traces.json`; run `node evaluation/is/score-is.js evaluation/is/eval-traces.json > evaluation/taze/run-13/is-score.md`
-  3. **Output**: `evaluation/taze/run-13/is-score.md` is written by the command above.
-  4. **Note for k8s repos**: IS scoring requires a running cluster; see `evaluation/is/README.md` for the Kind-based workflow
+  2. **Setup**: In `~/Documents/Repositories/taze`, check out the instrumented branch: `git checkout spiny-orb/instrument-1777809261652`. Build the project: `pnpm build`. The OTel init file is `examples/instrumentation.js` (sdkInitFile in spiny-orb.yaml). The CLI entry point is `bin/taze.mjs`.
+  3. **Action**: In a separate terminal with the Collector running, run taze with the --import flag (replace `<args>` with any taze subcommand, e.g., `check`): `OTEL_EXPORTER_OTLP_TRACES_ENDPOINT=http://localhost:4318/v1/traces node --import ./examples/instrumentation.js ./bin/taze.mjs <args>`. Multiple runs with different subcommands will enrich the trace data. Then: `node evaluation/is/score-is.js evaluation/is/eval-traces.json > evaluation/taze/run-13/is-score.md`
+  4. **Output**: `evaluation/taze/run-13/is-score.md` is written by the command above.
+  5. **Restore**: After scoring, `git checkout main` in the taze fork. Restart the Datadog Agent.
   Produces: `evaluation/taze/run-13/is-score.md`
 
 - [ ] **Actionable fix output**
