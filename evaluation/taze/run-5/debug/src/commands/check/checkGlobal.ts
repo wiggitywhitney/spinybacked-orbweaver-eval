@@ -1,0 +1,220 @@
+import type { CheckOptions, GlobalPackageMeta, RawDep } from '../../types'
+/* eslint-disable no-console */
+import { getCommand } from '@antfu/ni'
+import prompts from '@posva/prompts'
+import c from 'ansis'
+import { trace, SpanStatusCode } from '@opentelemetry/api'
+import { exec } from 'tinyexec'
+import { dumpDependencies } from '../../io/dependencies'
+import { resolvePackage } from '../../io/resolves'
+import { createMultiProgressBar } from '../../log'
+import { createDependenciesFilter } from '../../utils/dependenciesFilter'
+import { promptInteractive } from './interactive'
+import { outputErr, renderPackages } from './render'
+
+const tracer = trace.getTracer('taze')
+
+interface NpmOut {
+  dependencies: {
+    [name: string]: {
+      version?: string
+    }
+  }
+}
+
+interface PnpmOut {
+  path: string
+  dependencies: {
+    [name: string]: {
+      version: string
+    }
+  }
+}
+
+export async function checkGlobal(options: CheckOptions) {
+  return tracer.startActiveSpan('taze.check.global', async (span) => {
+    try {
+      if (options.mode != null)
+        span.setAttribute('taze.check.mode', options.mode)
+      if (options.recursive != null)
+        span.setAttribute('taze.check.recursive', options.recursive)
+      if (options.write != null)
+        span.setAttribute('taze.check.write_mode', options.write)
+
+      let exitCode = 0
+      let resolvePkgs: GlobalPackageMeta[] = []
+
+      const globalPkgs = await Promise.all([
+        loadGlobalNpmPackage(options),
+        loadGlobalPnpmPackage(options),
+      ])
+      const pkgs = globalPkgs.flat(1)
+
+      const bars = options.loglevel === 'silent'
+        ? null
+        : createMultiProgressBar()
+      await Promise.all(pkgs.map(async (pkg) => {
+        const depBar = bars?.create(pkg.deps.length, 0, { type: c.green(pkg.agent) })
+        await resolvePackage(
+          pkg,
+          options,
+          () => true,
+          (_pkgName, name, progress) => depBar?.update(progress, { name }),
+        )
+      }))
+      bars?.stop()
+
+      resolvePkgs = pkgs
+
+      if (options.interactive)
+        resolvePkgs = await promptInteractive(resolvePkgs, options) as GlobalPackageMeta[]
+
+      const packagesTotal = resolvePkgs.reduce((acc, pkg) => acc + pkg.deps.length, 0)
+      const packagesOutdated = resolvePkgs.reduce((acc, pkg) => acc + pkg.resolved.filter(j => j.update).length, 0)
+      span.setAttribute('taze.check.packages_total', packagesTotal)
+      span.setAttribute('taze.check.packages_outdated', packagesOutdated)
+
+      const { lines, errLines } = renderPackages(resolvePkgs, options)
+
+      const hasChanges = resolvePkgs.length && resolvePkgs.some(i => i.resolved.some(j => j.update))
+      if (!hasChanges) {
+        if (errLines.length)
+          outputErr(errLines)
+        else
+          console.log(c.green('dependencies are already up-to-date'))
+
+        return exitCode
+      }
+
+      console.log(lines.join('\n'))
+
+      if (errLines.length)
+        outputErr(errLines)
+
+      if (options.interactive && !options.install) {
+        options.install = await prompts([
+          {
+            name: 'install',
+            type: 'confirm',
+            initial: true,
+            message: c.green('install now'),
+          },
+        ]).then(r => r.install)
+      }
+
+      if (!options.write) {
+        console.log()
+
+        if (options.mode === 'default')
+          console.log(`Add ${c.green('major')} to check major updates`)
+
+        if (hasChanges) {
+          if (options.failOnOutdated)
+            exitCode = 1
+
+          console.log(`Add ${c.green('-i')} to update global dependency`)
+        }
+
+        console.log()
+      }
+
+      if (options.install) {
+        console.log(c.magenta('installing...'))
+        console.log()
+
+        for (const pkg of resolvePkgs)
+          await installPkg(pkg)
+      }
+
+      return exitCode
+    }
+    catch (error) {
+      span.recordException(error instanceof Error ? error : new Error(String(error)))
+      span.setStatus({ code: SpanStatusCode.ERROR })
+      throw error
+    }
+    finally {
+      span.end()
+    }
+  })
+}
+
+async function loadGlobalPnpmPackage(options: CheckOptions): Promise<GlobalPackageMeta[]> {
+  let pnpmStdout
+
+  try {
+    pnpmStdout = (await exec('pnpm', ['ls', '--global', '--depth=0', '--json'], { throwOnError: true })).stdout
+  }
+  catch {
+    return []
+  }
+
+  const pnpmOuts = (JSON.parse(pnpmStdout) as PnpmOut[]).filter(it => it.dependencies != null)
+  const filter = createDependenciesFilter(options.include, options.exclude)
+
+  const pkgMetas: GlobalPackageMeta[] = pnpmOuts.map(
+    pnpmOut => Object.entries(pnpmOut.dependencies)
+      .filter(([_name, i]) => i?.version)
+      .map(([name, i]) => ({
+        name,
+        currentVersion: `^${i.version}`,
+        update: filter(name),
+        source: 'dependencies',
+      } satisfies RawDep)),
+  )
+    .map((deps, i) => ({
+      agent: 'pnpm',
+      type: 'global',
+      private: true,
+      resolved: [],
+      raw: null,
+      version: '',
+      filepath: '',
+      relative: '',
+      deps,
+      name: c.red`pnpm` + c.gray.dim` (global) ` + c.gray.dim(pnpmOuts[i].path),
+    }))
+
+  return pkgMetas
+}
+
+async function loadGlobalNpmPackage(options: CheckOptions): Promise<GlobalPackageMeta> {
+  const { stdout } = await exec('npm', ['ls', '--global', '--depth=0', '--json'], { throwOnError: true })
+  const npmOut = JSON.parse(stdout) as NpmOut
+  const filter = createDependenciesFilter(options.include, options.exclude)
+
+  let deps: RawDep[] = []
+  if ('dependencies' in npmOut) {
+    deps = Object.entries(npmOut.dependencies)
+      .filter(([_name, i]) => i?.version)
+      .map(([name, i]) => ({
+        name,
+        currentVersion: `^${i.version}`,
+        update: filter(name),
+        source: 'dependencies',
+      }))
+  }
+
+  return {
+    agent: 'npm',
+    private: true,
+    type: 'global',
+    resolved: [],
+    raw: null,
+    version: '',
+    filepath: '',
+    relative: '',
+    deps,
+    name: c.red`npm` + c.gray.dim` (global)`,
+  }
+}
+
+async function installPkg(pkg: GlobalPackageMeta) {
+  const changes = pkg.resolved.filter(i => i.update)
+  if (!changes.length)
+    return
+  const dependencies = dumpDependencies(changes, 'dependencies')
+  const updateArgs = Object.entries(dependencies).map(([name, version]) => `${name}@${version}`)
+  const install = getCommand(pkg.agent, 'global', [...updateArgs])
+  await exec(install.command, install.args, { throwOnError: true })
+}
