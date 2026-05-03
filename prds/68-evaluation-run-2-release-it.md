@@ -117,7 +117,7 @@ The feature branch for this PRD (`feature/prd-68-evaluation-run-2-release-it`) *
 
   **Instrument command** (run from `~/Documents/Repositories/release-it/`):
   ```bash
-  caffeinate -s env -u ANTHROPIC_CUSTOM_HEADERS -u ANTHROPIC_BASE_URL vals exec -i -f .vals.yaml -- node ~/Documents/Repositories/spinybacked-orbweaver/bin/spiny-orb.js instrument lib --verbose 2>&1 | tee ~/Documents/Repositories/spinybacked-orbweaver-eval/evaluation/release-it/run-2/spiny-orb-output.log
+  caffeinate -s env -u ANTHROPIC_CUSTOM_HEADERS -u ANTHROPIC_BASE_URL vals exec -i -f .vals.yaml -- node ~/Documents/Repositories/spinybacked-orbweaver/bin/spiny-orb.js instrument lib --verbose --thinking 2>&1 | tee ~/Documents/Repositories/spinybacked-orbweaver-eval/evaluation/release-it/run-2/spiny-orb-output.log
   ```
 
   AI role: (1) confirm readiness, (2) once Whitney provides the log output, save it and write `evaluation/release-it/run-2/run-summary.md`, (3) **push the eval branch to origin immediately** — the branch holds the only copy of run artifacts until step 13 copies them to main.

@@ -120,7 +120,7 @@ The feature branch for this PRD **never merges to main**. The PR exists for Code
   Whitney runs `spiny-orb instrument`. **Do NOT run yourself.** Copy the command template from `docs/language-extension-plan.md` (line ~72). Replace `commit-story-v2` with the chosen target name, `run-N` with `run-1`, and `src` with the target's source directory (Python repos may use `commitizen/`, `src/`, or the package name as the source dir). Create `evaluation/<target>/run-1/debug-dumps/` before running.
   AI role: confirm readiness, save log, write run-summary.md, and **push the eval branch to origin immediately** (`git push -u origin feature/prd-51-python-eval-setup`) — the branch holds the only copy of run-1 artifacts until PRD #57's backfill lands.
 
-  **Diagnostic protocol**: When a file fails, check `spiny-orb-output.log` for full validator error messages and tsc codes (dimension 3, in `--verbose` output) and `debug-dumps/<filename>` for the actual instrumented code (dimension 2, via `--debug-dump-dir`). Do not diagnose from rule IDs alone. (Per 2026-04-28 decision in PRD #50.)
+  **Diagnostic protocol**: When a file fails, check `spiny-orb-output.log` for full validator error messages (dimension 3, in `--verbose` output), agent notes (dimension 4, in `--verbose` output), and agent thinking blocks for failed files (dimension 5, in `--thinking` output — use `--verbose --thinking` together). Also check `debug-dumps/<filename>` for the actual instrumented code (dimension 2, via `--debug-dump-dir`). Do not diagnose from rule IDs alone. (Per 2026-04-28 decision in PRD #50; `--thinking` flag added per spiny-orb #643.)
 
 - [ ] **Findings Discussion** *(user-facing checkpoint 1)*
 

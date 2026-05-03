@@ -80,12 +80,12 @@ This PRD type exists exactly once per target. It is the "onboarding" for that la
 **Exact instrument command** (run from the target repo directory, update `run-N` to current run number):
 
 ```bash
-caffeinate -s env -u ANTHROPIC_CUSTOM_HEADERS -u ANTHROPIC_BASE_URL vals exec -i -f .vals.yaml -- node ~/Documents/Repositories/spinybacked-orbweaver/bin/spiny-orb.js instrument src --verbose --debug-dump-dir ~/Documents/Repositories/spinybacked-orbweaver-eval/evaluation/commit-story-v2/run-N/debug-dumps 2>&1 | tee ~/Documents/Repositories/spinybacked-orbweaver-eval/evaluation/commit-story-v2/run-N/spiny-orb-output.log
+caffeinate -s env -u ANTHROPIC_CUSTOM_HEADERS -u ANTHROPIC_BASE_URL vals exec -i -f .vals.yaml -- node ~/Documents/Repositories/spinybacked-orbweaver/bin/spiny-orb.js instrument src --verbose --thinking --debug-dump-dir ~/Documents/Repositories/spinybacked-orbweaver-eval/evaluation/commit-story-v2/run-N/debug-dumps 2>&1 | tee ~/Documents/Repositories/spinybacked-orbweaver-eval/evaluation/commit-story-v2/run-N/spiny-orb-output.log
 ```
 
 Note: update `run-N` to the current run number and `commit-story-v2` to the target repo name (e.g., `taze`, `commitizen`, `k8s-vectordb-sync`) before each run. The `src` argument is the directory to instrument — adapt if the target uses a different source directory. Create the `debug-dumps/` subdirectory before running: `mkdir -p ~/Documents/Repositories/spinybacked-orbweaver-eval/evaluation/<target>/run-N/debug-dumps`.
 
-**Diagnostic protocol** (for all eval runs): Do not diagnose failures from errorProgression rule IDs alone. Check all available dimensions in `spiny-orb-output.log`: **(3) full validator error messages** (complete tsc error codes, NDS-005 block previews — in `--verbose` output since PRD #582 M8) and **(4) agent notes** (always in `--verbose`). Also check **(2) actual instrumented code** in `debug-dumps/<filename>` after any failed file. Dimensions (1) run history and (5) agent thinking are test-harness only and not available in CLI eval runs.
+**Diagnostic protocol** (for all eval runs): Do not diagnose failures from errorProgression rule IDs alone. Check all available dimensions: **(2) actual instrumented code** in `debug-dumps/<filename>` (via `--debug-dump-dir`); **(3) full validator error messages** (complete tsc error codes, NDS-005 block previews — in `--verbose` output); **(4) agent notes** (in `--verbose` output); **(5) agent thinking blocks** for failed files (in `--thinking` output — use `--verbose --thinking` together for full diagnostics). Dimension (1) run history is test-harness only and not available in CLI eval runs.
 
 ### Type D: Run-N PRD (recurring, indefinitely)
 Identical in structure to the existing PRDs #3–13. Triggered by findings from the previous run. Follows the established milestone sequence:

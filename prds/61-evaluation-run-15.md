@@ -128,7 +128,7 @@ The **evaluation execution branch** created by `/prd-start` from main **never me
 
   **Exact command** (run from `~/Documents/Repositories/commit-story-v2`):
   ```bash
-  caffeinate -s env -u ANTHROPIC_CUSTOM_HEADERS -u ANTHROPIC_BASE_URL vals exec -i -f .vals.yaml -- node ~/Documents/Repositories/spinybacked-orbweaver/bin/spiny-orb.js instrument src --verbose 2>&1 | tee ~/Documents/Repositories/spinybacked-orbweaver-eval/evaluation/commit-story-v2/run-15/spiny-orb-output.log
+  caffeinate -s env -u ANTHROPIC_CUSTOM_HEADERS -u ANTHROPIC_BASE_URL vals exec -i -f .vals.yaml -- node ~/Documents/Repositories/spinybacked-orbweaver/bin/spiny-orb.js instrument src --verbose --thinking 2>&1 | tee ~/Documents/Repositories/spinybacked-orbweaver-eval/evaluation/commit-story-v2/run-15/spiny-orb-output.log
   ```
 
   **After saving artifacts and committing, push the eval branch to origin immediately** (`git push -u origin feature/prd-61-evaluation-run-15`). The branch holds the only copy of run-15 artifacts until the "Copy artifacts to main" milestone runs — do not leave it local-only.
