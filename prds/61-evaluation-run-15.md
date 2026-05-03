@@ -109,7 +109,7 @@ The **evaluation execution branch** created by `/prd-start` from main **never me
 
 - [x] **Collect skeleton documents** — Create `evaluation/commit-story-v2/run-15/` directory with `lessons-for-prd16.md` skeleton. Must run before pre-run verification step 9.
 
-- [ ] **Pre-run verification** — Verify spiny-orb fixes and validate run prerequisites:
+- [x] **Pre-run verification** — Verify spiny-orb fixes and validate run prerequisites:
   1. **Handoff triage review**: Read the spiny-orb team's triage of `evaluation/commit-story-v2/run-14/actionable-fix-output.md`. Check which findings were filed as issues.
   2. **Catch-block consistency fix** (P1 — critical, RUN14-1): Verify the fix for summaryNode's missing error recording landed. The fix involves prompt guidance for consistent `span.recordException() + span.setStatus(ERROR)` across all LangGraph node catch blocks in `journal-graph.js`. Confirm the relevant issue/PR is closed and merged to spiny-orb main.
   3. **COV-004 outcome from PRD #483 M2**: Check whether PRD #483 Milestone M2 completed and what decision was made for COV-004. Three outcomes are possible:
@@ -133,7 +133,7 @@ The **evaluation execution branch** created by `/prd-start` from main **never me
 
   **After saving artifacts and committing, push the eval branch to origin immediately** (`git push -u origin feature/prd-61-evaluation-run-15`). The branch holds the only copy of run-15 artifacts until the "Copy artifacts to main" milestone runs — do not leave it local-only.
 
-- [ ] **Findings Discussion** *(user-facing checkpoint 1)* — After `run-summary.md` is written, before any evaluation documents are started: report to Whitney: (1) files committed / failed / partial, (2) whether any checkpoint failures occurred, (3) whether summaryNode catch block looks consistent with the other nodes (signal for RUN14-1 fix), (4) quality score if visible, (5) cost, (6) push/PR status. Keep it conversational, under 10 lines. Wait for acknowledgment before proceeding.
+- [ ] **Findings Discussion** *(user-facing checkpoint 1)* — After `run-summary.md` is written, before any evaluation documents are started: report to Whitney: (1) files committed / failed / partial, (2) whether any checkpoint failures occurred, (3) COV-003/CDQ-003 result for journal-graph.js — **note**: per Decision D1, summaryNode's catch block returning degraded state without rethrowing is an OTel-spec-correct graceful-degradation catch; COV-003 *should* pass via `isExpectedConditionCatch` exemption; if it still fails, that is the anomaly to explain — not summaryNode's missing error recording, (4) quality score if visible, (5) cost, (6) push/PR status. Keep it conversational, under 10 lines. Wait for acknowledgment before proceeding.
 
 - [ ] **Failure deep-dives** — For each failed file AND run-level failure. Includes any partial files.
   Produces: `evaluation/commit-story-v2/run-15/failure-deep-dives.md`
@@ -193,6 +193,9 @@ The **evaluation execution branch** created by `/prd-start` from main **never me
 
 | ID | Decision | Rationale | Date |
 |----|----------|-----------|------|
+| D1 | RUN14-1 framing changed: COV-003/CDQ-003 for summaryNode were likely rubric errors, not agent errors | PRD #483 M2 Decision 5 established that COV-003's `isExpectedConditionCatch` exemption is correct per OTel Recording Errors spec — graceful-degradation catches (no rethrow, returns degraded state) SHOULD NOT have `span.recordException() + span.setStatus(ERROR)`. LangGraph nodes returning `{ summary: '[failed]' }` without rethrowing are exempted. technicalNode/dialogueNode having error recording may be over-recording. No fix was filed or merged for RUN14-1. | 2026-05-03 |
+| D2 | Build from `fix/724-attribute-namespace` (SHA 1b6c3d9), not main | Whitney specified this branch for run-15; it adds attribute namespace enforcement (MUST start with namespace prefix, Do NOT invent new namespaces). PR #739 open with run-acceptance label. | 2026-05-03 |
+| D3 | COV-004 stays advisory for run-15 | PRD #483 M2 decided "keep (advisory)" for COV-004 — not promoted to blocking, no per-function validator added. Message strengthened. Same COV-004 behavior expected as run-14 unless strengthened message is more effective. | 2026-05-03 |
 
 ---
 
