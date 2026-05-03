@@ -48,7 +48,7 @@ Verify that the catch-block consistency fix (RUN14-1) landed cleanly: all three 
 
 | Item | Origin | Runs Open | Status |
 |------|--------|-----------|--------|
-| COV-003 + CDQ-003: summaryNode catch | RUN14-1 | 1 run | P1 fix pending in spiny-orb |
+| COV-003 + CDQ-003: summaryNode catch | RUN14-1 | 1 run | Resolved (rubric error — OTel spec exemption correct; see D1) |
 | COV-004: summary-manager.js | RUN12-1 | 3 runs | Disposition pending PRD #483 M2 |
 | journal-graph.js 3 attempts | RUN12-4 | 3 runs | Root cause uninvestigated; cost driver |
 | Cost above $4.00 | RUN11-4 | 4 runs | $5.59 in run-14 |
@@ -94,8 +94,8 @@ The **evaluation execution branch** created by `/prd-start` from main **never me
 ## Success Criteria
 
 1. Quality score of 25/25 restored
-2. `journal-graph.js` summaryNode catch block has `span.recordException()` + `span.setStatus(ERROR)` — consistent with technicalNode and dialogueNode
-3. COV-003 and CDQ-003 pass for all three LangGraph nodes
+2. `journal-graph.js` COV-003 and CDQ-003 pass for all three LangGraph nodes — per Decision D1, summaryNode's catch returning degraded state without rethrowing is OTel-spec-correct (exempted); technicalNode/dialogueNode having error recording is the behavior to watch for over-recording (NDS-005b)
+3. No new COV-003/CDQ-003 failures introduced on journal-graph.js
 4. At least 12 committed files (no regression from run-14)
 5. Push/PR succeeds (fifth consecutive)
 6. Per-file span counts verified by post-hoc counting
@@ -111,7 +111,7 @@ The **evaluation execution branch** created by `/prd-start` from main **never me
 
 - [x] **Pre-run verification** — Verify spiny-orb fixes and validate run prerequisites:
   1. **Handoff triage review**: Read the spiny-orb team's triage of `evaluation/commit-story-v2/run-14/actionable-fix-output.md`. Check which findings were filed as issues.
-  2. **Catch-block consistency fix** (P1 — critical, RUN14-1): Verify the fix for summaryNode's missing error recording landed. The fix involves prompt guidance for consistent `span.recordException() + span.setStatus(ERROR)` across all LangGraph node catch blocks in `journal-graph.js`. Confirm the relevant issue/PR is closed and merged to spiny-orb main.
+  2. **Catch-block consistency (RUN14-1 — reframed per D1)**: No fix was filed or merged. PRD #483 M2 Decision 5 determined that COV-003's `isExpectedConditionCatch` exemption is correct per OTel spec — LangGraph nodes returning degraded state without rethrowing are graceful-degradation catches that SHOULD NOT have `span.recordException() + span.setStatus(ERROR)`. Verify that summaryNode's catch block still returns degraded state without rethrowing (i.e., the exemption should apply). Also note that technicalNode/dialogueNode having error recording may be over-recording per OTel spec (potential NDS-005b violation).
   3. **COV-004 outcome from PRD #483 M2**: Check whether PRD #483 Milestone M2 completed and what decision was made for COV-004. Three outcomes are possible:
      - COV-004 promoted to blocking → summary-manager.js will commit with all 9 functions if the fix was also made
      - COV-004 gets per-function validator output → agent receives specific function names; same commit behavior expected
@@ -120,7 +120,7 @@ The **evaluation execution branch** created by `/prd-start` from main **never me
   4. **Target repo readiness** (commit-story-v2): Verify on `main`, clean working tree, spiny-orb.yaml and semconv/ exist. **Before switching to main, check for uncommitted artifacts on the current instrument branch** (run `git status` in commit-story-v2) and commit any to that branch before switching.
   5. **Push auth stability check**: Verify token still works (dry-run push).
   6. **File inventory**: Count .js files in commit-story-v2's `src/` directory.
-  7. Rebuild spiny-orb from **main**.
+  7. Rebuild spiny-orb from **`fix/724-attribute-namespace`** (SHA 1b6c3d9) — per Decision D2.
   8. Record version and findings status.
   9. Append observations to `evaluation/commit-story-v2/run-15/lessons-for-prd16.md`.
 
