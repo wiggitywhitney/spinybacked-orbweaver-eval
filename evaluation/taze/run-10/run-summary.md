@@ -16,7 +16,7 @@
 | Metric | Value |
 |--------|-------|
 | Files discovered | 33 |
-| Files processed | 19 of 33 (14 skipped as already instrumented) |
+| Files processed | 19 of 33 (9 skipped as already instrumented) |
 | Committed | 1 |
 | Correct skips | 7 |
 | Partial | 0 |

@@ -60,8 +60,8 @@ Replace `run-N` with the run number. The `debug/` directory is present when `--d
 | FH — NDS-003 null guard catch-22 (run-9) | ✅ Fixed |
 | FI — NDS-003 flags `as const` on discriminant fields (run-10) | ✅ Fixed |
 | FJ — Agent rewrites semconv schema file, removing prior definitions (run-10) | ✅ Fixed |
-| FK — SCH-001 blocking causes span name cascade deadlock (run-12) | 🔴 Open |
-| FL — NDS-003 misses regex literal modifications (run-12) | 🔴 Open |
+| FK — SCH-001 blocking causes span name cascade deadlock (run-12) | ✅ Fixed — SCH-001 is now advisory (PR #711); run-13 confirmed 0 failures |
+| FL — NDS-003 misses regex literal modifications (run-12) | ✅ Fixed — included in PR #711; run-13 confirmed 0 failures |
 
 ---
 
@@ -342,9 +342,8 @@ The judge's rulings in this run were arguably wrong. `taze.cli.run` is a CLI dis
 
 ---
 
-## What's Needed for Run-13
+## Status After Run-13
 
-1. **SCH-001: make advisory, not blocking** — research OTel span naming best practices first (see `docs/spiny-orb-design-handoff.md`). This is the highest-priority fix: without it, every run will have span name collisions and cascading failures.
-2. **Checkpoint rollback**: `versions.test.ts` and `packageConfig.test.ts` failed again at file 25 — same pre-existing live-registry flakiness. The smart-rollback PRD (PRD 2 in design handoff) is needed to prevent this.
+Run-13 was a perfect run — 0 failures, 0 rollbacks. Both pre-run-13 fixes (SCH-001 advisory, NDS-003 regex) are confirmed working. The TypeScript baseline is established.
 
-After merging: rebuild spiny-orb, `git checkout main` in taze, create `evaluation/taze/run-13/` directory.
+No current blockers for the eval team's analysis phase. Outstanding infrastructure improvements for future runs are tracked in `docs/spiny-orb-design-handoff.md`.
