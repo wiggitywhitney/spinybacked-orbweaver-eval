@@ -1,6 +1,6 @@
 # PRD #77: JavaScript Evaluation Run-3: release-it — First Committed Baseline Run
 
-**Status:** Draft
+**Status:** Ready
 **Created:** 2026-04-21
 **GitHub Issue:** #77
 **Depends on:** PRD #68 (run-2 complete, blockers documented in `evaluation/release-it/run-2/actionable-fix-output.md`)
@@ -39,8 +39,8 @@ Run-2 processed all 23 release-it `lib/` files and established a quality baselin
 
 | # | Blocker | Root cause | Fix |
 |---|---------|------------|-----|
-| RUN2-1 | OTel module resolution at checkpoint | `@opentelemetry/api` in peerDependencies only; not installed at test time | Add `@opentelemetry/api` to devDependencies in the release-it fork: `npm install --save-dev @opentelemetry/api` and commit to fork main |
-| RUN2-2 | PAT lacks `pull_requests:write` | `github-token-release-it` secret in GCP Secret Manager was created without this scope | Regenerate fine-grained PAT with `pull_requests:write` scoped to `wiggitywhitney/release-it`; update GCP Secret Manager |
+| RUN2-1 | OTel module resolution at checkpoint | `@opentelemetry/api` in peerDependencies only; not installed at test time | ✅ **RESOLVED (2026-05-04)** — `@opentelemetry/api` added to devDependencies on fork main in a prior session |
+| RUN2-2 | PAT lacks `pull_requests:write` | `GITHUB_TOKEN_RELEASE_IT` was missing from `spinybacked-orbweaver-eval/.vals.yaml` — the PAT itself had correct scope all along | ✅ **RESOLVED (2026-05-04)** — Added `GITHUB_TOKEN_RELEASE_IT: ref+gcpsecrets://demoo-ooclock/github-token-release-it` to `.vals.yaml`; push auth verified with dry-run |
 
 ### P2 Quality Issues from Run-2 (watch but do not block on)
 
@@ -71,7 +71,7 @@ Same twelve-milestone structure as all Type D eval runs. Pre-run verification ex
 
 ### Key Inputs
 
-- **Run-2 results** (eval repo): `evaluation/release-it/run-2/` on branch `feature/prd-68-evaluation-run-2-release-it`
+- **Run-2 results**: `evaluation/release-it/run-2/` (on `main` if PRD #68 "Copy artifacts to main" step ran; on branch `feature/prd-68-evaluation-run-2-release-it` otherwise)
 - **Run-2 actionable fix output**: `evaluation/release-it/run-2/actionable-fix-output.md`
 - **Run-2 lessons**: `evaluation/release-it/run-2/lessons-for-run3.md`
 - **Evaluation rubric** (spiny-orb repo): `research/evaluation-rubric.md` (32 rules)
@@ -95,9 +95,7 @@ The feature branch for this PRD (`feature/prd-77-evaluation-run-3-release-it`) *
 
 ## Milestones
 
-- [ ] **Read language-extension-plan.md**
-
-  Read `docs/language-extension-plan.md` completely before proceeding with any other milestone.
+- [ ] **Read `docs/language-extension-plan.md` completely before proceeding with any other milestone.** Pay particular attention to step 9.5 (SPA-001 calibration note) and step 9 (IS scoring protocol). **Do not mark this complete until you have read both sections.**
 
 - [ ] **Collect skeleton documents**
 
@@ -114,13 +112,17 @@ The feature branch for this PRD (`feature/prd-77-evaluation-run-3-release-it`) *
      python3 -c "import json; p=json.load(open('package.json')); print(p.get('devDependencies',{}).get('@opentelemetry/api','MISSING'))"
      ```
      Must print a version string (not `MISSING`). If missing, run `npm install --save-dev @opentelemetry/api`, commit to fork main, and run `npm test` to confirm tests still pass before proceeding.
-  2. **RUN2-2 (PAT scope) — MUST PASS**: Verify `GITHUB_TOKEN_RELEASE_IT` has `pull_requests:write` for `wiggitywhitney/release-it`. Fine-grained PATs don't show this scope in `gh auth status`. Verify directly: go to https://github.com/settings/personal-access-tokens, find the release-it eval token, confirm it shows "Pull requests: Read and write" under repository permissions for `wiggitywhitney/release-it`. Alternatively, check the token's repo-level permissions via: `vals exec -i -f .vals.yaml -- gh api repos/wiggitywhitney/release-it --jq '.permissions'` — if `admin: true` appears, the token was created with admin scope and should include PR creation. The definitive test is the run itself — if PR creation fails with the same GraphQL error as run-2, the PAT was not updated.
+  2. **RUN2-2 (PAT + vals.yaml) — MUST PASS**: Verify `GITHUB_TOKEN_RELEASE_IT` resolves correctly from `spinybacked-orbweaver-eval/.vals.yaml` and the PAT has push access. Run the dry-run push verification:
+     ```bash
+     vals exec -i -f .vals.yaml -- bash -c 'git -C ~/Documents/Repositories/release-it push --dry-run https://x-access-token:${GITHUB_TOKEN_RELEASE_IT}@github.com/wiggitywhitney/release-it.git HEAD:refs/heads/spiny-orb/auth-test 2>&1'
+     ```
+     Must succeed without authentication errors. "Password authentication is not supported" or 403 means the token is missing or invalid — check that `GITHUB_TOKEN_RELEASE_IT` is in `.vals.yaml` and the GCP secret `github-token-release-it` is populated. Do NOT use `HEAD:main` for verification (will fail if local is behind remote).
   3. **RUN2-3 (arrowParens LINT)**: Check if spiny-orb has merged a Prettier post-pass fix. If landed, LINT failures on files with arrowParens should resolve. If not, 6 files will likely fail LINT again.
   4. **RUN2-4 (NDS-003 GitHub.js)**: Check if spiny-orb has fixed the NDS-003 return-value capture issue or updated agent guidance to omit `release_it.github.release_id`.
   5. **RUN2-5 (COV-003/NDS-007 GitLab.js)**: Check if spiny-orb has updated the COV-003 validator to exempt graceful-degradation catch blocks.
   6. **Target repo readiness**: Verify release-it fork is on `main`, working tree is clean, `spiny-orb.yaml` and `semconv/` exist, `@opentelemetry/api` is installed.
   7. **File inventory**: Confirm 23 `.js` files in `lib/` — run `find lib -name "*.js" | wc -l` from `~/Documents/Repositories/release-it/`.
-  8. **Rebuild spiny-orb**: Rebuild from current branch (not necessarily main). Record SHA.
+  8. **Rebuild spiny-orb**: Rebuild from **main** (unless a specific fix branch has been communicated for this run). Record SHA.
   9. **Record versions**: Node.js version, spiny-orb version/SHA, release-it version.
   10. Append observations to `evaluation/release-it/run-3/lessons-for-run4.md`.
 
@@ -167,27 +169,28 @@ The feature branch for this PRD (`feature/prd-77-evaluation-run-3-release-it`) *
 
 - [ ] **IS scoring run**
 
-  Prerequisites: OTel Collector running with `evaluation/is/otelcol-config.yaml` (see `evaluation/is/README.md`). Stop Datadog Agent first: `sudo launchctl stop com.datadoghq.agent`. IS scoring requires committed instrumented files in the working tree — if 0 files committed, mark as NOT EVALUABLE.
+  Prerequisites: OTel Collector running with `evaluation/is/otelcol-config.yaml` (see `evaluation/is/README.md`). Stop Datadog Agent first: `datadog-agent stop`. IS scoring requires committed instrumented files in the working tree — if 0 files committed, mark as NOT EVALUABLE.
 
-  Action: Run release-it in dry-run mode with the Collector as OTLP receiver (dry-run exercises all code paths without publishing).
+  Action: Run release-it in dry-run mode with the Collector as OTLP receiver (dry-run exercises all code paths without publishing). The run must export traces to the collector — verify the correct entry point and `--import` path from the fork's `examples/` directory before running.
 
   From `~/Documents/Repositories/release-it/`:
   ```bash
-  release-it --dry-run
+  OTEL_EXPORTER_OTLP_TRACES_ENDPOINT=http://localhost:4318/v1/traces node --import ./examples/instrumentation.js ./bin/release-it.js --dry-run
   ```
+  If this entry point doesn't exist or traces don't appear in `evaluation/is/eval-traces.json`, check the fork's `examples/` directory for the correct instrumentation bootstrap file and adjust accordingly.
 
   Then from `~/Documents/Repositories/spinybacked-orbweaver-eval/`:
   ```bash
   node evaluation/is/score-is.js evaluation/is/eval-traces.json > evaluation/release-it/run-3/is-score.md
   ```
 
-  Restart Datadog Agent when done: `sudo launchctl start com.datadoghq.agent`
+  Restart Datadog Agent when done: `datadog-agent start`
 
   Produces: `evaluation/release-it/run-3/is-score.md`
 
 - [ ] **Baseline comparison**
 
-  Compare run-3 against commit-story-v2 run-13 (most recent cross-target reference) and against release-it run-2. Highlight dimensions that differ by more than 1 point from commit-story-v2.
+  Compare run-3 against the most recent commit-story-v2 run (check `evaluation/commit-story-v2/run-log.md` for the current run number) and against release-it run-2. Highlight dimensions that differ by more than 1 point from commit-story-v2.
   Produces: `evaluation/release-it/run-3/baseline-comparison.md`
   Style reference: `Read docs/templates/eval-run-style-reference/baseline-comparison.md`
 
@@ -265,6 +268,7 @@ The feature branch for this PRD (`feature/prd-77-evaluation-run-3-release-it`) *
 |------|----------|-----------|
 | 2026-04-21 | Run-3 proceeds only after P1 blockers resolved | OTel devDep and PAT scope are eval-team actions. P2 items (arrowParens, NDS-003, COV-003) are spiny-orb work — run-3 proceeds regardless, accepting possible quality failures on those files. |
 | 2026-04-21 | IS scoring marked NOT EVALUABLE if 0 committed files | IS scoring requires runtime OTLP data from instrumented code; if no instrumented files survive, scoring produces no useful data. |
+| 2026-05-04 | Both P1 blockers confirmed resolved | RUN2-1: `@opentelemetry/api` was already in devDependencies from a prior session. RUN2-2: The PAT had correct `pull_requests:write` scope all along — the issue was that `GITHUB_TOKEN_RELEASE_IT` was missing from `spinybacked-orbweaver-eval/.vals.yaml`. Entry added 2026-05-04; push auth verified with dry-run. |
 
 ---
 
