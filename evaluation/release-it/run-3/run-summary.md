@@ -20,8 +20,8 @@
 | Correct skips | 18 | 3 |
 | Tokens (input) | 33.2K (33.2K cached) | — |
 | Tokens (output) | 73.9K | — |
-| Push | NO (suppressed by prd-687) | YES |
-| PR | NO | FAILED (PAT scope) |
+| Push | YES (branch on remote) | YES |
+| PR | FAILED (createPr crash, created manually as PR#2) | FAILED (PAT scope) |
 
 ---
 
@@ -66,15 +66,14 @@ All of the following were correctly pre-scanned as containing only pure synchron
 
 **GitHub.js correctly skipped:** In run-2, GitHub.js failed with NDS-003 (6 failures). In run-3, it was pre-scanned as having no instrumentable functions. This needs validation — GitHub.js uses Octokit and should have async instrumentation candidates. Either the pre-scan correctly identified unexported methods as the only async functions, or this is a false negative.
 
-**Push suppressed by prd-687:** The new end-of-run failure handling does not push the branch when file failures exist. The instrument branch (`spiny-orb/instrument-1777912706406`) exists locally on the release-it fork but was not pushed to remote and no PR was created. This is a new behavior requiring spiny-orb team discussion.
+**Push succeeded, PR creation failed silently:** The branch (`spiny-orb/instrument-1777912706406`) was pushed to remote by spiny-orb. PR creation (`createPr`) crashed in a way that bypassed the try-catch in git-workflow.js, killing the process before the `finally` block could print "Completed in..." and leaving no error in the log. PR was created manually as https://github.com/wiggitywhitney/release-it/pull/2. See FINDING-RUN-1 in spiny-orb-findings.md.
 
 ---
 
 ## Instrument Branch
 
-**Branch:** `spiny-orb/instrument-1777912706406` (local only, not pushed)  
-**Commits:** 2031 total (includes repo history + run-3 commits)  
-**PR:** Not created
+**Branch:** `spiny-orb/instrument-1777912706406` (pushed to remote by spiny-orb)  
+**PR:** https://github.com/wiggitywhitney/release-it/pull/2 (created manually after createPr crash)
 
 ---
 

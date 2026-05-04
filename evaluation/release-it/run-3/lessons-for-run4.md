@@ -49,10 +49,10 @@ lib/plugin/version/Version.js
 
 **Instrument command for run-3** (run from `~/Documents/Repositories/release-it/`):
 ```bash
-caffeinate -s env -u ANTHROPIC_CUSTOM_HEADERS -u ANTHROPIC_BASE_URL GIT_CONFIG_GLOBAL=/Users/whitney.lee/.config/spiny-orb-eval/gitconfig vals exec -i -f .vals.yaml -- bash -c 'GITHUB_TOKEN=$GITHUB_TOKEN_RELEASE_IT node ~/Documents/Repositories/spinybacked-orbweaver/bin/spiny-orb.js instrument lib --verbose 2>&1 | tee ~/Documents/Repositories/spinybacked-orbweaver-eval/evaluation/release-it/run-3/spiny-orb-output.log'
+caffeinate -s env -u ANTHROPIC_CUSTOM_HEADERS -u ANTHROPIC_BASE_URL HOME="$HOME" GIT_CONFIG_GLOBAL=/Users/whitney.lee/.config/spiny-orb-eval/gitconfig vals exec -i -f .vals.yaml -- bash -c 'GITHUB_TOKEN=$GITHUB_TOKEN_RELEASE_IT node ~/Documents/Repositories/spinybacked-orbweaver/bin/spiny-orb.js instrument lib --verbose --thinking 2>&1 | tee ~/Documents/Repositories/spinybacked-orbweaver-eval/evaluation/release-it/run-3/spiny-orb-output.log'
 ```
 
-Note: source directory is `lib/` (not `src/`). spiny-orb built from `feature/prd-687-smarter-end-of-run-failure-handling`.
+Note: source directory is `lib/` (not `src/`). spiny-orb built from `feature/prd-687-smarter-end-of-run-failure-handling`. `HOME="$HOME"` is required in the `env` prefix — the prd-687 weaver prerequisite check needs HOME to write to `~/.weaver/vdir_cache/`. Without it the download hangs and hits the 30s timeout (FINDING-PRE-1). PR creation crashed silently after push; PR#2 was created manually.
 
 ---
 

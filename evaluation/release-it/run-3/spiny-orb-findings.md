@@ -43,7 +43,23 @@ Completed in 32.1s
 
 ## P2 — High Priority
 
-*(fill in during run and failure deep-dives)*
+### FINDING-RUN-1: PR creation crash is silent — process exits without logging and without `finally` running
+
+**Severity**: P2 (PR not created; user has no indication of what went wrong)
+
+**Symptom**: After a successful push, the spiny-orb process exits abruptly. The log ends at the `onRunComplete` "Run complete" line with no push/PR output and no "Completed in..." from the `finally` block in `instrument-handler.js`. No error message appears. The instrument branch exists on the remote but no PR is created.
+
+**Root cause (inferred)**: `createPr` in `git-workflow.js` is wrapped in a try-catch (lines 128–134), but something in the `deps.createPr` call path is crashing the process in a way that bypasses both the try-catch and the `finally` block in `instrument-handler.js`. The most likely mechanism is an unhandled promise rejection or a synchronous throw from a dependency that escapes the async boundary.
+
+**Evidence**: 
+- Branch `spiny-orb/instrument-1777912706406` IS on remote (push succeeded)
+- No PR existed on `wiggitywhitney/release-it` after the run
+- Log ends with "Run complete" + token summary, no subsequent output
+- `finally` block `deps.stderr(\`Completed in ${formatDuration(durationMs)}\`)` never fired
+
+**Workaround**: Create the PR manually with `gh pr create --repo <fork> --head <branch> --base main`.
+
+**Suggested fix**: Ensure `createPr` errors are caught at the process level, not just inside `runGitWorkflow`. Add a top-level unhandled rejection handler that logs to stderr before exiting. The `finally` block should print "Completed in..." unconditionally — if it's not printing, something is calling `process.exit()` or an uncaught synchronous throw is escaping the async boundary.
 
 ---
 
