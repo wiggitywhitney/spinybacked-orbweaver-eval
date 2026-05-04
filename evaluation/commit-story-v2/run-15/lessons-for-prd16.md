@@ -40,7 +40,13 @@ These changes apply to all runs going forward. The COV-003 `isExpectedConditionC
 
 ## Run-Level Observations
 
-<!-- Populated after evaluation run completes -->
+**PROGRESS.md prompt blocks push when 's' (skip) is chosen**: spiny-orb's orchestrator prompts for a PROGRESS.md entry before pushing the instrument branch. Pressing 's' caused the push to fail from spiny-orb's perspective ("Push failed — skipping PR creation"). A second push attempt was made automatically but failed because the branch was already on the remote. Total run time: 2h 7m (81min instrumentation + 46min PROGRESS.md + internal CodeRabbit review). Action needed: either fix the 's' path to be a true bypass, or document the expected behavior.
+
+**spiny-orb internal CodeRabbit review ran after PROGRESS.md interaction**: The orchestrator ran its own CodeRabbit CLI review as part of the pre-push flow, surfacing 9 findings including: summary-detector.js missing outer catch in getDaysWithEntries/getDaysWithDailySummaries (potential CDQ-003); index.js process.exit() inside span (acknowledged limitation); SCH-001 "the existing name" placeholder in advisory messages (spiny-orb output issue).
+
+**summary-detector.js inconsistency: findUnsummarizedDays has catch, getDaysWithEntries/getDaysWithDailySummaries do not**: Three functions share a try/finally structure, but only findUnsummarizedDays records exceptions. The inner ENOENT catches are graceful-degradation (NDS-007 correct), but the outer span wrappers for the first two functions have no catch for unexpected errors. This may or may not be a CDQ-003 finding depending on rubric interpretation.
+
+**journal-graph.js 1-attempt success may not be reproducible**: The breakthrough from 3 attempts to 1 attempt is positive, but root cause is unknown. It could be --thinking flag, fix/724 attribute guidance, or LLM variation. Don't assume it's fixed until run-16 confirms.
 
 ## Evaluation Process Observations
 
