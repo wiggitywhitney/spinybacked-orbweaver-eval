@@ -95,7 +95,7 @@ The feature branch for this PRD (`feature/prd-77-evaluation-run-3-release-it`) *
 
 ## Milestones
 
-- [ ] **Read language-extension-plan.md**
+- [x] **Read language-extension-plan.md**
 
   Read `docs/language-extension-plan.md` completely before proceeding with any other milestone.
 
