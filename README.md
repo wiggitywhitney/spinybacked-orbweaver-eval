@@ -57,7 +57,7 @@ spinybacked-orbweaver-eval/
 │
 ├── evaluation/
 │   ├── commit-story-v2/           # Artifacts from each JS eval run
-│   │   ├── run-2/ … run-14/      # Per-run: rubric scores, per-file eval,
+│   │   ├── run-2/ … run-15/      # Per-run: rubric scores, per-file eval,
 │   │   │                         #   baseline comparison, actionable-fix-output,
 │   │   │                         #   spiny-orb-output.log, is-score.md
 │   │   └── run-log.md            # (planned, PRD #57)
@@ -93,10 +93,11 @@ spinybacked-orbweaver-eval/
 | 12 | 23/25 (92%) | 5/5 | 12+1p | 31 | $5.19 | YES | — |
 | 13 | **25/25 (100%)** | 5/5 | 7+1p+11f | 16 | ~$6.41 | YES | — |
 | 14 | 22/25 (88%) | 5/5 | 12 | 32 | $5.59 | YES | **80/100** |
+| **15** | **24/25 (96%)** | **5/5** | **14** | **40** | **$6.44** | **YES** | **70/100** |
 
 Files column notation: plain count = committed files; `+Np` = N partial files (instrumentation started, not fully committed); `+Nf` = N files rolled back after a checkpoint test failure. Cost column: `~` prefix indicates an estimated/derived cost (early runs predating direct cost reporting in the tool); unprefixed values are directly reported by spiny-orb.
 
-**Run-15 is next** — verifying catch-block consistency in `journal-graph.js` (`summaryNode` error recording) and monitoring COV-004 disposition from the parallel advisory rules audit (spiny-orb PRD #483).
+**Run-16 is next** — addressing COV-003 on `summary-detector.js` (getDaysWithEntries and getDaysWithDailySummaries need outer catch for error recording) and investigating IS SPA-001 growth (37 INTERNAL spans; structural challenge for CLI apps). The OTel spec interpretation from Decision D1 (graceful-degradation catches should NOT record exceptions per Recording Errors spec) should be embedded in run-16's pre-run verification.
 
 Full run-by-run analysis: [`evaluation/commit-story-v2/`](evaluation/commit-story-v2/)
 
