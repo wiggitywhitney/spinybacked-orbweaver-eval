@@ -10,24 +10,26 @@ Observations collected during run-3 evaluation that should inform the next evalu
 
 | Item | Status | Detail |
 |------|--------|--------|
-| spiny-orb.yaml | | |
-| semconv/ | | |
-| .js file inventory | | |
-| GITHUB_TOKEN_RELEASE_IT | | |
-| GIT_CONFIG_GLOBAL override | | |
-| Node.js version | | |
-| spiny-orb version | | Branch `feature/prd-687-smarter-end-of-run-failure-handling` |
-| release-it version | | |
+| spiny-orb.yaml | ✅ | Present in release-it fork root |
+| semconv/ | ✅ | `attributes.yaml` + `registry_manifest.yaml` present |
+| .js file inventory | ✅ | 23 files in `lib/` (same as runs 1–2 — fork is frozen) |
+| GITHUB_TOKEN_RELEASE_IT | ✅ | Resolves via vals; push dry-run to non-existent branch succeeded |
+| GIT_CONFIG_GLOBAL override | ✅ | `/Users/whitney.lee/.config/spiny-orb-eval/gitconfig` — disables gpgsign |
+| @opentelemetry/api | ✅ | v1.9.1 in devDependencies AND installed in node_modules |
+| Working tree | ⚠️ benign | `.gitignore` modified (`+.vals.yaml`), `bin/release-it` untracked — both benign per run-2 |
+| Node.js version | v25.8.0 | |
+| spiny-orb version | 1.0.0 (SHA 3d69f96) | Branch `feature/prd-687-smarter-end-of-run-failure-handling` |
+| release-it version | 20.0.0 | |
 
-**RUN2-1 (OTel devDependency) resolution**: *(fill in)*
+**RUN2-1 (OTel devDependency) resolution** ✅ PASS: `@opentelemetry/api` v1.9.1 in devDependencies AND installed in node_modules. Checkpoint tests will no longer crash on OTel imports.
 
-**RUN2-2 (PAT / vals.yaml) resolution**: `GITHUB_TOKEN_RELEASE_IT` added to `spinybacked-orbweaver-eval/.vals.yaml` on 2026-05-04. The PAT itself had correct `pull_requests:write` scope all along — the issue was the missing vals.yaml entry. Push auth verified with dry-run before run-3.
+**RUN2-2 (PAT / vals.yaml) resolution** ✅ PASS: `GITHUB_TOKEN_RELEASE_IT` added to `spinybacked-orbweaver-eval/.vals.yaml` on 2026-05-04. The PAT itself had correct `pull_requests:write` scope all along — the issue was the missing vals.yaml entry. Push auth verified with dry-run before run-3.
 
-**RUN2-3 (arrowParens LINT)**: *(fill in — did feature/prd-687 include the Prettier post-pass fix?)*
+**RUN2-3 (arrowParens LINT)**: ❌ NOT in `feature/prd-687`. Branch is focused on end-of-run failure handling (call-path analysis, direct-error rollback, flag-and-surface routing) — no Prettier post-pass fix. Expect 6 LINT failures again on arrowParens files.
 
-**RUN2-4 (NDS-003 GitHub.js)**: *(fill in — did feature/prd-687 include a fix?)*
+**RUN2-4 (NDS-003 GitHub.js)**: ❌ NOT in `feature/prd-687`. No NDS-003 return-value capture fix on this branch.
 
-**RUN2-5 (COV-003/NDS-007 GitLab.js)**: *(fill in — did feature/prd-687 include a fix?)*
+**RUN2-5 (COV-003/NDS-007 GitLab.js)**: ❌ NOT in `feature/prd-687`. No COV-003 validator fix on this branch.
 
 **Source file inventory (23 .js files in `lib/`):**
 ```text

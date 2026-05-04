@@ -105,7 +105,7 @@ The feature branch for this PRD (`feature/prd-77-evaluation-run-3-release-it`) *
   - `lessons-for-run4.md` (copy structure from `evaluation/release-it/run-2/lessons-for-run3.md`)
   - `spiny-orb-findings.md` (fresh skeleton with P1/P2/P3 sections)
 
-- [ ] **Pre-run verification**
+- [x] **Pre-run verification**
 
   Verify both run-2 P1 blockers are resolved and validate run prerequisites:
 
