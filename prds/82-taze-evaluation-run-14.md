@@ -1,6 +1,6 @@
 # PRD #82: TS Evaluation Run-14: taze — CDQ-006 isRecording Guard Verification
 
-**Status:** Draft
+**Status:** Ready
 **Created:** 2026-05-03
 **GitHub Issue:** [#82](https://github.com/wiggitywhitney/spinybacked-orbweaver-eval/issues/82)
 **Depends on:** PRD #50 (taze run-13 complete, actionable fix output delivered, 5 findings filed)
@@ -78,7 +78,7 @@ The eval execution branch (`feature/prd-82-taze-evaluation-run-14`) **never has 
 
 ### Key Inputs
 
-- **Run-13 results** (eval repo): `evaluation/taze/run-13/` on branch `feature/prd-50-typescript-eval-setup`
+- **Run-13 results**: `evaluation/taze/run-13/` (on `main` if PRD #50 "Copy artifacts to main" step ran; on branch `feature/prd-50-typescript-eval-setup` otherwise)
 - **Evaluation rubric** (spiny-orb repo): `~/Documents/Repositories/spinybacked-orbweaver/research/evaluation-rubric.md`
 - **Run-13 actionable fix output**: `evaluation/taze/run-13/actionable-fix-output.md`
 - **Run-13 findings**: `evaluation/taze/run-13/spiny-orb-findings.md`
@@ -101,15 +101,13 @@ The eval execution branch (`feature/prd-82-taze-evaluation-run-14`) **never has 
 
 ## Milestones
 
-- [ ] **Read `docs/language-extension-plan.md` completely before proceeding**
-
-  Pay particular attention to: (1) Type D structure and step sequence; (2) "Two User-Facing Checkpoints" section — exact wording for Findings Discussion and handoff pause; (3) eval branch convention (never merges to main); (4) step 13 (copy artifacts to main before closing).
+- [ ] **Read `docs/language-extension-plan.md` completely before proceeding with any other milestone.** Pay particular attention to: (1) Type D structure and step sequence; (2) "Two User-Facing Checkpoints" section — exact wording for Findings Discussion and handoff pause; (3) eval branch convention (never merges to main); (4) step 13 (copy artifacts to main before closing); (5) step 9.5 (SPA-001 calibration note for CLI apps — taze had 164 INTERNAL spans in run-13; treat this as structural, not a regression). **Do not mark this complete until you have read all five sections.**
 
 - [ ] **Collect skeleton documents** — Create `evaluation/taze/run-14/` directory with `lessons-for-run15.md` and `spiny-orb-findings.md` skeleton files. Create `evaluation/taze/run-log.md` (this is the first taze Type D run; the file does not yet exist). Must run before pre-run verification.
 
 - [ ] **Pre-run verification** — Verify fixes and validate prerequisites:
 
-  1. **Schema type fix** (TAZE-RUN1-1 — eval team fix before the run): In `~/Documents/Repositories/taze`, on the `main` branch, update `semconv/agent-extensions.yaml`: change `taze.config.sources_found` → `type: int`, `taze.cache.hit` → `type: boolean`, `taze.cache.changed` → `type: boolean`. Commit and push to fork main.
+  1. **Schema type fix** (TAZE-RUN1-1 — eval team fix before the run): In `~/Documents/Repositories/taze`, on the `main` branch, update `semconv/agent-extensions.yaml`: change `taze.config.sources_found` → `type: int`, `taze.cache.hit` → `type: boolean`, `taze.cache.changed` → `type: boolean`. Commit and push to fork main: `git -C ~/Documents/Repositories/taze commit -am "fix: correct semconv type declarations for run-14" && git -C ~/Documents/Repositories/taze push`.
   2. **IS RES-001 fix** (TAZE-RUN1-5 — eval team fix): In `~/Documents/Repositories/taze`, add `service.instance.id: randomUUID()` to `resourceFromAttributes()` in `examples/instrumentation.js`. Import `randomUUID` from `node:crypto`. Commit and push to fork main.
   3. **spiny-orb #728** (CDQ-006 advisory pass gap): Check whether #728 is merged to spiny-orb main. Record the current spiny-orb SHA. If #728 is not yet merged, document the expected behavior: CDQ-006 violations will likely recur at a similar rate to run-13.
   4. **checkSyntax() moduleResolution gate**: Confirm that spiny-orb's per-file tsc check reads the project's `tsconfig.json` moduleResolution. This fix was required for run-4 (bundler vs NodeNext). If the fix regressed, NDS-001 will fire on every taze file.
@@ -152,15 +150,17 @@ The eval execution branch (`feature/prd-82-taze-evaluation-run-14`) **never has 
 
   **IS scoring gotchas from run-13**: (1) Docker blocked by Datadog MDM policy — download `otelcol-contrib` binary directly from GitHub releases (darwin_arm64); (2) OTel SDK packages (`@opentelemetry/sdk-node`, `exporter-trace-otlp-http`, `sdk-trace-base`, `resources`) are not in taze devDependencies — temporarily install via `pnpm add -D` for the IS scoring run, then revert with `git restore package.json pnpm-lock.yaml`; (3) taze CLI modes are `default | major | minor | patch | latest | newest | next` (no "check" subcommand); (4) Run 3-4 modes to enrich trace data.
 
-  1. **Prerequisites**: OTel Collector running with `evaluation/is/otelcol-config.yaml` — use binary if Docker is unavailable (see `evaluation/is/README.md` for binary download instructions and Datadog Agent port conflict). Stop Datadog Agent before starting Collector.
-  2. **Setup**: In `~/Documents/Repositories/taze`, check out the instrumented branch from run-14's PR. Build: `pnpm build`. Install SDK packages temporarily: `pnpm add -D @opentelemetry/sdk-node @opentelemetry/exporter-trace-otlp-http @opentelemetry/sdk-trace-base @opentelemetry/resources`.
+  1. **Prerequisites**: OTel Collector running with `evaluation/is/otelcol-config.yaml` — use binary if Docker is unavailable (see `evaluation/is/README.md` for binary download instructions and Datadog Agent port conflict). Stop Datadog Agent first: `datadog-agent stop`.
+  2. **Setup**: Find the instrument branch name from the end of `evaluation/taze/run-14/spiny-orb-output.log` (look for `Branch:` in the final summary box) or run `gh pr list --repo wiggitywhitney/taze --json number,headRefName`. In `~/Documents/Repositories/taze`, run: `git fetch && git checkout <instrument-branch> -- src/ examples/`. Build: `pnpm build`. Install SDK packages temporarily: `pnpm add -D @opentelemetry/sdk-node @opentelemetry/exporter-trace-otlp-http @opentelemetry/sdk-trace-base @opentelemetry/resources`.
   3. **Action**: Run several taze modes with the Collector receiving: `OTEL_EXPORTER_OTLP_TRACES_ENDPOINT=http://localhost:4318/v1/traces node --import ./examples/instrumentation.js ./bin/taze.mjs <mode>` (e.g., `default`, `major`, `latest`). Then: `node evaluation/is/score-is.js evaluation/is/eval-traces.json > evaluation/taze/run-14/is-score.md`
-  4. **Restore**: `git restore package.json pnpm-lock.yaml` in the taze fork; `git checkout main`; restart Datadog Agent: `launchctl start com.datadoghq.agent`.
+  4. **Restore**: `git restore package.json pnpm-lock.yaml` in the taze fork; `git checkout main`; restart Datadog Agent: `datadog-agent start`.
   Produces: `evaluation/taze/run-14/is-score.md`
 
 - [ ] **Baseline comparison** — Compare run-14 vs run-13 (only prior TS run). Note improvements on CDQ-006 and SCH-003 specifically.
   Produces: `evaluation/taze/run-14/baseline-comparison.md`
   Style reference: `docs/templates/eval-run-style-reference/baseline-comparison.md`
+
+- [ ] **Update root README** — After baseline comparison: (1) add a row for run-14 to the taze run history table in `README.md` with quality score, gates, files, spans, cost, push/PR status, and IS score; (2) update the "next run" sentence below the taze run history table to reference run-15 and its primary goals.
 
 - [ ] **Actionable fix output** — Primary handoff deliverable.
 
