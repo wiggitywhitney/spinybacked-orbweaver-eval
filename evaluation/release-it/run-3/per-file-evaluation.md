@@ -159,7 +159,7 @@ All 18 were pre-scanned as containing only synchronous utilities, pure constants
 | lib/shell.js | Synchronous only — shell execution utilities |  |
 | lib/spinner.js | Synchronous only — spinner UI |  |
 
-**Pre-scan caveat — GitHub.js and npm/npm.js**: Both files may contain exported async functions that exercise COV-001 (entry point spans) and COV-004 (async I/O spans). The run-2 attempt on GitHub.js produced instrumented code (though it failed validation). If the pre-scan is classifying all plugin class methods as unexported or sync without inspecting the class body, this is a systematic false negative for plugin files. Flag for spiny-orb team: plugin class methods exported via class syntax may not be correctly identified as exported+async.
+**Pre-scan false negatives confirmed — GitHub.js, npm/npm.js, and 6 more**: PR advisory findings (see pr-evaluation.md) confirmed that GitHub.js has 13 uninstrumented async class methods, npm/npm.js has 8, GitBase.js has 6, and GitRelease.js, Plugin.js, Version.js, prompt.js, and shell.js have 1–2 each. The pre-scan is systematically misclassifying plugin class methods as unexported or sync without inspecting the class body. True correct skips are 10 files (the purely sync-only ones). 8 of the 18 "no changes needed" files are false negatives.
 
 ---
 
