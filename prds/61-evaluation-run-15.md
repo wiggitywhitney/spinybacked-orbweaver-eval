@@ -124,7 +124,7 @@ The **evaluation execution branch** created by `/prd-start` from main **never me
   8. Record version and findings status.
   9. Append observations to `evaluation/commit-story-v2/run-15/lessons-for-prd16.md`.
 
-- [ ] **Evaluation run-15** — Whitney runs `spiny-orb instrument` in her own terminal. **Do NOT run the command yourself.** AI role: (1) confirm readiness with Whitney, (2) once Whitney provides the log output, save it to `evaluation/commit-story-v2/run-15/spiny-orb-output.log` and write `evaluation/commit-story-v2/run-15/run-summary.md`.
+- [x] **Evaluation run-15** — Whitney runs `spiny-orb instrument` in her own terminal. **Do NOT run the command yourself.** AI role: (1) confirm readiness with Whitney, (2) once Whitney provides the log output, save it to `evaluation/commit-story-v2/run-15/spiny-orb-output.log` and write `evaluation/commit-story-v2/run-15/run-summary.md`.
 
   **Exact command** (run from `~/Documents/Repositories/commit-story-v2`):
   ```bash
@@ -133,25 +133,25 @@ The **evaluation execution branch** created by `/prd-start` from main **never me
 
   **After saving artifacts and committing, push the eval branch to origin immediately** (`git push -u origin feature/prd-61-evaluation-run-15`). The branch holds the only copy of run-15 artifacts until the "Copy artifacts to main" milestone runs — do not leave it local-only.
 
-- [ ] **Findings Discussion** *(user-facing checkpoint 1)* — After `run-summary.md` is written, before any evaluation documents are started: report to Whitney: (1) files committed / failed / partial, (2) whether any checkpoint failures occurred, (3) COV-003/CDQ-003 result for journal-graph.js — **note**: per Decision D1, summaryNode's catch block returning degraded state without rethrowing is an OTel-spec-correct graceful-degradation catch; COV-003 *should* pass via `isExpectedConditionCatch` exemption; if it still fails, that is the anomaly to explain — not summaryNode's missing error recording, (4) quality score if visible, (5) cost, (6) push/PR status. Keep it conversational, under 10 lines. Wait for acknowledgment before proceeding.
+- [x] **Findings Discussion** *(user-facing checkpoint 1)* — After `run-summary.md` is written, before any evaluation documents are started: report to Whitney: (1) files committed / failed / partial, (2) whether any checkpoint failures occurred, (3) COV-003/CDQ-003 result for journal-graph.js — **note**: per Decision D1, summaryNode's catch block returning degraded state without rethrowing is an OTel-spec-correct graceful-degradation catch; COV-003 *should* pass via `isExpectedConditionCatch` exemption; if it still fails, that is the anomaly to explain — not summaryNode's missing error recording, (4) quality score if visible, (5) cost, (6) push/PR status. Keep it conversational, under 10 lines. Wait for acknowledgment before proceeding.
 
-- [ ] **Failure deep-dives** — For each failed file AND run-level failure. Includes any partial files.
+- [x] **Failure deep-dives** — For each failed file AND run-level failure. Includes any partial files.
   Produces: `evaluation/commit-story-v2/run-15/failure-deep-dives.md`
   Style reference: `Read docs/templates/eval-run-style-reference/failure-deep-dives.md`
 
-- [ ] **Per-file evaluation** — Full rubric on ALL files (no spot-checking). Evaluate all 32 rules across all committed and partial files.
+- [x] **Per-file evaluation** — Full rubric on ALL files (no spot-checking). Evaluate all 32 rules across all committed and partial files.
   Produces: `evaluation/commit-story-v2/run-15/per-file-evaluation.md`
   Style reference: `Read docs/templates/eval-run-style-reference/per-file-evaluation.md`
 
-- [ ] **PR artifact evaluation** — Evaluate PR quality.
+- [x] **PR artifact evaluation** — Evaluate PR quality.
   Produces: `evaluation/commit-story-v2/run-15/pr-evaluation.md`
   Style reference: `Read docs/templates/eval-run-style-reference/pr-evaluation.md`
 
-- [ ] **Rubric scoring** — Synthesize dimension-level scores.
+- [x] **Rubric scoring** — Synthesize dimension-level scores.
   Produces: `evaluation/commit-story-v2/run-15/rubric-scores.md`
   Style reference: `Read docs/templates/eval-run-style-reference/rubric-scores.md`
 
-- [ ] **IS scoring run** — Follow `docs/language-extension-plan.md` step 9. Full protocol in `evaluation/is/README.md` (commit-story-v2 section).
+- [x] **IS scoring run** — Follow `docs/language-extension-plan.md` step 9. Full protocol in `evaluation/is/README.md` (commit-story-v2 section).
 
   1. **Claude runs**: `datadog-agent stop`
   2. **Claude starts** the OTel Collector in the background:
@@ -170,13 +170,13 @@ The **evaluation execution branch** created by `/prd-start` from main **never me
   6. **Claude runs**: `datadog-agent start`
   Produces: `evaluation/commit-story-v2/run-15/is-score.md`
 
-- [ ] **Baseline comparison** — Compare run-15 vs runs 2-14.
+- [x] **Baseline comparison** — Compare run-15 vs runs 2-14.
   Produces: `evaluation/commit-story-v2/run-15/baseline-comparison.md`
   Style reference: `Read docs/templates/eval-run-style-reference/baseline-comparison.md`
 
-- [ ] **Update root README** — After baseline comparison, update `README.md`: (1) add a row for run-15 to the run history table (quality, gates, files, spans, cost, push/PR, IS score); (2) update the "next run" sentence at the bottom to reference run-16 and its primary goals.
+- [x] **Update root README** — After baseline comparison, update `README.md`: (1) add a row for run-15 to the run history table (quality, gates, files, spans, cost, push/PR, IS score); (2) update the "next run" sentence at the bottom to reference run-16 and its primary goals.
 
-- [ ] **Actionable fix output** — Primary handoff deliverable. At milestone completion:
+- [x] **Actionable fix output** — Primary handoff deliverable. At milestone completion:
   1. Run the cross-document audit agent to verify consistency across all run-15 evaluation artifacts.
   2. *(User-facing checkpoint 2)* Give Whitney an interpreted summary of key findings — failures, root causes, notable patterns, what to watch for in run-16.
   3. **Advisory findings document for PRD #483** (if PRD #483 is still active): Create `evaluation/commit-story-v2/run-15/advisory-findings-for-audit.md` using the same format as run-14's version. Hard data only — rule ID, finding text, TP/FP classification.
