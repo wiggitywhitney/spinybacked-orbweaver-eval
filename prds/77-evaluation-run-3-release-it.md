@@ -126,7 +126,7 @@ The feature branch for this PRD (`feature/prd-77-evaluation-run-3-release-it`) *
 
   **Do not proceed if RUN2-1 or RUN2-2 are unresolved.** The run will produce no commits or no PR.
 
-- [ ] **Evaluation run-3**
+- [x] **Evaluation run-3**
 
   Whitney runs `spiny-orb instrument` in her own terminal. **Do NOT run the command yourself.**
 
@@ -137,7 +137,7 @@ The feature branch for this PRD (`feature/prd-77-evaluation-run-3-release-it`) *
 
   AI role: (1) confirm readiness, (2) once Whitney provides the log output, save it and write `evaluation/release-it/run-3/run-summary.md`, (3) **push the eval branch to origin immediately** — the branch holds the only copy of run artifacts until step 13 copies them to main.
 
-- [ ] **Findings Discussion** *(user-facing checkpoint 1)*
+- [x] **Findings Discussion** *(user-facing checkpoint 1)*
 
   After `run-summary.md` is written, before any evaluation documents: report to Whitney with a raw overview — files committed/failed/partial, quality score if visible in log, cost, push/PR status, top 1-2 surprises. Conversational, under 10 lines. Wait for acknowledgment before proceeding.
 
