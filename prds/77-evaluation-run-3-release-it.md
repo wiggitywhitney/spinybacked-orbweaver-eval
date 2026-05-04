@@ -191,7 +191,7 @@ The feature branch for this PRD (`feature/prd-77-evaluation-run-3-release-it`) *
   Produces: `evaluation/release-it/run-3/baseline-comparison.md`
   Style reference: `Read docs/templates/eval-run-style-reference/baseline-comparison.md`
 
-- [ ] **Update root README**
+- [x] **Update root README**
 
   After baseline comparison: (1) add a row for run-3 to the run history table in `README.md` with quality score, gates, files, spans, cost, push/PR status, and IS score; (2) update the "next run" sentence (bold paragraph below the release-it run history table) to reference run-4 and its primary goals.
 

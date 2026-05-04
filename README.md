@@ -99,3 +99,21 @@ Files column notation: plain count = committed files; `+Np` = N partial files (i
 **Run-15 is next** — verifying catch-block consistency in `journal-graph.js` (`summaryNode` error recording) and monitoring COV-004 disposition from the parallel advisory rules audit (spiny-orb PRD #483).
 
 Full run-by-run analysis: [`evaluation/commit-story-v2/`](evaluation/commit-story-v2/)
+
+---
+
+## Run history: release-it
+
+release-it is the second JavaScript evaluation target — a release automation CLI that creates git tags, GitHub releases, and npm publishes. It exercises spiny-orb on a plugin-based class architecture, outbound Octokit calls, and shell exec wrappers.
+
+| Run | Quality | Gates | Files | Spans | Cost | Push/PR | IS |
+|-----|---------|-------|-------|-------|------|---------|-----|
+| 1 | — | — | 0 | 0 | — | NO | — |
+| 2 | 24/25 (96%) | 4/5 | 0 (rollback) | 0 | $5.69 | push YES / PR NO | — |
+| 3 | **25/25 (100%)** | 5/5 | 3 | 6 | $1.59 | push YES / manual PR | **90/100** |
+
+Run-1 was the initial setup run. Run-2: 0 committed due to OTel module resolution checkpoint rollbacks (infrastructure); agent quality was 24/25 assessed from branch output. Run-3: first non-zero Q×F (3.0); pre-scan false negatives on async class methods limited file count; IS 90/100.
+
+**Run-4 primary goals**: fix pre-scan false negative on async class methods (GitHub.js, npm.js, GitBase.js — 8 files with uninstrumented async methods identified in run-3 advisory findings); surface Git.js instrumentation (API termination prevented in run-3); fix `gh pr create` upstream-targeting bug (spiny-orb team action).
+
+Full run-by-run analysis: [`evaluation/release-it/`](evaluation/release-it/)
