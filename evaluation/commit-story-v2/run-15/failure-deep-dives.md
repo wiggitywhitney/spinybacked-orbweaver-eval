@@ -29,7 +29,7 @@ Whitney pressed 's' (skip). The push then "failed" from spiny-orb's perspective 
 
 PR #66 was created manually. No evaluation data was lost.
 
-**Action**: Record as an advisory finding — pressing 's' on the PROGRESS.md check causes the push to fail in spiny-orb's orchestrator. Document whether 's' is intended to block or bypass-and-continue.
+**Correction (post-handoff, spiny-orb team input)**: The first push actually succeeded — pressing 's' exited the hook and git completed the push. spiny-orb's push success detection misread the result (likely due to hook output mixing with git stdout) and reported "Push failed." spiny-orb then ran CodeRabbit and attempted a second push, which failed with "reference already exists" — confirming the branch was already on the remote. The bug is spiny-orb's push result detection, not the 's' key behavior. Branch was pushed manually before this was understood; the manual push was a duplicate (harmless — same commit, remote rejected).
 
 ### spiny-orb Internal CodeRabbit Review — 9 Findings
 

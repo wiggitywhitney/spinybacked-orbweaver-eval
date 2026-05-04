@@ -128,13 +128,19 @@ return tracer.startActiveSpan('span.name', async (span) => {
 
 Span `47f9607c` had a `parentSpanId` (`749f9c3b`) with no matching parent span in the trace. This is a new failure not present in run-14. Likely from an auto-instrumentation interaction (LangChain or MCP instrumentation creating a child span whose parent was created in a different async context or dropped). Not in spiny-orb's direct instrumentation scope — the orphan is likely in the auto-instrumentation libraries. Worth monitoring in run-16.
 
-### RUN15-3: PROGRESS.md Orchestrator Prompt Blocks Push on 's' (Skip) (Low)
+### RUN15-3: spiny-orb Push Success Detection Misfired After git Hook Interaction (Low)
 
-The spiny-orb orchestrator's pre-push PROGRESS.md check prompts the user for a PROGRESS.md entry. When the user presses 's' (skip/bypass), the orchestrator marks the push as failed and skips PR creation. spiny-orb then retries the push, which fails because the branch was already pushed in the first attempt. The expected behavior for 's' (skip this run, still push) is not implemented — 's' behaves like a failure.
+**What actually happened** (corrected post-handoff with spiny-orb team input):
 
-**Impact in run-15**: Branch was pushed manually; PR created manually. Total elapsed time: 2h 7m (vs. ~81min for instrumentation) due to the stuck orchestrator running CodeRabbit review after the failed push.
+The `progress-md-pr.sh` pre-push git hook fired during the instrument branch push (this hook is part of the eval repo's git configuration, not spiny-orb's code — spiny-orb's orchestrator does not interact with it). Whitney pressed 's' in the terminal to skip the PROGRESS.md check. The hook exited and **the first push succeeded** — the branch reached GitHub. However, spiny-orb's push success detection still reported "Push failed — skipping PR creation" despite the push having completed. spiny-orb then ran its internal CodeRabbit review and attempted a second push, which failed with "remote rejected: reference already exists" — confirming the first push had already landed the branch.
 
-**Fix needed**: When the user presses 's' on the PROGRESS.md prompt, the push should continue (bypassing PROGRESS.md check for this run only) and PR creation should proceed normally.
+**What the bug is NOT**: This is not a case where pressing 's' caused the push to fail. The push succeeded. The proposed fix in the initial handoff ("when user presses 's', push should continue") was aimed at the wrong layer — the orchestrator doesn't control the hook, and the push did continue.
+
+**What the bug IS**: spiny-orb's push success detection reported failure despite a successful push. The likely cause is that the hook's interactive output (the prompt text) mixed with git's stdout/stderr in a way that spiny-orb's push result parser interpreted as a failure signal. The branch was on the remote; spiny-orb didn't know it.
+
+**Impact in run-15**: Branch was already on remote when manually pushed; second push failed as expected. PR created manually. Total elapsed time: ~2h 7m (vs. ~81min for instrumentation) — the CodeRabbit review after the misdetected failure added ~46min.
+
+**Fix needed**: spiny-orb's push result detection should verify whether the branch exists on the remote as a secondary confirmation signal when the primary detection is ambiguous — particularly in environments where pre-push hooks produce interactive output that may interfere with stdout parsing.
 
 ### RUN15-4: Advisory Contradiction Rate ~94% (Low)
 
