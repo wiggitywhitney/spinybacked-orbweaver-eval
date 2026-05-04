@@ -183,9 +183,9 @@ The **evaluation execution branch** created by `/prd-start` from main **never me
   4. Print the absolute file path of `evaluation/commit-story-v2/run-15/actionable-fix-output.md`.
   5. **Pause.** Do not proceed to Draft PRD #16 until Whitney confirms she has handed the document off to the spiny-orb team.
 
-- [ ] **Draft PRD #16** — Create on a separate branch from main. Merge the PRD PR to main so `/prd-start` can pick it up. Carry forward both user-facing checkpoints into PRD #16's milestone structure. IS scoring milestone must use the same format as this PRD's IS scoring milestone.
+- [x] **Draft PRD #16** — Create on a separate branch from main. Merge the PRD PR to main so `/prd-start` can pick it up. Carry forward both user-facing checkpoints into PRD #16's milestone structure. IS scoring milestone must use the same format as this PRD's IS scoring milestone.
 
-- [ ] **Copy artifacts to main** — From main, run `git checkout feature/prd-61-evaluation-run-15 -- evaluation/commit-story-v2/run-15/` to copy all artifacts. Commit to main with message `eval: save run-15 artifacts to main [skip ci]`. Add one row to `evaluation/commit-story-v2/run-log.md` for run-15 and commit with `eval: update run-log for run-15 [skip ci]`. Push main. This step runs before `/prd-done` so the artifacts land on main while the eval branch is still reachable.
+- [x] **Copy artifacts to main** — From main, run `git checkout feature/prd-61-evaluation-run-15 -- evaluation/commit-story-v2/run-15/` to copy all artifacts. Commit to main with message `eval: save run-15 artifacts to main [skip ci]`. Add one row to `evaluation/commit-story-v2/run-log.md` for run-15 and commit with `eval: update run-log for run-15 [skip ci]`. Push main. This step runs before `/prd-done` so the artifacts land on main while the eval branch is still reachable.
 
 ---
 
