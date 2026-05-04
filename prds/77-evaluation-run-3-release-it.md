@@ -115,12 +115,12 @@ The feature branch for this PRD (`feature/prd-77-evaluation-run-3-release-it`) *
      ```
      Must print a version string (not `MISSING`). If missing, run `npm install --save-dev @opentelemetry/api`, commit to fork main, and run `npm test` to confirm tests still pass before proceeding.
   2. **RUN2-2 (PAT scope) — MUST PASS**: Verify `GITHUB_TOKEN_RELEASE_IT` has `pull_requests:write` for `wiggitywhitney/release-it`. Fine-grained PATs don't show this scope in `gh auth status`. Verify directly: go to https://github.com/settings/personal-access-tokens, find the release-it eval token, confirm it shows "Pull requests: Read and write" under repository permissions for `wiggitywhitney/release-it`. Alternatively, check the token's repo-level permissions via: `vals exec -i -f .vals.yaml -- gh api repos/wiggitywhitney/release-it --jq '.permissions'` — if `admin: true` appears, the token was created with admin scope and should include PR creation. The definitive test is the run itself — if PR creation fails with the same GraphQL error as run-2, the PAT was not updated.
-  3. **RUN2-3 (arrowParens LINT)**: Check if spiny-orb has merged a Prettier post-pass fix. If landed, LINT failures on files with arrowParens should resolve. If not, 6 files will likely fail LINT again.
-  4. **RUN2-4 (NDS-003 GitHub.js)**: Check if spiny-orb has fixed the NDS-003 return-value capture issue or updated agent guidance to omit `release_it.github.release_id`.
-  5. **RUN2-5 (COV-003/NDS-007 GitLab.js)**: Check if spiny-orb has updated the COV-003 validator to exempt graceful-degradation catch blocks.
+  3. **RUN2-3 (arrowParens LINT)**: Check if `feature/prd-687-smarter-end-of-run-failure-handling` includes a Prettier post-pass fix. If landed on that branch, LINT failures on files with arrowParens should resolve. If not, 6 files will likely fail LINT again.
+  4. **RUN2-4 (NDS-003 GitHub.js)**: Check if `feature/prd-687-smarter-end-of-run-failure-handling` includes a fix for the NDS-003 return-value capture issue or updated agent guidance to omit `release_it.github.release_id`.
+  5. **RUN2-5 (COV-003/NDS-007 GitLab.js)**: Check if `feature/prd-687-smarter-end-of-run-failure-handling` includes a COV-003 validator fix to exempt graceful-degradation catch blocks.
   6. **Target repo readiness**: Verify release-it fork is on `main`, working tree is clean, `spiny-orb.yaml` and `semconv/` exist, `@opentelemetry/api` is installed.
   7. **File inventory**: Confirm 23 `.js` files in `lib/` — run `find lib -name "*.js" | wc -l` from `~/Documents/Repositories/release-it/`.
-  8. **Rebuild spiny-orb**: Rebuild from current branch (not necessarily main). Record SHA.
+  8. **Rebuild spiny-orb**: Rebuild from `feature/prd-687-smarter-end-of-run-failure-handling` (not main) — this branch contains smarter end-of-run failure handling that may reduce checkpoint rollbacks. Record SHA.
   9. **Record versions**: Node.js version, spiny-orb version/SHA, release-it version.
   10. Append observations to `evaluation/release-it/run-3/lessons-for-run4.md`.
 
@@ -265,6 +265,7 @@ The feature branch for this PRD (`feature/prd-77-evaluation-run-3-release-it`) *
 |------|----------|-----------|
 | 2026-04-21 | Run-3 proceeds only after P1 blockers resolved | OTel devDep and PAT scope are eval-team actions. P2 items (arrowParens, NDS-003, COV-003) are spiny-orb work — run-3 proceeds regardless, accepting possible quality failures on those files. |
 | 2026-04-21 | IS scoring marked NOT EVALUABLE if 0 committed files | IS scoring requires runtime OTLP data from instrumented code; if no instrumented files survive, scoring produces no useful data. |
+| 2026-05-04 | Build spiny-orb from `feature/prd-687-smarter-end-of-run-failure-handling` for run-3 | This branch contains smarter end-of-run failure handling. It may reduce checkpoint rollbacks seen in run-2 and improve Q×F. |
 
 ---
 

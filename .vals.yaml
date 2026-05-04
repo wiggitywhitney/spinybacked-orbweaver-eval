@@ -10,6 +10,12 @@
 
 ANTHROPIC_API_KEY: ref+gcpsecrets://demoo-ooclock/anthropic-api-key
 GITHUB_TOKEN: ref+gcpsecrets://demoo-ooclock/github-token
+# Fine-grained PAT scoped to wiggitywhitney/taze with contents:write and pull_requests:write.
+# Use for taze eval runs: bash -c 'GITHUB_TOKEN=$GITHUB_TOKEN_TAZE node .../spiny-orb.js ...'
+GITHUB_TOKEN_TAZE: ref+gcpsecrets://demoo-ooclock/github-token-taze
+# Fine-grained PAT scoped to wiggitywhitney/release-it with contents:write and pull_requests:write.
+# Use for release-it eval runs: bash -c 'GITHUB_TOKEN=$GITHUB_TOKEN_RELEASE_IT node ...'
+GITHUB_TOKEN_RELEASE_IT: ref+gcpsecrets://demoo-ooclock/github-token-release-it
 
 # Datadog credentials for OTLP export (Phase 2/3 - telemetry agent)
 DD_API_KEY: ref+gcpsecrets://demoo-ooclock/datadog-commit-story-dev
