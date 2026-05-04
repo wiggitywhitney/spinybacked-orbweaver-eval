@@ -43,23 +43,31 @@ Completed in 32.1s
 
 ## P2 — High Priority
 
-### FINDING-RUN-1: PR creation crash is silent — process exits without logging and without `finally` running
+### FINDING-RUN-1: `createPr` targets upstream repo in forks — PAT cannot authenticate to upstream
 
-**Severity**: P2 (PR not created; user has no indication of what went wrong)
+**Severity**: P1 (PR never created in any forked eval target repo)
 
-**Symptom**: After a successful push, the spiny-orb process exits abruptly. The log ends at the `onRunComplete` "Run complete" line with no push/PR output and no "Completed in..." from the `finally` block in `instrument-handler.js`. No error message appears. The instrument branch exists on the remote but no PR is created.
+**Root cause**: `createPr` in `git-workflow.js` calls `gh pr create` without `--repo`. In a forked repo with both `origin` (the fork) and `upstream` remotes, `gh` defaults to the upstream as the PR target. The fine-grained PAT is scoped to the fork (`wiggitywhitney/release-it`) and cannot create PRs on the upstream (`release-it/release-it`). Result:
 
-**Root cause (inferred)**: `createPr` in `git-workflow.js` is wrapped in a try-catch (lines 128–134), but something in the `deps.createPr` call path is crashing the process in a way that bypasses both the try-catch and the `finally` block in `instrument-handler.js`. The most likely mechanism is an unhandled promise rejection or a synchronous throw from a dependency that escapes the async boundary.
+```text
+pull request create failed: GraphQL: Resource not accessible by personal access token (createPullRequest)
+```
 
-**Evidence**: 
-- Branch `spiny-orb/instrument-1777912706406` IS on remote (push succeeded)
-- No PR existed on `wiggitywhitney/release-it` after the run
-- Log ends with "Run complete" + token summary, no subsequent output
-- `finally` block `deps.stderr(\`Completed in ${formatDuration(durationMs)}\`)` never fired
+This is the same GraphQL error that blocked run-2 — which was misdiagnosed as a missing `pull_requests:write` scope. The PAT scope was correct all along; the target repo was wrong.
 
-**Workaround**: Create the PR manually with `gh pr create --repo <fork> --head <branch> --base main`.
+**Confirmed by**: Running `gh pr create --head spiny-orb/instrument-1777912706406 --title "test" --body "test"` from the fork directory (no `--repo`) reproduces the exact error. Adding `--repo wiggitywhitney/release-it` succeeds.
 
-**Suggested fix**: Ensure `createPr` errors are caught at the process level, not just inside `runGitWorkflow`. Add a top-level unhandled rejection handler that logs to stderr before exiting. The `finally` block should print "Completed in..." unconditionally — if it's not printing, something is calling `process.exit()` or an uncaught synchronous throw is escaping the async boundary.
+**Secondary symptom**: The "PR creation failed: ..." log message and the "Completed in..." `finally` output are missing from the run log despite the error being caught by the try-catch in `runGitWorkflow`. The error IS caught, but something prevents those `deps.stderr` calls from reaching the tee file. Root cause of the silent exit is a separate investigation item.
+
+**Workaround**: Create the PR manually: `gh pr create --repo wiggitywhitney/release-it --head <branch> --base main`.
+
+**Suggested fix**: In `createPr`, derive the target repo from the `origin` remote URL rather than letting `gh` default to upstream:
+```javascript
+const originUrl = execFileSync('git', ['remote', 'get-url', 'origin'], { cwd: projectDir }).toString().trim();
+// parse "owner/repo" from https://github.com/owner/repo.git or git@github.com:owner/repo.git
+args.push('--repo', parseGhRepo(originUrl));
+```
+This applies to every eval target that is a fork — which is all of them.
 
 ---
 
