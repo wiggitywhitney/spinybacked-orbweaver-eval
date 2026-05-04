@@ -99,7 +99,7 @@ The feature branch for this PRD (`feature/prd-77-evaluation-run-3-release-it`) *
 
   Read `docs/language-extension-plan.md` completely before proceeding with any other milestone.
 
-- [ ] **Collect skeleton documents**
+- [x] **Collect skeleton documents**
 
   Create `evaluation/release-it/run-3/` directory in the eval repo with skeleton files:
   - `lessons-for-run4.md` (copy structure from `evaluation/release-it/run-2/lessons-for-run3.md`)
