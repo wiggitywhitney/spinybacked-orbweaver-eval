@@ -8,3 +8,4 @@ Column key: **N** = run number · **Q×F** = (quality/total) × files_committed 
 |---|------|---------|-------|-----|------|--------------|
 | 1 | 2026-04-18 | N/A (halted file 5/23) | 0 | 0 | NO | gpgsign checkpoint failure (run halted); arrowParens LINT oscillation (config.js, index.js); PAT missing pull_requests:write |
 | 2 | 2026-04-21 | 24/25 (96%) | 0 | 0 | branch YES / PR FAILED | OTel module resolution fails checkpoint tests (all commits rolled back); LINT arrowParens+print-width (6 files); NDS-003 GitHub.js; COV-003 GitLab.js; PAT lacks pull_requests:write |
+| 3 | 2026-05-04 | 25/25 (100%) | 3 | 3.0 | branch YES / manual PR#2 | Pre-scan false negatives on 8 plugin class-method files; Git.js API termination; GitLab.js COV-002 pre-scan miss; gh pr create targets upstream in fork; HOME not forwarded to weaver subprocess under vals exec; IS 90/100 |
