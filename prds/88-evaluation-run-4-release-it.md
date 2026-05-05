@@ -64,7 +64,7 @@ Additionally, Git.js failed in run-3 due to Anthropic API termination (not a qua
 
 ### Primary Goal
 
-Increase Q×F by correctly instrumenting the 8 false-negative plugin files. If RUN3-1 pre-scan fix has landed, estimated Q×F: ~20–25. If not, Q×F stays near 3.0.
+Increase Q×F by correctly instrumenting the 8 false-negative plugin files. If RUN3-1 pre-scan fix has landed, estimated Q×F: ~8–12 (8 new files + 3 from run-3 ≈ 11 committed at quality). If not, Q×F stays near 3.0.
 
 ---
 
@@ -88,7 +88,7 @@ The feature branch for this PRD (`feature/prd-88-evaluation-run-4-release-it`) *
 
 ## Success Criteria
 
-1. Q×F > 3.0 (at least one more file committed than run-3)
+1. Q×F ≥ 8 if RUN3-1 pre-scan fix landed; Q×F > 3.0 if RUN3-1 not yet fixed (fallback: at least one more file than run-3)
 2. Pre-scan false negative status assessed — if RUN3-1 fixed, 8+ additional files attempted
 3. PR created in wiggitywhitney/release-it (auto if RUN3-2 fixed; manual otherwise)
 4. All 23 `lib/` files processed
