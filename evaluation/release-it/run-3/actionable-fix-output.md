@@ -66,7 +66,7 @@ execFileSync('weaver', ['registry', 'check', '-r', fullPath], {
   env: { ...process.env, HOME: process.env.HOME || homedir() },
 });
 ```
-This applies to ALL `execFile`/`execFileSync`/`spawn` calls that invoke the `weaver` binary. See also `~/.claude/rules/weaver-gotchas.md` — this pattern is already documented there.
+This applies to ALL `execFile`/`execFileSync`/`spawn` calls that invoke the `weaver` binary.
 
 **Scope**: `caffeinate -s` also strips HOME, so this will affect any CI or scripted runner. Not limited to `vals exec`.
 

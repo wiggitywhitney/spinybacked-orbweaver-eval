@@ -134,7 +134,7 @@ Not evaluated against quality rubric — pre-scan false negative prevented any i
 
 ---
 
-## Correct Skips (18)
+## Pre-scan Results: 18 classified as skips (10 true correct skips, 8 confirmed false negatives)
 
 All 18 were pre-scanned as containing only synchronous utilities, pure constants, or unexported helpers with no async entry points.
 

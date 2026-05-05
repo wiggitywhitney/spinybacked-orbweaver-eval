@@ -6,11 +6,13 @@ Issues and observations surfaced by spiny-orb during run-3 that warrant filing a
 
 ## P1 — Blocking
 
-*(fill in during run and failure deep-dives)*
+### FINDING-RUN-1: `createPr` targets upstream repo in forks — PAT cannot authenticate to upstream
+
+See full finding in P2 section below. Promoted to P1: affects every forked eval target, no auto-workaround — PR must be created manually on every run until fixed.
 
 ---
 
-## Pre-run findings (before run-3 executed)
+## P2 — High Priority
 
 ### FINDING-PRE-1: Weaver registry check timeout produces misleading "validation failed" message
 
@@ -45,7 +47,7 @@ Completed in 32.1s
 
 ### FINDING-RUN-1: `createPr` targets upstream repo in forks — PAT cannot authenticate to upstream
 
-**Severity**: P1 (PR never created in any forked eval target repo)
+**Severity**: P1 — see P1 section above. Full detail here for reference.
 
 **Root cause**: `createPr` in `git-workflow.js` calls `gh pr create` without `--repo`. In a forked repo with both `origin` (the fork) and `upstream` remotes, `gh` defaults to the upstream as the PR target. The fine-grained PAT is scoped to the fork (`wiggitywhitney/release-it`) and cannot create PRs on the upstream (`release-it/release-it`). Result:
 
