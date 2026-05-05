@@ -195,7 +195,7 @@ The feature branch for this PRD (`feature/prd-77-evaluation-run-3-release-it`) *
 
   After baseline comparison: (1) add a row for run-3 to the run history table in `README.md` with quality score, gates, files, spans, cost, push/PR status, and IS score; (2) update the "next run" sentence (bold paragraph below the release-it run history table) to reference run-4 and its primary goals.
 
-- [ ] **Actionable fix output** *(user-facing checkpoint 2)*
+- [x] **Actionable fix output** *(user-facing checkpoint 2)*
 
   1. Run the cross-document audit agent to verify consistency across all run-3 evaluation artifacts.
   2. Give Whitney an interpreted summary of key findings — failures, root causes, notable patterns, what to watch for in run-4.
