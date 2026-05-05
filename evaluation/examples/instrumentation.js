@@ -1,28 +1,58 @@
-// ABOUTME: OpenTelemetry SDK initialization for commit-story-v2.
-// ABOUTME: Bootstraps the NodeSDK with an instrumentations array for the telemetry agent to populate.
+// ABOUTME: OTel SDK bootstrap template for eval target repos.
+// ABOUTME: Copy to target repo's examples/instrumentation.js and replace service.name placeholder.
 
 import { NodeSDK } from '@opentelemetry/sdk-node';
+import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-http';
+import { SimpleSpanProcessor } from '@opentelemetry/sdk-trace-base';
+import { resourceFromAttributes } from '@opentelemetry/resources';
+import { randomUUID } from 'node:crypto';
+import { readFileSync } from 'node:fs';
+import { fileURLToPath } from 'node:url';
+import { dirname, join } from 'node:path';
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
+const pkg = JSON.parse(readFileSync(join(__dirname, '..', 'package.json'), 'utf-8'));
 
 const instrumentations = [
   // Telemetry agent appends instrumentation entries here
 ];
 
+// Disable auto-metrics — SDK 2.x auto-instantiates a Metrics SDK.
+// For IS scoring runs: set IS_SCORING_RUN=1 to enable the metrics exporter so
+// MET rules can be evaluated.
+if (!process.env.OTEL_METRICS_EXPORTER && !process.env.IS_SCORING_RUN) {
+  process.env.OTEL_METRICS_EXPORTER = 'none';
+}
+
+const traceExporter = new OTLPTraceExporter({
+  url: process.env.OTEL_EXPORTER_OTLP_TRACES_ENDPOINT || 'http://localhost:4318/v1/traces',
+});
+
 const sdk = new NodeSDK({
+  resource: resourceFromAttributes({
+    'service.name': 'target-app', // replace with actual service name
+    'service.version': pkg.version,
+    'deployment.environment': process.env.NODE_ENV || 'development',
+    'service.instance.id': randomUUID(),
+  }),
+  // SimpleSpanProcessor exports each span immediately on span.end() — better
+  // for CLI apps where process.exit() can kill the event loop before a
+  // BatchSpanProcessor flushes.
+  spanProcessors: [new SimpleSpanProcessor(traceExporter)],
   instrumentations,
 });
 
 sdk.start();
 
-const shutdown = () => {
-  sdk.shutdown()
-    .then(() => process.exit(0))
-    .catch((err) => {
-      console.error('Error shutting down OTel SDK', err);
-      process.exit(1);
-    });
-};
+// Graceful shutdown — flush pending spans before exit.
+// SIGTERM uses 143 (128 + SIGTERM signal number 15).
+// SIGINT uses 130 (128 + SIGINT signal number 2).
+process.on('SIGTERM', async () => {
+  await sdk.shutdown().catch((err) => console.error('OTel SDK shutdown error:', err));
+  process.exit(143);
+});
 
-process.on('SIGTERM', shutdown);
-process.on('SIGINT', shutdown);
-
-export default sdk;
+process.on('SIGINT', async () => {
+  await sdk.shutdown().catch((err) => console.error('OTel SDK shutdown error:', err));
+  process.exit(130);
+});
