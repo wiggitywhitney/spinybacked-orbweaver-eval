@@ -7,7 +7,7 @@ Entry format: `- (YYYY-MM-DD) Description of feature-level change (PRD #X, miles
 ## [Unreleased]
 
 ### Fixed
-- (2026-05-05) Added `service.instance.id: randomUUID()` to `resourceFromAttributes` in the eval bootstrap template (`evaluation/examples/instrumentation.js`) and in all three active target forks (release-it, commit-story-v2, taze). The attribute was absent from all bootstraps, causing RES-001 (service.instance.id absent) to fail in every IS scoring run — a 10-point miss at 100 applicable IS points. Also brought the eval template up to the full reference pattern (exporter, resource config, graceful shutdown) matching the target forks (issue #90).
+- (2026-05-05) Added `service.instance.id: randomUUID()` to `resourceFromAttributes` in the eval bootstrap template and in all three active target forks (release-it, commit-story-v2, taze). The attribute was absent from all bootstraps, causing RES-001 to fail in every IS scoring run — a 10-point miss. Also brought the eval template up to the full reference pattern (OTLP exporter, resource config, graceful shutdown) to serve as a complete starting point for future Type C eval setups.
 - (2026-04-11) Fixed stale repo name references missed during PRD #43 generalization: updated Two-Repo Workflow tables in prd-32 and prd-33 to spinybacked-orbweaver-eval, removed commit-story-v2-eval/ prefix from prd-3 run-2 path, corrected self-contradictory grep patterns in prd-43 validation section (PRD #43, CodeRabbit review)
 
 ### Added
