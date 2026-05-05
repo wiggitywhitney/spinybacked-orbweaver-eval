@@ -5,7 +5,11 @@ Execution order within each tier matters. Items are listed in dependency order �
 ## Short-term
 - ~~JS evaluation run-13: NDS-003 truthy fix verification (PRD #37)~~ ✅ Complete
 - ~~JS evaluation run-14: commit-story-v2 — smart rollback + type-safety verification (PRD #55)~~ ✅ Complete — 22/25, 12 files, IS 80/100, PR #65
-- JS evaluation run-15: commit-story-v2 — catch-block consistency + COV-004 audit (PRD #61)
+- ~~JS evaluation run-15: commit-story-v2 — catch-block consistency + COV-004 audit (PRD #61)~~ ✅ Complete — 24/25, 14 files, IS 70/100, Q×F 13.4 (new record), PR #66
+- JS evaluation run-16: commit-story-v2 — summary-detector.js outer catch fix (PRD #86)
+- ~~JS evaluation run-3: release-it — first committed baseline (PRD #77)~~ ✅ Complete — 25/25, 3 files, IS 90/100, Q×F 3.0, PR #2
+- JS evaluation run-4: release-it — pre-scan class method detection (PRD #88)
+- TS evaluation run-14: taze — CDQ-006 isRecording guard verification (PRD #82)
 
 ## Medium-term (in order)
 1. ~~Repo generalization (PRD #43)~~ ✅ Complete
