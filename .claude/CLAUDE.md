@@ -105,3 +105,27 @@ git log --oneline <branch> ^origin/main ^origin/<branch>
 ```
 
 If the output is non-empty, the branch has commits that exist nowhere else — push first, then delete. This applies especially to eval branches, which hold the canonical run artifacts until PRD #57 backfill lands. Do not assume `gh pr merge --delete-branch` handled cleanup for branches whose PRs didn't merge (eval branches never merge per convention, so their cleanup is manual and must preserve the remote).
+
+## Eval Branch PR Convention
+
+Every Type C and Type D eval branch **must have an open PR** that is never merged and never closed. A branch without a PR is invisible — it cannot be cited in issues or PRDs by number, and it disappears from view when scanning run history.
+
+**When to create it:** Immediately after the eval run is committed and pushed (Type D step 3). Do not wait until the end of the PRD.
+
+**PR title format:**
+- Type D (recurring eval runs): `eval(prd-N): <target> run-N evaluation — <quality score> quality, Q×F <score>, IS <score>/100`
+- Type C (setup + Run-1): `feat(prd-N): <target> eval setup + run-1 — <language> baseline (PRD #N)`
+
+**Never merge, never close** — eval branches are permanent artifacts. The PR stays open indefinitely.
+
+## Handoff Document Convention
+
+Each eval run produces a handoff document at a stable, per-run path:
+
+```text
+evaluation/<target>/run-<N>/handoff-to-orbweaver.md
+```
+
+**Never reuse or overwrite** a handoff doc from a prior run. Each run gets its own file at its own path so Spiny can reference it permanently in issues and PRDs. A single shared file would be overwritten each run and break any existing references.
+
+When the handoff doc is ready or updated, print the full absolute path so Whitney can share it with the Spiny team directly.
