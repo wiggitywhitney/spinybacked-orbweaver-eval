@@ -123,6 +123,7 @@ The feature branch for this PRD (`feature/prd-88-evaluation-run-4-release-it`) *
   7. **File inventory**: Confirm 23 `.js` files in `lib/` — run `find lib -name "*.js" | wc -l` from `~/Documents/Repositories/release-it/`.
   8. **Rebuild spiny-orb**: Rebuild from **main** (unless a specific fix branch has been communicated for this run). Record SHA.
   9. **Record versions**: Node.js version, spiny-orb version/SHA, release-it version.
+  10. **698 live-check gate**: Confirm the 698 live-check feature is on spiny-orb main. Run `git -C ~/Documents/Repositories/spinybacked-orbweaver log --oneline | head -20 | grep -i 'prd-698\|live-check'`. If present, the run will produce a three-state live-check result (pass/advisory/fail) in the PR summary and verbose log — the Findings Discussion live-check item and PR artifact live-check section both apply. If absent, note in lessons-for-run5.md and skip those items.
   10. Append observations to `evaluation/release-it/run-4/lessons-for-run5.md`.
 
   **If RUN3-1 is not fixed**: proceed anyway. Document the miss. Q×F will remain near 3.0 but run-4 still produces valid evaluation data.
@@ -142,7 +143,7 @@ The feature branch for this PRD (`feature/prd-88-evaluation-run-4-release-it`) *
 
 - [ ] **Findings Discussion** *(user-facing checkpoint 1)*
 
-  After `run-summary.md` is written, before any evaluation documents: report to Whitney with a raw overview — files committed/failed/partial, quality score if visible in log, cost, push/PR status, top 1-2 surprises. Conversational, under 10 lines. Wait for acknowledgment before proceeding.
+  After `run-summary.md` is written, before any evaluation documents: report to Whitney with a raw overview — files committed/failed/partial, quality score if visible in log, cost, push/PR status, live-check result (pass/advisory/fail plus a one-line summary of what Weaver found, or "not triggered" if 698 was absent from the build), top 1-2 surprises. Conversational, under 10 lines. Wait for acknowledgment before proceeding.
 
   Success criteria: Whitney has acknowledged the findings overview.
 
@@ -160,6 +161,7 @@ The feature branch for this PRD (`feature/prd-88-evaluation-run-4-release-it`) *
 
 - [ ] **PR artifact evaluation**
 
+  Include a live-check section: assess the three-state result (pass/advisory/fail), whether Weaver's compliance findings accurately reflect the telemetry produced, and whether the advisory detail is actionable. If 698 was absent from the build, note that and skip the live-check section.
   Produces: `evaluation/release-it/run-4/pr-evaluation.md`
   Style reference: `Read docs/templates/eval-run-style-reference/pr-evaluation.md`
 
