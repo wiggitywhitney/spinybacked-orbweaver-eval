@@ -158,7 +158,7 @@ The feature branch for this PRD (`feature/prd-88-evaluation-run-4-release-it`) *
   Produces: `evaluation/release-it/run-4/per-file-evaluation.md`
   Style reference: `Read docs/templates/eval-run-style-reference/per-file-evaluation.md`
 
-- [ ] **PR artifact evaluation**
+- [x] **PR artifact evaluation**
 
   Produces: `evaluation/release-it/run-4/pr-evaluation.md`
   Style reference: `Read docs/templates/eval-run-style-reference/pr-evaluation.md`
