@@ -100,17 +100,17 @@ The feature branch for this PRD (`feature/prd-88-evaluation-run-4-release-it`) *
 
 ## Milestones
 
-- [ ] **Read language-extension-plan.md**
+- [x] **Read language-extension-plan.md**
 
   Read `docs/language-extension-plan.md` completely before proceeding with any other milestone.
 
-- [ ] **Collect skeleton documents**
+- [x] **Collect skeleton documents**
 
   Create `evaluation/release-it/run-4/` directory in the eval repo with skeleton files:
   - `lessons-for-run5.md` (copy structure from `evaluation/release-it/run-3/lessons-for-run4.md`)
   - `spiny-orb-findings.md` (fresh skeleton with P1/P2/P3 sections)
 
-- [ ] **Pre-run verification**
+- [x] **Pre-run verification**
 
   Verify run-3 P1 blockers and validate run prerequisites:
 
@@ -268,6 +268,7 @@ The feature branch for this PRD (`feature/prd-88-evaluation-run-4-release-it`) *
 |------|----------|-----------|
 | 2026-05-05 | Run-4 proceeds regardless of whether RUN3-1 pre-scan fix has landed | Even without the fix, run-4 validates quality on the 3 files that did commit in run-3, retries Git.js, and produces a valid eval data point for tracking progress |
 | 2026-05-05 | HOME="$HOME" stays in instrument command until spiny-orb P2-A fix confirmed on main | Workaround is safe and low-cost; removing it without confirming the fix would repeat run-3's blocked start |
+| 2026-05-06 | GITHUB_TOKEN_RELEASE_IT lives only in the release-it fork's .vals.yaml, not the eval repo's | Token was added to the fork's vals.yaml during run-2 setup but never mirrored to the eval repo's vals.yaml. Always use `-f ~/Documents/Repositories/release-it/.vals.yaml` for dry-run verification, not the eval repo's file. Using the eval repo's file produces "invalid token" — a false alarm. |
 
 ---
 
