@@ -96,6 +96,23 @@ Include both user-facing checkpoints (Findings Discussion and Handoff pause) in 
 
 See `docs/language-extension-plan.md` for full context: PRD taxonomy, language candidate table, score projection methodology, and process requirements.
 
+## IS Scoring Runs
+
+IS scoring is **fully automated** — the AI runs all commands. Do NOT surface IS scoring steps as user-facing instructions.
+
+**Prerequisites check**: If 0 files were committed on the instrument branch, write `evaluation/[TARGET]/run-[N]/is-score.md` containing only `NOT EVALUABLE — 0 files committed` and stop. Do not proceed.
+
+Full sequence (see `docs/language-extension-plan.md` step 9 for target-specific entrypoint and path values):
+
+1. Verify Colima is running: `colima status`. If not running, start it: `colima start`.
+2. Remove any stale collector container from a prior run: `docker rm -f eval-collector 2>/dev/null || true`
+3. Install OTel SDK devDeps in target repo (instrument branch): `npm --prefix ~/Documents/Repositories/[TARGET] install --save-dev @opentelemetry/sdk-node @opentelemetry/exporter-trace-otlp-http @opentelemetry/sdk-trace-base @opentelemetry/resources`
+4. Stop Datadog Agent (port 4318 conflict): `datadog-agent stop`
+5. Pre-create output file and start collector: `touch evaluation/is/eval-traces.json && docker run -d --name eval-collector -p 4318:4318 --user "$(id -u):$(id -g)" -w /etc/otelcol -v /Users/whitney.lee/Documents/Repositories/spinybacked-orbweaver-eval/evaluation/is:/etc/otelcol otel/opentelemetry-collector-contrib:latest --config /etc/otelcol/otelcol-config.yaml`
+6. Run target app from the target repo (instrument branch): `OTEL_EXPORTER_OTLP_TRACES_ENDPOINT=http://localhost:4318/v1/traces node --import ./examples/instrumentation.js ./bin/[ENTRYPOINT].js --dry-run`
+7. Wait 2 seconds after the process exits (gRPC spans may still be in transit), then score: `node evaluation/is/score-is.js evaluation/is/eval-traces.json > evaluation/[TARGET]/run-[N]/is-score.md`
+8. Clean up: `docker stop eval-collector && docker rm eval-collector`; `datadog-agent start`; restore target repo: `cd ~/Documents/Repositories/[TARGET] && git checkout main && npm install`
+
 ## Analyzing Eval Failures
 
 When diagnosing a failed file in a spiny-orb eval run, check all three sources before drawing conclusions:

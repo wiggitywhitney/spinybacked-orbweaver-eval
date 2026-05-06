@@ -147,23 +147,20 @@ The **evaluation execution branch** created by `/prd-start` from main **never me
   Produces: `evaluation/commit-story-v2/run-16/rubric-scores.md`
   Style reference: `Read docs/templates/eval-run-style-reference/rubric-scores.md`
 
-- [ ] **IS scoring run** — Follow `docs/language-extension-plan.md` step 9. Full protocol in `evaluation/is/README.md` (commit-story-v2 section).
+- [ ] **IS scoring run** — **AI runs all commands**. See CLAUDE.md "IS Scoring Runs" section and `docs/language-extension-plan.md` step 9 for the full automated sequence.
 
-  1. **Claude runs**: `datadog-agent stop`
-  2. **Claude starts** the OTel Collector in the background:
-     ```bash
-     docker run --rm -d --name otelcol-is -w /etc/otelcol -p 4318:4318 -v /Users/whitney.lee/Documents/Repositories/spinybacked-orbweaver-eval/evaluation/is:/etc/otelcol otel/opentelemetry-collector-contrib:latest --config /etc/otelcol/otelcol-config.yaml
-     ```
-  3. **Claude checks out** instrument files and runs the app from `~/Documents/Repositories/commit-story-v2`:
+  **Commit-story-v2-specific steps** (after standard CLAUDE.md setup — note: use container name `otelcol-is` not `eval-collector` to match this PRD):
+  1. Check out instrument files from `~/Documents/Repositories/commit-story-v2`:
      ```bash
      git checkout spiny-orb/instrument-XXXXXXXXXX -- src/ examples/
-     OTEL_EXPORTER_OTLP_TRACES_ENDPOINT=http://localhost:4318/v1/traces env -u ANTHROPIC_CUSTOM_HEADERS -u ANTHROPIC_BASE_URL vals exec -i -f .vals.yaml -- node --import ./examples/instrumentation.js src/index.js HEAD
-     git checkout main -- src/ examples/
      ```
-     Note: omit `COMMIT_STORY_TRACELOOP=true` — `@traceloop/instrumentation-langchain` API incompatibility crashes the process. See `evaluation/is/README.md`.
-  4. **Claude stops** the Collector: `docker stop otelcol-is`
-  5. **Claude runs** the scorer: `node evaluation/is/score-is.js evaluation/is/eval-traces.json > evaluation/commit-story-v2/run-16/is-score.md`
-  6. **Claude runs**: `datadog-agent start`
+  2. Run the app (omit `COMMIT_STORY_TRACELOOP=true` — `@traceloop/instrumentation-langchain` API incompatibility crashes the process):
+     ```bash
+     OTEL_EXPORTER_OTLP_TRACES_ENDPOINT=http://localhost:4318/v1/traces env -u ANTHROPIC_CUSTOM_HEADERS -u ANTHROPIC_BASE_URL vals exec -i -f .vals.yaml -- node --import ./examples/instrumentation.js src/index.js HEAD
+     ```
+  3. Restore: `git checkout main -- src/ examples/`
+  4. Score: `node evaluation/is/score-is.js evaluation/is/eval-traces.json > evaluation/commit-story-v2/run-16/is-score.md`
+
   Produces: `evaluation/commit-story-v2/run-16/is-score.md`
 
 - [ ] **Baseline comparison** — Compare run-16 vs runs 2-15.
