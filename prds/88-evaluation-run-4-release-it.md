@@ -127,7 +127,7 @@ The feature branch for this PRD (`feature/prd-88-evaluation-run-4-release-it`) *
 
   **If RUN3-1 is not fixed**: proceed anyway. Document the miss. Q×F will remain near 3.0 but run-4 still produces valid evaluation data.
 
-- [ ] **Evaluation run-4**
+- [x] **Evaluation run-4**
 
   Whitney runs `spiny-orb instrument` in her own terminal. **Do NOT run the command yourself.**
 
@@ -140,13 +140,13 @@ The feature branch for this PRD (`feature/prd-88-evaluation-run-4-release-it`) *
 
   AI role: (1) confirm readiness, (2) once Whitney provides the log output, save it and write `evaluation/release-it/run-4/run-summary.md`, (3) **push the eval branch to origin immediately** — the branch holds the only copy of run artifacts until step 13 copies them to main.
 
-- [ ] **Findings Discussion** *(user-facing checkpoint 1)*
+- [x] **Findings Discussion** *(user-facing checkpoint 1)*
 
   After `run-summary.md` is written, before any evaluation documents: report to Whitney with a raw overview — files committed/failed/partial, quality score if visible in log, cost, push/PR status, top 1-2 surprises. Conversational, under 10 lines. Wait for acknowledgment before proceeding.
 
   Success criteria: Whitney has acknowledged the findings overview.
 
-- [ ] **Failure deep-dives**
+- [x] **Failure deep-dives**
 
   Root cause analysis for each failed/partial file and run-level failures.
   Produces: `evaluation/release-it/run-4/failure-deep-dives.md`
@@ -269,6 +269,8 @@ The feature branch for this PRD (`feature/prd-88-evaluation-run-4-release-it`) *
 | 2026-05-05 | Run-4 proceeds regardless of whether RUN3-1 pre-scan fix has landed | Even without the fix, run-4 validates quality on the 3 files that did commit in run-3, retries Git.js, and produces a valid eval data point for tracking progress |
 | 2026-05-05 | HOME="$HOME" stays in instrument command until spiny-orb P2-A fix confirmed on main | Workaround is safe and low-cost; removing it without confirming the fix would repeat run-3's blocked start |
 | 2026-05-06 | GITHUB_TOKEN_RELEASE_IT lives only in the release-it fork's .vals.yaml, not the eval repo's | Token was added to the fork's vals.yaml during run-2 setup but never mirrored to the eval repo's vals.yaml. Always use `-f ~/Documents/Repositories/release-it/.vals.yaml` for dry-run verification, not the eval repo's file. Using the eval repo's file produces "invalid token" — a false alarm. |
+| 2026-05-06 | Spiny-orb findings go in handoff document, not filed directly as GitHub issues | The eval team's role is to collect findings and deliver actionable-fix-output.md to the spiny-orb team. The spiny-orb team decides what to file. Direct issue creation from eval sessions bypasses the triage handoff. |
+| 2026-05-06 | LINT/NDS-003 indentation conflict is a structural spiny-orb issue, not an agent prompt issue | Adding the startActiveSpan wrapper adds 2 indentation levels, pushing long lines over Prettier's 120-char print width. The LINT validator catches if the agent preserves originals; NDS-003 catches if the agent reformats. No prompt change fixes this — the fix requires a Prettier post-pass before NDS-003 comparison, or computing NDS-003's baseline against the Prettier-formatted original. |
 
 ---
 
