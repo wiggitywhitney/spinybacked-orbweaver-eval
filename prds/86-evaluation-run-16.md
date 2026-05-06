@@ -113,6 +113,7 @@ The **evaluation execution branch** created by `/prd-start` from main **never me
   1. **Handoff triage review**: Read the spiny-orb team's triage of `evaluation/commit-story-v2/run-15/actionable-fix-output.md`. Check which findings were filed as issues.
   2. **Outer catch guidance fix** (P1 — critical, RUN15-1): Verify the fix for the outer catch gap in `summary-detector.js` landed. The fix involves prompt guidance distinguishing inner graceful-degradation catches (NDS-007 applies — no error recording) from the outer span-level catch (still needed for unexpected exceptions). Confirm the relevant issue/PR is closed and merged to spiny-orb main.
   3. **Other spiny-orb fixes since run-15**: Check spiny-orb main for any merged PRs relevant to commit-story-v2 evaluation (push detection bug RUN15-3, advisory quality improvements #728 #729).
+  3a. **698 live-check gate**: Confirm the 698 live-check feature is on spiny-orb main. Run `git -C ~/Documents/Repositories/spinybacked-orbweaver log --oneline | head -20 | grep -i 'prd-698\|live-check'`. If present, the run will produce a three-state live-check result (pass/advisory/fail) in the PR summary and verbose log — the Findings Discussion live-check item and PR artifact live-check section both apply. If absent, note in lessons-for-prd17.md and skip those items.
   4. **Target repo readiness** (commit-story-v2): Verify on `main`, clean working tree, spiny-orb.yaml and semconv/ exist. **Before switching to main, check for uncommitted artifacts on the current instrument branch** (run `git status` in commit-story-v2) and commit any to that branch before switching.
   5. **Push auth stability check**: Verify token still works (dry-run push to non-existent branch).
   6. **File inventory**: Count .js files in commit-story-v2's `src/` directory.
@@ -129,7 +130,7 @@ The **evaluation execution branch** created by `/prd-start` from main **never me
 
   **After saving artifacts and committing, push the eval branch to origin immediately** (`git push -u origin <eval-branch>`). The branch holds the only copy of run-16 artifacts until the "Copy artifacts to main" milestone runs — do not leave it local-only.
 
-- [ ] **Findings Discussion** *(user-facing checkpoint 1)* — After `run-summary.md` is written, before any evaluation documents are started: report to Whitney: (1) files committed / failed / partial, (2) whether any checkpoint failures occurred, (3) COV-003 result for `summary-detector.js` — specifically whether `getDaysWithEntries` and `getDaysWithDailySummaries` now have outer catches consistent with `findUnsummarized*`, (4) `journal-graph.js` attempt count (did the 1-attempt result hold?), (5) quality score if visible, (6) cost, (7) push/PR status. Keep it conversational, under 10 lines. Wait for acknowledgment before proceeding.
+- [ ] **Findings Discussion** *(user-facing checkpoint 1)* — After `run-summary.md` is written, before any evaluation documents are started: report to Whitney: (1) files committed / failed / partial, (2) whether any checkpoint failures occurred, (3) COV-003 result for `summary-detector.js` — specifically whether `getDaysWithEntries` and `getDaysWithDailySummaries` now have outer catches consistent with `findUnsummarized*`, (4) `journal-graph.js` attempt count (did the 1-attempt result hold?), (5) quality score if visible, (6) cost, (7) push/PR status, (8) live-check result — pass/advisory/fail plus a one-line summary of what Weaver found (or "not triggered" if 698 was absent from the build). Keep it conversational, under 10 lines. Wait for acknowledgment before proceeding.
 
 - [ ] **Failure deep-dives** — For each failed file AND run-level failure. Includes any partial files.
   Produces: `evaluation/commit-story-v2/run-16/failure-deep-dives.md`
@@ -139,7 +140,7 @@ The **evaluation execution branch** created by `/prd-start` from main **never me
   Produces: `evaluation/commit-story-v2/run-16/per-file-evaluation.md`
   Style reference: `Read docs/templates/eval-run-style-reference/per-file-evaluation.md`
 
-- [ ] **PR artifact evaluation** — Evaluate PR quality.
+- [ ] **PR artifact evaluation** — Evaluate PR quality. Include a live-check section: assess the three-state result (pass/advisory/fail), whether Weaver's compliance findings accurately reflect the telemetry produced, and whether the advisory detail is actionable. If 698 was absent from the build, note that and skip the live-check section.
   Produces: `evaluation/commit-story-v2/run-16/pr-evaluation.md`
   Style reference: `Read docs/templates/eval-run-style-reference/pr-evaluation.md`
 

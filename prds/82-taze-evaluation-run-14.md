@@ -119,6 +119,7 @@ The eval execution branch (`feature/prd-82-taze-evaluation-run-14`) **never has 
   7. **File inventory**: Count `.ts` files in `~/Documents/Repositories/taze/src/` — should be 33.
   8. Rebuild spiny-orb: `cd ~/Documents/Repositories/spinybacked-orbweaver && npm run build`
   9. Record spiny-orb SHA, Node version, and pnpm version. Append to `evaluation/taze/run-14/lessons-for-run15.md`.
+  10. **698 live-check gate**: Confirm the 698 live-check feature is on spiny-orb main. Run `git -C ~/Documents/Repositories/spinybacked-orbweaver log --oneline | head -20 | grep -i 'prd-698\|live-check'`. If present, the run will produce a three-state live-check result (pass/advisory/fail) in the PR summary and verbose log — the Findings Discussion live-check item (item 7) and PR artifact live-check section both apply. If absent, note in lessons-for-run15.md and skip those items.
 
 - [ ] **Evaluation run-14** — Whitney runs `spiny-orb instrument` in her own terminal. **Do NOT run the command yourself.** Run from `~/Documents/Repositories/taze`:
 
@@ -128,7 +129,7 @@ The eval execution branch (`feature/prd-82-taze-evaluation-run-14`) **never has 
 
   AI role: (1) create the `debug/` directory before Whitney runs; (2) confirm readiness; (3) once Whitney provides the log, save it and write `evaluation/taze/run-14/run-summary.md`. **After saving artifacts and committing, push the eval branch to origin immediately.**
 
-- [ ] **Findings Discussion** *(user-facing checkpoint 1)* — After `run-summary.md` is written, before any evaluation documents are started: report to Whitney: (1) files committed / failed / partial, (2) quality score, (3) cost, (4) push/PR status, (5) CDQ-006 violation count vs run-13 (was 8 across 5 files), (6) top 1-2 surprises. Conversational, under 10 lines. Wait for acknowledgment before proceeding.
+- [ ] **Findings Discussion** *(user-facing checkpoint 1)* — After `run-summary.md` is written, before any evaluation documents are started: report to Whitney: (1) files committed / failed / partial, (2) quality score, (3) cost, (4) push/PR status, (5) CDQ-006 violation count vs run-13 (was 8 across 5 files), (6) live-check result — pass/advisory/fail plus a one-line summary of what Weaver found (or "not triggered" if 698 was absent from the build), (7) top 1-2 surprises. Conversational, under 10 lines. Wait for acknowledgment before proceeding.
 
 - [ ] **Failure deep-dives** — For each failed or partially committed file and run-level failure.
   Produces: `evaluation/taze/run-14/failure-deep-dives.md`
@@ -138,7 +139,7 @@ The eval execution branch (`feature/prd-82-taze-evaluation-run-14`) **never has 
   Produces: `evaluation/taze/run-14/per-file-evaluation.md`
   Style reference: `docs/templates/eval-run-style-reference/per-file-evaluation.md`
 
-- [ ] **PR artifact evaluation** — Evaluate PR summary quality.
+- [ ] **PR artifact evaluation** — Evaluate PR summary quality. Include a live-check section: assess the three-state result (pass/advisory/fail), whether Weaver's compliance findings accurately reflect the telemetry produced, and whether the advisory detail is actionable. If 698 was absent from the build, note that and skip the live-check section.
   Produces: `evaluation/taze/run-14/pr-evaluation.md`
   Style reference: `docs/templates/eval-run-style-reference/pr-evaluation.md`
 
@@ -232,3 +233,4 @@ The eval execution branch (`feature/prd-82-taze-evaluation-run-14`) **never has 
 | 2026-05-03 | Apply schema type fix (TAZE-RUN1-1) in pre-run, not as a spiny-orb issue | The agent inferred correct types; the schema YAML was authored incorrectly. Fix the schema before run-14 so SCH-003 doesn't recur and CDQ-006 is the clean primary variable. |
 | 2026-05-03 | Apply IS RES-001 fix (service.instance.id) in pre-run | One-line SDK bootstrap fix; no instrumentation impact; makes IS score more meaningful for run-14 comparison. |
 | 2026-05-03 | Create evaluation/taze/run-log.md in this PRD's milestone 2 | First Type D taze PRD — the file does not yet exist. Use commit-story-v2/run-log.md column format. |
+| 2026-05-06 | 698 live-check validation must be verified as part of every eval run | spiny-orb PR #795 (698) shipped real Weaver compliance scoring into every `spiny-orb instrument` run. Before 698, live-check was a no-op. After 698, runs produce a three-state result (pass/advisory/fail) with Weaver compliance detail in the PR summary and verbose log. Pre-run verification now includes a 698 live-check gate (step 10); Findings Discussion now includes the live-check result (item 6); PR artifact evaluation now includes a live-check section. Same changes applied to PRDs #86 and #88 and the Type D template in `docs/language-extension-plan.md`. |

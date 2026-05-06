@@ -90,13 +90,13 @@ Note: update `run-N` to the current run number and `commit-story-v2` to the targ
 ### Type D: Run-N PRD (recurring, indefinitely)
 Identical in structure to the existing PRDs #3–13. Triggered by findings from the previous run. Follows the established milestone sequence:
 1. Collect skeleton documents
-2. Pre-run verification (verify prior findings fixed, check prerequisites)
+2. Pre-run verification (verify prior findings fixed, check prerequisites; confirm 698 live-check is on spiny-orb main)
 3. Evaluation run (Whitney runs `spiny-orb instrument` in her terminal — see exact command in Type C section above). **After saving artifacts and committing, push the eval branch to origin immediately.** The branch holds the only copy of run artifacts until PRD #57's backfill lands — do not leave it local-only.
 3a. **Create PR for the eval branch** (`gh pr create --base main`). Leave it open — eval PRs are never merged. Title format: `eval(prd-N): <target> run-N evaluation — <quality score> quality, Q×F <score>, IS <score>/100`. The score fields are filled in after rubric scoring (step 8) and IS scoring (step 9) complete — update the PR title at that point.
-4. Findings Discussion *(user-facing checkpoint 1: raw signal before analysis)*
+4. Findings Discussion *(user-facing checkpoint 1: raw signal before analysis)* — required items: files committed/failed/partial, quality score, cost, push/PR status, live-check result (pass/advisory/fail + one-line Weaver summary, or "not triggered"), and run-specific highlights
 5. Failure deep-dives
 6. Per-file evaluation
-7. PR artifact evaluation
+7. PR artifact evaluation — include a live-check section: three-state result accuracy (pass/advisory/fail), compliance finding quality, and actionability of advisory detail
 8. Rubric scoring
 9. IS scoring run
    1. **Prerequisites**: OTel Collector running with `evaluation/is/otelcol-config.yaml` (see `evaluation/is/README.md` for install and start instructions). No metrics-exporter override needed — MET rules are marked `not_applicable` by the scorer regardless.
