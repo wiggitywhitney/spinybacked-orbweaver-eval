@@ -41,6 +41,13 @@ caffeinate -s env -u ANTHROPIC_CUSTOM_HEADERS -u ANTHROPIC_BASE_URL HOME="$HOME"
 
 Note: `HOME="$HOME"` required for Weaver. `vals exec` reads from release-it fork's `.vals.yaml` (not eval repo). Source directory is `lib/` (not `src/`).
 
+⚠️ **`--debug-dump-dir` was missing from the run-4 command** — debug dumps were not collected. The failure deep-dives relied on log analysis alone rather than inspecting the actual instrumented code. The `eval-github-pat.md` step-6 template has been corrected; future run PRDs must include `--debug-dump-dir`.
+
+**Correct instrument command for run-5** (AI creates `debug-dumps/` dir before handing command to Whitney):
+```bash
+caffeinate -s env -u ANTHROPIC_CUSTOM_HEADERS -u ANTHROPIC_BASE_URL HOME="$HOME" GIT_CONFIG_GLOBAL=/Users/whitney.lee/.config/spiny-orb-eval/gitconfig vals exec -i -f ~/Documents/Repositories/release-it/.vals.yaml -- bash -c 'GITHUB_TOKEN=$GITHUB_TOKEN_RELEASE_IT node ~/Documents/Repositories/spinybacked-orbweaver/bin/spiny-orb.js instrument lib --verbose --thinking --debug-dump-dir ~/Documents/Repositories/spinybacked-orbweaver-eval/evaluation/release-it/run-5/debug-dumps 2>&1 | tee ~/Documents/Repositories/spinybacked-orbweaver-eval/evaluation/release-it/run-5/spiny-orb-output.log'
+```
+
 ---
 
 ## Run-4 Observations

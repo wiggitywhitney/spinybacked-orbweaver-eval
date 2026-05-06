@@ -152,7 +152,7 @@ The feature branch for this PRD (`feature/prd-88-evaluation-run-4-release-it`) *
   Produces: `evaluation/release-it/run-4/failure-deep-dives.md`
   Style reference: `Read docs/templates/eval-run-style-reference/failure-deep-dives.md`
 
-- [ ] **Per-file evaluation**
+- [x] **Per-file evaluation**
 
   Full 32-rule rubric on ALL processed files.
   Produces: `evaluation/release-it/run-4/per-file-evaluation.md`
