@@ -1,6 +1,7 @@
 # PRD #88: JavaScript Evaluation Run-4: release-it — Pre-scan Class Method Detection
 
-**Status:** Ready
+**Status:** Complete
+**Completed:** 2026-05-07
 **Created:** 2026-05-05
 **GitHub Issue:** #88
 **Depends on:** PRD #77 (run-3 complete, findings in `evaluation/release-it/run-3/actionable-fix-output.md`)
@@ -100,17 +101,17 @@ The feature branch for this PRD (`feature/prd-88-evaluation-run-4-release-it`) *
 
 ## Milestones
 
-- [ ] **Read language-extension-plan.md**
+- [x] **Read language-extension-plan.md**
 
   Read `docs/language-extension-plan.md` completely before proceeding with any other milestone.
 
-- [ ] **Collect skeleton documents**
+- [x] **Collect skeleton documents**
 
   Create `evaluation/release-it/run-4/` directory in the eval repo with skeleton files:
   - `lessons-for-run5.md` (copy structure from `evaluation/release-it/run-3/lessons-for-run4.md`)
   - `spiny-orb-findings.md` (fresh skeleton with P1/P2/P3 sections)
 
-- [ ] **Pre-run verification**
+- [x] **Pre-run verification**
 
   Verify run-3 P1 blockers and validate run prerequisites:
 
@@ -127,7 +128,7 @@ The feature branch for this PRD (`feature/prd-88-evaluation-run-4-release-it`) *
 
   **If RUN3-1 is not fixed**: proceed anyway. Document the miss. Q×F will remain near 3.0 but run-4 still produces valid evaluation data.
 
-- [ ] **Evaluation run-4**
+- [x] **Evaluation run-4**
 
   Whitney runs `spiny-orb instrument` in her own terminal. **Do NOT run the command yourself.**
 
@@ -140,65 +141,53 @@ The feature branch for this PRD (`feature/prd-88-evaluation-run-4-release-it`) *
 
   AI role: (1) confirm readiness, (2) once Whitney provides the log output, save it and write `evaluation/release-it/run-4/run-summary.md`, (3) **push the eval branch to origin immediately** — the branch holds the only copy of run artifacts until step 13 copies them to main.
 
-- [ ] **Findings Discussion** *(user-facing checkpoint 1)*
+- [x] **Findings Discussion** *(user-facing checkpoint 1)*
 
   After `run-summary.md` is written, before any evaluation documents: report to Whitney with a raw overview — files committed/failed/partial, quality score if visible in log, cost, push/PR status, top 1-2 surprises. Conversational, under 10 lines. Wait for acknowledgment before proceeding.
 
   Success criteria: Whitney has acknowledged the findings overview.
 
-- [ ] **Failure deep-dives**
+- [x] **Failure deep-dives**
 
   Root cause analysis for each failed/partial file and run-level failures.
   Produces: `evaluation/release-it/run-4/failure-deep-dives.md`
   Style reference: `Read docs/templates/eval-run-style-reference/failure-deep-dives.md`
 
-- [ ] **Per-file evaluation**
+- [x] **Per-file evaluation**
 
   Full 32-rule rubric on ALL processed files.
   Produces: `evaluation/release-it/run-4/per-file-evaluation.md`
   Style reference: `Read docs/templates/eval-run-style-reference/per-file-evaluation.md`
 
-- [ ] **PR artifact evaluation**
+- [x] **PR artifact evaluation**
 
   Produces: `evaluation/release-it/run-4/pr-evaluation.md`
   Style reference: `Read docs/templates/eval-run-style-reference/pr-evaluation.md`
 
-- [ ] **Rubric scoring**
+- [x] **Rubric scoring**
 
   Produces: `evaluation/release-it/run-4/rubric-scores.md`
   Style reference: `Read docs/templates/eval-run-style-reference/rubric-scores.md`
 
-- [ ] **IS scoring run**
+- [x] **IS scoring run** — **AI runs all commands**. See `docs/language-extension-plan.md` step 9 for the full automated sequence. Full protocol in CLAUDE.md "IS Scoring Runs" section.
 
-  Prerequisites: OTel Collector running with `evaluation/is/otelcol-config.yaml` (see `evaluation/is/README.md`). Stop Datadog Agent first: `datadog-agent stop`. IS scoring requires committed instrumented files in the working tree — if 0 files committed, mark as NOT EVALUABLE.
+  If 0 files committed on the instrument branch: write `NOT EVALUABLE — 0 files committed` to `evaluation/release-it/run-4/is-score.md` and stop.
 
-  Action: Run release-it in dry-run mode with the Collector as OTLP receiver.
-
-  From `~/Documents/Repositories/release-it/` (on the instrument branch, with OTel SDK devDeps installed):
-  ```bash
-  OTEL_EXPORTER_OTLP_TRACES_ENDPOINT=http://localhost:4318/v1/traces node --import ./examples/instrumentation.js ./bin/release-it.js --dry-run
-  ```
-
-  Then from `~/Documents/Repositories/spinybacked-orbweaver-eval/`:
-  ```bash
-  node evaluation/is/score-is.js evaluation/is/eval-traces.json > evaluation/release-it/run-4/is-score.md
-  ```
-
-  Restart Datadog Agent when done: `datadog-agent start`
+  Target-specific values for release-it: instrument branch `spiny-orb/instrument-XXXXXXXXXX`; entrypoint `./bin/release-it.js --dry-run`; devDep install via `npm`.
 
   Produces: `evaluation/release-it/run-4/is-score.md`
 
-- [ ] **Baseline comparison**
+- [x] **Baseline comparison**
 
   Compare run-4 against the most recent commit-story-v2 run (check `evaluation/commit-story-v2/run-log.md`) and against release-it run-3. Highlight dimensions that differ by more than 1 point from commit-story-v2.
   Produces: `evaluation/release-it/run-4/baseline-comparison.md`
   Style reference: `Read docs/templates/eval-run-style-reference/baseline-comparison.md`
 
-- [ ] **Update root README**
+- [x] **Update root README**
 
   After baseline comparison: (1) add a row for run-4 to the release-it run history table in `README.md`; (2) update the "next run" sentence below the release-it run history table to reference run-5 and its primary goals.
 
-- [ ] **Actionable fix output** *(user-facing checkpoint 2)*
+- [x] **Actionable fix output** *(user-facing checkpoint 2)*
 
   1. Run the cross-document audit agent to verify consistency across all run-4 evaluation artifacts.
   2. Give Whitney an interpreted summary of key findings — failures, root causes, notable patterns, what to watch for in run-5.
@@ -211,7 +200,7 @@ The feature branch for this PRD (`feature/prd-88-evaluation-run-4-release-it`) *
 
   Create on a separate branch from main. Use Type D structure from `docs/language-extension-plan.md` and this PRD as the milestone style reference. Carry forward both user-facing checkpoints. Merge the PRD-only PR to main so `/prd-start` can pick it up.
 
-- [ ] **Copy artifacts to main**
+- [x] **Copy artifacts to main**
 
   From main, run:
   ```bash
@@ -268,6 +257,10 @@ The feature branch for this PRD (`feature/prd-88-evaluation-run-4-release-it`) *
 |------|----------|-----------|
 | 2026-05-05 | Run-4 proceeds regardless of whether RUN3-1 pre-scan fix has landed | Even without the fix, run-4 validates quality on the 3 files that did commit in run-3, retries Git.js, and produces a valid eval data point for tracking progress |
 | 2026-05-05 | HOME="$HOME" stays in instrument command until spiny-orb P2-A fix confirmed on main | Workaround is safe and low-cost; removing it without confirming the fix would repeat run-3's blocked start |
+| 2026-05-06 | GITHUB_TOKEN_RELEASE_IT lives only in the release-it fork's .vals.yaml, not the eval repo's | Token was added to the fork's vals.yaml during run-2 setup but never mirrored to the eval repo's vals.yaml. Always use `-f ~/Documents/Repositories/release-it/.vals.yaml` for dry-run verification, not the eval repo's file. Using the eval repo's file produces "invalid token" — a false alarm. |
+| 2026-05-06 | Spiny-orb findings go in handoff document, not filed directly as GitHub issues | The eval team's role is to collect findings and deliver actionable-fix-output.md to the spiny-orb team. The spiny-orb team decides what to file. Direct issue creation from eval sessions bypasses the triage handoff. |
+| 2026-05-06 | LINT/NDS-003 indentation conflict is a structural spiny-orb issue, not an agent prompt issue | Adding the startActiveSpan wrapper adds 2 indentation levels, pushing long lines over Prettier's 120-char print width. The LINT validator catches if the agent preserves originals; NDS-003 catches if the agent reformats. No prompt change fixes this — the fix requires a Prettier post-pass before NDS-003 comparison, or computing NDS-003's baseline against the Prettier-formatted original. |
+| 2026-05-06 | IS scoring is fully automated — AI runs all commands, never surfaces steps for user | IS scoring is not a user-facing action. The AI handles Colima check, stale container removal, devDep install, Datadog Agent stop/start, Docker collector, target app dry-run, score-is.js, and cleanup. Canonical instructions: CLAUDE.md "IS Scoring Runs" section and `docs/language-extension-plan.md` step 9. Applies to all Type C and Type D eval PRDs. |
 
 ---
 

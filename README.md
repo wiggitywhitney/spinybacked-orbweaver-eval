@@ -106,16 +106,19 @@ Full run-by-run analysis: [`evaluation/commit-story-v2/`](evaluation/commit-stor
 
 release-it is the JavaScript evaluation target for testing spiny-orb on a foreign (non-primary) codebase. It is a release automation CLI for Node.js — no LangGraph, no LLM calls, no MCP server. The async I/O is primarily git operations, GitHub/GitLab REST API calls, and npm registry checks, giving spiny-orb a structurally different challenge than commit-story-v2.
 
-| Run | Quality | Gates | Files | Spans | Cost | Push/PR | IS |
-|-----|---------|-------|-------|-------|------|---------|-----|
-| 1 | N/A (halted) | N/A | 0+5f | 0 | $0.68 | NO | — |
-| 2 | 24/25 (96%) | 4/5† | 0+13f | 0 | $5.69 | branch YES / PR FAILED | N/E |
+| Run | Quality | Gates | Files | Spans | Cost | Push/PR | Q×F | IS |
+|-----|---------|-------|-------|-------|------|---------|-----|-----|
+| 1 | N/A (halted) | N/A | 0+5f | 0 | $0.68 | NO | 0 | — |
+| 2 | 24/25 (96%) | 4/5† | 0+13f | 0 | $5.69 | branch YES / PR FAILED | 0 | N/E |
+| 3 | 25/25 (100%) | 5/5 | 3 | 6 | $1.59 | push YES / manual PR | 3.0 | 90/100 |
+| 4 | 24/25 (96%) | 5/5 | 7 | 20 | $6.97 | push YES / PR manual‡ | 6.7 | 100/100 |
 
 Files column: `+Nf` = N files rolled back by checkpoint or end-of-run test failure. Run-1 halted at file 5/23. Run-2 processed all 23 files; 0 committed net due to OTel module resolution failures at every checkpoint.
 † Gates: 4 pass + 1 NOT EVALUABLE (NDS-002 — checkpoint tests fail for infrastructure reasons, not agent error). NDS-003 gate fails for GitHub.js.
+‡ Run-4: push succeeded to correct fork (RUN3-2 fixed). PR auto-creation failed with `spawn E2BIG` — PR body too large for `gh pr create --body` (compliance report is a 399K-line JSON blob). Manual PR #3 created.
 IS column: N/E = Not Evaluable (no instrumented files survived to the working tree).
 
-**Run-3 is next** — two P1 blockers must be resolved before running: (1) OTel module resolution at checkpoint (`@opentelemetry/api` not resolvable under peerDependencies strategy — needs devDependency or install step before checkpoint tests); (2) PAT scope in GCP Secret Manager (`github-token-release-it` lacks `pull_requests:write`).
+**Run-5 is next** — primary goal: resolve the indentation-width conflict (LINT/NDS-003) that caused all 6 run-4 failures. The `startActiveSpan` wrapper adds 2 indent levels, pushing long lines over Prettier's 120-char print width; the agent can't satisfy both LINT and NDS-003 simultaneously. Fix requires a Prettier post-pass before NDS-003 comparison, or computing NDS-003 baseline against the Prettier-formatted original. Secondary goal: fix PR auto-creation (`E2BIG` — use `gh pr create --body-file` instead of `--body`).
 
 Full run-by-run analysis: [`evaluation/release-it/`](evaluation/release-it/)
 

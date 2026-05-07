@@ -98,11 +98,15 @@ Identical in structure to the existing PRDs #3–13. Triggered by findings from 
 6. Per-file evaluation
 7. PR artifact evaluation
 8. Rubric scoring
-9. IS scoring run
-   1. **Prerequisites**: OTel Collector running with `evaluation/is/otelcol-config.yaml` (see `evaluation/is/README.md` for install and start instructions). No metrics-exporter override needed — MET rules are marked `not_applicable` by the scorer regardless.
-   2. **Action**: Run the target app with the Collector as OTLP receiver; collect `evaluation/is/eval-traces.json`; run `node evaluation/is/score-is.js evaluation/is/eval-traces.json > evaluation/[TARGET]/run-[N]/is-score.md`
-   3. **Output**: `evaluation/[TARGET]/run-[N]/is-score.md` is written by the command above.
-   4. **Note for k8s repos**: IS scoring requires a running cluster; see `evaluation/is/README.md` for the Kind-based workflow
+9. IS scoring run — **fully automated, AI runs all commands**
+   1. **Prerequisites check**: If 0 files committed on the instrument branch, mark as NOT EVALUABLE and skip. Otherwise proceed.
+   2. **Install OTel SDK devDeps** in the target repo (on the instrument branch): `npm --prefix ~/Documents/Repositories/[TARGET] install --save-dev @opentelemetry/sdk-node @opentelemetry/exporter-trace-otlp-http @opentelemetry/sdk-trace-base @opentelemetry/resources`
+   3. **Stop Datadog Agent** (port 4318 conflict): `datadog-agent stop`
+   4. **Start OTel Collector** via Docker (Colima must be running — check `colima status` first). Pre-create output file: `touch evaluation/is/eval-traces.json`. Then: `docker run -d --name eval-collector -p 4318:4318 --user "$(id -u):$(id -g)" -w /etc/otelcol -v /Users/whitney.lee/Documents/Repositories/spinybacked-orbweaver-eval/evaluation/is:/etc/otelcol otel/opentelemetry-collector-contrib:latest --config /etc/otelcol/otelcol-config.yaml`
+   5. **Run the target app** with instrumentation (from the target repo, on the instrument branch): `OTEL_EXPORTER_OTLP_TRACES_ENDPOINT=http://localhost:4318/v1/traces node --import ./examples/instrumentation.js ./bin/[ENTRYPOINT].js --dry-run`
+   6. **Wait 2 seconds** after the process exits (gRPC spans may still be in transit), then score: `node evaluation/is/score-is.js evaluation/is/eval-traces.json > evaluation/[TARGET]/run-[N]/is-score.md`
+   7. **Clean up**: `docker stop eval-collector && docker rm eval-collector`; `datadog-agent start`; restore the target repo to main and reinstall deps: `cd ~/Documents/Repositories/[TARGET] && git checkout main && npm install`
+   8. **Note for k8s repos**: IS scoring requires a running cluster; see `evaluation/is/README.md` for the Kind-based workflow
 10. Baseline comparison
 10a. **Update root README** — After baseline comparison, update `README.md`: (1) add a row for this run to the run history table with quality score, gates, files, spans, cost, push/PR status, and IS score; (2) update the "next run" sentence (the bold paragraph immediately below the run history table, above the "Full run-by-run analysis" link) to reference the upcoming run number and its primary goals.
 11. Actionable fix output *(user-facing checkpoint 2: interpreted summary + handoff pause)*

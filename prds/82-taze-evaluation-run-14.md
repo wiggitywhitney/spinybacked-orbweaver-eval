@@ -146,14 +146,21 @@ The eval execution branch (`feature/prd-82-taze-evaluation-run-14`) **never has 
   Produces: `evaluation/taze/run-14/rubric-scores.md`
   Style reference: `docs/templates/eval-run-style-reference/rubric-scores.md`
 
-- [ ] **IS scoring run**
+- [ ] **IS scoring run** — **AI runs all commands**. See CLAUDE.md "IS Scoring Runs" section and `docs/language-extension-plan.md` step 9 for the full automated sequence.
 
-  **IS scoring gotchas from run-13**: (1) Docker blocked by Datadog MDM policy — download `otelcol-contrib` binary directly from GitHub releases (darwin_arm64); (2) OTel SDK packages (`@opentelemetry/sdk-node`, `exporter-trace-otlp-http`, `sdk-trace-base`, `resources`) are not in taze devDependencies — temporarily install via `pnpm add -D` for the IS scoring run, then revert with `git restore package.json pnpm-lock.yaml`; (3) taze CLI modes are `default | major | minor | patch | latest | newest | next` (no "check" subcommand); (4) Run 3-4 modes to enrich trace data.
+  **Taze-specific gotchas** (from run-13):
+  - Docker may be blocked by Datadog MDM policy — if `docker run` fails, download `otelcol-contrib` binary from GitHub releases (darwin_arm64) and run it directly instead
+  - OTel SDK packages are not in taze devDependencies — install temporarily: `pnpm add -D @opentelemetry/sdk-node @opentelemetry/exporter-trace-otlp-http @opentelemetry/sdk-trace-base @opentelemetry/resources`; restore after: `git restore package.json pnpm-lock.yaml`
+  - taze CLI modes: `default | major | minor | patch | latest | newest | next` (no "check" subcommand)
+  - Run 3-4 modes to enrich trace data (more spans = more meaningful IS score)
 
-  1. **Prerequisites**: OTel Collector running with `evaluation/is/otelcol-config.yaml` — use binary if Docker is unavailable (see `evaluation/is/README.md` for binary download instructions and Datadog Agent port conflict). Stop Datadog Agent first: `datadog-agent stop`.
-  2. **Setup**: Find the instrument branch name from the end of `evaluation/taze/run-14/spiny-orb-output.log` (look for `Branch:` in the final summary box) or run `gh pr list --repo wiggitywhitney/taze --json number,headRefName`. In `~/Documents/Repositories/taze`, run: `git fetch && git checkout <instrument-branch> -- src/ examples/`. Build: `pnpm build`. Install SDK packages temporarily: `pnpm add -D @opentelemetry/sdk-node @opentelemetry/exporter-trace-otlp-http @opentelemetry/sdk-trace-base @opentelemetry/resources`.
-  3. **Action**: Run several taze modes with the Collector receiving: `OTEL_EXPORTER_OTLP_TRACES_ENDPOINT=http://localhost:4318/v1/traces node --import ./examples/instrumentation.js ./bin/taze.mjs <mode>` (e.g., `default`, `major`, `latest`). Then: `node evaluation/is/score-is.js evaluation/is/eval-traces.json > evaluation/taze/run-14/is-score.md`
-  4. **Restore**: `git restore package.json pnpm-lock.yaml` in the taze fork; `git checkout main`; restart Datadog Agent: `datadog-agent start`.
+  **Taze-specific sequence** (runs after the standard CLAUDE.md setup):
+  1. Find the instrument branch: from `evaluation/taze/run-14/spiny-orb-output.log` (look for `Branch:` in the final summary) or `gh pr list --repo wiggitywhitney/taze --json number,headRefName`
+  2. In `~/Documents/Repositories/taze`: `git fetch && git checkout <instrument-branch> -- src/ examples/`. Build: `pnpm build`. Install SDK devDeps (see gotcha above).
+  3. Run several modes: `OTEL_EXPORTER_OTLP_TRACES_ENDPOINT=http://localhost:4318/v1/traces node --import ./examples/instrumentation.js ./bin/taze.mjs <mode>` for `default`, `major`, `latest`
+  4. Score: `node evaluation/is/score-is.js evaluation/is/eval-traces.json > evaluation/taze/run-14/is-score.md`
+  5. Restore: `git restore package.json pnpm-lock.yaml` in taze fork; `git checkout main`
+
   Produces: `evaluation/taze/run-14/is-score.md`
 
 - [ ] **Baseline comparison** — Compare run-14 vs run-13 (only prior TS run). Note improvements on CDQ-006 and SCH-003 specifically.
