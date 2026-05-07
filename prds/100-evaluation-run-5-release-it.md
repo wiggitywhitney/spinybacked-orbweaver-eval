@@ -135,7 +135,7 @@ The feature branch for this PRD (`feature/prd-100-evaluation-run-5-release-it`) 
 
   Note: `HOME="$HOME"` is required — weaver prerequisite check needs HOME for `~/.weaver/vdir_cache/`. `vals exec` reads from release-it fork's `.vals.yaml` (NOT the eval repo's). Source directory is `lib/`.
 
-  AI role: (1) confirm readiness, (2) once Whitney provides the log output, save it and write `evaluation/release-it/run-5/run-summary.md`, (3) **push the eval branch to origin immediately** — the branch holds the only copy of run artifacts until step 13 copies them to main.
+  AI role: (1) confirm readiness, (2) once Whitney provides the log output, save it and write `evaluation/release-it/run-5/run-summary.md`, (3) **push the eval branch to origin immediately** — the branch holds the only copy of run artifacts until step 13 copies them to main, (4) **if auto PR creation failed**, create the PR from the file spiny-orb already wrote to disk — do NOT write a shortened manual body: `gh pr create --body-file ~/Documents/Repositories/release-it/spiny-orb-pr-summary.md --repo wiggitywhitney/release-it --head <instrument-branch> --title "..."`
 
 - [ ] **Findings Discussion** *(user-facing checkpoint 1)*
 

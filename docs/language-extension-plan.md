@@ -93,6 +93,11 @@ Identical in structure to the existing PRDs #3–13. Triggered by findings from 
 2. Pre-run verification (verify prior findings fixed, check prerequisites)
 3. Evaluation run (Whitney runs `spiny-orb instrument` in her terminal — see exact command in Type C section above). **After saving artifacts and committing, push the eval branch to origin immediately.** The branch holds the only copy of run artifacts until PRD #57's backfill lands — do not leave it local-only.
 3a. **Create PR for the eval branch** (`gh pr create --base main`). Leave it open — eval PRs are never merged. Title format: `eval(prd-N): <target> run-N evaluation — <quality score> quality, Q×F <score>, IS <score>/100`. The score fields are filled in after rubric scoring (step 8) and IS scoring (step 9) complete — update the PR title at that point.
+
+   **If auto PR creation fails**: spiny-orb always writes the full PR body to `<target-repo-root>/spiny-orb-pr-summary.md` before attempting `gh pr create`. Use that file — do NOT write a shortened manual body:
+   ```bash
+   gh pr create --body-file ~/Documents/Repositories/<target>/spiny-orb-pr-summary.md --repo wiggitywhitney/<target> --head <instrument-branch> --title "eval(prd-N): <target> run-N evaluation — <quality score> quality, Q×F <score>, IS <score>/100"
+   ```
 4. Findings Discussion *(user-facing checkpoint 1: raw signal before analysis)*
 5. Failure deep-dives
 6. Per-file evaluation

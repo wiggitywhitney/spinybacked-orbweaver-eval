@@ -96,6 +96,18 @@ Include both user-facing checkpoints (Findings Discussion and Handoff pause) in 
 
 See `docs/language-extension-plan.md` for full context: PRD taxonomy, language candidate table, score projection methodology, and process requirements.
 
+## PR Auto-Creation Failure Recovery
+
+When spiny-orb's auto PR creation fails for any reason (E2BIG, PAT scope, upstream targeting, network error), the full generated PR summary is already on disk at `<target-repo-root>/spiny-orb-pr-summary.md`. spiny-orb always writes this file unconditionally before attempting `gh pr create`.
+
+**Do NOT write a shortened manual body.** Create the PR from the file:
+
+```bash
+gh pr create --body-file ~/Documents/Repositories/<target>/spiny-orb-pr-summary.md --repo wiggitywhitney/<target> --head <instrument-branch> --title "..."
+```
+
+The full PR summary contains per-file breakdown, schema changes, advisory findings, and token usage — this content matters for review and for demos.
+
 ## Analyzing Eval Failures
 
 When diagnosing a failed file in a spiny-orb eval run, check all three sources before drawing conclusions:
