@@ -186,7 +186,7 @@ The feature branch for this PRD (`feature/prd-88-evaluation-run-4-release-it`) *
 
   After baseline comparison: (1) add a row for run-4 to the release-it run history table in `README.md`; (2) update the "next run" sentence below the release-it run history table to reference run-5 and its primary goals.
 
-- [ ] **Actionable fix output** *(user-facing checkpoint 2)*
+- [x] **Actionable fix output** *(user-facing checkpoint 2)*
 
   1. Run the cross-document audit agent to verify consistency across all run-4 evaluation artifacts.
   2. Give Whitney an interpreted summary of key findings — failures, root causes, notable patterns, what to watch for in run-5.
