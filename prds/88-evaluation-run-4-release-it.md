@@ -1,6 +1,7 @@
 # PRD #88: JavaScript Evaluation Run-4: release-it — Pre-scan Class Method Detection
 
-**Status:** Ready
+**Status:** Complete
+**Completed:** 2026-05-07
 **Created:** 2026-05-05
 **GitHub Issue:** #88
 **Depends on:** PRD #77 (run-3 complete, findings in `evaluation/release-it/run-3/actionable-fix-output.md`)
