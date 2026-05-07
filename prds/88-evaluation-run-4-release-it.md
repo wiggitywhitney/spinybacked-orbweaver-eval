@@ -199,7 +199,7 @@ The feature branch for this PRD (`feature/prd-88-evaluation-run-4-release-it`) *
 
   Create on a separate branch from main. Use Type D structure from `docs/language-extension-plan.md` and this PRD as the milestone style reference. Carry forward both user-facing checkpoints. Merge the PRD-only PR to main so `/prd-start` can pick it up.
 
-- [ ] **Copy artifacts to main**
+- [x] **Copy artifacts to main**
 
   From main, run:
   ```bash
