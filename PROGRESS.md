@@ -6,6 +6,9 @@ Entry format: `- (YYYY-MM-DD) Description of feature-level change (PRD #X, miles
 
 ## [Unreleased]
 
+### Added
+- (2026-05-11) Started commit-story-v2 run-16 evaluation: created run-16 artifact directory with lessons skeleton and debug-dumps subdirectory, ready for pre-run verification.
+
 ### Fixed
 - (2026-05-05) Backfilled missing GitHub PRs for three eval branches (commit-story-v2 runs 13, 14, 15) that were completed and committed but never had PRs created — a convention established since run-6 that had been dropped. Root cause was a documentation gap: "Create PR" was not an explicit step in the Type D milestone sequence in `docs/language-extension-plan.md`, so agents skipped it. Added step 3a to the Type D sequence to make PR creation a named, actionable step after the eval artifacts are committed and pushed. Also verified that the prd-44 cascade decision (IS scoring steps in PRDs #50–55) was already applied across all five PRDs — no further action needed on the cascade.
 - (2026-05-05) Added `service.instance.id: randomUUID()` to `resourceFromAttributes` in the eval bootstrap template and in all three active target forks (release-it, commit-story-v2, taze). The attribute was absent from all bootstraps, causing RES-001 to fail in every IS scoring run — a 10-point miss. Also brought the eval template up to the full reference pattern (OTLP exporter, resource config, graceful shutdown) to serve as a complete starting point for future Type C eval setups.

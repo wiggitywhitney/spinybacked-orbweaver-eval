@@ -105,9 +105,9 @@ The **evaluation execution branch** created by `/prd-start` from main **never me
 
 ## Milestones
 
-- [ ] **Read `docs/language-extension-plan.md` completely before proceeding with any other milestone.** Pay particular attention to step 9.5 (SPA-001 calibration note for commit-story-v2) and step 9 (IS scoring protocol). **Do not mark this complete until you have read both sections.**
+- [x] **Read `docs/language-extension-plan.md` completely before proceeding with any other milestone.** Pay particular attention to step 9.5 (SPA-001 calibration note for commit-story-v2) and step 9 (IS scoring protocol). **Do not mark this complete until you have read both sections.**
 
-- [ ] **Collect skeleton documents** — Create `evaluation/commit-story-v2/run-16/` directory with `lessons-for-prd17.md` skeleton. Must run before pre-run verification step 9.
+- [x] **Collect skeleton documents** — Create `evaluation/commit-story-v2/run-16/` directory with `lessons-for-prd17.md` skeleton. Must run before pre-run verification step 9.
 
 - [ ] **Pre-run verification** — Verify spiny-orb fixes and validate run prerequisites:
   1. **Handoff triage review**: Read the spiny-orb team's triage of `evaluation/commit-story-v2/run-15/actionable-fix-output.md`. Check which findings were filed as issues.
