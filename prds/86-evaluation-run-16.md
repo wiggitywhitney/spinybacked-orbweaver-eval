@@ -148,6 +148,7 @@ The **evaluation execution branch** created by `/prd-start` from main **never me
 - [ ] **Rubric scoring** — Synthesize dimension-level scores.
   Produces: `evaluation/commit-story-v2/run-16/rubric-scores.md`
   Style reference: `Read docs/templates/eval-run-style-reference/rubric-scores.md`
+  *(Updated per D1: NDS-003 for summary-manager.js is PASS — the "line 155 missing" flag is a false positive from line number drift; the early-return guard is present in the committed code.)*
 
 - [ ] **IS scoring run** — Follow `docs/language-extension-plan.md` step 9. Full protocol in `evaluation/is/README.md` (commit-story-v2 section).
 
@@ -179,8 +180,10 @@ The **evaluation execution branch** created by `/prd-start` from main **never me
   2. *(User-facing checkpoint 2)* Give Whitney an interpreted summary of key findings — failures, root causes, notable patterns, what to watch for in run-17.
   3. Print the absolute file path of `evaluation/commit-story-v2/run-16/actionable-fix-output.md`.
   4. **Pause.** Do not proceed to Draft PRD #17 until Whitney confirms she has handed the document off to the spiny-orb team.
+  *(Updated per D2: null parsed_output fix recommendation = increase minimum token budget for function-level fallback calls on short files, or detect when adaptive thinking reaches ~80% of budget and force output generation. Root cause is token budget exhaustion — NOT output format changes from PRD #509.)*
 
 - [ ] **Draft PRD #17** — Create on a separate branch from main. Merge the PRD PR to main so `/prd-start` can pick it up. Carry forward both user-facing checkpoints into PRD #17's milestone structure. IS scoring milestone must use the same format as this PRD's IS scoring milestone.
+  *(Updated per D2: primary goal for run-17 = verify spiny-orb fix for function-level fallback token budget exhaustion. Affected files: context-capture-tool.js, reflection-tool.js, index.js, and the 2 summary-manager.js functions. The fix is spiny-orb-side — increase minimum budget or detect thinking-dominated responses early. PRD #17 pre-run verification must confirm a fix landed before running.)*
 
 - [ ] **Copy artifacts to main** — From main, run `git checkout <eval-branch> -- evaluation/commit-story-v2/run-16/` to copy all artifacts. Commit to main with message `eval: save run-16 artifacts to main [skip ci]`. Add one row to `evaluation/commit-story-v2/run-log.md` for run-16 and commit with `eval: update run-log for run-16 [skip ci]`. Push main. This step runs before `/prd-done` so the artifacts land on main while the eval branch is still reachable.
 
@@ -190,6 +193,8 @@ The **evaluation execution branch** created by `/prd-start` from main **never me
 
 | ID | Decision | Rationale | Date |
 |----|----------|-----------|------|
+| D1 | NDS-003 validator flag on summary-manager.js "line 155 missing" is a false positive from line number drift, not a real structural defect. The return statement IS present in the instrumented file (at line 187/221 due to span wrapper additions shifting line numbers). Rubric should score NDS-003 as PASS for summary-manager.js. | The validator compared against instrument-time base; line numbers shifted between that base and current main. The early-return guard exists in the committed code. | 2026-05-11 |
+| D2 | Null parsed_output failures are caused by adaptive thinking exhausting the token budget before producing structured JSON output — not by output format changes introduced in PRD #509. The function-level fallback triggers separate per-function LLM calls with small budgets (min 16,384 for short functions); the model exhausts the budget on reasoning and produces no structured output. | Log shows `stop_reason: max_tokens` + `raw_preview: <no text content>` on all 4 affected calls. Fix recommendation for PRD #17: increase minimum budget for function-level fallback calls, or detect when thinking reaches 80% of budget and force output generation. | 2026-05-11 |
 
 ---
 
