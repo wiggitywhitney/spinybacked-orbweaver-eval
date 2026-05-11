@@ -7,6 +7,7 @@ Entry format: `- (YYYY-MM-DD) Description of feature-level change (PRD #X, miles
 ## [Unreleased]
 
 ### Added
+- (2026-05-11) Completed commit-story-v2 run-16 evaluation through per-file evaluation: run produced 10 committed files, 3 failed (2 null parsed_output from token exhaustion, 1 API terminated), 3 partial (NDS-003 oscillation on journal-graph technicalNode, function-level fallback NDS-005 bug on commit-analyzer, token exhaustion on 2 summary-manager functions). Primary goal confirmed: COV-003 now passes for all 5 spans in summary-detector.js — the outer catch block fix for getDaysWithEntries and getDaysWithDailySummaries landed correctly. New systemic finding: function-level fallback adaptive thinking exhausts the token budget on short-to-medium files, producing null parsed_output with no structured output.
 - (2026-05-11) Completed pre-run verification for commit-story-v2 run-16: confirmed the P1 fix for missing outer catch blocks in summary-detector.js landed on spiny-orb main (commit e2582c3, PR #749), documented all other significant spiny-orb changes since run-15 (dependency-aware ordering, Prettier-normalized NDS-003, Weaver live-check integration, human-facing advisory output), verified target repo readiness and push auth, rebuilt spiny-orb from main (SHA dc5a2aa). Ready to run.
 - (2026-05-11) Started commit-story-v2 run-16 evaluation: created run-16 artifact directory with lessons skeleton, ready for pre-run verification.
 

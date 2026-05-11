@@ -29,7 +29,13 @@ These are substantial changes since run-15. Run-16 results may differ more than 
 
 ## Run-Level Observations
 
-<!-- Populated during and after evaluation run -->
+**Live-check JSON blob dumped to terminal (RUN16-2, new — P2)**: At end of run, spiny-orb printed the entire live-check compliance report JSON to terminal stdout. The report was thousands of lines of raw JSON (543 spans × multiple advisory findings each = 3,615 advisories). This is a bad user experience — the user's terminal was flooded with machine-readable JSON that is not intended for direct reading. The report should be written to disk only (it is saved to `spiny-orb-live-check-report.json` on disk), not echoed to stdout. Filed for spiny-orb team.
+
+**null parsed_output failures (RUN16-1, new — P1)**: Three full file failures (context-capture-tool.js, reflection-tool.js, src/index.js) and two function-level failures within summary-manager.js all failed with "null parsed_output." At least two attempts show `stop_reason: max_tokens` with 16,384 output tokens — the LLM response exceeded the structured output token limit and the parser received incomplete/malformed JSON. This is a new failure mode not present in runs 9-15. Possible causes: (1) more complex output format from PRD #509 human-facing advisory additions, (2) larger file sizes triggering longer responses. Watch in run-17.
+
+**journal-graph.js 3 attempts**: The 1-attempt result from run-15 did NOT hold — back to 3 attempts with technicalNode skipped (NDS-003 oscillation: error count 1→5 on fresh regeneration at lines 29, 30, 54, 57, 31). Root cause of run-15's single-attempt success remains unknown; not a confirmed fix.
+
+**summary-detector.js COV-003: FIXED**: Both getDaysWithEntries and getDaysWithDailySummaries committed with outer error-recording catch blocks, consistent with the findUnsummarized* functions. Primary goal of run-16 confirmed met.
 
 ## Evaluation Process Observations
 

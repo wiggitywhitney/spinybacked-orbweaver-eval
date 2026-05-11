@@ -120,7 +120,7 @@ The **evaluation execution branch** created by `/prd-start` from main **never me
   8. Record version and findings status.
   9. Append observations to `evaluation/commit-story-v2/run-16/lessons-for-prd17.md`.
 
-- [ ] **Evaluation run-16** — Whitney runs `spiny-orb instrument` in her own terminal. **Do NOT run the command yourself.** AI role: (1) confirm readiness with Whitney, (2) once Whitney provides the log output, save it to `evaluation/commit-story-v2/run-16/spiny-orb-output.log` and write `evaluation/commit-story-v2/run-16/run-summary.md`, (3) **if auto PR creation failed**, create the PR from the file spiny-orb already wrote to disk — do NOT write a shortened manual body: `gh pr create --body-file ~/Documents/Repositories/commit-story-v2/spiny-orb-pr-summary.md --repo wiggitywhitney/commit-story-v2 --head <instrument-branch> --title "..."`
+- [x] **Evaluation run-16** — Whitney runs `spiny-orb instrument` in her own terminal. **Do NOT run the command yourself.** AI role: (1) confirm readiness with Whitney, (2) once Whitney provides the log output, save it to `evaluation/commit-story-v2/run-16/spiny-orb-output.log` and write `evaluation/commit-story-v2/run-16/run-summary.md`, (3) **if auto PR creation failed**, create the PR from the file spiny-orb already wrote to disk — do NOT write a shortened manual body: `gh pr create --body-file ~/Documents/Repositories/commit-story-v2/spiny-orb-pr-summary.md --repo wiggitywhitney/commit-story-v2 --head <instrument-branch> --title "..."`
 
   AI must create `evaluation/commit-story-v2/run-16/debug-dumps/` before handing Whitney the command.
 
@@ -131,13 +131,13 @@ The **evaluation execution branch** created by `/prd-start` from main **never me
 
   **After saving artifacts and committing, push the eval branch to origin immediately** (`git push -u origin <eval-branch>`). The branch holds the only copy of run-16 artifacts until the "Copy artifacts to main" milestone runs — do not leave it local-only.
 
-- [ ] **Findings Discussion** *(user-facing checkpoint 1)* — After `run-summary.md` is written, before any evaluation documents are started: report to Whitney: (1) files committed / failed / partial, (2) whether any checkpoint failures occurred, (3) COV-003 result for `summary-detector.js` — specifically whether `getDaysWithEntries` and `getDaysWithDailySummaries` now have outer catches consistent with `findUnsummarized*`, (4) `journal-graph.js` attempt count (did the 1-attempt result hold?), (5) quality score if visible, (6) cost, (7) push/PR status. Keep it conversational, under 10 lines. Wait for acknowledgment before proceeding.
+- [x] **Findings Discussion** *(user-facing checkpoint 1)* — After `run-summary.md` is written, before any evaluation documents are started: report to Whitney: (1) files committed / failed / partial, (2) whether any checkpoint failures occurred, (3) COV-003 result for `summary-detector.js` — specifically whether `getDaysWithEntries` and `getDaysWithDailySummaries` now have outer catches consistent with `findUnsummarized*`, (4) `journal-graph.js` attempt count (did the 1-attempt result hold?), (5) quality score if visible, (6) cost, (7) push/PR status. Keep it conversational, under 10 lines. Wait for acknowledgment before proceeding.
 
-- [ ] **Failure deep-dives** — For each failed file AND run-level failure. Includes any partial files.
+- [x] **Failure deep-dives** — For each failed file AND run-level failure. Includes any partial files.
   Produces: `evaluation/commit-story-v2/run-16/failure-deep-dives.md`
   Style reference: `Read docs/templates/eval-run-style-reference/failure-deep-dives.md`
 
-- [ ] **Per-file evaluation** — Full rubric on ALL files (no spot-checking). Evaluate all rules across all committed and partial files.
+- [x] **Per-file evaluation** — Full rubric on ALL files (no spot-checking). Evaluate all rules across all committed and partial files.
   Produces: `evaluation/commit-story-v2/run-16/per-file-evaluation.md`
   Style reference: `Read docs/templates/eval-run-style-reference/per-file-evaluation.md`
 
