@@ -93,10 +93,12 @@ spinybacked-orbweaver-eval/
 | 12 | 23/25 (92%) | 5/5 | 12+1p | 31 | $5.19 | YES | — |
 | 13 | **25/25 (100%)** | 5/5 | 7+1p+11f | 16 | ~$6.41 | YES | — |
 | 14 | 22/25 (88%) | 5/5 | 12 | 32 | $5.59 | YES | **80/100** |
+| 15 | 24/25 (96%) | 5/5 | 14 | 40 | $6.44 | YES (#66) | 70/100 |
+| 16 | 22/25 (88%) | 5/5 | 10+3p | ~38 | $12.29 | YES (#68) | **80/100** |
 
 Files column notation: plain count = committed files; `+Np` = N partial files (instrumentation started, not fully committed); `+Nf` = N files rolled back after a checkpoint test failure. Cost column: `~` prefix indicates an estimated/derived cost (early runs predating direct cost reporting in the tool); unprefixed values are directly reported by spiny-orb.
 
-**Run-15 is next** — verifying catch-block consistency in `journal-graph.js` (`summaryNode` error recording) and monitoring COV-004 disposition from the parallel advisory rules audit (spiny-orb PRD #483).
+**Run-17 is next** — verifying the spiny-orb fix for function-level fallback token budget exhaustion (null parsed_output), which caused 3 full-file failures and 2 function-level skips in run-16; also watching whether the NDS-005 function-level fallback bug (try/catch stripped on 0-span files) and journal-graph.js `technicalNode` NDS-003 oscillation are addressed.
 
 Full run-by-run analysis: [`evaluation/commit-story-v2/`](evaluation/commit-story-v2/)
 
