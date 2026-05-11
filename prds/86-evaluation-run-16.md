@@ -109,7 +109,7 @@ The **evaluation execution branch** created by `/prd-start` from main **never me
 
 - [x] **Collect skeleton documents** — Create `evaluation/commit-story-v2/run-16/` directory with `lessons-for-prd17.md` skeleton. Must run before pre-run verification step 9.
 
-- [ ] **Pre-run verification** — Verify spiny-orb fixes and validate run prerequisites:
+- [x] **Pre-run verification** — Verify spiny-orb fixes and validate run prerequisites:
   1. **Handoff triage review**: Read the spiny-orb team's triage of `evaluation/commit-story-v2/run-15/actionable-fix-output.md`. Check which findings were filed as issues.
   2. **Outer catch guidance fix** (P1 — critical, RUN15-1): Verify the fix for the outer catch gap in `summary-detector.js` landed. The fix involves prompt guidance distinguishing inner graceful-degradation catches (NDS-007 applies — no error recording) from the outer span-level catch (still needed for unexpected exceptions). Confirm the relevant issue/PR is closed and merged to spiny-orb main.
   3. **Other spiny-orb fixes since run-15**: Check spiny-orb main for any merged PRs relevant to commit-story-v2 evaluation (push detection bug RUN15-3, advisory quality improvements #728 #729).

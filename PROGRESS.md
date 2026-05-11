@@ -7,6 +7,7 @@ Entry format: `- (YYYY-MM-DD) Description of feature-level change (PRD #X, miles
 ## [Unreleased]
 
 ### Added
+- (2026-05-11) Completed pre-run verification for commit-story-v2 run-16: confirmed the P1 fix for missing outer catch blocks in summary-detector.js landed on spiny-orb main (commit e2582c3, PR #749), documented all other significant spiny-orb changes since run-15 (dependency-aware ordering, Prettier-normalized NDS-003, Weaver live-check integration, human-facing advisory output), verified target repo readiness and push auth, rebuilt spiny-orb from main (SHA dc5a2aa). Ready to run.
 - (2026-05-11) Started commit-story-v2 run-16 evaluation: created run-16 artifact directory with lessons skeleton, ready for pre-run verification.
 
 ### Fixed
