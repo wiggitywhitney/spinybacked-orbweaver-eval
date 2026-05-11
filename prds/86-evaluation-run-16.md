@@ -150,7 +150,7 @@ The **evaluation execution branch** created by `/prd-start` from main **never me
   Style reference: `Read docs/templates/eval-run-style-reference/rubric-scores.md`
   *(Updated per D1: NDS-003 for summary-manager.js is PASS — the "line 155 missing" flag is a false positive from line number drift; the early-return guard is present in the committed code.)*
 
-- [ ] **IS scoring run** — Follow `docs/language-extension-plan.md` step 9. Full protocol in `evaluation/is/README.md` (commit-story-v2 section).
+- [x] **IS scoring run** — Follow `docs/language-extension-plan.md` step 9. Full protocol in `evaluation/is/README.md` (commit-story-v2 section).
 
   1. **Claude runs**: `datadog-agent stop`
   2. **Claude starts** the OTel Collector in the background:
