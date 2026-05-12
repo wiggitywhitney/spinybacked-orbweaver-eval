@@ -20,3 +20,4 @@ Column key: **N** = run number · **Q×F** = (quality/total) × files_committed 
 | 13 | 2026-04-12 | 25/25 | 7 | 7.0 | YES (#62) | Checkpoint rollbacks → 7 files only (quality restored, coverage dropped) |
 | 14 | 2026-04-15 | 22/25 | 12 | 10.6 | YES (#65) | COV-003 summaryNode catch missing error recording; COV-004 summary-manager.js (3rd run) |
 | 15 | 2026-05-03 | 24/25 | 14 | 13.4 | YES (#66) | New Q×F record (13.4); 14 files (new record); COV-004 summary-manager.js resolved (9 spans); COV-003 new failure on summary-detector.js outer catch; IS 70/100 (SPA-001 structural) |
+| 16 | 2026-05-11 | 22/25 | 10+3p | 8.8 | YES (#68) | COV-003 summary-detector.js RESOLVED (primary goal); RUN16-1: null parsed_output on 3 files — adaptive thinking (type:'adaptive') exhausted budget after COV-003 guidance expansion; RUN16-3: NDS-005 fallback bug stripped try/catch on 0-span file; IS 80/100 (+10pp); cost $12.29 all-time high |
