@@ -138,6 +138,7 @@ The eval execution branch (`feature/prd-82-taze-evaluation-run-14`) **never has 
   Produces: `evaluation/taze/run-14/per-file-evaluation.md`
   Style reference: `docs/templates/eval-run-style-reference/per-file-evaluation.md`
   **Also track attempt counts per file**: Note how many files needed 1 / 2 / 3 attempts. For files with ≥2 attempts, assess whether extra attempts corrected real quality issues vs. validation noise. (Trend identified in commit-story-v2 run-17: attempt counts rising across runs as validators grow stricter — cross-target data will help determine if this is universal.)
+  **(D-2) Use one agent per file**: Spawn one agent per file in parallel; each agent reads style reference, run-17 per-file-evaluation.md (for rule descriptions), original source (`git show main:src/file`), committed source (`git show <instrument-branch>:src/file`), agent notes from log, and schema; each writes its section to `evaluation/taze/run-14/per-file-sections/<filename>.md`; main context assembles sections. Correct-skip files: one batch agent for RST-001 verification. This approach surfaced two previously undetected quality gaps in commit-story-v2 run-17 that single-context evaluation missed.
 
 - [ ] **PR artifact evaluation** — Evaluate PR summary quality.
   Produces: `evaluation/taze/run-14/pr-evaluation.md`

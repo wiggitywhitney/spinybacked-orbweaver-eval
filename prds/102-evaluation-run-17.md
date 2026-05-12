@@ -179,13 +179,13 @@ The **evaluation execution branch** created by `/prd-start` from main **never me
 
 - [x] **Update root README** — After baseline comparison, update `README.md`: (1) add a row for run-17 to the run history table (quality, gates, files, spans, cost, push/PR, IS score); (2) update the "next run" sentence at the bottom to reference run-18 and its primary goals.
 
-- [ ] **Actionable fix output** — Primary handoff deliverable. At milestone completion:
+- [x] **Actionable fix output** — Primary handoff deliverable. At milestone completion:
   1. Run the cross-document audit agent to verify consistency across all run-17 evaluation artifacts.
   2. *(User-facing checkpoint 2)* Give Whitney an interpreted summary of key findings — failures, root causes, notable patterns, what to watch for in run-18.
   3. Print the absolute file path of `evaluation/commit-story-v2/run-17/actionable-fix-output.md`.
   4. **Pause.** Do not proceed to Draft PRD #18 until Whitney confirms she has handed the document off to the spiny-orb team.
 
-- [ ] **Draft PRD #18** — Create on a separate branch from main. Merge the PRD PR to main so `/prd-start` can pick it up. Carry forward both user-facing checkpoints into PRD #18's milestone structure. IS scoring milestone must use the same format as this PRD's IS scoring milestone.
+- [ ] **Draft PRD #18** — Create on a separate branch from main. Merge the PRD PR to main so `/prd-start` can pick it up. Carry forward both user-facing checkpoints into PRD #18's milestone structure. IS scoring milestone must use the same format as this PRD's IS scoring milestone. **(D-2) Per-file evaluation milestone must specify one-agent-per-file approach**: spawn one agent per file in parallel; each agent reads style reference, rubric, original source, agent notes from log, debug dump if applicable, and schema; each writes its section to `evaluation/commit-story-v2/run-18/per-file-sections/<filename>.md`; main context assembles sections. The 15 correct-skip files get one batch agent for RST-001 verification. Use run-16 per-file-evaluation.md as the rule-description reference. Primary goals for run-18: RUN17-1 (NDS-003 reconciler gap fixed), RUN17-2 (journal-graph content corruption), RUN17-3 (git-collector getCommitData), RUN17-4 (summary-graph SCH-002).
 
 - [ ] **Copy artifacts to main** — From main, run `git checkout <eval-branch> -- evaluation/commit-story-v2/run-17/` to copy all artifacts. Commit to main with message `eval: save run-17 artifacts to main [skip ci]`. Add one row to `evaluation/commit-story-v2/run-log.md` for run-17 and commit with `eval: update run-log for run-17 [skip ci]`. Push main. This step runs before `/prd-done` so the artifacts land on main while the eval branch is still reachable.
 
@@ -196,6 +196,7 @@ The **evaluation execution branch** created by `/prd-start` from main **never me
 | ID | Decision | Rationale | Date |
 |----|----------|-----------|------|
 | D-1 | Investigate rising attempt counts during per-file evaluation | Run-15 most instrumented files succeeded in 1 attempt; run-16 simple files took 2 attempts; run-17 git-collector.js took 3 attempts at file 2 of 30. Trend is real and building across runs. Likely cause: cumulative validation improvements (Prettier-normalized NDS-003, stricter reconcilers, new rules) catching more first-pass failures. Open question: is increased attempt count producing better final instrumentation quality, or just more validation overhead? | 2026-05-12 |
+| D-2 | Use one agent per file for per-file evaluation in all future eval runs | Single-context per-file evaluation misses findings — evaluator samples rather than checks every rule when context grows large. Run-17 per-agent approach (16 agents in parallel, each writing to disk) surfaced git-collector COV-001 (getCommitData missing, present 8+ runs) and summary-graph SCH-002 (wrong attribute domain, present since run-12) that prior single-context evaluations missed. Per-agent evaluation also produced more precise NDS-003 root cause analysis (reconciler gap vs genuine corruption). Template and open eval PRDs (#82, #100) should be updated with this methodology before run-18. | 2026-05-12 |
 
 ---
 
