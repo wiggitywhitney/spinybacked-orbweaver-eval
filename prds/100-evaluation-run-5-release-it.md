@@ -116,7 +116,7 @@ The feature branch for this PRD (`feature/prd-100-evaluation-run-5-release-it`) 
   5. **RUN3-3 (HOME forwarding) — MUST APPLY**: Confirm `HOME="$HOME"` is included in the instrument command regardless of whether spiny-orb fix has landed.
   6. **Target repo readiness**: Verify release-it fork is on `main`, working tree is clean. Run `git status` in `~/Documents/Repositories/release-it` — if OTel devDeps from a prior IS scoring run are present in package.json/package-lock.json, restore with `git restore package.json package-lock.json` before proceeding.
   7. **File inventory**: Confirm 23 `.js` files in `lib/` — run `find lib -name "*.js" | wc -l` from `~/Documents/Repositories/release-it/`.
-  8. **Rebuild spiny-orb**: Rebuild from **main**. Record SHA.
+  8. **Rebuild spiny-orb**: Rebuild from **main**: `cd ~/Documents/Repositories/spinybacked-orbweaver && git checkout main && git pull && npm install && npm run build`. Record SHA.
   9. **Record versions**: Node.js version, spiny-orb version/SHA, release-it version.
   10. Append observations to `evaluation/release-it/run-5/lessons-for-run6.md`.
 

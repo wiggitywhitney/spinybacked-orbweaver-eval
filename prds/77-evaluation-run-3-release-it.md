@@ -122,7 +122,7 @@ The feature branch for this PRD (`feature/prd-77-evaluation-run-3-release-it`) *
   5. **RUN2-5 (COV-003/NDS-007 GitLab.js)**: Check if spiny-orb has updated the COV-003 validator to exempt graceful-degradation catch blocks.
   6. **Target repo readiness**: Verify release-it fork is on `main`, working tree is clean, `spiny-orb.yaml` and `semconv/` exist, `@opentelemetry/api` is installed.
   7. **File inventory**: Confirm 23 `.js` files in `lib/` — run `find lib -name "*.js" | wc -l` from `~/Documents/Repositories/release-it/`.
-  8. **Rebuild spiny-orb**: Rebuild from **main** (unless a specific fix branch has been communicated for this run). Record SHA.
+  8. **Rebuild spiny-orb**: Rebuild from **main** (unless a specific fix branch has been communicated for this run): `cd ~/Documents/Repositories/spinybacked-orbweaver && npm install && npm run build`. Record SHA.
   9. **Record versions**: Node.js version, spiny-orb version/SHA, release-it version.
   10. Append observations to `evaluation/release-it/run-3/lessons-for-run4.md`.
 

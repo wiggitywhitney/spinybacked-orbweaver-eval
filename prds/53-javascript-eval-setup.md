@@ -108,7 +108,7 @@ If this PRD proceeds past milestone 0 (i.e., a new target is selected), the feat
   Verify spiny-orb JavaScript provider and validate all run prerequisites:
   1. Verify target repo has `spiny-orb.yaml` and `semconv/` configured correctly
   2. Count `.js` files in source directories — record the file inventory
-  3. Rebuild spiny-orb from current branch
+  3. Rebuild spiny-orb from current branch: `cd ~/Documents/Repositories/spinybacked-orbweaver && npm install && npm run build`
   4. Verify push auth (`GITHUB_TOKEN` in environment)
   5. Record version info
   6. Append observations to `evaluation/<target-name>/run-1/lessons-for-run2.md`

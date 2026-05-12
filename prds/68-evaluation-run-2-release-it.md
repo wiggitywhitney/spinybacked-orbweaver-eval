@@ -105,7 +105,7 @@ The feature branch for this PRD (`feature/prd-68-evaluation-run-2-release-it`) *
   3. **RUN1-2 (LINT arrowParens)**: Check if spiny-orb has merged a fix for the Prettier diff surfacing issue. If landed, config.js and index.js should commit this run. If not landed, note it — they will likely fail again.
   4. **Target repo readiness**: Verify release-it fork is on `main`, working tree is clean, `spiny-orb.yaml` and `semconv/` exist.
   5. **File inventory**: Confirm 23 `.js` files in `lib/` (match run-1 inventory in `evaluation/release-it/run-1/lessons-for-run2.md`).
-  6. **Rebuild spiny-orb**: Rebuild from current branch (not necessarily main). Record SHA.
+  6. **Rebuild spiny-orb**: Rebuild from current branch: `cd ~/Documents/Repositories/spinybacked-orbweaver && npm install && npm run build`. Record SHA.
   7. **Record versions**: Node.js version, spiny-orb version/SHA, release-it version.
   8. Append observations to `evaluation/release-it/run-2/lessons-for-run3.md`.
 

@@ -114,7 +114,7 @@ The feature branch for this PRD **never merges to main**. The PR exists for Code
   1. Verify TypeScript language provider is available: confirm `feature/prd-372-typescript-provider` is checked out in `~/Documents/Repositories/spinybacked-orbweaver/` and record the SHA. (Gate 1 waived — running from feature branch per 2026-04-24 decision.)
   2. Verify target repo has spiny-orb.yaml and semconv/ configured
   3. Count .ts files — record file inventory
-  4. Rebuild spiny-orb from current branch
+  4. Rebuild spiny-orb from current branch: `cd ~/Documents/Repositories/spinybacked-orbweaver && npm install && npm run build`
   5. Verify push auth: confirm `GITHUB_TOKEN_TAZE` resolves and has write access. Push to a non-existent branch (avoids false "fetch first" rejection if local is behind remote): `vals exec -i -f .vals.yaml -- bash -c 'git -C ~/Documents/Repositories/taze push --dry-run https://x-access-token:$GITHUB_TOKEN_TAZE@github.com/wiggitywhitney/taze.git HEAD:refs/heads/spiny-orb/auth-test'` — expect `[new branch] HEAD -> spiny-orb/auth-test`. Any auth error means wrong token; stop and regenerate per `~/.claude/rules/eval-github-pat.md`.
   6. Record version info
   7. Append observations to lessons-for-run2.md
