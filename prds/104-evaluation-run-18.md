@@ -66,6 +66,8 @@ Verify that RUN17-1 (NDS-003 reconciler gap for `startActiveSpan` in nested call
 | journal-graph.js NDS-003 (full failure, 4 runs) | RUN16-4 | 4 runs | P1 component of RUN17-1+RUN17-2 |
 | IS SPA-001: INTERNAL span count structural | RUN15-4 | 3 runs | Structural calibration mismatch |
 | Advisory contradiction rate ~39% | RUN11-1 | 8 runs | SCH-001 false positives on extension spans |
+| RUN17-5: Advisory pass rollback path unaudited | **RUN17-5** | 1 run | Low — bundled with RUN17-6; rollback-to-prior-passing-file path has no confirmed test coverage |
+| RUN17-6: PR title "(N files)" count wrong | **RUN17-6** | 1 run | Low — bundled with RUN17-5; title shows unexplained count vs actual processed/committed |
 
 ---
 
