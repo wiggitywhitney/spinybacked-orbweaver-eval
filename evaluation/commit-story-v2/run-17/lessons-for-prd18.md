@@ -38,6 +38,16 @@ Run-17 observations to carry forward into the next evaluation run PRD.
 
 <!-- IS run observations; remember SPA-001 always fails (>10 INTERNAL spans structural mismatch) -->
 
+## Advisory Pass Rollback Verification (spiny-orb team ask)
+
+The validation pipeline diagram shows: if a file passes blocking checks, goes through the advisory improvement pass, and the re-validation introduces NEW blocking failures → "Prior passing file committed" (rollback to the clean version). Whitney flagged this for verification.
+
+**Why it matters**: If the rollback isn't firing correctly, files could silently be committed with the broken advisory-pass version instead of the clean prior version. This wouldn't show up in the FAILED count — it would degrade committed file quality invisibly.
+
+**What we know from run-17**: The four failures (journal-graph.js, context-capture-tool.js, reflection-tool.js, index.js) all failed INITIAL blocking checks — they never reached the advisory pass, so this mechanism isn't the cause of those failures. But the question stands for the 10 committed files: did any of them have an advisory pass that introduced blocking failures? Was the rollback triggered? Was it correct?
+
+**Ask for the spiny-orb team**: Verify the advisory improvement pass rollback path. Specifically: (1) does the rollback correctly restore the prior passing file when the advisory improvement re-run introduces blocking failures? (2) Add or confirm a test covering this path. (3) If there's a logging gap (no observable signal when rollback fires), add one.
+
 ## What to Watch in Run-18
 
 <!-- Primary goals and watch items for the next run -->
