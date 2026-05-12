@@ -154,6 +154,7 @@ The feature branch for this PRD (`feature/prd-100-evaluation-run-5-release-it`) 
   Full 32-rule rubric on ALL processed files.
   Produces: `evaluation/release-it/run-5/per-file-evaluation.md`
   Style reference: `Read docs/templates/eval-run-style-reference/per-file-evaluation.md`
+  **Also track attempt counts per file**: Note how many files needed 1 / 2 / 3 attempts. For files with ≥2 attempts, assess whether extra attempts corrected real quality issues vs. validation noise. (Trend identified in commit-story-v2 run-17: attempt counts rising across runs as validators grow stricter — cross-target data will help determine if this is universal.)
 
 - [ ] **PR artifact evaluation**
 

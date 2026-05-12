@@ -137,6 +137,7 @@ The eval execution branch (`feature/prd-82-taze-evaluation-run-14`) **never has 
 - [ ] **Per-file evaluation** — Full rubric on ALL processed files (committed + correct skips). Evaluate all rules across all files.
   Produces: `evaluation/taze/run-14/per-file-evaluation.md`
   Style reference: `docs/templates/eval-run-style-reference/per-file-evaluation.md`
+  **Also track attempt counts per file**: Note how many files needed 1 / 2 / 3 attempts. For files with ≥2 attempts, assess whether extra attempts corrected real quality issues vs. validation noise. (Trend identified in commit-story-v2 run-17: attempt counts rising across runs as validators grow stricter — cross-target data will help determine if this is universal.)
 
 - [ ] **PR artifact evaluation** — Evaluate PR summary quality.
   Produces: `evaluation/taze/run-14/pr-evaluation.md`
