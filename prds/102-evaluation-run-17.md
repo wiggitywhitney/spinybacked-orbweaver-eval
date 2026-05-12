@@ -107,11 +107,11 @@ The **evaluation execution branch** created by `/prd-start` from main **never me
 
 ## Milestones
 
-- [ ] **Read `docs/language-extension-plan.md` completely before proceeding with any other milestone.** Pay particular attention to step 9.5 (SPA-001 calibration note for commit-story-v2) and step 9 (IS scoring protocol). **Do not mark this complete until you have read both sections.**
+- [x] **Read `docs/language-extension-plan.md` completely before proceeding with any other milestone.** Pay particular attention to step 9.5 (SPA-001 calibration note for commit-story-v2) and step 9 (IS scoring protocol). **Do not mark this complete until you have read both sections.**
 
-- [ ] **Collect skeleton documents** — Create `evaluation/commit-story-v2/run-17/` directory with `lessons-for-prd18.md` skeleton. Must run before pre-run verification step 9.
+- [x] **Collect skeleton documents** — Create `evaluation/commit-story-v2/run-17/` directory with `lessons-for-prd18.md` skeleton. Must run before pre-run verification step 9.
 
-- [ ] **Pre-run verification** — Verify spiny-orb fixes and validate run prerequisites:
+- [x] **Pre-run verification** — Verify spiny-orb fixes and validate run prerequisites:
   1. **Handoff triage review**: Read the spiny-orb team's triage of `evaluation/commit-story-v2/run-16/actionable-fix-output.md`. Check which issues were filed (Issue 1: RUN16-1 adaptive thinking; Issue 2: RUN16-2+RUN16-3 bundled) and confirm their status.
   2. **RUN16-1 fix** (P1 — critical): In `src/agent/instrument-file.ts`, search for the `thinking:` configuration (was `{ type: 'adaptive' }` at run-16 time). Verify it now uses `type: 'enabled'` with a `budget_tokens` value that is less than `max_tokens` — the exact ratio may vary (0.65 was the recommendation; the team may have shipped a slightly different calibration). The key check is that `type: 'adaptive'` is GONE — replaced by a cap. Also verify the function-level fallback in `instrument-with-retry.ts` propagates the thinking cap correctly (it passes `maxOutputTokens` in — confirm the thinking configuration applies there too). Confirm Issue 1 is closed and on spiny-orb main.
   3. **RUN16-3 fix** (P1 — critical): Verify the function-level fallback returns the original file unchanged when 0 spans are added (no reassembly pass for 0-span files). Confirm Issue 2 is closed and on spiny-orb main.
