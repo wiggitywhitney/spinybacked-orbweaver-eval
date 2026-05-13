@@ -7,7 +7,7 @@ Execution order within each tier matters. Items are listed in dependency order �
 - ~~JS evaluation run-14: commit-story-v2 — smart rollback + type-safety verification (PRD #55)~~ ✅ Complete — 22/25, 12 files, IS 80/100, PR #65
 - ~~JS evaluation run-15: commit-story-v2 — catch-block consistency + COV-004 audit (PRD #61)~~ ✅ Complete — 24/25, 14 files, IS 70/100, Q×F 13.4 (new record), PR #66
 - ~~JS evaluation run-16: commit-story-v2 — summary-detector.js outer catch fix (PRD #86)~~ ✅ Complete — 22/25, 10 files, IS 80/100, Q×F 8.8, PR #68
-- JS evaluation run-17: commit-story-v2 — adaptive thinking budget fix verification ([PRD #102](https://github.com/wiggitywhitney/spinybacked-orbweaver-eval/issues/102)) — verifies RUN16-1 (type:enabled + budget_tokens) and RUN16-3 (0-span passthrough) fixes
+- ~~JS evaluation run-17: commit-story-v2 — adaptive thinking budget fix verification (PRD #102)~~ ✅ Complete — 22/25, 10 files, IS 90/100, Q×F 8.8, PR #69; NDS-003 reconciler gap revealed; per-agent evaluation approach validated
 - JS evaluation run-3: release-it — first committed baseline (PRD #77)
 - TS evaluation run-14: taze — CDQ-006 isRecording guard verification (PRD #82)
 

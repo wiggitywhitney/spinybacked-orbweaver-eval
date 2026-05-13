@@ -1,6 +1,7 @@
 # PRD #17: JS Evaluation Run-17: commit-story-v2 — Adaptive Thinking Budget Fix Verification
 
-**Status:** Ready
+**Status:** Complete
+**Completed:** 2026-05-13
 **Created:** 2026-05-11
 **GitHub Issue:** #102
 **Depends on:** PRD #86 (run-16 complete, actionable fix output delivered to spiny-orb team)
