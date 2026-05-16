@@ -114,11 +114,11 @@ The **evaluation execution branch** created by `/prd-start` from main **never me
 
 ## Milestones
 
-- [ ] **Read `docs/language-extension-plan.md` completely before proceeding with any other milestone.** Pay particular attention to step 9.5 (SPA-001 calibration note for commit-story-v2) and step 9 (IS scoring protocol). **Do not mark this complete until you have read both sections.**
+- [x] **Read `docs/language-extension-plan.md` completely before proceeding with any other milestone.** Pay particular attention to step 9.5 (SPA-001 calibration note for commit-story-v2) and step 9 (IS scoring protocol). **Do not mark this complete until you have read both sections.**
 
-- [ ] **Collect skeleton documents** — Create `evaluation/commit-story-v2/run-18/` directory with `lessons-for-prd19.md` skeleton. Must run before pre-run verification step 9.
+- [x] **Collect skeleton documents** — Create `evaluation/commit-story-v2/run-18/` directory with `lessons-for-prd19.md` skeleton. Must run before pre-run verification step 9.
 
-- [ ] **Pre-run verification** — Verify spiny-orb fixes and validate run prerequisites:
+- [x] **Pre-run verification** — Verify spiny-orb fixes and validate run prerequisites:
   1. **Handoff triage review**: Read the spiny-orb team's triage of `evaluation/commit-story-v2/run-17/actionable-fix-output.md`. Check which issues were filed (RUN17-1: NDS-003 reconciler gap + PRD #845 update; RUN17-2: thinking budget cap issue; RUN17-3+RUN17-4: coverage/schema bundle; RUN17-5+RUN17-6: reliability/UX bundle) and confirm their status.
   2. **RUN17-1 fix** (P1 — critical): In the NDS-003 reconciler, verify the offset calculation now handles `startActiveSpan` wrapping inside nested callbacks. Check that context-capture-tool.js `saveContext` (original 121 lines) and reflection-tool.js `saveReflection` (original 113 lines) — both MCP `server.tool()` callback structures — would produce output the validator accepts. The key check: does the reconciler correctly skip re-indented lines inside span wrappers rather than counting them as removals? If PRD #845 M2 has a regression fixture for this pattern, confirm it passes.
   3. **RUN17-2 fix** (P1 — critical): Verify the thinking budget for file-level calls is sufficient for complex files (journal-graph.js is 629 lines with nested template literals and regex arrays). The issue was tracking whether 65% of max_tokens is the right cap. Check if the cap was raised or made dynamic.
