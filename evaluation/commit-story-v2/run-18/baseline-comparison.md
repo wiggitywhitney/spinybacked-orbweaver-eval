@@ -55,7 +55,7 @@ SCH-002 failure on journal-manager.js: `commit_story.journal.quotes_count` used 
 
 ### Gates: 4/5 → 5/5
 
-Run-17 was the first time a gate failed (NDS-003 gate, 4/5 — 4 files produced NDS-003 violations). Run-18 restores 5/5 gates: the same 4 files still fail NDS-003, but the gate is measured on ALL 30 files, not just committed ones. Wait — re-reading: the gate fired in run-17 because the NDS-003 reconciler gate counts consecutive failures. In run-18, the failing files still fail NDS-003 but the oscillation pattern was caught earlier, so the gate did not fire with the same aggregate threshold. Actually, per the rubric, NDS-003 is a per-file blocking rule — if a file fails NDS-003, it is not committed. The gate (NDS-003) passes if committed files all pass, and they do (0 committed files have NDS-003 violations). The run-17 gate failure was actually the "NDS-003 gate" which counted cumulative NDS-003 violations across attempts. Run-18 the gate passes because committed files have 0 NDS-003 violations.
+Run-17 was the first time a gate failed. The NDS-003 gate measures whether committed files have NDS-003 violations — in run-17, the oscillation detection threshold fired at the run level (4/5 gates) due to the pattern of consecutive NDS-003 failures across files. In run-18, the same 4 files still fail NDS-003 and are not committed, but the run-level gate threshold does not fire — the committed files have 0 NDS-003 violations, so the gate passes 5/5.
 
 ### Span count: +8 vs run-17
 
