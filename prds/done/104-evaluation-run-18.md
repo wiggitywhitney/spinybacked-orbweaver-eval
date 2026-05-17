@@ -1,6 +1,6 @@
 # PRD #18: JS Evaluation Run-18: commit-story-v2 — NDS-003 Reconciler Gap Fix Verification
 
-**Status:** Ready
+**Status:** Complete (2026-05-17)
 **Created:** 2026-05-12
 **GitHub Issue:** #104
 **Depends on:** PRD #17 (run-17 complete, actionable fix output delivered to spiny-orb team)
@@ -196,7 +196,7 @@ The **evaluation execution branch** created by `/prd-start` from main **never me
   3. Print the absolute file path of `evaluation/commit-story-v2/run-18/actionable-fix-output.md`.
   4. **Pause.** Do not proceed to Draft PRD #19 until Whitney confirms she has handed the document off to the spiny-orb team.
 
-- [ ] **Draft PRD #19** — Create on a separate branch from main. Merge the PRD PR to main so `/prd-start` can pick it up. Carry forward both user-facing checkpoints into PRD #19's milestone structure. IS scoring milestone must use the same format as this PRD's IS scoring milestone. Per-file evaluation milestone must specify the D-2 per-agent approach.
+- [x] **Draft PRD #19** — Create on a separate branch from main. Merge the PRD PR to main so `/prd-start` can pick it up. Carry forward both user-facing checkpoints into PRD #19's milestone structure. IS scoring milestone must use the same format as this PRD's IS scoring milestone. Per-file evaluation milestone must specify the D-2 per-agent approach.
 
 - [x] **Copy artifacts to main** — From main, run `git checkout <eval-branch> -- evaluation/commit-story-v2/run-18/` to copy all artifacts. Commit to main with message `eval: save run-18 artifacts to main [skip ci]`. Add one row to `evaluation/commit-story-v2/run-log.md` for run-18 and commit with `eval: update run-log for run-18 [skip ci]`. Push main. This step runs before `/prd-done` so the artifacts land on main while the eval branch is still reachable.
 
