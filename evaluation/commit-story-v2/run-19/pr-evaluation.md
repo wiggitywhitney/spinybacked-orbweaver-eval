@@ -51,7 +51,7 @@ The table shows only 8 files (committed files with non-trivial span counts). Mis
 
 ### Advisory Findings Quality
 
-52 advisory findings total. Breakdown:
+55 advisory findings total. Breakdown:
 - CDQ-007 (Attribute Data Quality): 32 findings
 - SCH-001 (Span Names Match Registry): 14 findings
 - COV-004 (Async Operation Spans): 6 findings

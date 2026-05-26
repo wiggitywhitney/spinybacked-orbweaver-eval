@@ -83,7 +83,7 @@ SPA-001 (>10 INTERNAL spans) continues as expected (22 spans; structural calibra
 
 ### SCH-002: Third Consecutive Failure
 
-journal-manager.js `discoverReflections` uses `commit_story.journal.quotes_count` for the third time (runs 17's summary-graph was a different file, but journal-manager.js specifically has now failed SCH-002 in runs 18 and 19). The agent's stated reasoning evolved across runs — run-18 said "aligns with reflections being developer-written content"; run-19 repeated the same rationalization. The schema definition clearly says "AI-extracted journal quotes" — no amount of reasoning changes this. An explicit negative directive in the prompt is needed.
+journal-manager.js `discoverReflections` uses `commit_story.journal.quotes_count` for the second consecutive run on this specific file (runs 18 and 19). SCH-002 has now appeared in 3 runs total across the series (run-17 summary-graph.js, run-18 journal-manager.js, run-19 journal-manager.js). The agent's stated reasoning evolved across runs — run-18 said "aligns with reflections being developer-written content"; run-19 repeated the same rationalization. The schema definition clearly says "AI-extracted journal quotes" — no amount of reasoning changes this. An explicit negative directive in the prompt is needed.
 
 ---
 
