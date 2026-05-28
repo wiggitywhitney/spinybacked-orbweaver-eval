@@ -59,6 +59,7 @@ Self-contained handoff from evaluation run-19 to the spiny-orb team.
 **What happened**: claude-collector.js, summary-manager.js (3 functions), and auto-summarize.js (1 function) all hit NDS-003 on multi-line expressions that Prettier reformats differently when the code is at deeper indentation inside a `startActiveSpan` callback.
 
 **Affected functions and patterns**:
+
 | File | Function | Line | Pattern |
 |------|----------|------|---------|
 | claude-collector.js | collectChatMessages | `allMessages.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));` | Method chain near 80-char boundary |

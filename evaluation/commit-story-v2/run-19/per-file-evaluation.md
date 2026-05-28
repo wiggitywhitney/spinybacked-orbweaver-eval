@@ -65,7 +65,7 @@ Both exported async functions (`getPreviousCommitTime`, `getCommitData`) are ins
 
 ### 3. generators/journal-graph.js (4 spans, 2 attempts)
 
-**RUN18 HELD**: 4 spans, 2 attempts — same outcome as run-18. Third consecutive run success (run-18, run-19, and this is the third). Four exported async functions (`summaryNode`, `technicalNode`, `dialogueNode`, `generateJournalSections`) each receive one span. Thirteen sync helpers correctly skipped. The three node functions retain their original graceful-degradation catches inside `startActiveSpan` callbacks (NDS-007 pattern A). The orchestrator's catch records exception, sets ERROR status, and rethrows. LangChain calls auto-instrumented via `@traceloop/instrumentation-langchain` (COV-006).
+4 spans, 2 attempts — same outcome as run-18. Third consecutive run success (runs 17, 18, 19). Four exported async functions (`summaryNode`, `technicalNode`, `dialogueNode`, `generateJournalSections`) each receive one span. Thirteen sync helpers correctly skipped. The three node functions retain their original graceful-degradation catches inside `startActiveSpan` callbacks (NDS-007 pattern A). The orchestrator's catch records exception, sets ERROR status, and rethrows. LangChain calls auto-instrumented via `@traceloop/instrumentation-langchain` (COV-006).
 
 The agent correctly removed `if (result.response_metadata?.model != null)` guard blocks — these would have triggered NDS-003. The `gen_ai.usage.input_tokens/output_tokens` pair is guarded by `result.usage_metadata != null`. Optional chaining on `NODE_TEMPERATURES?.summary` is safe — NODE_TEMPERATURES is a module-level const.
 
@@ -462,3 +462,4 @@ All 17 files correctly skipped — same set as runs 9–18. No spans committed, 
 | summary-manager.js | COV-004 | Partial | 6 of 9 exported async functions covered |
 | auto-summarize.js | COV-001 | Partial | `triggerAutoSummaries` missing span (NDS-003 skip) |
 | claude-collector.js | NDS-003 | Partial | Reassembly failure; committed output is clean |
+

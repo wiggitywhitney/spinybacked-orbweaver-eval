@@ -22,7 +22,7 @@
 | Skipped | 0 |
 | Input tokens | 250.8K |
 | Output tokens | 360.6K (644.2K cached) |
-| Total cost | ~$8.60 |
+| Total cost | $8.83 |
 | Live-check | OK (523 spans, 4170 advisory findings) |
 | Push | AUTO ✅ — issue #867 retry fix confirmed working |
 | PR created | YES — #71 (auto) |

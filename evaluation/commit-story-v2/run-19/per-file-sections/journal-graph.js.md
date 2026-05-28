@@ -1,6 +1,6 @@
 ### 3. generators/journal-graph.js (4 spans, 2 attempts)
 
-**RUN18-3 HELD**: 4 spans, 2 attempts — same attempt count and span count as run-18. File continues to be a clean instrumentation target with no regressions.
+Third consecutive run success (runs 17, 18, 19): 4 spans, 2 attempts — same outcome as run-18. File continues to be a clean instrumentation target with no regressions.
 
 Four exported async functions each receive one span: `summaryNode`, `technicalNode`, `dialogueNode` (the three LangGraph node functions), and `generateJournalSections` (the public orchestrator). Thirteen sync helpers and unexported utilities correctly skipped. The three node functions retain their original graceful-degradation catches inside `startActiveSpan` callbacks (NDS-005/NDS-007 pattern A — finally block, no ERROR status). The orchestrator's catch records exception, sets ERROR status, and rethrows (COV-003 pattern). LangChain calls are auto-instrumented via `@traceloop/instrumentation-langchain`; manual spans wrap the application-layer logic above them (COV-006).
 

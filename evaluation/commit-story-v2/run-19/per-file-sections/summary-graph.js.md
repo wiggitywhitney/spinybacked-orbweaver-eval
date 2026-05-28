@@ -16,7 +16,7 @@ Each of the six functions follows the same two-catch structure inherited from th
 | COV-001 | PASS — all 6 exported async functions have entry-point spans |
 | COV-003 | PASS — all 6 spans have outer catch with `recordException` + `setStatus(ERROR)` + rethrow |
 | COV-004 | PASS — all 6 exported async functions instrumented; sync helpers correctly skipped per RST-001 |
-| COV-005 | PASS — `commit_story.journal.entry_date`, `commit_story.summary.entries_count`, `week_label`, `month_label` |
+| COV-005 | PASS — `commit_story.journal.entry_date`, `commit_story.summary.entries_count`, `commit_story.summary.week_label`, `commit_story.summary.month_label` |
 | COV-006 | PASS — `model.invoke()` and `graph.invoke()` calls instrumented by `@traceloop/instrumentation-langchain` |
 | RST-001 | PASS — all sync formatting, parsing, cleaning, and graph-builder helpers skipped |
 | RST-004 | PASS — one span per exported async function; no internal detail spans |

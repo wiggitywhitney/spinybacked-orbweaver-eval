@@ -23,7 +23,7 @@ The 5 sync functions (formatDailySummary, formatWeeklySummary, formatMonthlySumm
 | NDS-005 | PASS — ENOENT-swallowing catch blocks (readFile, access, readdir) all preserved in committed functions |
 | NDS-006 | PASS — all inline comments preserved in committed functions |
 | API-001 | PASS — `@opentelemetry/api` only; `SpanStatusCode` and `trace` imported correctly |
-| COV-001 | PARTIAL — 3 of 6 exported async orchestrators missing spans; read/save helpers covered but primary pipeline entry points (generateAndSaveDailySummary, generateAndSaveWeeklySummary, generateAndSaveMonthlySummary) not instrumented |
+| COV-001 | PARTIAL — 3 of 3 exported async orchestrators missing spans (generateAndSaveDailySummary, generateAndSaveWeeklySummary, generateAndSaveMonthlySummary); read/save helpers (6 functions) covered but primary pipeline entry points not instrumented |
 | COV-003 | PASS for 6 committed spans — all have try/catch/finally with recordException + ERROR status + rethrow |
 | COV-004 | PARTIAL — 6 of 9 exported async functions covered; 3 skipped due to NDS-003 on both attempts; 5 sync helpers correctly skipped per RST-001 |
 | COV-005 | PASS for committed spans — date/path/count attributes on read and save functions; schema-appropriate selections |
@@ -31,7 +31,7 @@ The 5 sync functions (formatDailySummary, formatWeeklySummary, formatMonthlySumm
 | RST-004 | PASS — no unexported async functions in this file |
 | SCH-001 | PASS — span names registered under commit_story.summary.* and commit_story.journal.* namespaces |
 | SCH-002 | PASS — commit_story.summary.entries_count (int), week_label/month_label (string), journal.entry_date (string), journal.file_path (string) all correctly typed per schema |
-| SCH-003 | PASS — entries_count set from .length (int); label arguments are string type; date converted via .toISOString().split('T')[0] |
+| SCH-003 | PASS — entries_count set from .length (int); label arguments are string type; date converted via `.toISOString().split('T')[0]` |
 | CDQ-001 | PASS |
 | CDQ-002 | PASS |
 | CDQ-003 | PASS |

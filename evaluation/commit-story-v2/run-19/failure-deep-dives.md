@@ -1,6 +1,6 @@
 # Failure Deep-Dives — Run-19
 
-**Run-19 result**: 10 committed, 0 failed, 3 partial, 17 correct skips, $8.60.
+**Run-19 result**: 10 committed, 0 failed, 3 partial, 17 correct skips, $8.83.
 
 No file-level failures. Three partial commits, all due to the same root cause: lines near Prettier's 80-character print width that reformat inside a `startActiveSpan` callback body. This is the class targeted by PRD #875 (AST comparison).
 
