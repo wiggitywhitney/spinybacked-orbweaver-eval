@@ -49,7 +49,21 @@ Run-20 observations to carry forward into the next evaluation run PRD.
 
 ## Run Observations
 
-<!-- Add observations as the run unfolds -->
+### mcp/server.js NDS-003 False Positive — `stripOtelNodes` Leading Trivia Bug
+
+`stripOtelNodes` loses the shebang and file-level JSDoc block when it removes an OTel import placed as the **first statement** in the file. Mechanism: ts-morph stores the shebang and pre-import JSDoc as leading trivia of the first statement; when that statement is the OTel import, ts-morph takes the trivia with it on removal.
+
+Result: `normalizedStripped` has 2× `/**` / `*/` while `normalizedOriginal` has 3× → 21 forward-check failures at lines 1 (shebang), 3–20 (JSDoc lines), 37 (`/**`), 39 (`*/`). All three attempts produce identical violations because the failure is structural.
+
+**Reproducible test**: `stripOtelNodes(debug_dump, filePath)` → first line is `import { McpServer }`, no shebang, `/**` count is 2 vs 3 in original.
+
+**Root cause was introduced in PRD #885** (`normalizeMultiLineFlags` + `stripOtelNodes` comparison pipeline). Pre-885 compared `Prettier(original)` vs `Prettier(instrumented)` directly — no stripping, no trivia loss.
+
+**Fix location**: `removeOtelImports` in `nds003-ast-stripper.ts` — when removing a first-position OTel import, transfer its leading file-level trivia to the next statement before deletion.
+
+### High Multi-Attempt Rate
+
+5 of 12 committed files and the 1 failed file all required 3 attempts, vs 1 file at 3 attempts in run-19. Notable regressions: context-integrator.js, journal-manager.js, src/index.js each went from 1→3 attempts. Per-file evaluation should identify whether a specific validator change drove these regressions.
 
 ## Findings to Carry Forward
 
