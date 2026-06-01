@@ -157,7 +157,7 @@ The **evaluation execution branch** created by `/prd-start` from main **never me
   Produces: `evaluation/commit-story-v2/run-20/pr-evaluation.md`
   Style reference: `Read docs/templates/eval-run-style-reference/pr-evaluation.md`
 
-- [ ] **Rubric scoring** — Synthesize dimension-level scores.
+- [x] **Rubric scoring** — Synthesize dimension-level scores.
   Produces: `evaluation/commit-story-v2/run-20/rubric-scores.md`
   Style reference: `Read docs/templates/eval-run-style-reference/rubric-scores.md`
 
