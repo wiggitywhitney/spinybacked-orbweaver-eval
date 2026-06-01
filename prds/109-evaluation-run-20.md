@@ -143,7 +143,7 @@ The **evaluation execution branch** created by `/prd-start` from main **never me
   **Run-20 failures**: 1 failed file, 0 partial files.
   - `src/mcp/server.js` — NDS-003 oscillation: 21 duplicate violations at fixed line numbers across all 3 attempts (lines 1, 3–20, 37, 39). Was clean in run-19. Root cause confirmed: PRD #885 introduced `stripOtelNodes` + `normalizeMultiLineFlags` comparison pipeline; when the agent places the OTel import first in the file, ts-morph removes that node's leading trivia (shebang + file-level JSDoc) with it. `normalizedStripped` is therefore missing those 21 lines vs `normalizedOriginal`. This is a spiny-orb false positive — the agent's code was correct. Fix location: `removeOtelImports` in `nds003-ast-stripper.ts` — transfer leading trivia to the next statement before removing a first-position OTel import.
 
-- [ ] **Per-file evaluation** — Full rubric on ALL files (no spot-checking). Evaluate all rules across all committed and partial files.
+- [x] **Per-file evaluation** — Full rubric on ALL files (no spot-checking). Evaluate all rules across all committed and partial files.
   Produces: `evaluation/commit-story-v2/run-20/per-file-evaluation.md`
   Style reference: `Read docs/templates/eval-run-style-reference/per-file-evaluation.md`
 
