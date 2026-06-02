@@ -107,7 +107,7 @@
 | Cost | **$9.08** | $8.83 | $9.16 | $10.43 | $12.29 |
 | Q×F | **11.5** | 8.4 | 10.6 | 8.8 | 8.8 |
 | Push/PR | **AUTO ✅ (#73)** | AUTO ✅ (#71) | YES (#70, manual) | YES (#69) | YES (#68) |
-| IS | — *(pending)* | 80/100 | 90/100 | 90/100 | 80/100 |
+| IS | **80/100** | 80/100 | 90/100 | 90/100 | 80/100 |
 
 **Q×F = 11.5** (24/25 × 12). Better than run-19 (8.4) but below run-18 (10.6) due to mcp/server.js failure reducing committed file count from expected 13 to 12. PRD target of Q×F ≥ 12.0 required 14 files; 12 committed files yields 11.5 at this quality level.
 

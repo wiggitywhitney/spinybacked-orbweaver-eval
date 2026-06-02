@@ -2,13 +2,13 @@
 
 **Run-20 result**: 12 committed, 1 failed, 0 partial, 17 correct skips.
 
-One new file-level failure: `src/mcp/server.js` — clean in run-19, failed in run-20 with NDS-003 oscillation. Root cause is a spiny-orb bug in `stripOtelNodes` introduced by PRD #885. Run-level observations on attempt distribution follow.
+One new file-level failure: `mcp/server.js` — clean in run-19, failed in run-20 with NDS-003 oscillation. Root cause is a spiny-orb bug in `stripOtelNodes` introduced by PRD #885. Run-level observations on attempt distribution follow.
 
 ---
 
 ## File-Level Failures
 
-### src/mcp/server.js — NDS-003 oscillation (3 attempts, 0 spans)
+### mcp/server.js — NDS-003 oscillation (3 attempts, 0 spans)
 
 **Status**: FAILED. Was clean in run-19 (1 span, 1 attempt).
 

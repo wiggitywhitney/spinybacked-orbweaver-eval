@@ -7,9 +7,9 @@
 
 ---
 
-## Push Auth — Eleventh Consecutive Fully Automated Push + PR
+## Push Auth — Tenth Consecutive Fully Automated Push + PR
 
-PR #73 was created automatically with no manual intervention — eleventh consecutive success. The URL swap mechanism fires correctly (`urlChanged=true, path=token-swap`). Run-18's retry-logic fix (issue #867) continues to hold.
+PR #73 was created automatically with no manual intervention — tenth consecutive success (runs 11–20). The URL swap mechanism fires correctly (`urlChanged=true, path=token-swap`). Run-18's retry-logic fix (issue #867) continues to hold.
 
 ---
 
@@ -145,7 +145,7 @@ Run-20 introduces a new section in the PR body advising that `service.instance.i
 | Run-19 | $8.83 |
 | Run-18 | $9.16 |
 | Run-17 | $10.43 |
-| Run-16 | $5.90 |
+| Run-16 | $12.29 |
 | Delta vs run-19 | +$0.25 |
 
 **$9.08** — $0.25 higher than run-19. Primary driver: 5 files at 3 attempts (vs run-19's 1 file at 3 attempts). The 3-attempt cluster (claude-collector, git-collector, context-integrator, journal-manager, index.js) added approximately $1.50 in incremental cost. Summary-manager.js at 1 attempt ($0.62 for 9 spans) demonstrates the efficiency when NDS-003 doesn't block.
