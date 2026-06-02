@@ -98,10 +98,11 @@ spinybacked-orbweaver-eval/
 | 17 | 22/25 (88%) | 4/5 | 10+1p | ~28 | $10.43 | YES | 90/100 |
 | 18 | 24/25 (96%) | 5/5 | 11 | 36 | $9.16 | YES | 90/100 |
 | 19 | 21/25 (84%) | 5/5 | 10+3p | 30 | $8.83 | YES (#71, AUTO) | 80/100 |
+| 20 | 24/25 (96%) | 5/5 | 12 | 42 | $9.08 | YES (#73, AUTO) | 80/100 |
 
 Files column notation: plain count = committed files; `+Np` = N partial files (instrumentation started, not fully committed); `+Nf` = N files rolled back after a checkpoint test failure. Cost column: `~` prefix indicates an estimated/derived cost (early runs predating direct cost reporting in the tool); unprefixed values are directly reported by spiny-orb.
 
-**Run-20 is next** — verifying NDS-003 multiLine flag normalization (PRD #885) for summary-manager.js `generateAndSave*`, auto-summarize.js `triggerAutoSummaries`, and claude-collector.js; monitoring COV-005 on git-collector.js `getCommitData` (per-function guidance removed by PRD #894 generality cleanup).
+**Run-21 is next** — verifying the mcp/server.js NDS-003 false positive fix (PRD #885 `removeOtelImports` trivia-loss regression in `nds003-ast-stripper.ts`); monitoring COV-005 on git-collector.js `getCommitData` (no per-function guidance after PRD #897 generality cleanup); investigating the high 3-attempt rate (5 of 12 files) potentially driven by PRD #897 prompt changes.
 
 Full run-by-run analysis: [`evaluation/commit-story-v2/`](evaluation/commit-story-v2/)
 
