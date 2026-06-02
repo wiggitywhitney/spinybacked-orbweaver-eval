@@ -61,10 +61,22 @@ Result: `normalizedStripped` has 2× `/**` / `*/` while `normalizedOriginal` has
 
 **Fix location**: `removeOtelImports` in `nds003-ast-stripper.ts` — when removing a first-position OTel import, transfer its leading file-level trivia to the next statement before deletion.
 
-### High Multi-Attempt Rate
+### High Multi-Attempt Rate and Retry-Correlated Schema Extension Suppression
 
-5 of 12 committed files and the 1 failed file all required 3 attempts, vs 1 file at 3 attempts in run-19. Notable regressions: context-integrator.js, journal-manager.js, src/index.js each went from 1→3 attempts. Per-file evaluation should identify whether a specific validator change drove these regressions.
+5 of 12 committed files and the 1 failed file all required 3 attempts, vs 1 file at 3 attempts in run-19. Every 3-attempt file registered 0 new schema attributes. Every file that registered new attributes used ≤ 2 attempts. This correlation surfaced post-evaluation via verbose log framing analysis — not through the standard per-file evaluation process.
+
+**Diagnostic signal**: agent notes for files that successfully register new attributes say `"New attribute X: no registered key captures..."`. Notes for 3-attempt files with unregistered gaps say `"X captures [concept]. No registered attribute covers..."` — the agent documents the gap rather than acting on it.
+
+**Root cause hypothesis**: the retry mechanism may reset `agent-extensions.yaml` between attempts, so schema extensions registered in attempt 1 or 2 are lost when the file retries. By attempt 3 the agent may have adapted to avoid new attribute creation.
+
+**Process change for PRD #21**: Apply the expanded failure deep-dives and per-file evaluation methodology from issue #112:
+- For each file with ≥ 3 attempts AND a quality failure, include the verbose log section as input to the per-file evaluation agent (grep: `grep -A 80 "Processing file.*<filename>" spiny-orb-output.log`)
+- Check agent note framing: `"New attribute X"` = announced registration; `"X captures... No registered attribute"` = gap documented, not acted on
+- Failure deep-dives scope covers these files too, not just files with 0 committed spans
 
 ## Findings to Carry Forward
 
-<!-- Populated after per-file evaluation and rubric scoring -->
+- Retry-correlated schema extension suppression: investigate whether agent-extensions.yaml is reset between retry attempts (spiny-orb source investigation; issue #112 tracks the eval process side)
+- COV-005 blocking gate and stronger prompt language around schema extension as potential spiny-orb fixes (see actionable-fix-output.md §5 item 3)
+- summary-manager.js read-path COV-005 (readWeek/readMonth) — first-time commit revealed input-only labeling; no prompt guidance for output counts on read-path functions
+- mcp/server.js SCH-001 recurring — unregistered span name across runs 18–20; will become scored failure once NDS-003 fix lands
