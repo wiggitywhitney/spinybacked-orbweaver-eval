@@ -37,7 +37,7 @@ Self-contained handoff from evaluation run-20 to the spiny-orb team.
 | # | Finding | Priority | Status in Run-20 |
 |---|---------|----------|-----------------|
 | RUN19-1 | NDS-003 indentation-driven Prettier reformatting — 3 partial files | P1 | **FULLY RESOLVED** — all 4 blocked functions committed; PRD #885 multiLine flag fix confirmed |
-| RUN19-2 | git-collector.js COV-005 (getCommitData missing output attributes) | P2 | **PERSISTS** — PRD #892 guidance added then removed by PRD #897; committed code sets only input param |
+| RUN19-2 | git-collector.js COV-005 (getCommitData missing output attributes) | P2 | **PERSISTS** — agent identified schema gaps and stated intent to add extensions, but none registered in `agent-extensions.yaml`; schema update reliability failure |
 | RUN19-3 | IS SPA-002 orphan span — partial instrumentation creates context gap | P2 | **PERSISTS** — different orphan ID each run (run-20: ce5f0429 → parent 25a9f60d); underlying LangChain propagation gap open |
 | IS SPA-001 | INTERNAL span count structural | Structural | **STRUCTURAL** — 29 spans; calibration mismatch, not regression target |
 | RUN18-2 | SCH-002 journal-manager.js quotes_count mismatch | P2 | **RESOLVED** — run-20 used `commit_story.journal.entries_count` (correct); three-run watch broken |
@@ -163,9 +163,9 @@ The agent invents a new variant each run without a schema-registered canonical n
 
 2. **RUN20-2 (P2)**: After RUN20-1 fix lands, observe whether the 3-attempt cluster (context-integrator.js, journal-manager.js, index.js) resolves naturally. If not, compare first-attempt debug dumps from runs 19 and 20 for these three files to isolate whether PRD #897 prompt generality changes are the causal factor.
 
-3. **RUN19-2 / RUN20-3 (P2)**: git-collector.js `getCommitData` COV-005 has now persisted for 2 consecutive runs (19–20). General CDQ-006/COV-005 guidance is insufficient for this function. Options: (a) re-add explicit per-function guidance for `getCommitData` requiring `commit_story.commit.message` (guarded) + `commit_story.commit.timestamp`; or (b) add schema extensions (`commit_story.git.command`, `commit_story.git.parent_count`, `commit_story.git.is_merge`) which the agent already independently invented in run-20 but couldn't commit without registration.
+3. **RUN19-2 (P2 — root cause investigation)**: git-collector.js `getCommitData` COV-005 persists for 2 consecutive runs (19–20). The schema gaps (`commit_story.git.command`, `.parent_count`, `.is_merge`) are intentional — they exist to test whether spiny-orb autonomously detects schema gaps and extends the registry. The agent correctly identified the need in run-20 (agent notes named all three attributes), but nothing landed in `agent-extensions.yaml` and nothing appeared on the span. The root cause to investigate is **schema update reliability**: why does the agent express intent to add new schema extensions but fail to register them? Inspect what happens in the schema update step for `getCommitData` on the run-20 debug dump — does the agent attempt to write to `agent-extensions.yaml`? Does a retry or NDS-003 pressure clear the write?
 
-4. **RUN20-5 (P3)**: Add a registered span name for the MCP server entry point (e.g., `commit_story.mcp.server`) to `semconv/agent-extensions.yaml` in the commit-story-v2 target repo. The agent invents a new variant each run; a registered name will anchor it.
+4. **RUN20-5 (P3 — same root cause)**: mcp/server.js SCH-001 persists across runs 18–20 (three different invented names, none registered). The agent should register whatever span name it chooses in `agent-extensions.yaml` as part of instrumentation. The instability (different name each run) is a symptom of the same schema update reliability failure — the agent invents the extension but doesn't anchor it. The NDS-003 false positive causing file-level failure may be preventing the schema update step from completing. Verify whether the update step runs before or after NDS-003 validation.
 
 **For eval team:**
 
@@ -174,4 +174,4 @@ The agent invents a new variant each run without a schema-registered canonical n
 - Watch: 3-attempt rate — should drop if NDS-003 contamination was the cause; stays elevated if PRD #897 prompt generality is an independent factor
 - Watch: IS SPA-002 orphan span — different span ID each run; investigate whether the orphan trace correlates with specific LangGraph execution paths that can be addressed in the bootstrap
 - Carry forward: summary-manager.js read-path COV-005 (readWeek/readMonth) — need prompt guidance for result-count attributes on read-path functions
-- Carry forward: mcp/server.js SCH-001 — will become a scored failure once RUN20-1 fix allows the file to commit; schema registration needed
+- Carry forward: mcp/server.js SCH-001 — will become a scored failure once RUN20-1 fix allows the file to commit; root cause is schema update reliability (agent invents name but doesn't register it), same as RUN19-2

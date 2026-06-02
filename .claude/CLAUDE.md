@@ -108,6 +108,16 @@ gh pr create --body-file ~/Documents/Repositories/<target>/spiny-orb-pr-summary.
 
 The full PR summary contains per-file breakdown, schema changes, advisory findings, and token usage — this content matters for review and for demos.
 
+## Suggesting Fixes to the spiny-orb Team
+
+When writing fix recommendations in actionable-fix-output.md or any handoff document:
+
+**Fix root causes, not symptoms.** Before recommending a fix, identify the mechanism that produced the failure. A schema gap appearing in evaluation output is a symptom; the question is why the mechanism that was supposed to fill it didn't work. Do not suggest workarounds that bypass the mechanism (e.g., pre-registering attributes that the agent should discover and register autonomously).
+
+**Do not suggest adding attributes or span names to the target repo's Weaver registry.** The schema gaps in the target repo are intentional — they exist to test whether spiny-orb can detect them and autonomously extend the registry. Pre-registering them defeats the test. If an agent fails to register schema extensions it identified, the root cause is a reliability problem in the schema update step, not a gap the eval team should fill.
+
+**Read and understand the source before recommending a specific fix.** Before naming a function, file path, or code change in a fix recommendation, read the relevant spiny-orb source files and understand what they actually do — not just whether they exist. A fix recommendation based on inferred behavior from logs or debug dumps alone is speculation. If you have not read the code, you do not know the fix. If you do not have access to the spiny-orb codebase, frame the recommendation as an investigation direction with a hypothesis, not a prescription.
+
 ## Analyzing Eval Failures
 
 When diagnosing a failed file in a spiny-orb eval run, check all three sources before drawing conclusions:
