@@ -29,6 +29,19 @@ Run-21 observations to carry forward into the next evaluation run PRD.
 
 *(populate during per-file evaluation)*
 
+## Agent Notes vs Code Divergence Pattern
+
+Two instances in run-21 where the agent's self-reported notes diverged from the code it actually committed — and both times the **code was correct, the notes were wrong**:
+
+1. **summarize.js**: agent notes documented `commit_story.commands.*` attribute namespace; actual `setAttribute` calls use `commit_story.summary.*` (the registered namespace).
+2. **journal-graph.js**: agent notes (from attempt 1) said `gen_ai.usage.*` attributes were dropped to avoid a CDQ-007/NDS-003 conflict; the committed code kept them with optional chaining throughout.
+
+The pattern: notes appear to reflect an earlier internal draft or reasoning step that was superseded by what the agent ultimately wrote. The notes are generated during or before the final code is produced, not from the committed output.
+
+**Implication for evaluation**: agent-generated notes in `.instrumentation.md` files and log output cannot be treated as ground truth about what was committed. Code inspection is required to verify. Per-file evaluation agents who rely solely on notes without reading the instrumented source will draw wrong conclusions.
+
+**Implication for spiny-orb**: notes generation should ideally occur after the final committed version is determined — or at minimum, notes should be flagged as provisional until the file commits successfully. This is worth raising with the spiny-orb team as a documentation reliability issue.
+
 ## Carry-Forward Items
 
 *(populate during actionable fix output)*
