@@ -106,11 +106,11 @@ The **evaluation execution branch** created by `/prd-start` from main **never me
 
 ## Milestones
 
-- [ ] **Read `docs/language-extension-plan.md` completely before proceeding with any other milestone.** Pay particular attention to step 9.5 (SPA-001 calibration note for commit-story-v2) and step 9 (IS scoring protocol). **Do not mark this complete until you have read both sections.**
+- [x] **Read `docs/language-extension-plan.md` completely before proceeding with any other milestone.** Pay particular attention to step 9.5 (SPA-001 calibration note for commit-story-v2) and step 9 (IS scoring protocol). **Do not mark this complete until you have read both sections.**
 
-- [ ] **Collect skeleton documents** — Create `evaluation/commit-story-v2/run-21/` directory with `lessons-for-prd22.md` skeleton. Must run before pre-run verification step 12.
+- [x] **Collect skeleton documents** — Create `evaluation/commit-story-v2/run-21/` directory with `lessons-for-prd22.md` skeleton. Must run before pre-run verification step 12.
 
-- [ ] **Pre-run verification** — Verify spiny-orb fixes and validate run prerequisites:
+- [x] **Pre-run verification** — Verify spiny-orb fixes and validate run prerequisites:
   1. **Handoff triage review**: Read the spiny-orb team's triage of `evaluation/commit-story-v2/run-20/actionable-fix-output.md`. Check which findings were filed (RUN20-1: `removeOtelImports` trivia-loss; RUN20-2: 3-attempt cluster; RUN19-2: schema update reliability) and confirm their status.
   2. **RUN20-1 fix** (P1 — critical): Verify that `removeOtelImports` in `nds003-ast-stripper.ts` has been updated to transfer leading file-level trivia (shebang, file-level JSDoc) to the next statement before removing a first-position OTel import. Check whether a regression fixture for the mcp/server.js pattern (shebang + 18-line file-level JSDoc before imports) exists and passes. If the fix has NOT landed, still proceed — run-21 will confirm the gap persists.
   3. **RUN20-3 dependency** (P2): No independent fix is expected for index.js COV-005 — it should resolve automatically if RUN20-1 lands. Verify this understanding is correct.
