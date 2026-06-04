@@ -258,7 +258,7 @@
 | CDQ-005 | PASS |
 | CDQ-007 | PARTIAL — journal.file_path is a raw filesystem path (known limitation; basename not imported); all other setAttribute calls null-safe: entries_count is array.length (guaranteed int), week/month labels are string params, weekly_summaries_count is summaries.length |
 
-**Failures**: COV-005 — save_daily_summary span has no attributes on the file-already-exists skip path. Fix: set commit_story.journal.entry_date unconditionally at span start, mirroring save_weekly_summary and save_monthly_summary which set their period labels unconditionally.
+**Failures**: COV-005 — save_daily_summary span has no attributes on the file-already-exists skip path. Fix: set `commit_story.journal.entry_date` unconditionally at span start, mirroring save_weekly_summary and save_monthly_summary which set their period labels unconditionally.
 
 ---
 
