@@ -125,7 +125,7 @@ The **evaluation execution branch** created by `/prd-start` from main **never me
   12. **README check**: Verify `README.md` on main has rows for runs 15–20 in the commit-story-v2 run history table.
   13. Append observations to `evaluation/commit-story-v2/run-21/lessons-for-prd22.md`.
 
-- [ ] **Evaluation run-21** — Whitney runs `spiny-orb instrument` in her own terminal. **Do NOT run the command yourself.** AI role: (1) confirm readiness with Whitney, (2) once Whitney provides the log output, save it to `evaluation/commit-story-v2/run-21/spiny-orb-output.log` and write `evaluation/commit-story-v2/run-21/run-summary.md`, (3) **if auto PR creation failed**, create the PR from the file spiny-orb already wrote to disk — do NOT write a shortened manual body: `gh pr create --body-file ~/Documents/Repositories/commit-story-v2/spiny-orb-pr-summary.md --repo wiggitywhitney/commit-story-v2 --head <instrument-branch> --title "..."`
+- [x] **Evaluation run-21** — Whitney runs `spiny-orb instrument` in her own terminal. **Do NOT run the command yourself.** AI role: (1) confirm readiness with Whitney, (2) once Whitney provides the log output, save it to `evaluation/commit-story-v2/run-21/spiny-orb-output.log` and write `evaluation/commit-story-v2/run-21/run-summary.md`, (3) **if auto PR creation failed**, create the PR from the file spiny-orb already wrote to disk — do NOT write a shortened manual body: `gh pr create --body-file ~/Documents/Repositories/commit-story-v2/spiny-orb-pr-summary.md --repo wiggitywhitney/commit-story-v2 --head <instrument-branch> --title "..."`
 
   AI must create `evaluation/commit-story-v2/run-21/debug-dumps/` before handing Whitney the command.
 
