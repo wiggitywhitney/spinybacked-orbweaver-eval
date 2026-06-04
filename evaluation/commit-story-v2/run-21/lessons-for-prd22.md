@@ -29,6 +29,12 @@ Run-21 observations to carry forward into the next evaluation run PRD.
 
 *(populate during per-file evaluation)*
 
+## Workflow Tool Assembly Stall — D-2 Evaluation Approach
+
+When running D-2 per-file evaluation (one agent per file), the Workflow tool's assembly stage stalls if all per-file section strings are concatenated into the assembly agent's prompt. With 12+ committed files each producing ~30-line evaluation sections, the combined prompt exceeds what the assembly agent can process within the 180-second timeout (stalled on all 6 retry attempts).
+
+**Working pattern for future runs**: Have each per-file agent write its section directly to `evaluation/commit-story-v2/run-N/per-file-sections/<filename>.md`, then read and assemble those files in the main context rather than passing sections as string arguments through the Workflow harness. Individual background Agent() calls (not Workflow) with `run_in_background: true` work reliably for this pattern — each agent is lightweight (reads 2 source files, writes 1 section) and notifications arrive as they complete.
+
 ## Agent Notes vs Code Divergence Pattern
 
 Two instances in run-21 where the agent's self-reported notes diverged from the code it actually committed — and both times the **code was correct, the notes were wrong**:

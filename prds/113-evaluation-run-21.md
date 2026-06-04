@@ -153,6 +153,7 @@ The **evaluation execution branch** created by `/prd-start` from main **never me
 - [ ] **PR artifact evaluation** — Evaluate PR quality.
   Produces: `evaluation/commit-story-v2/run-21/pr-evaluation.md`
   Style reference: `Read docs/templates/eval-run-style-reference/pr-evaluation.md`
+  PR: https://github.com/wiggitywhitney/commit-story-v2/pull/74 (instrument branch: spiny-orb/instrument-1780596389399)
 
 - [ ] **Rubric scoring** — Synthesize dimension-level scores.
   Produces: `evaluation/commit-story-v2/run-21/rubric-scores.md`
