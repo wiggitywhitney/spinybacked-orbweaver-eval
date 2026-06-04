@@ -142,7 +142,7 @@ The **evaluation execution branch** created by `/prd-start` from main **never me
   Produces: `evaluation/commit-story-v2/run-21/failure-deep-dives.md`
   Style reference: `Read docs/templates/eval-run-style-reference/failure-deep-dives.md`
 
-- [ ] **Per-file evaluation** — Full rubric on ALL files (no spot-checking). Evaluate all rules across all committed and partial files.
+- [x] **Per-file evaluation** — Full rubric on ALL files (no spot-checking). Evaluate all rules across all committed and partial files.
   Produces: `evaluation/commit-story-v2/run-21/per-file-evaluation.md`
   Style reference: `Read docs/templates/eval-run-style-reference/per-file-evaluation.md`
 
@@ -167,7 +167,7 @@ The **evaluation execution branch** created by `/prd-start` from main **never me
      ```
   3. **Claude checks out** instrument files and runs the app from `~/Documents/Repositories/commit-story-v2`:
      ```bash
-     git checkout spiny-orb/instrument-XXXXXXXXXX -- src/ examples/
+     git checkout spiny-orb/instrument-1780596389399 -- src/ examples/
      OTEL_EXPORTER_OTLP_TRACES_ENDPOINT=http://localhost:4318/v1/traces env -u ANTHROPIC_CUSTOM_HEADERS -u ANTHROPIC_BASE_URL vals exec -i -f .vals.yaml -- node --import ./examples/instrumentation.js src/index.js HEAD
      git checkout main -- src/ examples/
      ```
