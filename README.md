@@ -97,10 +97,13 @@ spinybacked-orbweaver-eval/
 | 16 | 22/25 (88%) | 5/5 | 10+3p | ~24 | $12.29 | YES | 80/100 |
 | 17 | 22/25 (88%) | 4/5 | 10+1p | ~28 | $10.43 | YES | 90/100 |
 | 18 | 24/25 (96%) | 5/5 | 11 | 36 | $9.16 | YES | 90/100 |
+| 19 | 21/25 (84%) | 5/5 | 10+3p | 30 | $8.83 | AUTO (#71) | 80/100 |
+| 20 | 24/25 (96%) | 5/5 | 12 | 42 | $9.08 | AUTO (#73) | 80/100 |
+| 21 | 23/25 (92%) | 5/5 | 12 | 42 | ~$8.10 | AUTO (#74) | 90/100 |
 
 Files column notation: plain count = committed files; `+Np` = N partial files (instrumentation started, not fully committed); `+Nf` = N files rolled back after a checkpoint test failure. Cost column: `~` prefix indicates an estimated/derived cost (early runs predating direct cost reporting in the tool); unprefixed values are directly reported by spiny-orb.
 
-**Run-19 is next** — verifying NDS-003 reconciler gap fix (PRD #845, content-aware diff) for context-capture-tool.js, reflection-tool.js, index.js, and summary-graph.js; monitoring SCH-002 recurrence on journal-manager.js `quotes_count` attribute.
+**Run-22 is next** — verifying NDS-003 blank-line-near-JSDoc fix on mcp/server.js (second consecutive validator false positive, new variant); CDQ-001 fix on claude-collector.js (double-end in `startActiveSpan`); COV-005 fix on summary-manager.js `saveDailySummary` (zero-attrs on skip path).
 
 Full run-by-run analysis: [`evaluation/commit-story-v2/`](evaluation/commit-story-v2/)
 

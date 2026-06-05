@@ -182,11 +182,11 @@ The **evaluation execution branch** created by `/prd-start` from main **never me
   6. **Claude runs**: `datadog-agent start`
   Produces: `evaluation/commit-story-v2/run-21/is-score.md`
 
-- [ ] **Baseline comparison** — Compare run-21 vs runs 2–20.
+- [x] **Baseline comparison** — Compare run-21 vs runs 2–20.
   Produces: `evaluation/commit-story-v2/run-21/baseline-comparison.md`
   Style reference: `Read docs/templates/eval-run-style-reference/baseline-comparison.md`
 
-- [ ] **Update root README** — After baseline comparison, update `README.md`: (1) add a row for run-21 to the run history table (quality, gates, files, spans, cost, push/PR, IS score); (2) update the "next run" sentence to reference run-22 and its primary goals.
+- [x] **Update root README** — After baseline comparison, update `README.md`: (1) add a row for run-21 to the run history table (quality, gates, files, spans, cost, push/PR, IS score); (2) update the "next run" sentence to reference run-22 and its primary goals.
 
 - [ ] **Actionable fix output** — Primary handoff deliverable. At milestone completion:
   1. Run the cross-document audit agent to verify consistency across all run-21 evaluation artifacts.
