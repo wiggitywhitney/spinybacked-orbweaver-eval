@@ -1,7 +1,8 @@
 # PRD #21: JS Evaluation Run-21: commit-story-v2 — NDS-003 Trivia-Loss Bug Fix Verification
 
-**Status:** Ready
+**Status:** Complete
 **Created:** 2026-06-02
+**Completed:** 2026-06-05
 **GitHub Issue:** #113
 **Depends on:** PRD #20 (run-20 complete, actionable fix output delivered to spiny-orb team)
 
