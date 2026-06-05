@@ -155,7 +155,7 @@ The **evaluation execution branch** created by `/prd-start` from main **never me
   Style reference: `Read docs/templates/eval-run-style-reference/pr-evaluation.md`
   PR: https://github.com/wiggitywhitney/commit-story-v2/pull/74 (instrument branch: spiny-orb/instrument-1780596389399)
 
-- [ ] **Rubric scoring** — Synthesize dimension-level scores.
+- [x] **Rubric scoring** — Synthesize dimension-level scores.
   Produces: `evaluation/commit-story-v2/run-21/rubric-scores.md`
   Style reference: `Read docs/templates/eval-run-style-reference/rubric-scores.md` (run-12 format)
   **IMPORTANT — use run-20 rubric as the primary precedent reference** (`evaluation/commit-story-v2/run-20/rubric-scores.md`), not run-12. Run-20 contains the current rule set and two critical precedents:
