@@ -188,7 +188,7 @@ The **evaluation execution branch** created by `/prd-start` from main **never me
 
 - [x] **Update root README** — After baseline comparison, update `README.md`: (1) add a row for run-21 to the run history table (quality, gates, files, spans, cost, push/PR, IS score); (2) update the "next run" sentence to reference run-22 and its primary goals.
 
-- [ ] **Actionable fix output** — Primary handoff deliverable. At milestone completion:
+- [x] **Actionable fix output** — Primary handoff deliverable. At milestone completion:
   1. Run the cross-document audit agent to verify consistency across all run-21 evaluation artifacts.
   2. *(User-facing checkpoint 2)* Give Whitney an interpreted summary of key findings — failures, root causes, notable patterns, what to watch for in run-22.
   3. Print the absolute file path of `evaluation/commit-story-v2/run-21/actionable-fix-output.md`.
