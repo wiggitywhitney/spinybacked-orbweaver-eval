@@ -157,7 +157,11 @@ The **evaluation execution branch** created by `/prd-start` from main **never me
 
 - [ ] **Rubric scoring** — Synthesize dimension-level scores.
   Produces: `evaluation/commit-story-v2/run-21/rubric-scores.md`
-  Style reference: `Read docs/templates/eval-run-style-reference/rubric-scores.md`
+  Style reference: `Read docs/templates/eval-run-style-reference/rubric-scores.md` (run-12 format)
+  **IMPORTANT — use run-20 rubric as the primary precedent reference** (`evaluation/commit-story-v2/run-20/rubric-scores.md`), not run-12. Run-20 contains the current rule set and two critical precedents:
+  1. **CDQ-006 precedent**: CDQ-006 advisory findings (e.g., external-source strings in setAttribute) are "advisory, not canonical failures per established rubric precedent" — do NOT fail CDQ-006 for the advisory findings in run-21's pr-evaluation.md for context-capture-tool and journal-manager.
+  2. **COV-001 failed-file precedent**: Files that failed to commit but whose agent output would have passed COV-001 ("WOULD PASS" in per-file evaluation) are scored as COV-001 PASS, consistent with run-20's treatment of mcp/server.js. Apply this to both mcp/server.js and index.js in run-21.
+  **Rule set**: CDQ dimension is 7/7 max (CDQ-001, CDQ-002, CDQ-003, CDQ-005, CDQ-006, CDQ-007, CDQ-008). NDS-005 is now NDS-007 in per-file evaluation tables — treat as the same rule for rubric scoring.
 
 - [ ] **IS scoring run** — Follow `docs/language-extension-plan.md` step 9. Full protocol in `evaluation/is/README.md` (commit-story-v2 section).
 
