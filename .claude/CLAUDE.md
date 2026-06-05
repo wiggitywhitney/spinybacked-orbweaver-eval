@@ -108,6 +108,21 @@ gh pr create --body-file ~/Documents/Repositories/<target>/spiny-orb-pr-summary.
 
 The full PR summary contains per-file breakdown, schema changes, advisory findings, and token usage — this content matters for review and for demos.
 
+## Spiny-Orb Team Fix Triage Principles
+
+When writing fix suggestions in `actionable-fix-output.md`, the spiny-orb team applies two non-negotiable filters:
+
+1. **Fix root causes, not symptoms.** Ask why the mechanism failed — not how to work around this specific instance. Don't suggest validator exceptions to cover for agent misbehavior; fix the agent. Don't suggest pre-registering schema extensions; ask why the registration step didn't fire.
+
+2. **No target-repo-specific fixes.** The team never touches the instrument branch or target repo. Every fix must be general — prompt guidance, validator algorithm, or architecture changes that apply to any target. Do not suggest modifying committed instrumentation, naming target-specific attributes in fix prescriptions, or changes that only help one codebase.
+
+**Practical consequences:**
+- Never suggest "fix the committed instrument branch" as a path, even for trivial one-line corrections.
+- When a fix example uses a target-specific name (attribute key, span name, file path), mark it as illustration only — the prompt or code fix must be general.
+- The NDS-003 validator's job is to catch agent misbehavior, not to be lenient about it. Do not suggest relaxing validator rules to excuse agent reformatting.
+- CDQ-001 "fix the committed double-end" is out of scope; "add prompt guidance distinguishing startSpan from startActiveSpan lifecycle" is in scope.
+- COV-005 fix suggestions should state a general principle ("set input attrs before early-return guards") without naming target-specific attributes.
+
 ## Analyzing Eval Failures
 
 When diagnosing a failed file in a spiny-orb eval run, check all three sources before drawing conclusions:
