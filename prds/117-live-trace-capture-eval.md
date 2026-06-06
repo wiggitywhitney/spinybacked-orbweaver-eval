@@ -93,7 +93,7 @@ The invocation command for each target is in that target's eval PRD's IS scoring
 
 - [ ] **Post-run Datadog verification** — After each eval run, once the new instrument branch is in use, confirm spans appear in Datadog. Add this step after the "Findings Discussion" checkpoint in the PRD template and to PRD #22:
   1. **Organic targets:** Query `service:<target>` for spans newer than the eval run's timestamp. Check `vcs.ref.head.revision` on relevant spans to confirm the new instrument branch SHA appears. If commit-story-v2 has not generated a new journal entry since the eval run, note this and defer verification to the next organic run.
-  2. **Non-organic targets:** Run the IS scoring invocation command once with the DD Agent running (after IS scoring is complete and the Agent is restarted). Query Datadog for `service.instance.id` from that run.
+  2. **Non-organic targets:** Query `service:<target>` in Datadog MCP for spans from the IS scoring run (filter `from: now-30m` immediately after the run, or use the IS scoring run's start timestamp). Record `service.instance.id` from any span in the result. No second invocation is needed — traces reached Datadog via the OTel Collector's Datadog exporter during IS scoring itself (issue #899).
   3. Record the `service.instance.id` from the new instrument branch in `trace-artifact.md` as the post-run trace reference.
 
 - [ ] **Update PRD template and PRD #22** — Propagate the three Datadog steps into the eval process:
