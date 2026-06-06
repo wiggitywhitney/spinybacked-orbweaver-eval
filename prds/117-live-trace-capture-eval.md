@@ -28,9 +28,9 @@ Capture `service.instance.id` from a controlled instrumentation run as a first-c
 
 ### Trace Identification
 
-**Use `service.instance.id`, not `vcs.ref.head.revision`.**
+**Use `service.instance.id`, not `vcs.ref.head.revision` or trace ID.**
 
-`vcs.ref.head.revision` (the instrument branch commit SHA) only appears on spans that explicitly record it in the instrumented code — confirmed via live query: filtering by SHA returned 1 span out of 621 from the same process run. `service.instance.id` is a UUID set once per process invocation and appears on every span from that run. It is the correct identifier for "all spans from this specific execution."
+`vcs.ref.head.revision` (the instrument branch commit SHA) only appears on spans that explicitly record it in the instrumented code — confirmed via live query: filtering by SHA returned 1 span out of 621 from the same process run. Trace IDs are also not suitable: one process invocation produces multiple traces (each journal section generation is its own trace), so no single trace ID captures the full run. `service.instance.id` is a UUID set once per process invocation and appears on every span from that run. It is the correct identifier for "all spans from this specific execution."
 
 ### Two Target Types
 
@@ -42,7 +42,7 @@ Note: once issue #899 lands (Datadog exporter added to the OTel Collector config
 
 ### How to Find the Per-Target Invocation Command
 
-The invocation command for each target is in that target's eval PRD, in the IS scoring milestone under "Action". For commit-story-v2, see the IS scoring milestone in the most recent commit-story-v2 eval PRD. For taze, see PRD #82. These commands are not centralized — each PRD carries target-specific context (SDK installs, CLI modes, etc.) that the README omits.
+The invocation command for each target is in that target's eval PRD's IS scoring milestone — look for the step that sets `OTEL_EXPORTER_OTLP_TRACES_ENDPOINT`. For commit-story-v2, see the most recent commit-story-v2 eval PRD. For taze, see PRD #82. These commands are not centralized — each PRD carries target-specific context (SDK installs, CLI modes, etc.) that the README omits.
 
 ---
 
@@ -61,7 +61,7 @@ The invocation command for each target is in that target's eval PRD, in the IS s
 
 - [ ] **Trace capture protocol** — Define and document the trace capture procedure for both target types. Produce `evaluation/trace-capture-protocol.md` with:
   1. **Organic targets (commit-story-v2):** Query `service:commit-story` in Datadog MCP for spans from the last 7 days. Identify the most recent complete journal generation run — look for a `commit_story.journal.generate_sections` span whose `commit_story.journal.sections` attribute contains all three section types (`["summary","dialogue","technical_decisions"]`). Record `service.instance.id` from that span. This becomes the trace artifact for the eval.
-  2. **Non-organic targets (taze, etc.):** With the Datadog Agent running (before the IS scoring step stops it), execute the target's IS scoring invocation command — found in that PRD's IS scoring milestone under "Action". Query `service:<target>` in Datadog MCP immediately after (filter `from: now-5m`) to get any span from the run. Record `service.instance.id`. Then proceed with IS scoring as documented.
+  2. **Non-organic targets (taze, etc.):** With the Datadog Agent running (before the IS scoring step stops it), execute the target's IS scoring invocation command — found in that target's eval PRD IS scoring milestone (the step that sets `OTEL_EXPORTER_OTLP_TRACES_ENDPOINT`). Query `service:<target>` in Datadog MCP immediately after (filter `from: now-5m`) to get any span from the run. Record `service.instance.id`. Then proceed with IS scoring as documented.
   3. **Artifact format:** Store in `evaluation/<target>/run-N/trace-artifact.md`:
      ```text
      service.instance.id: <uuid>
@@ -119,3 +119,4 @@ The invocation command for each target is in that target's eval PRD, in the IS s
 | D-3 | One controlled run is sufficient | For structural verification (span presence, attribute presence, parent-child), one run provides the necessary evidence. Multiple runs would add confidence on early-exit path coverage but are not required for the rubric. | 2026-06-06 |
 | D-4 | Per-target invocation commands stay in individual eval PRDs | `evaluation/is/README.md` has only a generic template + one commit-story-v2 example. Taze's invocation (pnpm build, SDK install, multi-mode CLI) lives in PRD #82. Centralizing would require maintaining a registry that diverges from the PRDs. Reference the IS scoring milestone in the relevant eval PRD instead. | 2026-06-06 |
 | D-5 | Organic vs non-organic target handling differs | commit-story-v2 generates spans via daily developer workflow — no dedicated trace capture invocation needed. Other targets (taze, future) require a deliberate invocation with DD Agent running. Issue #899 (DD exporter in OTel Collector) will eventually collapse these two paths. | 2026-06-06 |
+| D-6 | Span count tracking and token usage trends not added to eval process | Both were evaluated during design: span count is a different signal than IS scoring's SPA-001 rule (counts INTERNAL spans only) and adds redundancy without insight; token usage trends require baseline comparison across runs and are better suited to a dedicated PRD if needed. Neither improves the per-file rubric or the structural verification goal. | 2026-06-06 |

@@ -18,7 +18,7 @@ Execution order within each tier matters. Items are listed in dependency order �
 4. ~~Research spike: eval target criteria — redo scorecard + find 12 candidates (PRD #45)~~ ✅ Complete
 5. ~~TypeScript eval setup + Run-1: taze — first TypeScript baseline (PRD #50)~~ ✅ Complete — 27/29 (93%), 14 files, Q×F 13.0, IS 60/100; run-14 PRD #82 queued
 6. JavaScript eval setup + Run-1: target selection from 3 candidates (PRD #53) — JS provider already exists; sequenced after TypeScript eval
-7. Live Datadog trace capture for eval verification ([PRD #117](https://github.com/wiggitywhitney/spinybacked-orbweaver-eval/issues/117)) — adds runtime trace evidence to supplement static code review and IS scoring
+6. Live Datadog trace capture for eval verification ([PRD #117](https://github.com/wiggitywhitney/spinybacked-orbweaver-eval/issues/117)) — adds runtime trace evidence to supplement static code review and IS scoring
 
 ## Long-term (blocked by language providers)
 7. Python eval setup + Run-1: target selection from 3 candidates (PRD #51) — depends on Python provider landing
