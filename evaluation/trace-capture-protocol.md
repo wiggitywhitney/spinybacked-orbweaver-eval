@@ -84,7 +84,7 @@ instrument_branch: <branch-name>
 query: service:<target> @service.instance.id:<uuid>
 ```
 
-Example:
+Example (trace found):
 ```text
 service.instance.id: a1b2c3d4-e5f6-7890-abcd-ef1234567890
 captured: 2026-06-06T15:30:00Z
@@ -93,13 +93,27 @@ instrument_branch: spiny-orb/instrument-1749221400000
 query: service:commit-story @service.instance.id:a1b2c3d4-e5f6-7890-abcd-ef1234567890
 ```
 
+Example (trace absent):
+```text
+service.instance.id: none
+captured: 2026-06-07T10:00:00Z
+target: taze
+instrument_branch: spiny-orb/instrument-1749221400000
+query: (no trace captured — 0 spans after retry)
+```
+
 The `query` field is a ready-to-paste `search_datadog_spans` query that retrieves all spans from the captured run. Per-file agents must use this field — not the `captured` timestamp — for subsequent queries, because Datadog ingestion lag means not all spans may have arrived at capture time.
 
 ---
 
 ## Using the Trace Artifact in Per-File Evaluation
 
-Each per-file evaluation agent receives the `service.instance.id` from `trace-artifact.md`. Before writing any evaluation section, the agent uses `search_datadog_spans` with the `query` field from the artifact as the base query, appending `resource_name:<prefix>.*` to filter to spans for the file under review (e.g., `resource_name:commit_story.journal.*` for `journal-graph.js`, `resource_name:taze.*` for taze files).
+Each per-file evaluation agent receives the `service.instance.id` from `trace-artifact.md`. Before writing any evaluation section, the agent uses `search_datadog_spans` with the `query` field from the artifact as the base query, appending a space and `resource_name:<prefix>.*` to filter to spans for the file under review. Convert the target name to the span prefix using dot notation and underscores (not hyphens):
+- `resource_name:commit_story.journal.*` for `journal-graph.js`
+- `resource_name:taze.*` for taze files
+- `resource_name:release_it.*` for release-it files
+
+For example, if the artifact's `query` field is `service:taze @service.instance.id:a1b2c3d4-e5f6-7890-abcd-ef1234567890`, the per-file query becomes: `service:taze @service.instance.id:a1b2c3d4-e5f6-7890-abcd-ef1234567890 resource_name:taze.*`
 
 Runtime signals to check per file:
 - **Attribute presence at runtime**: Does the span carry expected custom attributes with non-null values?
