@@ -101,7 +101,11 @@ The eval execution branch (`feature/prd-82-taze-evaluation-run-14`) **never has 
 
 ## Milestones
 
-- [ ] **Read `docs/language-extension-plan.md` completely before proceeding with any other milestone.** Pay particular attention to: (1) Type D structure and step sequence; (2) "Two User-Facing Checkpoints" section — exact wording for Findings Discussion and handoff pause; (3) eval branch convention (never merges to main); (4) step 13 (copy artifacts to main before closing); (5) step 9.5 (SPA-001 calibration note for CLI apps — taze had 164 INTERNAL spans in run-13; treat this as structural, not a regression). **Do not mark this complete until you have read all five sections.**
+- [ ] **Step 0 — Bootstrap reading.** Before proceeding with any other milestone, read these documents in order:
+  1. `docs/language-extension-plan.md` — completely. Pay particular attention to: (a) Type D structure and step sequence; (b) "Two User-Facing Checkpoints" section — exact wording for Findings Discussion and handoff pause; (c) eval branch convention (never merges to main); (d) step 13 (copy artifacts to main before closing); (e) step 9.5 (SPA-001 calibration note for CLI apps — taze had 164 INTERNAL spans in run-13; treat this as structural, not a regression).
+  2. `prds/115-evaluation-run-22.md` — canonical Type D milestone style reference. **Taze is non-organic** (unlike commit-story-v2): the trace artifact is created during IS scoring (step 9.5), NOT during pre-run verification. The IS scoring milestone and per-file trace supplement timing differ accordingly — read both PRDs side by side to understand where taze diverges.
+  3. `evaluation/taze/run-13/actionable-fix-output.md` — prior run findings. The carry-forward items (CDQ-006 violations, SCH-003 type fix, IS RES-001) are the primary goals for this run.
+  **Do not mark this complete until you have read all three documents.**
 
 - [ ] **Collect skeleton documents** — Create `evaluation/taze/run-14/` directory with `lessons-for-run15.md` and `spiny-orb-findings.md` skeleton files. Create `evaluation/taze/run-log.md` (this is the first taze Type D run; the file does not yet exist). Must run before pre-run verification.
 
@@ -123,10 +127,10 @@ The eval execution branch (`feature/prd-82-taze-evaluation-run-14`) **never has 
 - [ ] **Evaluation run-14** — Whitney runs `spiny-orb instrument` in her own terminal. **Do NOT run the command yourself.** Run from `~/Documents/Repositories/taze`:
 
   ```bash
-  caffeinate -s env -u ANTHROPIC_CUSTOM_HEADERS -u ANTHROPIC_BASE_URL vals exec -i -f .vals.yaml -- bash -c 'GITHUB_TOKEN=$GITHUB_TOKEN_TAZE node ~/Documents/Repositories/spinybacked-orbweaver/bin/spiny-orb.js instrument src --verbose --thinking --debug-dump-dir ~/Documents/Repositories/spinybacked-orbweaver-eval/evaluation/taze/run-14/debug 2>&1 | tee ~/Documents/Repositories/spinybacked-orbweaver-eval/evaluation/taze/run-14/spiny-orb-output.log'
+  caffeinate -s env -u ANTHROPIC_CUSTOM_HEADERS -u ANTHROPIC_BASE_URL vals exec -i -f .vals.yaml -- bash -c 'GITHUB_TOKEN=$GITHUB_TOKEN_TAZE node ~/Documents/Repositories/spinybacked-orbweaver/bin/spiny-orb.js instrument src --verbose --thinking --debug-dump-dir ~/Documents/Repositories/spinybacked-orbweaver-eval/evaluation/taze/run-14/debug-dumps 2>&1 | tee ~/Documents/Repositories/spinybacked-orbweaver-eval/evaluation/taze/run-14/spiny-orb-output.log'
   ```
 
-  AI role: (1) create the `debug/` directory before Whitney runs; (2) confirm readiness; (3) once Whitney provides the log, save it and write `evaluation/taze/run-14/run-summary.md`; (4) **if auto PR creation failed**, create the PR from the file spiny-orb already wrote to disk — do NOT write a shortened manual body: `gh pr create --body-file ~/Documents/Repositories/taze/spiny-orb-pr-summary.md --repo wiggitywhitney/taze --head <instrument-branch> --title "..."`. **After saving artifacts and committing, push the eval branch to origin immediately.**
+  AI role: (1) create the `debug-dumps/` directory before Whitney runs; (2) confirm readiness; (3) once Whitney provides the log, save it and write `evaluation/taze/run-14/run-summary.md`; (4) **if auto PR creation failed**, create the PR from the file spiny-orb already wrote to disk — do NOT write a shortened manual body: `gh pr create --body-file ~/Documents/Repositories/taze/spiny-orb-pr-summary.md --repo wiggitywhitney/taze --head <instrument-branch> --title "..."`. **After saving artifacts and committing, push the eval branch to origin immediately.**
 
 - [ ] **Findings Discussion** *(user-facing checkpoint 1)* — After `run-summary.md` is written, before any evaluation documents are started: report to Whitney: (1) files committed / failed / partial, (2) quality score, (3) cost, (4) push/PR status, (5) CDQ-006 violation count vs run-13 (was 8 across 5 files), (6) top 1-2 surprises. Conversational, under 10 lines. Wait for acknowledgment before proceeding.
 

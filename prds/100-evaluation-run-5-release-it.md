@@ -95,9 +95,11 @@ The feature branch for this PRD (`feature/prd-100-evaluation-run-5-release-it`) 
 
 ## Milestones
 
-- [ ] **Read language-extension-plan.md**
-
-  Read `docs/language-extension-plan.md` completely before proceeding with any other milestone.
+- [ ] **Step 0 — Bootstrap reading.** Before proceeding with any other milestone, read these documents in order:
+  1. `docs/language-extension-plan.md` — completely.
+  2. `prds/115-evaluation-run-22.md` — canonical Type D milestone style reference. **Release-it is non-organic** (unlike commit-story-v2): the trace artifact is created during IS scoring (step 9.5), NOT during pre-run verification. The IS scoring milestone and per-file trace supplement timing differ accordingly — read both PRDs side by side to understand where release-it diverges.
+  3. `evaluation/release-it/run-4/actionable-fix-output.md` — prior run findings. RUN4-1 (LINT/NDS-003 indentation-width conflict) and RUN4-2 (PR body E2BIG) are the P1 blockers that drive run-5's pre-run verification.
+  **Do not mark this complete until you have read all three documents.**
 
 - [ ] **Collect skeleton documents**
 
@@ -167,13 +169,15 @@ The feature branch for this PRD (`feature/prd-100-evaluation-run-5-release-it`) 
   Produces: `evaluation/release-it/run-5/rubric-scores.md`
   Style reference: `Read docs/templates/eval-run-style-reference/rubric-scores.md`
 
-- [ ] **IS scoring run** — **AI runs all commands**. See CLAUDE.md "IS Scoring Runs" section and `docs/language-extension-plan.md` step 9 for the full automated sequence.
+- [ ] **IS scoring run** — **AI runs all commands.** If 0 files committed on the instrument branch: write `NOT EVALUABLE — 0 files committed` to `evaluation/release-it/run-5/is-score.md` and stop.
 
-  If 0 files committed on the instrument branch: write `NOT EVALUABLE — 0 files committed` to `evaluation/release-it/run-5/is-score.md` and stop.
+  **IS scoring gotchas for release-it**: (1) Docker may be blocked by Datadog MDM policy — download `otelcol-contrib` binary directly from GitHub releases (darwin_arm64) if Docker is unavailable; (2) OTel SDK packages (`@opentelemetry/sdk-node`, `exporter-trace-otlp-http`, `sdk-trace-base`, `resources`) are not in release-it devDependencies — temporarily install via `npm install --save-dev` for the IS scoring run, then revert with `git restore package.json package-lock.json`; (3) `--dry-run` flag is required — without it, release-it will attempt an actual release.
 
-  Target-specific values for release-it: entrypoint `./bin/release-it.js --dry-run`; devDep install via `npm`.
-
-  After IS scoring completes (release-it is a non-organic target — traces only exist during IS scoring, not from daily developer use): read `evaluation/trace-capture-protocol.md` for the artifact format and full guidance. Then use the `search_datadog_spans` Datadog MCP tool with query `service:release-it from:now-30m` (IS scoring takes several minutes so a 5-minute window is too tight). Retrieve `service.instance.id` from any span in the result. Write `evaluation/release-it/run-5/trace-artifact.md` — the `query` field should be `service:release-it @service.instance.id:<uuid>`. If no spans appear, wait up to 5 minutes for Datadog ingestion and retry once; if still empty, record trace absence in the artifact and note it in `run-summary.md`.
+  1. **Prerequisites**: Stop Datadog Agent (`datadog-agent stop`). Start OTel Collector with `evaluation/is/otelcol-config.yaml` — use binary if Docker is unavailable (see `evaluation/is/README.md` for binary download instructions and port 4318 conflict with Datadog Agent). Pre-create output file: `touch evaluation/is/eval-traces.json`.
+  2. **Setup**: Find the instrument branch name from the end of `evaluation/release-it/run-5/spiny-orb-output.log` (look for `Branch:` in the final summary box) or run `gh pr list --repo wiggitywhitney/release-it --json number,headRefName`. In `~/Documents/Repositories/release-it`, run: `git fetch && git checkout <instrument-branch> -- lib/ examples/`. Install SDK packages temporarily: `npm install --save-dev @opentelemetry/sdk-node @opentelemetry/exporter-trace-otlp-http @opentelemetry/sdk-trace-base @opentelemetry/resources`.
+  3. **Action**: Run release-it with the Collector receiving: `OTEL_EXPORTER_OTLP_TRACES_ENDPOINT=http://localhost:4318/v1/traces node --import ./examples/instrumentation.js ./bin/release-it.js --dry-run`. Then: `node evaluation/is/score-is.js evaluation/is/eval-traces.json > evaluation/release-it/run-5/is-score.md`
+  4. **Restore**: `git restore package.json package-lock.json` in the release-it fork; `git checkout main -- lib/ examples/`; restart Datadog Agent: `datadog-agent start`.
+  5. **Capture trace artifact** (release-it is a non-organic target — traces only exist during IS scoring, not from daily developer use): Read `evaluation/trace-capture-protocol.md` for the artifact format and full guidance. Then use the `search_datadog_spans` Datadog MCP tool with query `service:release-it from:now-30m` (IS scoring takes several minutes so a 5-minute window is too tight). Retrieve `service.instance.id` from any span in the result. Write `evaluation/release-it/run-5/trace-artifact.md` — the `query` field should be `service:release-it @service.instance.id:<uuid>`. If no spans appear, wait up to 5 minutes for Datadog ingestion and retry once; if still empty, record trace absence in the artifact and note it in `run-summary.md`.
 
   Produces: `evaluation/release-it/run-5/is-score.md`, `evaluation/release-it/run-5/trace-artifact.md`
 
