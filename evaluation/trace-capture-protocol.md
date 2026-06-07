@@ -10,13 +10,19 @@ Each eval run captures a `service.instance.id` from a live Datadog trace. This U
 
 ---
 
+## Datadog MCP Tool
+
+Use the `search_datadog_spans` Datadog MCP tool for all queries in this protocol. Pass the query string exactly as shown in each section — the `from:now-30m` filter is part of the query string, not a separate parameter.
+
+---
+
 ## Organic Targets (commit-story-v2)
 
 The instrument branch runs as part of the developer's normal workflow. Spans accumulate in Datadog naturally with each git commit and journal entry. No dedicated trace capture invocation is needed.
 
 **Step 1: Query Datadog MCP**
 
-Search for spans from the last 7 days:
+Use `search_datadog_spans` with query (last 7 days is the default window — wide enough to find recent organic runs without pulling in unrelated historical data):
 ```text
 service:commit-story
 ```
@@ -24,6 +30,10 @@ service:commit-story
 **Step 2: Identify the most recent complete run**
 
 Look for a span named `commit_story.journal.generate_sections` whose `commit_story.journal.sections` attribute contains all three section types: `["summary","dialogue","technical_decisions"]`. This indicates a complete journal generation run (not a partial execution or early exit).
+
+If multiple complete runs appear, take the most recent one whose `vcs.ref.head.revision` attribute matches the instrument branch under evaluation. If no `vcs.ref.head.revision` is present, take the most recent complete run by timestamp.
+
+If no complete run (all three section types) exists in the last 7 days, extend the window to 30 days. If still none found, record trace absence in the artifact (service.instance.id: none) and note it in `run-summary.md` — do not block evaluation.
 
 **Step 3: Record `service.instance.id`**
 
@@ -45,7 +55,7 @@ Run IS scoring as documented in that target's eval PRD (the IS scoring milestone
 
 **Step 2: Query Datadog MCP immediately after the run**
 
-Filter to the last 30 minutes to isolate the scoring run (IS scoring itself takes several minutes, so a 5-minute window is too tight):
+Use `search_datadog_spans` with query (IS scoring itself takes several minutes, so a 5-minute window is too tight; 30 minutes reliably captures all spans from the run):
 ```text
 service:<target> from:now-30m
 ```
@@ -53,6 +63,8 @@ service:<target> from:now-30m
 **Step 3: Record `service.instance.id`**
 
 Copy the `service.instance.id` from any span in the result. All spans from the same run share this UUID.
+
+If the query returns 0 spans: wait up to 5 minutes for Datadog ingestion and retry once. If still empty, record trace absence in the artifact (service.instance.id: none) and note it in `run-summary.md` — do not block evaluation.
 
 **Step 4: Write `trace-artifact.md`**
 
@@ -81,15 +93,19 @@ instrument_branch: spiny-orb/instrument-1749221400000
 query: service:commit-story @service.instance.id:a1b2c3d4-e5f6-7890-abcd-ef1234567890
 ```
 
-The `query` field is a ready-to-paste Datadog MCP search that retrieves all spans from the captured run.
+The `query` field is a ready-to-paste `search_datadog_spans` query that retrieves all spans from the captured run. Per-file agents must use this field — not the `captured` timestamp — for subsequent queries, because Datadog ingestion lag means not all spans may have arrived at capture time.
 
 ---
 
 ## Using the Trace Artifact in Per-File Evaluation
 
-Each per-file evaluation agent receives the `service.instance.id` from `trace-artifact.md`. Before writing any evaluation section, the agent queries Datadog MCP using the `query` field from the artifact, then filters to spans relevant to the file under review by `resourcename` prefix (e.g., `commit_story.journal.*` for `journal-graph.js`).
+Each per-file evaluation agent receives the `service.instance.id` from `trace-artifact.md`. Before writing any evaluation section, the agent uses `search_datadog_spans` with the `query` field from the artifact as the base query, appending `resource_name:<prefix>.*` to filter to spans for the file under review (e.g., `resource_name:commit_story.journal.*` for `journal-graph.js`, `resource_name:taze.*` for taze files).
 
-See the per-file evaluation milestone in the eval PRD for the full set of runtime checks the agent performs (attribute presence, parent-child relationships, early exit detection, CDQ-001 signal).
+Runtime signals to check per file:
+- **Attribute presence at runtime**: Does the span carry expected custom attributes with non-null values?
+- **Parent-child relationships**: Are spans nested as the code intends? Check `parentid` chains.
+- **Early exit detection**: A span with `gen_ai.operation.name` but no `gen_ai.response.id` indicates the node skipped the LLM call — note whether this matches the code's intent.
+- **CDQ-001 double-end**: A `startActiveSpan` span with unexpectedly short duration or error status may indicate `span.end()` called inside the callback — use as corroborating evidence alongside static review.
 
 If the trace has no spans for a given file's namespace, note this in the per-file evaluation. Do not fail the file solely on trace absence — the code path may not have been exercised in the captured run.
 
