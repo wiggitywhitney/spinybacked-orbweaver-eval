@@ -81,8 +81,10 @@ service.instance.id: <uuid>
 captured: <ISO timestamp>
 target: <target-name>
 instrument_branch: <branch-name>
-query: service:<target> @service.instance.id:<uuid>
+query: service:<service-name> @service.instance.id:<uuid>
 ```
+
+Note: `<service-name>` is the Datadog `service` tag value from the target's instrumentation bootstrap — it may differ from the eval target slug. For example, `commit-story-v2` (target slug) uses `service:commit-story` (service name). Check the bootstrap's `service.name` resource attribute to confirm.
 
 Example (trace found):
 ```text
