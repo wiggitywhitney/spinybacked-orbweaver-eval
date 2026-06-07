@@ -45,9 +45,9 @@ Run IS scoring as documented in that target's eval PRD (the IS scoring milestone
 
 **Step 2: Query Datadog MCP immediately after the run**
 
-Filter to the last 5 minutes to isolate the scoring run:
+Filter to the last 30 minutes to isolate the scoring run (IS scoring itself takes several minutes, so a 5-minute window is too tight):
 ```text
-service:<target> from:now-5m
+service:<target> from:now-30m
 ```
 
 **Step 3: Record `service.instance.id`**
