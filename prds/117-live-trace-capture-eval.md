@@ -36,9 +36,7 @@ Capture `service.instance.id` from a controlled instrumentation run as a first-c
 
 **Targets with organic daily use (commit-story-v2):** The instrument branch is running as part of the developer's normal workflow. Spans accumulate in Datadog naturally with each git commit / journal entry. The pre-run verification step queries these existing spans and captures `service.instance.id` from the most recent run — no dedicated trace capture invocation needed.
 
-**Targets without organic use (taze, future targets):** Run the target using the IS scoring invocation command (documented in each eval PRD's IS scoring milestone — not centralized; `evaluation/is/README.md` has only a generic template). Run this with the Datadog Agent running (before stopping it for IS scoring proper). Capture `service.instance.id` immediately after.
-
-Note: once issue #899 lands (Datadog exporter added to the OTel Collector config), non-organic-use targets can capture their trace from the IS scoring run itself without a separate invocation.
+**Targets without organic use (taze, future targets):** Traces are captured during the IS scoring run itself — the OTel Collector forwards to Datadog via the Datadog exporter (spinybacked-orbweaver#899 is complete). No pre-IS-scoring invocation with the DD Agent is needed. Query `service:<target>` in Datadog MCP immediately after the IS scoring run to retrieve `service.instance.id`.
 
 ### How to Find the Per-Target Invocation Command
 
@@ -61,7 +59,7 @@ The invocation command for each target is in that target's eval PRD's IS scoring
 
 - [ ] **Trace capture protocol** — Define and document the trace capture procedure for both target types. Produce `evaluation/trace-capture-protocol.md` with:
   1. **Organic targets (commit-story-v2):** Query `service:commit-story` in Datadog MCP for spans from the last 7 days. Identify the most recent complete journal generation run — look for a `commit_story.journal.generate_sections` span whose `commit_story.journal.sections` attribute contains all three section types (`["summary","dialogue","technical_decisions"]`). Record `service.instance.id` from that span. This becomes the trace artifact for the eval.
-  2. **Non-organic targets (taze, etc.):** With the Datadog Agent running (before the IS scoring step stops it), execute the target's IS scoring invocation command — found in that target's eval PRD IS scoring milestone (the step that sets `OTEL_EXPORTER_OTLP_TRACES_ENDPOINT`). Query `service:<target>` in Datadog MCP immediately after (filter `from: now-5m`) to get any span from the run. Record `service.instance.id`. Then proceed with IS scoring as documented.
+  2. **Non-organic targets (taze, etc.):** Run IS scoring as documented (OTel Collector receives on 4318, Datadog Agent is stopped). The OTel Collector forwards traces to Datadog in parallel with the file exporter (spinybacked-orbweaver#899 is complete). Query `service:<target>` in Datadog MCP immediately after the IS scoring run (filter `from: now-5m`) to get any span from the run. Record `service.instance.id`. No separate pre-IS-scoring invocation with the DD Agent is needed.
   3. **Artifact format:** Store in `evaluation/<target>/run-N/trace-artifact.md`:
      ```text
      service.instance.id: <uuid>
@@ -70,7 +68,6 @@ The invocation command for each target is in that target's eval PRD's IS scoring
      instrument_branch: <branch-name>
      query: service:<target> @service.instance.id:<uuid>
      ```
-  4. **Note on issue #899:** Once #899 lands (DD exporter in OTel Collector config), step 2 captures the trace during IS scoring itself — no pre-IS-scoring invocation needed.
 
 - [ ] **Pre-run Datadog verification** — Before starting each eval run, add a Datadog health + branch confirmation step. Add this to the pre-run verification milestone in the PRD template and to PRD #22:
   1. Query `service:<target>` in Datadog MCP (last 7 days). If no results: Datadog Agent is not running or target has never been instrumented — stop and investigate.
@@ -96,13 +93,13 @@ The invocation command for each target is in that target's eval PRD's IS scoring
 
 - [ ] **Post-run Datadog verification** — After each eval run, once the new instrument branch is in use, confirm spans appear in Datadog. Add this step after the "Findings Discussion" checkpoint in the PRD template and to PRD #22:
   1. **Organic targets:** Query `service:<target>` for spans newer than the eval run's timestamp. Check `vcs.ref.head.revision` on relevant spans to confirm the new instrument branch SHA appears. If commit-story-v2 has not generated a new journal entry since the eval run, note this and defer verification to the next organic run.
-  2. **Non-organic targets:** Run the IS scoring invocation command once with the DD Agent running (after IS scoring is complete and the Agent is restarted). Query Datadog for `service.instance.id` from that run.
+  2. **Non-organic targets:** Query `service:<target>` in Datadog MCP for spans from the IS scoring run (filter `from: now-30m` immediately after the run, or use the IS scoring run's start timestamp). Record `service.instance.id` from any span in the result. No second invocation is needed — traces reached Datadog via the OTel Collector's Datadog exporter during IS scoring itself (spinybacked-orbweaver#899).
   3. Record the `service.instance.id` from the new instrument branch in `trace-artifact.md` as the post-run trace reference.
 
 - [ ] **Update PRD template and PRD #22** — Propagate the three Datadog steps into the eval process:
   1. Read `evaluation/commit-story-v2/run-22/` — if it already exists, PRD #22 is in-progress; update its milestones in place.
   2. Add pre-run Datadog verification to the pre-run milestone (after the existing token/auth checks).
-  3. Add trace capture step to the IS scoring milestone (for non-organic targets: run with DD Agent before OTel Collector; for organic targets: capture from existing spans).
+  3. Add trace capture step to the IS scoring milestone. Both target types now capture their trace during IS scoring itself — the OTel Collector forwards to Datadog via the Datadog exporter (spinybacked-orbweaver#899). No separate pre-IS-scoring invocation with the DD Agent is needed.
   4. Add trace supplement instructions to the per-file evaluation milestone (agents receive `service.instance.id` from `trace-artifact.md`).
   5. Add post-run Datadog verification after the Findings Discussion checkpoint.
   6. PRD #22 (`prds/115-evaluation-run-22.md`) serves as both the currently open eval PRD (updated in steps 2-5 above) and the style reference for the next eval PRD (#23). There is no separate template file — update PRD #22 once; that single update serves both purposes.
@@ -118,5 +115,5 @@ The invocation command for each target is in that target's eval PRD's IS scoring
 | D-2 | Supplement IS scoring, do not replace it | Weaver live-check validates schema compliance — span name correctness, attribute types against registry. Datadog trace data adds runtime evidence that static analysis cannot provide (attribute values, parent-child relationships, lifecycle anomalies). The two are complementary. | 2026-06-06 |
 | D-3 | One controlled run is sufficient | For structural verification (span presence, attribute presence, parent-child), one run provides the necessary evidence. Multiple runs would add confidence on early-exit path coverage but are not required for the rubric. | 2026-06-06 |
 | D-4 | Per-target invocation commands stay in individual eval PRDs | `evaluation/is/README.md` has only a generic template + one commit-story-v2 example. Taze's invocation (pnpm build, SDK install, multi-mode CLI) lives in PRD #82. Centralizing would require maintaining a registry that diverges from the PRDs. Reference the IS scoring milestone in the relevant eval PRD instead. | 2026-06-06 |
-| D-5 | Organic vs non-organic target handling differs | commit-story-v2 generates spans via daily developer workflow — no dedicated trace capture invocation needed. Other targets (taze, future) require a deliberate invocation with DD Agent running. Issue #899 (DD exporter in OTel Collector) will eventually collapse these two paths. | 2026-06-06 |
+| D-5 | Organic vs non-organic target handling now unified via spinybacked-orbweaver#899 | commit-story-v2 generates spans via daily developer workflow — pre-run verification captures the most recent run's `service.instance.id`. Non-organic targets (taze, future) capture their trace from the IS scoring run itself via the Datadog exporter added in spinybacked-orbweaver#899. Both paths now yield a `service.instance.id` without a separate DD Agent invocation. | 2026-06-06 |
 | D-6 | Span count tracking and token usage trends not added to eval process | Both were evaluated during design: span count is a different signal than IS scoring's SPA-001 rule (counts INTERNAL spans only) and adds redundancy without insight; token usage trends require baseline comparison across runs and are better suited to a dedicated PRD if needed. Neither improves the per-file rubric or the structural verification goal. | 2026-06-06 |

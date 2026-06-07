@@ -1,7 +1,12 @@
 # OTel Collector config for IS scoring runs.
 # Receives OTLP traces on port 4318 (same port as Datadog Agent — they cannot
-# run simultaneously). Writes line-delimited JSON to eval-traces.json.
-# Each line is an ExportTraceServiceRequest JSON object, parseable by score-is.js.
+# run simultaneously). Writes line-delimited JSON to eval-traces.json for IS
+# scoring, and also forwards to Datadog APM for live trace inspection.
+# Each line of eval-traces.json is an ExportTraceServiceRequest JSON object,
+# parseable by score-is.js.
+#
+# Requires DD_API_KEY to be set in the environment. Use vals exec to inject:
+#   vals exec -f .vals.yaml -- bash -c 'export PATH="/opt/homebrew/bin:$PATH" && otelcol-contrib --config evaluation/is/otelcol-config.yaml > /tmp/otelcol.log 2>&1' &
 #
 # IS spec pinned to commit 52c14ba.
 
@@ -13,10 +18,16 @@ receivers:
 
 exporters:
   file:
+    # Path is relative to CWD. Binary: run from evaluation/is/ so this resolves
+    # to evaluation/is/eval-traces.json. Docker: -w /etc/otelcol handles this.
     path: ./eval-traces.json
+  datadog:
+    api:
+      key: ${env:DD_API_KEY}
+      site: ${env:DD_SITE:-datadoghq.com}
 
 service:
   pipelines:
     traces:
       receivers: [otlp]
-      exporters: [file]
+      exporters: [file, datadog]
