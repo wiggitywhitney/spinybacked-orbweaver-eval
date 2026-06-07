@@ -18,6 +18,8 @@ receivers:
 
 exporters:
   file:
+    # Path is relative to CWD. Binary: run from evaluation/is/ so this resolves
+    # to evaluation/is/eval-traces.json. Docker: -w /etc/otelcol handles this.
     path: ./eval-traces.json
   datadog:
     api:
