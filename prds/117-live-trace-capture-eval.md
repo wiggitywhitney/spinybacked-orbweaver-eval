@@ -96,7 +96,7 @@ The invocation command for each target is in that target's eval PRD's IS scoring
   2. **Non-organic targets:** Query `service:<target>` in Datadog MCP for spans from the IS scoring run (filter `from: now-30m` immediately after the run, or use the IS scoring run's start timestamp). Record `service.instance.id` from any span in the result. No second invocation is needed — traces reached Datadog via the OTel Collector's Datadog exporter during IS scoring itself (spinybacked-orbweaver#899).
   3. Record the `service.instance.id` from the new instrument branch in `trace-artifact.md` as the post-run trace reference.
 
-- [ ] **Update taze run-14 PRD with trace capture steps** — Propagate trace capture into `prds/82-taze-evaluation-run-14.md`. Taze is a **non-organic target** — traces are captured during IS scoring, not from organic daily use.
+- [x] **Update taze run-14 PRD with trace capture steps** — Propagate trace capture into `prds/82-taze-evaluation-run-14.md`. Taze is a **non-organic target** — traces are captured during IS scoring, not from organic daily use.
 
   **Step 0 — Orient:** Before making any changes, read these documents in order:
   1. `evaluation/trace-capture-protocol.md` — canonical protocol; defines the non-organic capture path, artifact format, and query patterns
@@ -113,7 +113,7 @@ The invocation command for each target is in that target's eval PRD's IS scoring
 
   After making both edits: verify the inserted text reads naturally in context. Save the file.
 
-- [ ] **Update release-it run-5 PRD with trace capture steps** — Propagate trace capture into `prds/100-evaluation-run-5-release-it.md`. Release-it is also a **non-organic target** — traces are captured during IS scoring.
+- [x] **Update release-it run-5 PRD with trace capture steps** — Propagate trace capture into `prds/100-evaluation-run-5-release-it.md`. Release-it is also a **non-organic target** — traces are captured during IS scoring.
 
   **Step 0 — Orient:** Before making any changes, read these documents in order:
   1. `evaluation/trace-capture-protocol.md` — canonical protocol; non-organic capture path, artifact format, query patterns
@@ -130,7 +130,7 @@ The invocation command for each target is in that target's eval PRD's IS scoring
 
   After making both edits: verify the inserted text reads naturally in context. Save the file.
 
-- [ ] **Update `docs/language-extension-plan.md` Type D step sequence** — The Type D step sequence in this document is the template for all future eval run PRDs. Without updating it, every new PRD drafted from it will be missing trace capture.
+- [x] **Update `docs/language-extension-plan.md` Type D step sequence** — The Type D step sequence in this document is the template for all future eval run PRDs. Without updating it, every new PRD drafted from it will be missing trace capture.
 
   **Step 0 — Orient:** Before making any changes, read these documents in order:
   1. `evaluation/trace-capture-protocol.md` — canonical protocol; both organic and non-organic paths

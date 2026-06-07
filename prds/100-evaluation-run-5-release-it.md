@@ -151,6 +151,8 @@ The feature branch for this PRD (`feature/prd-100-evaluation-run-5-release-it`) 
 
 - [ ] **Per-file evaluation**
 
+  **Step 0 — Trace supplement:** Read `evaluation/release-it/run-5/trace-artifact.md`. Query Datadog MCP using the `query` field from the artifact, filtered by `resourcename` prefix matching the file under review (e.g., `release_it.*`). Use live trace data to supplement static code review for: attribute values at runtime, parent-child span relationships, early exit detection (span with `gen_ai.operation.name` but no `gen_ai.response.id`), and CDQ-001 double-end signal. If the trace has no spans for the file's namespace, note it but do not fail the file solely on trace absence. See `evaluation/trace-capture-protocol.md` for full guidance.
+
   Full 32-rule rubric on ALL processed files.
   Produces: `evaluation/release-it/run-5/per-file-evaluation.md`
   Style reference: `Read docs/templates/eval-run-style-reference/per-file-evaluation.md`
@@ -171,7 +173,9 @@ The feature branch for this PRD (`feature/prd-100-evaluation-run-5-release-it`) 
 
   Target-specific values for release-it: entrypoint `./bin/release-it.js --dry-run`; devDep install via `npm`.
 
-  Produces: `evaluation/release-it/run-5/is-score.md`
+  After IS scoring completes: query `service:release-it` in Datadog MCP immediately after the run (filter `from: now-30m` — IS scoring takes several minutes so a 5-minute window is too tight). Retrieve `service.instance.id` from any span in the result. Write `evaluation/release-it/run-5/trace-artifact.md` using the format in `evaluation/trace-capture-protocol.md`. The `query` field in the artifact is a ready-to-paste Datadog MCP search for all spans from this run.
+
+  Produces: `evaluation/release-it/run-5/is-score.md`, `evaluation/release-it/run-5/trace-artifact.md`
 
 - [ ] **Baseline comparison**
 

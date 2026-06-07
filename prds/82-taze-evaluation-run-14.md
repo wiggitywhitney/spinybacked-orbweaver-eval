@@ -135,6 +135,9 @@ The eval execution branch (`feature/prd-82-taze-evaluation-run-14`) **never has 
   Style reference: `docs/templates/eval-run-style-reference/failure-deep-dives.md`
 
 - [ ] **Per-file evaluation** — Full rubric on ALL processed files (committed + correct skips). Evaluate all rules across all files.
+
+  **Step 0 — Trace supplement:** Read `evaluation/taze/run-14/trace-artifact.md`. Query Datadog MCP using the `query` field from the artifact, filtered by `resourcename` prefix matching the file under review (e.g., `taze.*`). Use live trace data to supplement static code review for: attribute values at runtime, parent-child span relationships, early exit detection (span with `gen_ai.operation.name` but no `gen_ai.response.id`), and CDQ-001 double-end signal. If the trace has no spans for the file's namespace, note it but do not fail the file solely on trace absence. See `evaluation/trace-capture-protocol.md` for full guidance.
+
   Produces: `evaluation/taze/run-14/per-file-evaluation.md`
   Style reference: `docs/templates/eval-run-style-reference/per-file-evaluation.md`
 
@@ -154,7 +157,8 @@ The eval execution branch (`feature/prd-82-taze-evaluation-run-14`) **never has 
   2. **Setup**: Find the instrument branch name from the end of `evaluation/taze/run-14/spiny-orb-output.log` (look for `Branch:` in the final summary box) or run `gh pr list --repo wiggitywhitney/taze --json number,headRefName`. In `~/Documents/Repositories/taze`, run: `git fetch && git checkout <instrument-branch> -- src/ examples/`. Build: `pnpm build`. Install SDK packages temporarily: `pnpm add -D @opentelemetry/sdk-node @opentelemetry/exporter-trace-otlp-http @opentelemetry/sdk-trace-base @opentelemetry/resources`.
   3. **Action**: Run several taze modes with the Collector receiving: `OTEL_EXPORTER_OTLP_TRACES_ENDPOINT=http://localhost:4318/v1/traces node --import ./examples/instrumentation.js ./bin/taze.mjs <mode>` (e.g., `default`, `major`, `latest`). Then: `node evaluation/is/score-is.js evaluation/is/eval-traces.json > evaluation/taze/run-14/is-score.md`
   4. **Restore**: `git restore package.json pnpm-lock.yaml` in the taze fork; `git checkout main`; restart Datadog Agent: `datadog-agent start`.
-  Produces: `evaluation/taze/run-14/is-score.md`
+  5. **Capture trace artifact**: Query `service:taze` in Datadog MCP immediately after the IS scoring run (filter `from: now-30m` — IS scoring takes several minutes so a 5-minute window is too tight). Retrieve `service.instance.id` from any span in the result. Write `evaluation/taze/run-14/trace-artifact.md` using the format in `evaluation/trace-capture-protocol.md`. The `query` field in the artifact is a ready-to-paste Datadog MCP search for all spans from this run.
+  Produces: `evaluation/taze/run-14/is-score.md`, `evaluation/taze/run-14/trace-artifact.md`
 
 - [ ] **Baseline comparison** — Compare run-14 vs run-13 (only prior TS run). Note improvements on CDQ-006 and SCH-003 specifically.
   Produces: `evaluation/taze/run-14/baseline-comparison.md`

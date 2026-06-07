@@ -90,7 +90,7 @@ Note: update `run-N` to the current run number and `commit-story-v2` to the targ
 ### Type D: Run-N PRD (recurring, indefinitely)
 Identical in structure to the existing PRDs #3–13. Triggered by findings from the previous run. Follows the established milestone sequence:
 1. Collect skeleton documents
-2. Pre-run verification (verify prior findings fixed, check prerequisites)
+2. Pre-run verification (verify prior findings fixed, check prerequisites). **Organic targets only (commit-story-v2):** As part of pre-run verification, also capture the trace artifact for this run. Query `service:<target>` in Datadog MCP (last 7 days). Identify the most recent complete run, record `service.instance.id`, and write `evaluation/<target>/run-N/trace-artifact.md`. See `evaluation/trace-capture-protocol.md` for the full organic capture procedure. This step is skipped for non-organic targets — they capture the trace artifact in step 9.5 during IS scoring.
 3. Evaluation run (Whitney runs `spiny-orb instrument` in her terminal — see exact command in Type C section above). **After saving artifacts and committing, push the eval branch to origin immediately.** The branch holds the only copy of run artifacts until PRD #57's backfill lands — do not leave it local-only.
 3a. **Create PR for the eval branch** (`gh pr create --base main`). Leave it open — eval PRs are never merged. Title format: `eval(prd-N): <target> run-N evaluation — <quality score> quality, Q×F <score>, IS <score>/100`. The score fields are filled in after rubric scoring (step 8) and IS scoring (step 9) complete — update the PR title at that point.
 
@@ -101,6 +101,8 @@ Identical in structure to the existing PRDs #3–13. Triggered by findings from 
 4. Findings Discussion *(user-facing checkpoint 1: raw signal before analysis)*
 5. Failure deep-dives
 6. Per-file evaluation
+
+   **Step 0 — Trace supplement:** Read `evaluation/<target>/run-N/trace-artifact.md`. Query Datadog MCP using the `query` field from the artifact, filtered by `resourcename` prefix matching the file under review (e.g., `taze.*` or `release_it.*`). Use live trace data to supplement static code review for: attribute values at runtime, parent-child span relationships, early exit detection (span with `gen_ai.operation.name` but no `gen_ai.response.id`), and CDQ-001 double-end signal. See `evaluation/trace-capture-protocol.md` for full guidance. If the trace has no spans for the file's namespace, note it but do not fail the file solely on trace absence.
 7. PR artifact evaluation
 8. Rubric scoring
 9. IS scoring run
@@ -108,6 +110,7 @@ Identical in structure to the existing PRDs #3–13. Triggered by findings from 
    2. **Action**: Run the target app with the Collector as OTLP receiver; collect `evaluation/is/eval-traces.json`; run `node evaluation/is/score-is.js evaluation/is/eval-traces.json > evaluation/[TARGET]/run-[N]/is-score.md`
    3. **Output**: `evaluation/[TARGET]/run-[N]/is-score.md` is written by the command above.
    4. **Note for k8s repos**: IS scoring requires a running cluster; see `evaluation/is/README.md` for the Kind-based workflow
+9.5. **Capture trace artifact (non-organic targets)**: Immediately after IS scoring completes, query `service:<target>` in Datadog MCP (filter `from: now-30m` — IS scoring takes several minutes so a 5-minute window is too tight). Retrieve `service.instance.id` from any span in the result. Write `evaluation/<target>/run-N/trace-artifact.md` using the format in `evaluation/trace-capture-protocol.md`. **Organic targets** (e.g., commit-story-v2) capture their trace artifact during pre-run verification (step 2) — not here.
 10. Baseline comparison
 10a. **Update root README** — After baseline comparison, update `README.md`: (1) add a row for this run to the run history table with quality score, gates, files, spans, cost, push/PR status, and IS score; (2) update the "next run" sentence (the bold paragraph immediately below the run history table, above the "Full run-by-run analysis" link) to reference the upcoming run number and its primary goals.
 11. Actionable fix output *(user-facing checkpoint 2: interpreted summary + handoff pause)*
