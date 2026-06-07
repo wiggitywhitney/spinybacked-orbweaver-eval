@@ -59,7 +59,7 @@ The invocation command for each target is in that target's eval PRD's IS scoring
 
 - [x] **Trace capture protocol** — Define and document the trace capture procedure for both target types. Produce `evaluation/trace-capture-protocol.md` with:
   1. **Organic targets (commit-story-v2):** Query `service:commit-story` in Datadog MCP for spans from the last 7 days. Identify the most recent complete journal generation run — look for a `commit_story.journal.generate_sections` span whose `commit_story.journal.sections` attribute contains all three section types (`["summary","dialogue","technical_decisions"]`). Record `service.instance.id` from that span. This becomes the trace artifact for the eval.
-  2. **Non-organic targets (taze, etc.):** Run IS scoring as documented (OTel Collector receives on 4318, Datadog Agent is stopped). The OTel Collector forwards traces to Datadog in parallel with the file exporter (spinybacked-orbweaver#899 is complete). Query `service:<target>` in Datadog MCP immediately after the IS scoring run (filter `from: now-5m`) to get any span from the run. Record `service.instance.id`. No separate pre-IS-scoring invocation with the DD Agent is needed.
+  2. **Non-organic targets (taze, etc.):** Run IS scoring as documented (OTel Collector receives on 4318, Datadog Agent is stopped). The OTel Collector forwards traces to Datadog in parallel with the file exporter (spinybacked-orbweaver#899 is complete). Query `service:<target>` in Datadog MCP immediately after the IS scoring run (filter `from: now-30m`) to get any span from the run. Record `service.instance.id`. No separate pre-IS-scoring invocation with the DD Agent is needed.
   3. **Artifact format:** Store in `evaluation/<target>/run-N/trace-artifact.md`:
      ```text
      service.instance.id: <uuid>
@@ -99,7 +99,7 @@ The invocation command for each target is in that target's eval PRD's IS scoring
 - [x] **Update PRD template and PRD #22** — Propagate the three Datadog steps into the eval process:
   1. Read `evaluation/commit-story-v2/run-22/` — if it already exists, PRD #22 is in-progress; update its milestones in place.
   2. Add pre-run Datadog verification to the pre-run milestone (after the existing token/auth checks).
-  3. Add trace capture step to the IS scoring milestone. Both target types now capture their trace during IS scoring itself — the OTel Collector forwards to Datadog via the Datadog exporter (spinybacked-orbweaver#899). No separate pre-IS-scoring invocation with the DD Agent is needed.
+  3. Add trace capture step to the IS scoring milestone. **Organic targets** capture their trace during pre-run verification (from existing workflow spans — no IS scoring step needed). **Non-organic targets** capture their trace during IS scoring itself — the OTel Collector forwards to Datadog via the Datadog exporter (spinybacked-orbweaver#899). No separate pre-IS-scoring invocation with the DD Agent is needed for either path.
   4. Add trace supplement instructions to the per-file evaluation milestone (agents receive `service.instance.id` from `trace-artifact.md`).
   5. Add post-run Datadog verification after the Findings Discussion checkpoint.
   6. PRD #22 (`prds/115-evaluation-run-22.md`) serves as both the currently open eval PRD (updated in steps 2-5 above) and the style reference for the next eval PRD (#23). There is no separate template file — update PRD #22 once; that single update serves both purposes.

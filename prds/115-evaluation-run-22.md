@@ -203,7 +203,7 @@ The **evaluation execution branch** created by `/prd-start` from main **never me
      Note: omit `COMMIT_STORY_TRACELOOP=true` — `@traceloop/instrumentation-langchain` API incompatibility crashes the process. See `evaluation/is/README.md`.
   4. **Claude stops** the Collector: `docker stop otelcol-is`
   5. **Claude runs** the scorer: `node evaluation/is/score-is.js evaluation/is/eval-traces.json > evaluation/commit-story-v2/run-22/is-score.md`
-  6. **Confirm IS scoring traces in Datadog**: Query `service:commit-story from:now-30m` in Datadog MCP. Record `service.instance.id` from any span in the result. This confirms the OTel Collector's Datadog exporter (spinybacked-orbweaver#899) forwarded spans from the IS scoring run. Note: per-target invocation commands are in each eval PRD's IS scoring milestone — `evaluation/is/README.md` has only a generic pattern.
+  6. **Confirm IS scoring traces in Datadog**: Note the IS scoring run start time, then query `service:commit-story from:<run-start-time>` in Datadog MCP (use the actual timestamp, not `now-30m`, to avoid matching unrelated organic traffic from daily use). If multiple `service.instance.id` values appear, pick the one whose spans cluster around the IS scoring invocation time. Record that `service.instance.id`. This confirms the OTel Collector's Datadog exporter (spinybacked-orbweaver#899) forwarded spans from the IS scoring run. Note: per-target invocation commands are in each eval PRD's IS scoring milestone — `evaluation/is/README.md` has only a generic pattern.
   7. **Claude runs**: `datadog-agent start`
   Produces: `evaluation/commit-story-v2/run-22/is-score.md`
 
