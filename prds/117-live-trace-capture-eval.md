@@ -57,7 +57,7 @@ The invocation command for each target is in that target's eval PRD's IS scoring
 
 ## Milestones
 
-- [ ] **Trace capture protocol** — Define and document the trace capture procedure for both target types. Produce `evaluation/trace-capture-protocol.md` with:
+- [x] **Trace capture protocol** — Define and document the trace capture procedure for both target types. Produce `evaluation/trace-capture-protocol.md` with:
   1. **Organic targets (commit-story-v2):** Query `service:commit-story` in Datadog MCP for spans from the last 7 days. Identify the most recent complete journal generation run — look for a `commit_story.journal.generate_sections` span whose `commit_story.journal.sections` attribute contains all three section types (`["summary","dialogue","technical_decisions"]`). Record `service.instance.id` from that span. This becomes the trace artifact for the eval.
   2. **Non-organic targets (taze, etc.):** Run IS scoring as documented (OTel Collector receives on 4318, Datadog Agent is stopped). The OTel Collector forwards traces to Datadog in parallel with the file exporter (spinybacked-orbweaver#899 is complete). Query `service:<target>` in Datadog MCP immediately after the IS scoring run (filter `from: now-5m`) to get any span from the run. Record `service.instance.id`. No separate pre-IS-scoring invocation with the DD Agent is needed.
   3. **Artifact format:** Store in `evaluation/<target>/run-N/trace-artifact.md`:
@@ -69,13 +69,13 @@ The invocation command for each target is in that target's eval PRD's IS scoring
      query: service:<target> @service.instance.id:<uuid>
      ```
 
-- [ ] **Pre-run Datadog verification** — Before starting each eval run, add a Datadog health + branch confirmation step. Add this to the pre-run verification milestone in the PRD template and to PRD #22:
+- [x] **Pre-run Datadog verification** — Before starting each eval run, add a Datadog health + branch confirmation step. Add this to the pre-run verification milestone in the PRD template and to PRD #22:
   1. Query `service:<target>` in Datadog MCP (last 7 days). If no results: Datadog Agent is not running or target has never been instrumented — stop and investigate.
   2. **For organic targets only:** Confirm the most recent spans are from the expected instrument branch. Check `vcs.ref.head.revision` on `commit_story.journal.save_journal_entry` spans (this attribute is set by the instrumented code on that specific span). The revision should match the most recent instrument branch SHA (`git -C <target-repo> rev-parse --short <instrument-branch>`).
   3. Capture `service.instance.id` from the most recent run (organic targets). This is the trace artifact for use in per-file evaluation.
   4. If the revision does not match: the target has drifted back to main or an older branch. Do not start the eval run — checkout the correct branch first.
 
-- [ ] **Per-file evaluation trace supplement** — Update the per-file evaluation methodology so agents query the captured trace to supplement static code review. Add these instructions to the per-file evaluation milestone in the PRD template and to PRD #22:
+- [x] **Per-file evaluation trace supplement** — Update the per-file evaluation methodology so agents query the captured trace to supplement static code review. Add these instructions to the per-file evaluation milestone in the PRD template and to PRD #22:
 
   Each per-file evaluation agent receives the `service.instance.id` from `trace-artifact.md` in addition to its existing inputs. **Before writing any evaluation section**, the agent queries Datadog MCP:
   ```text
@@ -91,12 +91,12 @@ The invocation command for each target is in that target's eval PRD's IS scoring
 
   If the trace has no spans for a given file's namespace: note this in the per-file evaluation (possible that the code path was not exercised in the captured run). Do not fail the file solely on trace absence.
 
-- [ ] **Post-run Datadog verification** — After each eval run, once the new instrument branch is in use, confirm spans appear in Datadog. Add this step after the "Findings Discussion" checkpoint in the PRD template and to PRD #22:
+- [x] **Post-run Datadog verification** — After each eval run, once the new instrument branch is in use, confirm spans appear in Datadog. Add this step after the "Findings Discussion" checkpoint in the PRD template and to PRD #22:
   1. **Organic targets:** Query `service:<target>` for spans newer than the eval run's timestamp. Check `vcs.ref.head.revision` on relevant spans to confirm the new instrument branch SHA appears. If commit-story-v2 has not generated a new journal entry since the eval run, note this and defer verification to the next organic run.
   2. **Non-organic targets:** Query `service:<target>` in Datadog MCP for spans from the IS scoring run (filter `from: now-30m` immediately after the run, or use the IS scoring run's start timestamp). Record `service.instance.id` from any span in the result. No second invocation is needed — traces reached Datadog via the OTel Collector's Datadog exporter during IS scoring itself (spinybacked-orbweaver#899).
   3. Record the `service.instance.id` from the new instrument branch in `trace-artifact.md` as the post-run trace reference.
 
-- [ ] **Update PRD template and PRD #22** — Propagate the three Datadog steps into the eval process:
+- [x] **Update PRD template and PRD #22** — Propagate the three Datadog steps into the eval process:
   1. Read `evaluation/commit-story-v2/run-22/` — if it already exists, PRD #22 is in-progress; update its milestones in place.
   2. Add pre-run Datadog verification to the pre-run milestone (after the existing token/auth checks).
   3. Add trace capture step to the IS scoring milestone. Both target types now capture their trace during IS scoring itself — the OTel Collector forwards to Datadog via the Datadog exporter (spinybacked-orbweaver#899). No separate pre-IS-scoring invocation with the DD Agent is needed.

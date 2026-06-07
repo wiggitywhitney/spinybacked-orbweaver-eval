@@ -122,7 +122,10 @@ The **evaluation execution branch** created by `/prd-start` from main **never me
   11. Rebuild spiny-orb from **main**: `cd ~/Documents/Repositories/spinybacked-orbweaver && npm install && npm run build`
   12. Record version and findings status.
   13. **README check**: Verify `README.md` on main has a row for run-21 in the commit-story-v2 run history table.
-  14. Append observations to `evaluation/commit-story-v2/run-22/lessons-for-prd23.md`.
+  14. **Datadog pre-run health check**: Query `service:commit-story` in Datadog MCP (last 7 days). If no results: Datadog Agent is not running or commit-story-v2 has never been instrumented — stop and investigate before proceeding.
+  15. **Instrument branch confirmation**: Check `vcs.ref.head.revision` on `commit_story.journal.save_journal_entry` spans. Compare against `git -C ~/Documents/Repositories/commit-story-v2 rev-parse --short <instrument-branch>` (the most recent instrument branch from run-21 — find its name in `evaluation/commit-story-v2/run-21/run-summary.md` or from the run-21 PR). If the revision does not match: the target has drifted to an older branch — do not start the eval run until the correct branch is confirmed.
+  16. **Capture trace artifact**: From the most recent complete journal generation run (most recent `commit_story.journal.generate_sections` span whose `commit_story.journal.sections` contains all three section types: `["summary","dialogue","technical_decisions"]`), record `service.instance.id`. Write `evaluation/commit-story-v2/run-22/trace-artifact.md` using the format in `evaluation/trace-capture-protocol.md`.
+  17. Append observations to `evaluation/commit-story-v2/run-22/lessons-for-prd23.md`.
 
 - [ ] **Evaluation run-22** — Whitney runs `spiny-orb instrument` in her own terminal. **Do NOT run the command yourself.** AI role: (1) confirm readiness with Whitney, (2) once Whitney provides the log output, save it to `evaluation/commit-story-v2/run-22/spiny-orb-output.log` and write `evaluation/commit-story-v2/run-22/run-summary.md`, (3) **if auto PR creation failed**, create the PR from the file spiny-orb already wrote to disk — do NOT write a shortened manual body: `gh pr create --body-file ~/Documents/Repositories/commit-story-v2/spiny-orb-pr-summary.md --repo wiggitywhitney/commit-story-v2 --head <instrument-branch> --title "..."`
 
@@ -141,6 +144,11 @@ The **evaluation execution branch** created by `/prd-start` from main **never me
 
 - [ ] **Findings Discussion** *(user-facing checkpoint 1)* — After `run-summary.md` is written, before any evaluation documents are started: report to Whitney: (1) files committed / failed / partial, (2) whether any checkpoint failures occurred, (3) RUN21-1 fix result — specifically whether mcp/server.js committed cleanly without NDS-003 violations, (4) RUN21-2 fix result — whether index.js committed cleanly and `commit_story.cli.subcommand` is present, (5) CDQ-001 watch — did claude-collector.js avoid the double-end pattern?, (6) journal-graph.js result — sixth consecutive?, (7) quality score if visible, (8) cost, (9) push/PR status (auto or manual?), (10) overall attempt-count distribution (D-1 signal). Keep it conversational, under 10 lines. Wait for acknowledgment before proceeding.
 
+- [ ] **Post-run Datadog verification** — After the Findings Discussion checkpoint, confirm the new instrument branch spans appear in Datadog:
+  1. Query `service:commit-story` in Datadog MCP for spans newer than the eval run's start timestamp. Check `vcs.ref.head.revision` on `commit_story.journal.save_journal_entry` spans to confirm the new instrument branch SHA appears.
+  2. If no new journal entries have been generated since the eval run: note this in `run-summary.md` and defer confirmation to the next organic run — do not block forward progress.
+  3. Record the `service.instance.id` from the new instrument branch in `trace-artifact.md` as the post-run trace reference.
+
 - [ ] **Failure deep-dives** — For each failed file AND run-level failure. Includes any partial files.
   Produces: `evaluation/commit-story-v2/run-22/failure-deep-dives.md`
   Style reference: `Read docs/templates/eval-run-style-reference/failure-deep-dives.md`
@@ -152,6 +160,17 @@ The **evaluation execution branch** created by `/prd-start` from main **never me
   **(D-2) Use one agent per file**: Spawn individual background Agent() calls (not Workflow) with `run_in_background: true`; each agent reads style reference, `evaluation/commit-story-v2/run-21/per-file-evaluation.md` (for rule descriptions), original source (`git show main:src/file`), committed source (`git show <instrument-branch>:src/file`), agent notes from log, debug dump if applicable, and schema (`semconv/attributes.yaml`); each agent **writes its section directly to `evaluation/commit-story-v2/run-22/per-file-sections/<filename>.md`** — do NOT pass section text back through the agent call result (assembly stalls when sections are concatenated into a large prompt). Main context assembles from the written files once all agents complete. Correct-skip files: one batch agent for RST-001 verification.
 
   **Important**: Agent notes in `.instrumentation.md` files and log output are NOT ground truth about what was committed — they reflect an earlier reasoning draft. Per-file evaluation agents must read the instrumented source file directly (`git show <instrument-branch>:src/file`); do not rely on notes alone.
+
+  **(Trace supplement)** Each per-file evaluation agent receives the `service.instance.id` from `evaluation/commit-story-v2/run-22/trace-artifact.md`. **Before writing any evaluation section**, the agent queries Datadog MCP:
+  ```text
+  service:commit-story @service.instance.id:<uuid>
+  ```
+  and filters to spans relevant to the file under review by `resourcename` prefix (e.g., `commit_story.journal.*` for `journal-graph.js`). The agent uses live trace data to supplement — not override — static code review for these specific checks:
+  - **Attribute presence at runtime**: Does the span carry expected custom attributes with non-null values?
+  - **Parent-child relationships**: Are spans nested as the code intends? Check `parentid` chains.
+  - **Early exit detection**: A span with `gen_ai.operation.name` but no `gen_ai.response.id` indicates the node skipped the LLM call — note whether this matches the code's intent.
+  - **CDQ-001 signal**: A `startActiveSpan` span with unexpectedly short duration or error status may indicate a double-end — use as corroborating evidence alongside static review.
+  If the trace has no spans for a given file's namespace: note this in the per-file evaluation. Do not fail the file solely on trace absence.
 
   **(D-1) Track attempt counts**: For each file, note attempts. spiny-orb only prints attempt count when > 1; no count = 1 attempt. If a file required ≥ 3 attempts AND has a quality failure, include the verbose log section as input to the per-file evaluation agent (grep: `grep -A 80 "Processing file.*<filename>" spiny-orb-output.log`). Check agent note framing: `"New attribute X"` = announced registration; `"X captures... No registered attribute"` = gap documented, not acted on.
 
@@ -184,7 +203,8 @@ The **evaluation execution branch** created by `/prd-start` from main **never me
      Note: omit `COMMIT_STORY_TRACELOOP=true` — `@traceloop/instrumentation-langchain` API incompatibility crashes the process. See `evaluation/is/README.md`.
   4. **Claude stops** the Collector: `docker stop otelcol-is`
   5. **Claude runs** the scorer: `node evaluation/is/score-is.js evaluation/is/eval-traces.json > evaluation/commit-story-v2/run-22/is-score.md`
-  6. **Claude runs**: `datadog-agent start`
+  6. **Confirm IS scoring traces in Datadog**: Query `service:commit-story from:now-30m` in Datadog MCP. Record `service.instance.id` from any span in the result. This confirms the OTel Collector's Datadog exporter (spinybacked-orbweaver#899) forwarded spans from the IS scoring run. Note: per-target invocation commands are in each eval PRD's IS scoring milestone — `evaluation/is/README.md` has only a generic pattern.
+  7. **Claude runs**: `datadog-agent start`
   Produces: `evaluation/commit-story-v2/run-22/is-score.md`
 
 - [ ] **Baseline comparison** — Compare run-22 vs runs 2–21.
