@@ -1,7 +1,8 @@
 # PRD #117: Live Datadog Trace Capture for Eval Verification
 
-**Status:** Ready
+**Status:** Complete
 **Created:** 2026-06-06
+**Completed:** 2026-06-07
 **GitHub Issue:** #117
 **Depends on:** None
 
