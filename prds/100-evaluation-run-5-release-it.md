@@ -151,6 +151,8 @@ The feature branch for this PRD (`feature/prd-100-evaluation-run-5-release-it`) 
 
 - [ ] **Per-file evaluation**
 
+  **Step 0 — Trace supplement:** Release-it is a non-organic target — the trace artifact is created during IS scoring (see IS scoring milestone below). If IS scoring has not yet run, complete the IS scoring milestone first, then return here to complete Step 0. Once the artifact exists: first read `evaluation/trace-capture-protocol.md` for full guidance. Then read `evaluation/release-it/run-5/trace-artifact.md` and use the `search_datadog_spans` Datadog MCP tool with the `query` field from the artifact as the base query, appending a space and `resource_name:release_it.*` to filter to spans for the file under review. Example: if the artifact's `query` field is `service:release-it @service.instance.id:a1b2c3d4...`, pass `service:release-it @service.instance.id:a1b2c3d4... resource_name:release_it.*` to `search_datadog_spans`. Use live trace data to supplement — not override — static code review for: attribute values at runtime, parent-child span relationships, early exit detection (span with `gen_ai.operation.name` but no `gen_ai.response.id`), and CDQ-001 double-end signal. If the trace has no spans for the file's namespace, note it — do not fail the file solely on trace absence.
+
   Full 32-rule rubric on ALL processed files.
   Produces: `evaluation/release-it/run-5/per-file-evaluation.md`
   Style reference: `Read docs/templates/eval-run-style-reference/per-file-evaluation.md`
@@ -171,7 +173,9 @@ The feature branch for this PRD (`feature/prd-100-evaluation-run-5-release-it`) 
 
   Target-specific values for release-it: entrypoint `./bin/release-it.js --dry-run`; devDep install via `npm`.
 
-  Produces: `evaluation/release-it/run-5/is-score.md`
+  After IS scoring completes (release-it is a non-organic target — traces only exist during IS scoring, not from daily developer use): read `evaluation/trace-capture-protocol.md` for the artifact format and full guidance. Then use the `search_datadog_spans` Datadog MCP tool with query `service:release-it from:now-30m` (IS scoring takes several minutes so a 5-minute window is too tight). Retrieve `service.instance.id` from any span in the result. Write `evaluation/release-it/run-5/trace-artifact.md` — the `query` field should be `service:release-it @service.instance.id:<uuid>`. If no spans appear, wait up to 5 minutes for Datadog ingestion and retry once; if still empty, record trace absence in the artifact and note it in `run-summary.md`.
+
+  Produces: `evaluation/release-it/run-5/is-score.md`, `evaluation/release-it/run-5/trace-artifact.md`
 
 - [ ] **Baseline comparison**
 
