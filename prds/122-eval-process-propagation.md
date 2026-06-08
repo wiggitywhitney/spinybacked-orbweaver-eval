@@ -41,6 +41,7 @@ Five changes — four structural updates to `docs/language-extension-plan.md` an
 | D-4 | Template updates require user-facing checkpoint — not autonomous | An agent running a taze eval could rewrite template guidance based on taze-specific observations that don't generalize |
 | D-5 | Do NOT hardcode commit-story-v2 as "where process improvements get validated first" | True now but not true forever; the structure should work for any target that runs most frequently |
 | D-6 | Structural fix (template changes) must be completed before the one-time backport | So the backport uses the finalized structure, not an intermediate state |
+| D-7 | M3 does NOT push template updates to other currently open eval PRDs mid-run | Multiple eval PRDs can be open simultaneously, but mid-run process improvements rarely affect milestones that are already completed. M2 pickup at the start of the next run is sufficient. Adding a mid-run propagation step to M3 would add friction to every run in exchange for catching edge cases that are almost always moot. |
 
 ---
 
@@ -49,7 +50,7 @@ Five changes — four structural updates to `docs/language-extension-plan.md` an
 - [ ] **Step 0 — Bootstrap reading.** Before proceeding with any other milestone, read these documents in order:
   1. `docs/language-extension-plan.md` — completely, paying attention to the current Type D step sequence and the "draft next PRD" phase
   2. `prds/115-evaluation-run-22.md` — most recent fully-implemented Type D PRD, for milestone style reference
-  3. This PRD's Decision Log (above) — all six decisions must be understood before editing any files
+  3. This PRD's Decision Log (above) — all seven decisions must be understood before editing any files
   **Do not mark complete until all three are read.**
 
 - [ ] **Milestone 1 — Establish template-as-source-of-truth contract in `language-extension-plan.md`.**
@@ -83,7 +84,7 @@ Five changes — four structural updates to `docs/language-extension-plan.md` an
   2. **User-facing checkpoint**: present proposed updates to `language-extension-plan.md` based on those observations. Distinguish between: (a) target-specific findings that don't belong in the template, and (b) generalizable process improvements that should be in the template
   3. After user approves: commit the template updates as a separate commit from the next PRD draft, so the two changes are independently reviewable
 
-  Success criterion: the checkpoint is clearly scoped — the agent knows what qualifies as a template-worthy improvement vs. a target-specific finding.
+  Success criterion: the checkpoint is clearly scoped — the agent knows what qualifies as a template-worthy improvement vs. a target-specific finding. **Do NOT add a step to propagate template updates to other currently open eval PRDs — this is a deliberate design choice (D-7).**
 
 - [ ] **Milestone 4 — Update `.claude/CLAUDE.md` with eval process propagation summary.**
 
