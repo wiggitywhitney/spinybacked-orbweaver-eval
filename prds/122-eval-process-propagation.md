@@ -100,7 +100,7 @@ Five changes — four structural updates to `docs/language-extension-plan.md` an
 
   Success criterion: a fresh AI starting any eval run can find the process propagation summary and the PRD quality gate in CLAUDE.md without reading the global rules.
 
-- [ ] **Milestone 5 — One-time backport: update all currently open eval run PRDs.**
+- [x] **Milestone 5 — One-time backport: update all currently open eval run PRDs.**
 
   After Milestones 1–3 are committed, update each open eval run PRD to include the new cross-run process review milestone from Milestone 2. The open PRDs to update are:
   - `prds/82-taze-evaluation-run-14.md`
