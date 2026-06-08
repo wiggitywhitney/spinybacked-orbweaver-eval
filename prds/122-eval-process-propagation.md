@@ -76,7 +76,7 @@ Five changes — four structural updates to `docs/language-extension-plan.md` an
 
   Success criterion: the step is explicit enough that an agent starting cold can execute it without additional guidance. The user-facing checkpoint is clearly named as such.
 
-- [ ] **Milestone 3 — Add template-update step to the "draft next PRD" phase in `language-extension-plan.md`.**
+- [x] **Milestone 3 — Add template-update step to the "draft next PRD" phase in `language-extension-plan.md`.**
 
   Find the step in the Type D sequence that covers creating the PRD for the next run of this target (find it semantically — its exact name in the file may vary). Expand it to include:
 

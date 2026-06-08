@@ -149,7 +149,18 @@ The most recently completed run for a target is the **style and format reference
 10. Baseline comparison
 10a. **Update root README** — After baseline comparison, update `README.md`: (1) add a row for this run to the run history table with quality score, gates, files, spans, cost, push/PR status, and IS score; (2) update the "next run" sentence (the bold paragraph immediately below the run history table, above the "Full run-by-run analysis" link) to reference the upcoming run number and its primary goals.
 11. Actionable fix output *(user-facing checkpoint 2: interpreted summary + handoff pause)*
-12. Draft next PRD
+12. **Draft next PRD** *(includes template-update checkpoint before drafting)*
+
+   1. **Review current run artifacts for process observations**: Before drafting the next PRD, read `evaluation/<target>/run-N/actionable-fix-output.md` and any `lessons-for-prd*.md` files in `evaluation/<target>/run-N/` (if no `lessons-for-prd*.md` files exist, proceed without them). Focus on observations about the eval process itself — not findings about the target codebase, but: steps that were confusing or under-specified, gaps in instructions that caused extra back-and-forth, new tools or techniques that worked well, steps that took longer than expected because the template lacked guidance. Separate these from target-specific findings (bugs in the target codebase, target-specific IS scoring details, organic/non-organic behavior).
+
+   2. **User-facing checkpoint** *(template updates require user approval)*: Present proposed updates to `docs/language-extension-plan.md` as a structured list with two sections:
+      - **(a) Target-specific findings** that apply only to this target and do not belong in the template (list them to confirm they're out of scope, not to ignore them)
+      - **(b) Generalizable process improvements** that belong in the template: for each, write the exact proposed text to add or change in `docs/language-extension-plan.md` — not a description, but the literal text in a fenced code block. If you have no proposed template changes (because all observations are target-specific or already in the template), say so explicitly.
+      If the user declines all changes, note this and proceed to drafting the next PRD.
+
+   3. **After user approves**: commit the approved template edits to `docs/language-extension-plan.md` as a **separate commit** from the next PRD draft. This makes the two changes independently reviewable. Commit message format: `docs: update language-extension-plan with process improvements from <target> run-N [skip ci]`. Do NOT propagate template updates to other currently open eval PRDs — this is intentional. The next run of each target picks up the updated template at its own Step 0.
+
+   4. **Draft the next PRD**: Use the most recently completed run for this target as the style and format reference. Use this template (`docs/language-extension-plan.md`) for all process steps — do not copy generic steps verbatim into the PRD, reference the template instead. Run `/write-prompt` on the PRD draft before committing.
 13. **Copy artifacts to main** — From main, run `git checkout <eval-branch> -- evaluation/<target>/run-N/` to copy all artifacts. Commit to main with message `eval: save run-N artifacts to main [skip ci]`. Update `evaluation/<target>/run-log.md` with a new row for this run. Push. This step runs before `/prd-done` so the artifacts land on main while the eval branch is still reachable.
 
 Type D PRDs form the recurring evaluation chain for each language/target.
