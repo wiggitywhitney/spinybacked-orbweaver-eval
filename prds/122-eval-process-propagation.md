@@ -47,7 +47,7 @@ Five changes — four structural updates to `docs/language-extension-plan.md` an
 
 ## Milestones
 
-- [ ] **Step 0 — Bootstrap reading.** Before proceeding with any other milestone, read these documents in order:
+- [x] **Step 0 — Bootstrap reading.** Before proceeding with any other milestone, read these documents in order:
   1. `docs/language-extension-plan.md` — completely, paying attention to the current Type D step sequence and the "draft next PRD" phase
   2. `prds/115-evaluation-run-22.md` — most recent fully-implemented Type D PRD, for milestone style reference
   3. This PRD's Decision Log (above) — all seven decisions must be understood before editing any files

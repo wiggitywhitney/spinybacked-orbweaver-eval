@@ -6,6 +6,9 @@ Entry format: `- (YYYY-MM-DD) Description of feature-level change (PRD #X, miles
 
 ## [Unreleased]
 
+### Added
+- (2026-06-08) Started PRD #122 (eval process propagation): read bootstrap documents and established implementation context. PRD addresses the problem of process improvements discovered during eval runs siloing in whichever target runs most frequently — taze and release-it targets drift because there is no mechanism to propagate improvements from commit-story-v2 runs to other targets or to the template.
+
 ### Changed
 - (2026-06-07) Applied cold-AI handoff verification framework to the four files modified by PRD #117: added Step 0 bootstrap reading lists to taze run-14 PRD (`prds/82-taze-evaluation-run-14.md`), release-it run-5 PRD (`prds/100-evaluation-run-5-release-it.md`), commit-story-v2 run-22 PRD (`prds/115-evaluation-run-22.md`), and the Type D template in `docs/language-extension-plan.md`. Each Step 0 contains an ordered reading list — language-extension-plan.md first, then the canonical style PRD (PRD #115 for future runs, PRD #113 for run-22's self-reference), then the prior run's actionable-fix-output.md — so a fresh AI instance can orient itself before starting implementation. Additional fixes: corrected `debug` → `debug-dumps` naming inconsistency in taze run-14's instrument command; expanded release-it run-5's IS scoring milestone from a one-line cross-reference to full inline numbered steps with commands; designated PRD #115 as the canonical Type D style reference in the template (replacing a vague "identical in structure to PRDs #3–13" note); added a `resource_name` prefix derivation rule directing agents to examine actual Datadog span data for the prefix rather than inferring it from filenames.
 
