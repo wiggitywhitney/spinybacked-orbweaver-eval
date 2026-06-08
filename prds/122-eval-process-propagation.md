@@ -63,7 +63,7 @@ Five changes — four structural updates to `docs/language-extension-plan.md` an
 
   Success criterion: a future AI reading only the template and target PRD can determine which document governs each piece of guidance. **Do NOT duplicate generic process steps in a target PRD — reference the template instead.**
 
-- [ ] **Milestone 2 — Add cross-run process review milestone to the Type D sequence in `language-extension-plan.md`.**
+- [x] **Milestone 2 — Add cross-run process review milestone to the Type D sequence in `language-extension-plan.md`.**
 
   Insert a new named step early in the Type D sequence: after Step 0 bootstrap reading, and before the step that covers verifying the target repo and tooling are ready (find this step semantically — its name in the file may vary). The step must direct the implementing agent to:
 
