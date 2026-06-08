@@ -22,7 +22,7 @@ The result: process advances silo in whichever target runs most frequently, and 
 
 ## Solution Overview
 
-Three structural changes to `docs/language-extension-plan.md`, plus a one-time backport:
+Five changes — four structural updates to `docs/language-extension-plan.md` and `.claude/CLAUDE.md`, plus a one-time backport to open eval run PRDs:
 
 1. **Establish template-as-source-of-truth contract** — make explicit that the template owns all generic process steps, and target-specific PRDs own only what differs per target
 2. **Add cross-run process review as a named milestone** in the Type D sequence — the agent reads the template, reads its own target's most recent run, checks for more recent runs from other targets, and surfaces process improvements as a user-facing checkpoint with proposed template edits (user must approve)
@@ -85,7 +85,19 @@ Three structural changes to `docs/language-extension-plan.md`, plus a one-time b
 
   Success criterion: the checkpoint is clearly scoped — the agent knows what qualifies as a template-worthy improvement vs. a target-specific finding.
 
-- [ ] **Milestone 4 — One-time backport: update all currently open eval run PRDs.**
+- [ ] **Milestone 4 — Update `.claude/CLAUDE.md` with eval process propagation summary.**
+
+  Add a new section to `.claude/CLAUDE.md` (after the existing "Adding a New Language Evaluation Chain" section) titled "Eval Process Propagation." The section should capture the two key behaviors so a fresh AI has a quick-reference reminder without reading all of `language-extension-plan.md`:
+
+  1. **At the start of each eval run**: before proceeding with any milestones, check whether a more recently completed run exists for any other eval target (completion signal: `actionable-fix-output.md` present in the run directory). If one exists, read its artifacts and compare its process against the current PRD's step sequence. Propose any process improvements as a user-facing checkpoint before proceeding. Details are in the cross-run process review milestone in `docs/language-extension-plan.md`.
+
+  2. **At the end of each eval run** (when drafting the next PRD): review the current run's `actionable-fix-output.md` and `lessons-for-prd*.md` for generalizable process improvements. Propose updates to `language-extension-plan.md` as a user-facing checkpoint before drafting the next PRD. Commit template updates as a separate commit. Details are in the template-update step in `docs/language-extension-plan.md`.
+
+  Run `/write-prompt` on the updated CLAUDE.md section before committing.
+
+  Success criterion: a fresh AI starting any eval run can find the two-sentence summary in CLAUDE.md and know to look at `language-extension-plan.md` for full details.
+
+- [ ] **Milestone 5 — One-time backport: update all currently open eval run PRDs.**
 
   After Milestones 1–3 are committed, update each open eval run PRD to include the new cross-run process review milestone from Milestone 2. The open PRDs to update are:
   - `prds/82-taze-evaluation-run-14.md`
@@ -99,7 +111,7 @@ Three structural changes to `docs/language-extension-plan.md`, plus a one-time b
 
   Success criterion: every open eval run PRD has the cross-run review milestone and a user-facing checkpoint for template updates.
 
-- [ ] **Milestone 5 — Update `PROGRESS.md` and `docs/ROADMAP.md`.**
+- [ ] **Milestone 6 — Update `PROGRESS.md` and `docs/ROADMAP.md`.**
 
   Add PROGRESS.md entries for each milestone as it completes (not batched at the end). Remove the ROADMAP.md entry for PRD #122 when done.
 

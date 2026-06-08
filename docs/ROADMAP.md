@@ -22,5 +22,5 @@ Execution order within each tier matters. Items are listed in dependency order �
 7. Eval process propagation — template-as-source-of-truth + cross-run review milestone ([PRD #122](https://github.com/wiggitywhitney/spinybacked-orbweaver-eval/issues/122))
 
 ## Long-term (blocked by language providers)
-7. Python eval setup + Run-1: target selection from 3 candidates (PRD #51) — depends on Python provider landing
-8. Go eval setup + Run-1: target selection from 3 candidates (PRD #52) — depends on Go provider landing
+8. Python eval setup + Run-1: target selection from 3 candidates (PRD #51) — depends on Python provider landing
+9. Go eval setup + Run-1: target selection from 3 candidates (PRD #52) — depends on Go provider landing
