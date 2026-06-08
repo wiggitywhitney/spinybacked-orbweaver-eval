@@ -1,7 +1,7 @@
 # PRD #122: Eval Process Propagation
 
 **GitHub Issue**: [#122](https://github.com/wiggitywhitney/spinybacked-orbweaver-eval/issues/122)
-**Status**: In Progress
+**Status**: Complete
 **Priority**: Medium
 **Created**: 2026-06-08
 
@@ -116,7 +116,7 @@ Five changes — four structural updates to `docs/language-extension-plan.md` an
 
 - [x] **Milestone 6 — Update `PROGRESS.md` and `docs/ROADMAP.md`.**
 
-  Add PROGRESS.md entries for each milestone as it completes (not batched at the end). Remove the ROADMAP.md entry for PRD #122 when done.
+  Add PROGRESS.md entries for each milestone as it completes (not batched at the end). Mark the ROADMAP.md entry for PRD #122 as complete when done.
 
 ---
 
