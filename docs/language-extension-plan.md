@@ -135,9 +135,19 @@ The most recently completed run for a target is the **style and format reference
    ```
 4. Findings Discussion *(user-facing checkpoint 1: raw signal before analysis)*
 5. Failure deep-dives
+
+   Scope: (a) files with 0 committed spans ("failed"), (b) partially-committed files, and (c) committed files that required ≥ 3 attempts AND have a quality failure (any COV, CDQ, NDS, or RST rule FAIL). Category (c) is explicitly in scope because retry-correlated behavior can suppress schema extension in a way that looks like an ordinary quality gap — the committed output exists, but the root cause is the retry mechanism rolling back an announced registration, not an independent agent decision. Documenting which category applies is part of the deep-dive output.
+
 6. Per-file evaluation
 
    **Step 0 — Trace supplement:** First read `evaluation/trace-capture-protocol.md` for full guidance. Then read `evaluation/<target>/run-N/trace-artifact.md` and use the `search_datadog_spans` Datadog MCP tool with the `query` field from the artifact as the base query, appending a space and `resource_name:<prefix>.*` to filter to spans for the file under review. Example: if the artifact `query` is `service:taze @service.instance.id:a1b2c3d4...`, pass `service:taze @service.instance.id:a1b2c3d4... resource_name:taze.*` (or `resource_name:commit_story.journal.*` for commit-story-v2 journal-graph.js) to `search_datadog_spans`. The `<prefix>` comes from actual `resource_name` values in Datadog spans — do not infer it from the filename alone. After querying with the base artifact query (no prefix), examine the `resource_name` values returned to find the correct prefix for each file. Use live trace data to supplement — not override — static code review for: attribute values at runtime, parent-child span relationships, early exit detection (span with `gen_ai.operation.name` but no `gen_ai.response.id`), and CDQ-001 double-end signal. If the trace has no spans for the file's namespace, note it — do not fail the file solely on trace absence. **Non-organic targets only:** the trace artifact is created in step 9.5 (after IS scoring). If step 9.5 has not yet run, complete steps 9 and 9.5 first, then return here to complete Step 0 with trace data.
+
+   **Retry-correlated quality failures:** If a file required ≥ 3 attempts AND has a quality failure, include the verbose log section for that file as additional input to the per-file evaluation agent:
+   ```bash
+   grep -A 80 "Processing file.*<filename>" spiny-orb-output.log | head -80
+   ```
+   The per-file agent should check schema-related agent note framing: `"New attribute X: no registered key captures..."` means the agent announced a registration — if the attribute is absent from `agent-extensions.yaml`, the registration step failed mid-attempt (mechanism failure). `"X captures [concept]. No registered attribute covers..."` means the agent documented a gap but chose not to act (agent decision, not mechanism failure). These are different root causes with different fix implications.
+
 7. PR artifact evaluation
 8. Rubric scoring
 9. IS scoring run
