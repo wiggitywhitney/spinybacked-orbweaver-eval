@@ -89,7 +89,41 @@ Note: update `run-N` to the current run number and `commit-story-v2` to the targ
 
 ### Type D: Run-N PRD (recurring, indefinitely)
 Triggered by findings from the previous run. Use `prds/115-evaluation-run-22.md` as the canonical milestone style reference — it is the most recent fully-implemented Type D PRD and shows the complete pattern for trace supplement, per-agent evaluation, IS scoring, and user-facing checkpoints. Non-organic targets (taze, release-it) differ from commit-story-v2 in trace timing and IS scoring setup — note those differences when adapting. Follows the established milestone sequence:
+
+#### Template vs. Target PRD Ownership
+
+This template (`docs/language-extension-plan.md`) is the source of truth for all generic eval process steps. When the same step appears in both the template and a target-specific PRD, **the template version is authoritative**.
+
+**This template owns:**
+- All generic process steps (bootstrap reading, pre-run verification, evaluation run, findings analysis, IS scoring, etc.)
+- The canonical Type D milestone sequence
+- Cross-target process improvements
+
+**Target-specific PRDs own only what differs per target:**
+- The organic vs. non-organic distinction for that target (trace timing, IS scoring setup)
+- IS scoring gotchas specific to that target
+- Prior run actionable findings that drive the current run's goals
+- The target's instrument command (source directory, run number, debug-dumps path)
+
+Target PRDs should reference this template for generic process steps rather than duplicating them. Do not copy process steps verbatim into target PRDs — duplication causes drift as the template evolves.
+
+The most recently completed run for a target is the **style and format reference only** — it shows how to write milestones and structure output files. It is not authoritative for process decisions. When a style reference and this template conflict, this template governs.
+
 0. **Bootstrap reading (for any fresh AI instance starting this PRD)**: Before proceeding with any other milestone, read these documents in order: (a) `docs/language-extension-plan.md` — this document, completely; (b) `prds/115-evaluation-run-22.md` — the canonical Type D milestone style reference (organic target — note differences for non-organic); (c) the prior run's `evaluation/<target>/run-<N-1>/actionable-fix-output.md` — drives the current run's goals. Do not mark complete until all three are read.
+0.5. **Cross-run process review** *(user-facing checkpoint — template changes require user approval)*: Before proceeding with any other steps, determine whether process improvements from other eval targets should be incorporated into this run. Do this in order:
+
+   1. You have already read `docs/language-extension-plan.md` in Step 0. Note the current step sequence and any guidance relevant to this target.
+   2. Find the most recently completed run for this target. A run is considered complete when its directory (`evaluation/<target>/run-N/`) contains `actionable-fix-output.md`. Scan `evaluation/<target>/` for the highest-numbered `run-N/` directory that has this file. Record its number.
+   3. Determine whether a more recently completed run exists from any OTHER eval target. Check all subdirectories of `evaluation/` except the directory for the current target — this covers any target added in the future, not just the ones known at the time this step was written. For each, find the highest-numbered `run-N/` directory that contains `actionable-fix-output.md`. Compare timestamps: use the `captured:` field in `evaluation/<target>/run-N/trace-artifact.md` if it exists, or the file modification time of `actionable-fix-output.md` as a proxy. If the current target has no completed runs (Run-1 scenario), treat it as having timestamp zero so any cross-target run will be considered more recent. If a cross-target run is more recent than the current target's most recent completed run, read its `actionable-fix-output.md` and any `lessons-for-prd*.md` files in that run directory.
+   4. If no cross-target run is more recent than the current target's most recent completed run, note this in the checkpoint report and skip to step 6. In the checkpoint report, omit sections (a) and (c); section (b) should state that no cross-target run was found and no template changes are proposed.
+   5. Compare what was found against the template's milestone structure as instantiated in this PRD (from `docs/language-extension-plan.md`). Specifically identify: (a) steps present in the template sequence but absent from this PRD, (b) steps in this PRD whose wording diverges materially from the template version, (c) process observations in the cross-target artifacts that are not captured anywhere in the template. These become the inputs to the user-facing checkpoint in step 6.
+   6. **User-facing checkpoint**: Report findings to the user as a structured list with three sections:
+      - **(a) Process improvements already in the template**: steps or guidance present in `docs/language-extension-plan.md` that address findings from the cross-target run.
+      - **(b) Process improvements missing from the template** (with proposed additions): for each gap, write the exact proposed text to add to `docs/language-extension-plan.md` — not a description, but the literal text. Place each proposed addition in a fenced code block so the user can review and approve it.
+      - **(c) Target-specific findings** that do not generalize and should not go in the template.
+      If no cross-target run was found (step 4), say so explicitly and note that no template changes are proposed.
+   7. **After user approves**: make the approved edits to `docs/language-extension-plan.md`. If any remaining milestones in the current PRD are affected by the approved changes, update them. Do NOT make any edits before receiving explicit approval. If the user declines all changes, mark this step complete and proceed.
+
 1. Collect skeleton documents
 2. Pre-run verification (verify prior findings fixed, check prerequisites). **Organic targets only (commit-story-v2):** As part of pre-run verification, also capture the trace artifact for this run. Use the `search_datadog_spans` Datadog MCP tool with query `service:commit-story` (last 7 days — note: the Datadog service name is `commit-story`, not `commit-story-v2`; the service name comes from the `service.name` resource attribute set in the instrumentation bootstrap, not the eval target slug). Identify the most recent complete run, record `service.instance.id`, and write `evaluation/<target>/run-N/trace-artifact.md`. See `evaluation/trace-capture-protocol.md` for the full organic capture procedure (including disambiguation when multiple runs appear and the fallback when no complete run exists). This step is skipped for non-organic targets — they capture the trace artifact in step 9.5 during IS scoring.
 3. Evaluation run (Whitney runs `spiny-orb instrument` in her terminal — see exact command in Type C section above). **After saving artifacts and committing, push the eval branch to origin immediately.** The branch holds the only copy of run artifacts until PRD #57's backfill lands — do not leave it local-only.
@@ -115,7 +149,18 @@ Triggered by findings from the previous run. Use `prds/115-evaluation-run-22.md`
 10. Baseline comparison
 10a. **Update root README** — After baseline comparison, update `README.md`: (1) add a row for this run to the run history table with quality score, gates, files, spans, cost, push/PR status, and IS score; (2) update the "next run" sentence (the bold paragraph immediately below the run history table, above the "Full run-by-run analysis" link) to reference the upcoming run number and its primary goals.
 11. Actionable fix output *(user-facing checkpoint 2: interpreted summary + handoff pause)*
-12. Draft next PRD
+12. **Draft next PRD** *(includes template-update checkpoint before drafting)*
+
+   1. **Review current run artifacts for process observations**: Before drafting the next PRD, read `evaluation/<target>/run-N/actionable-fix-output.md` and any `lessons-for-prd*.md` files in `evaluation/<target>/run-N/` (if no `lessons-for-prd*.md` files exist, proceed without them). Focus on observations about the eval process itself — not findings about the target codebase, but: steps that were confusing or under-specified, gaps in instructions that caused extra back-and-forth, new tools or techniques that worked well, steps that took longer than expected because the template lacked guidance. Separate these from target-specific findings (bugs in the target codebase, target-specific IS scoring details, organic/non-organic behavior).
+
+   2. **User-facing checkpoint** *(template updates require user approval)*: Present proposed updates to `docs/language-extension-plan.md` as a structured list with two sections:
+      - **(a) Target-specific findings** that apply only to this target and do not belong in the template (list them to confirm they're out of scope, not to ignore them)
+      - **(b) Generalizable process improvements** that belong in the template: for each, write the exact proposed text to add or change in `docs/language-extension-plan.md` — not a description, but the literal text in a fenced code block. If you have no proposed template changes (because all observations are target-specific or already in the template), say so explicitly.
+      If the user declines all changes, note this and proceed to drafting the next PRD.
+
+   3. **After user approves**: commit the approved template edits to `docs/language-extension-plan.md` as a **separate commit** from the next PRD draft. This makes the two changes independently reviewable. Commit message format: `docs: update language-extension-plan with process improvements from <target> run-N [skip ci]`. Do NOT propagate template updates to other currently open eval PRDs — this is intentional. The next run of each target picks up the updated template at its own Step 0.
+
+   4. **Draft the next PRD**: Use the most recently completed run for this target as the style and format reference. Use this template (`docs/language-extension-plan.md`) for all process steps — do not copy generic steps verbatim into the PRD, reference the template instead. Run `/write-prompt` on the PRD draft before committing.
 13. **Copy artifacts to main** — From main, run `git checkout <eval-branch> -- evaluation/<target>/run-N/` to copy all artifacts. Commit to main with message `eval: save run-N artifacts to main [skip ci]`. Update `evaluation/<target>/run-log.md` with a new row for this run. Push. This step runs before `/prd-done` so the artifacts land on main while the eval branch is still reachable.
 
 Type D PRDs form the recurring evaluation chain for each language/target.

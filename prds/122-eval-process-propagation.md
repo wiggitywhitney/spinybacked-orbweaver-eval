@@ -1,7 +1,7 @@
 # PRD #122: Eval Process Propagation
 
 **GitHub Issue**: [#122](https://github.com/wiggitywhitney/spinybacked-orbweaver-eval/issues/122)
-**Status**: In Progress
+**Status**: Complete
 **Priority**: Medium
 **Created**: 2026-06-08
 
@@ -47,13 +47,13 @@ Five changes — four structural updates to `docs/language-extension-plan.md` an
 
 ## Milestones
 
-- [ ] **Step 0 — Bootstrap reading.** Before proceeding with any other milestone, read these documents in order:
+- [x] **Step 0 — Bootstrap reading.** Before proceeding with any other milestone, read these documents in order:
   1. `docs/language-extension-plan.md` — completely, paying attention to the current Type D step sequence and the "draft next PRD" phase
   2. `prds/115-evaluation-run-22.md` — most recent fully-implemented Type D PRD, for milestone style reference
   3. This PRD's Decision Log (above) — all seven decisions must be understood before editing any files
   **Do not mark complete until all three are read.**
 
-- [ ] **Milestone 1 — Establish template-as-source-of-truth contract in `language-extension-plan.md`.**
+- [x] **Milestone 1 — Establish template-as-source-of-truth contract in `language-extension-plan.md`.**
 
   Read `docs/language-extension-plan.md` completely first. Locate the Type D section. Identify the first substantive subsection or step under the Type D heading — the new content goes immediately before it, as its own subsection. Match the heading level and formatting style of adjacent sections in the file. The new section should state:
   - The template owns all generic process steps — if a step appears in both the template and a target PRD, the template version is authoritative
@@ -63,7 +63,7 @@ Five changes — four structural updates to `docs/language-extension-plan.md` an
 
   Success criterion: a future AI reading only the template and target PRD can determine which document governs each piece of guidance. **Do NOT duplicate generic process steps in a target PRD — reference the template instead.**
 
-- [ ] **Milestone 2 — Add cross-run process review milestone to the Type D sequence in `language-extension-plan.md`.**
+- [x] **Milestone 2 — Add cross-run process review milestone to the Type D sequence in `language-extension-plan.md`.**
 
   Insert a new named step early in the Type D sequence: after Step 0 bootstrap reading, and before the step that covers verifying the target repo and tooling are ready (find this step semantically — its name in the file may vary). The step must direct the implementing agent to:
 
@@ -76,7 +76,7 @@ Five changes — four structural updates to `docs/language-extension-plan.md` an
 
   Success criterion: the step is explicit enough that an agent starting cold can execute it without additional guidance. The user-facing checkpoint is clearly named as such.
 
-- [ ] **Milestone 3 — Add template-update step to the "draft next PRD" phase in `language-extension-plan.md`.**
+- [x] **Milestone 3 — Add template-update step to the "draft next PRD" phase in `language-extension-plan.md`.**
 
   Find the step in the Type D sequence that covers creating the PRD for the next run of this target (find it semantically — its exact name in the file may vary). Expand it to include:
 
@@ -86,7 +86,7 @@ Five changes — four structural updates to `docs/language-extension-plan.md` an
 
   Success criterion: the checkpoint is clearly scoped — the agent knows what qualifies as a template-worthy improvement vs. a target-specific finding. **Do NOT add a step to propagate template updates to other currently open eval PRDs — this is a deliberate design choice (D-7).**
 
-- [ ] **Milestone 4 — Update `.claude/CLAUDE.md` with eval process propagation summary.**
+- [x] **Milestone 4 — Update `.claude/CLAUDE.md` with eval process propagation summary.**
 
   Add a new section to `.claude/CLAUDE.md` (after the existing "Adding a New Language Evaluation Chain" section) titled "Eval Process Propagation." The section should capture the two key behaviors so a fresh AI has a quick-reference reminder without reading all of `language-extension-plan.md`:
 
@@ -100,7 +100,7 @@ Five changes — four structural updates to `docs/language-extension-plan.md` an
 
   Success criterion: a fresh AI starting any eval run can find the process propagation summary and the PRD quality gate in CLAUDE.md without reading the global rules.
 
-- [ ] **Milestone 5 — One-time backport: update all currently open eval run PRDs.**
+- [x] **Milestone 5 — One-time backport: update all currently open eval run PRDs.**
 
   After Milestones 1–3 are committed, update each open eval run PRD to include the new cross-run process review milestone from Milestone 2. The open PRDs to update are:
   - `prds/82-taze-evaluation-run-14.md`
@@ -114,9 +114,9 @@ Five changes — four structural updates to `docs/language-extension-plan.md` an
 
   Success criterion: every open eval run PRD has the cross-run review milestone and a user-facing checkpoint for template updates.
 
-- [ ] **Milestone 6 — Update `PROGRESS.md` and `docs/ROADMAP.md`.**
+- [x] **Milestone 6 — Update `PROGRESS.md` and `docs/ROADMAP.md`.**
 
-  Add PROGRESS.md entries for each milestone as it completes (not batched at the end). Remove the ROADMAP.md entry for PRD #122 when done.
+  Add PROGRESS.md entries for each milestone as it completes (not batched at the end). Mark the ROADMAP.md entry for PRD #122 as complete when done.
 
 ---
 
