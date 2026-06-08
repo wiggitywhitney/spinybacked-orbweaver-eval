@@ -114,7 +114,7 @@ Five changes — four structural updates to `docs/language-extension-plan.md` an
 
   Success criterion: every open eval run PRD has the cross-run review milestone and a user-facing checkpoint for template updates.
 
-- [ ] **Milestone 6 — Update `PROGRESS.md` and `docs/ROADMAP.md`.**
+- [x] **Milestone 6 — Update `PROGRESS.md` and `docs/ROADMAP.md`.**
 
   Add PROGRESS.md entries for each milestone as it completes (not batched at the end). Remove the ROADMAP.md entry for PRD #122 when done.
 
