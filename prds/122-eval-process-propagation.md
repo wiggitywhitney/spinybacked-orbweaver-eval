@@ -86,7 +86,7 @@ Five changes — four structural updates to `docs/language-extension-plan.md` an
 
   Success criterion: the checkpoint is clearly scoped — the agent knows what qualifies as a template-worthy improvement vs. a target-specific finding. **Do NOT add a step to propagate template updates to other currently open eval PRDs — this is a deliberate design choice (D-7).**
 
-- [ ] **Milestone 4 — Update `.claude/CLAUDE.md` with eval process propagation summary.**
+- [x] **Milestone 4 — Update `.claude/CLAUDE.md` with eval process propagation summary.**
 
   Add a new section to `.claude/CLAUDE.md` (after the existing "Adding a New Language Evaluation Chain" section) titled "Eval Process Propagation." The section should capture the two key behaviors so a fresh AI has a quick-reference reminder without reading all of `language-extension-plan.md`:
 
