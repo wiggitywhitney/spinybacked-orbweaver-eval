@@ -7,6 +7,7 @@ Entry format: `- (YYYY-MM-DD) Description of feature-level change (PRD #X, miles
 ## [Unreleased]
 
 ### Added
+- (2026-06-08) Added template-vs-target-PRD ownership contract to `docs/language-extension-plan.md` (PRD #122, M1): inserted a "Template vs. Target PRD Ownership" subsection into the Type D section, before the milestone sequence. The section declares that the template owns all generic process steps and is authoritative when conflicts arise, while target-specific PRDs own only the organic/non-organic distinction, IS scoring gotchas, prior run findings, and the instrument command. Also clarifies that the most recent completed run is a style reference only, not a process authority.
 - (2026-06-08) Started PRD #122 (eval process propagation): read bootstrap documents and established implementation context. PRD addresses the problem of process improvements discovered during eval runs siloing in whichever target runs most frequently — taze and release-it targets drift because there is no mechanism to propagate improvements from commit-story-v2 runs to other targets or to the template.
 
 ### Changed

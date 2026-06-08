@@ -53,7 +53,7 @@ Five changes — four structural updates to `docs/language-extension-plan.md` an
   3. This PRD's Decision Log (above) — all seven decisions must be understood before editing any files
   **Do not mark complete until all three are read.**
 
-- [ ] **Milestone 1 — Establish template-as-source-of-truth contract in `language-extension-plan.md`.**
+- [x] **Milestone 1 — Establish template-as-source-of-truth contract in `language-extension-plan.md`.**
 
   Read `docs/language-extension-plan.md` completely first. Locate the Type D section. Identify the first substantive subsection or step under the Type D heading — the new content goes immediately before it, as its own subsection. Match the heading level and formatting style of adjacent sections in the file. The new section should state:
   - The template owns all generic process steps — if a step appears in both the template and a target PRD, the template version is authoritative

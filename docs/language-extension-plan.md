@@ -89,6 +89,26 @@ Note: update `run-N` to the current run number and `commit-story-v2` to the targ
 
 ### Type D: Run-N PRD (recurring, indefinitely)
 Triggered by findings from the previous run. Use `prds/115-evaluation-run-22.md` as the canonical milestone style reference — it is the most recent fully-implemented Type D PRD and shows the complete pattern for trace supplement, per-agent evaluation, IS scoring, and user-facing checkpoints. Non-organic targets (taze, release-it) differ from commit-story-v2 in trace timing and IS scoring setup — note those differences when adapting. Follows the established milestone sequence:
+
+#### Template vs. Target PRD Ownership
+
+This template (`docs/language-extension-plan.md`) is the source of truth for all generic eval process steps. When the same step appears in both the template and a target-specific PRD, **the template version is authoritative**.
+
+**This template owns:**
+- All generic process steps (bootstrap reading, pre-run verification, evaluation run, findings analysis, IS scoring, etc.)
+- The canonical Type D milestone sequence
+- Cross-target process improvements
+
+**Target-specific PRDs own only what differs per target:**
+- The organic vs. non-organic distinction for that target (trace timing, IS scoring setup)
+- IS scoring gotchas specific to that target
+- Prior run actionable findings that drive the current run's goals
+- The target's instrument command (source directory, run number, debug-dumps path)
+
+Target PRDs should reference this template for generic process steps rather than duplicating them. Do not copy process steps verbatim into target PRDs — duplication causes drift as the template evolves.
+
+The most recently completed run for a target is the **style and format reference only** — it shows how to write milestones and structure output files. It is not authoritative for process decisions. When a style reference and this template conflict, this template governs.
+
 0. **Bootstrap reading (for any fresh AI instance starting this PRD)**: Before proceeding with any other milestone, read these documents in order: (a) `docs/language-extension-plan.md` — this document, completely; (b) `prds/115-evaluation-run-22.md` — the canonical Type D milestone style reference (organic target — note differences for non-organic); (c) the prior run's `evaluation/<target>/run-<N-1>/actionable-fix-output.md` — drives the current run's goals. Do not mark complete until all three are read.
 1. Collect skeleton documents
 2. Pre-run verification (verify prior findings fixed, check prerequisites). **Organic targets only (commit-story-v2):** As part of pre-run verification, also capture the trace artifact for this run. Use the `search_datadog_spans` Datadog MCP tool with query `service:commit-story` (last 7 days — note: the Datadog service name is `commit-story`, not `commit-story-v2`; the service name comes from the `service.name` resource attribute set in the instrumentation bootstrap, not the eval target slug). Identify the most recent complete run, record `service.instance.id`, and write `evaluation/<target>/run-N/trace-artifact.md`. See `evaluation/trace-capture-protocol.md` for the full organic capture procedure (including disambiguation when multiple runs appear and the fallback when no complete run exists). This step is skipped for non-organic targets — they capture the trace artifact in step 9.5 during IS scoring.
