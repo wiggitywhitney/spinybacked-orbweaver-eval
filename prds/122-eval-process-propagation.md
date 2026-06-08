@@ -93,9 +93,11 @@ Five changes — four structural updates to `docs/language-extension-plan.md` an
 
   2. **At the end of each eval run** (when drafting the next PRD): review the current run's `actionable-fix-output.md` and `lessons-for-prd*.md` for generalizable process improvements. Propose updates to `language-extension-plan.md` as a user-facing checkpoint before drafting the next PRD. Commit template updates as a separate commit. Details are in the template-update step in `docs/language-extension-plan.md`.
 
+  Also add a second rule to the same section: **PRD quality gate.** Any time a PRD file is created or modified in this project, two steps are required before the PR can merge: (1) run `/write-prompt` on the changed PRD file, and (2) ensure the PR receives a CodeRabbit review. Note: these requirements already exist globally (global CLAUDE.md and git-workflow rules) — this entry makes them explicitly visible in the project context so no agent skips them assuming they are optional.
+
   Run `/write-prompt` on the updated CLAUDE.md section before committing.
 
-  Success criterion: a fresh AI starting any eval run can find the two-sentence summary in CLAUDE.md and know to look at `language-extension-plan.md` for full details.
+  Success criterion: a fresh AI starting any eval run can find the process propagation summary and the PRD quality gate in CLAUDE.md without reading the global rules.
 
 - [ ] **Milestone 5 — One-time backport: update all currently open eval run PRDs.**
 
