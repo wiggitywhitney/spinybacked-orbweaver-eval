@@ -19,6 +19,11 @@ Run-23 observations to carry forward into the next evaluation run PRD.
 - **Datadog spans**: 381 spans in last 7 days, all from 2026-06-04 (run-21 execution day). No organic traffic since then (expected — app runs on demand). Most recent complete journal generation run: service.instance.id 672acab3-4f86-478e-80e1-534c05e474b1, revision 9dda3af (run-21 branch HEAD). ✅
 - **Auth dry-run**: PASSED using commit-story-v2/.vals.yaml GITHUB_TOKEN.
 
+## Run-23 Execution Notes
+
+- `spiny-orb-output.log` is gitignored by `*.log` in the root `.gitignore`. Requires `git add -f evaluation/commit-story-v2/run-23/spiny-orb-output.log` to stage. This applies to all future run log files.
+- summary-detector.js: new failure class — SCH-002, agent declared `commit_story.journal.base_path` as a new extension but the validator identified it as a semantic duplicate of the existing `commit_story.journal.file_path`. See failure-deep-dives.md for root cause analysis.
+
 ## Rubric Gaps or Clarifications Needed
 
 *(populate during per-file evaluation)*
