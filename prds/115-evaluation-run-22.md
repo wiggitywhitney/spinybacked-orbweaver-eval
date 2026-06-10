@@ -150,8 +150,8 @@ The **evaluation execution branch** created by `/prd-start` from main **never me
 
 - [ ] **Post-run Datadog verification** — After the Findings Discussion checkpoint, confirm the new instrument branch spans appear in Datadog:
   1. Use the `search_datadog_spans` Datadog MCP tool with query `service:commit-story` filtered to spans newer than the eval run's start timestamp. Check `vcs.ref.head.revision` on `commit_story.journal.save_journal_entry` spans to confirm the new instrument branch SHA appears.
-  2. If no new journal entries have been generated since the eval run: note this in `run-summary.md` and defer confirmation to the next organic run — do not block forward progress.
-  3. Record the `service.instance.id` from the new instrument branch in `trace-artifact.md` as the post-run trace reference.
+  2. If no spans from the instrument branch appear yet: note this in `run-summary.md` and defer — do not block forward progress. **The trace run does not need to happen during the eval itself** — any invocation of the instrumented code on the correct branch after the eval completes is sufficient (e.g., a commit to the instrument branch triggers the post-commit hook and produces spans).
+  3. When confirmed, record the corresponding `service.instance.id` in `trace-artifact.md` as the post-run trace reference (update from the pre-run capture if the instance differs).
 
 - [ ] **Failure deep-dives** — For each failed file AND run-level failure. Includes any partial files.
   Produces: `evaluation/commit-story-v2/run-22/failure-deep-dives.md`
