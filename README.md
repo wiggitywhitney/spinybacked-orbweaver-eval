@@ -97,10 +97,13 @@ spinybacked-orbweaver-eval/
 | 16 | 22/25 (88%) | 5/5 | 10+3p | ~24 | $12.29 | YES | 80/100 |
 | 17 | 22/25 (88%) | 4/5 | 10+1p | ~28 | $10.43 | YES | 90/100 |
 | 18 | 24/25 (96%) | 5/5 | 11 | 36 | $9.16 | YES | 90/100 |
+| 19 | 21/25 (84%) | 5/5 | 10+3p | 30 | $8.83 | YES (#71, AUTO) | 80/100 |
+| 20 | 24/25 (96%) | 5/5 | 12+1f | 42 | $9.08 | YES (#73, AUTO) | 80/100 |
+| 21 | 23/25 (92%) | 5/5 | 12+2f | 42 | ~$8.10 | YES (#74, AUTO) | 90/100 |
 
-Files column notation: plain count = committed files; `+Np` = N partial files (instrumentation started, not fully committed); `+Nf` = N files rolled back after a checkpoint test failure. Cost column: `~` prefix indicates an estimated/derived cost (early runs predating direct cost reporting in the tool); unprefixed values are directly reported by spiny-orb.
+Files column notation: plain count = committed files; `+Np` = N partial files (instrumentation started, not fully committed); `+Nf` = N files that failed all attempts and were not committed. Cost column: `~` prefix indicates an estimated/derived cost; unprefixed values are directly reported by spiny-orb.
 
-**Run-19 is next** — verifying NDS-003 reconciler gap fix (PRD #845, content-aware diff) for context-capture-tool.js, reflection-tool.js, index.js, and summary-graph.js; monitoring SCH-002 recurrence on journal-manager.js `quotes_count` attribute.
+**Run-23 is next** — verifying RUN21-1 (mcp/server.js NDS-003 blank-line-near-JSDoc fix, spiny-orb issue #917) and RUN21-2 (index.js import expansion NDS-003 fix, spiny-orb issue #916); monitoring CDQ-001 double-end pattern and COV-005 skip-path gap from run-21. Run-22 was planned (PRD #115) but never executed.
 
 Full run-by-run analysis: [`evaluation/commit-story-v2/`](evaluation/commit-story-v2/)
 

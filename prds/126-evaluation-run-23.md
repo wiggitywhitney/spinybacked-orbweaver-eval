@@ -111,7 +111,7 @@ The **evaluation execution branch** created by `/prd-start` from main **never me
 
 - [x] **Collect skeleton documents** — Create `evaluation/commit-story-v2/run-23/` directory with `lessons-for-prd24.md` skeleton. Must run before pre-run verification begins.
 
-- [ ] **Pre-run verification** — Verify spiny-orb fixes and validate run prerequisites:
+- [x] **Pre-run verification** — Verify spiny-orb fixes and validate run prerequisites:
   1. **Handoff triage review**: Read the spiny-orb team's triage of `evaluation/commit-story-v2/run-21/actionable-fix-output.md`. Note: run-22 was never executed — the open items below are from run-21. Check which findings were filed and their current status.
   2. **RUN21-1 fix** (P1 — critical): Verify whether spiny-orb issue #917 (NDS-003 blank-line-near-JSDoc variant) has been resolved. Check `nds003-ast-stripper.ts` in the spinybacked-orbweaver repo for a fix that handles the case where a blank line is inserted adjacent to the pre-import JSDoc block (distinct from the run-20 shebang fix at lines 515–541). Check whether a regression fixture for the mcp/server.js blank-line pattern exists and passes. If not fixed, still proceed — run-23 will confirm the gap persists.
   3. **RUN21-2 fix** (P1 — critical): Verify whether spiny-orb issue #916 (import expansion / context pollution at large schema extension volume) has been addressed. Look for prompt guidance updates that explicitly prohibit reformatting single-line `import {` blocks into multi-line form. If no fix, still proceed — run-23 will confirm the gap persists.
