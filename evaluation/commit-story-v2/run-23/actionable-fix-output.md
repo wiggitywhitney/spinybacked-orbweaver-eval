@@ -117,17 +117,19 @@ The identical attributes in `auto-summarize.js` are correctly wrapped: `String(r
 
 ---
 
-### RUN23-4 (Watch): IS SPA-002 Recurrence — New Orphan parentSpanId
+### RUN23-4 (Watch): IS SPA-002 Recurrence — `commit_story.index.main` Not Exported
 
-**What happened**: IS scoring produced SPA-002: span `b5a83f5e` has `parentSpanId: 3a70d1c5`, but no span with ID `3a70d1c5` exists in the trace. This is an orphan span — the parent was never captured in the telemetry.
+**What happened**: IS scoring produced SPA-002: span `b5a83f5e` (`commit_story.context.gather_context_for_commit`) has `parentSpanId: 3a70d1c5`, but no span with ID `3a70d1c5` exists in eval-traces.json. Investigation via Datadog (trace `e41bf7db`, service.instance.id `2140b04c`) confirmed the missing span: `3a70d1c5...` = `commit_story.index.main` from `index.js` (decimal spanId `4211096296496310959`, hex `3a70d1c51330a2af`). The span is absent from both eval-traces.json AND Datadog APM — not a sampling artifact.
 
-**History**: SPA-002 failed in runs 19 and 20 (different orphan span ID each time), then passed cleanly in run-21. Run-23 introduces a new orphan span ID. The run-21 pass was not a structural fix — it was an incidental outcome of that run's specific span composition.
+**Root cause**: `index.js` creates `commit_story.index.main` as the outermost span. The span uses `startActiveSpan`, so context propagates correctly to 5 direct children (all reference `3a70d1c5...` as parent). But `index.js` calls `process.exit()` which terminates Node.js before the OTel batch exporter can flush the final batch. Child spans closed earlier and were exported in prior batches. `commit_story.index.main` — the last span to close — was queued but never sent. Per-file evaluation confirmed `process.exit()` is intentional in `index.js` (bypasses Promise resolution).
 
-**Context**: Run-23 added 3 new committed files compared to run-21 (mcp/server.js, index.js, commands/summarize.js) and one new partial file (summary-detector.js, 4/5 functions). One of these new additions likely introduces the broken parent chain. The orphan span `b5a83f5e` would need to be traced to its source file to identify the root cause.
+**History**: SPA-002 failed in runs 19 and 20 (different orphan span IDs), then passed cleanly in run-21. In run-21, `index.js` was not committed — no outermost wrapper span existed. Run-23 introduced `index.js` which adds `commit_story.index.main` as the new root. The run-21 clean pass was structural (no index.main), not incidental.
 
-**Datadog query for investigation**: `service:commit-story @service.instance.id:2140b04c-6055-4731-8b53-2d4225017478 @otel.trace_id:e41bf7dbf6a3a6424d36cabf57eee3d8` — look for span with ID `b5a83f5e` to identify the resource name and file.
+**Orphan span detail**: `b5a83f5e` is the first 8 hex chars (upper 32 bits) of the orphan's span ID. Decimal: `13089781990056542677` → hex `b5a83f5e...` = `commit_story.context.gather_context_for_commit`. All 5 direct children of index.main are technically orphans; the IS scorer reports only the first one found.
 
-**Impact**: SPA-002 failure drops IS from 90/100 (run-21) to 80/100 (run-23). Combined with SPA-001's worsening (25 spans vs 10-span limit), the IS regression is significant.
+**Fix path**: `examples/instrumentation.js` needs to intercept `process.exit()` and call `await provider.forceFlush()` before allowing process termination. The standard pattern: replace `process.exit(code)` with a graceful shutdown hook. Alternatively, `index.js` can end `commit_story.index.main` BEFORE calling `process.exit()`, ensuring it closes early enough to be included in an earlier export batch.
+
+**Impact**: SPA-002 failure drops IS from 90/100 (run-21) to 80/100 (run-23). Combined with SPA-001's worsening (25 spans vs 10-span limit), the IS regression is significant. The fix is in `examples/instrumentation.js` — a single graceful shutdown change would resolve SPA-002 for all future runs.
 
 ---
 
