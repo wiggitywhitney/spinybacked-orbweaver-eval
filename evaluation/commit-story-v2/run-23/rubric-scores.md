@@ -107,7 +107,7 @@
 | Cost | **$7.84** | $8.10 | $9.08 | $8.83 | $9.16 |
 | Q×F | **12.48** | 11.0 | 11.5 | 8.4 | 10.6 |
 | Push/PR | **AUTO ✅ (#75)** | AUTO ✅ (#74) | AUTO ✅ (#73) | AUTO ✅ (#71) | YES (#70, manual) |
-| IS | **TBD** | 90/100 | 80/100 | 80/100 | 90/100 |
+| IS | **80/100** | 90/100 | 80/100 | 80/100 | 90/100 |
 
 **Q×F = 12.48** (24/25 × 13). Improvement of +1.48 from run-21 (11.0) and recovery to near-run-20 levels (11.5). PRD Q×F target of ≥ 12.5 not met — short by 0.02. Root cause: summary-detector.js counted as partial (1 function missing) rather than a full committed file. If summary-detector.js had committed all 5 functions, Q×F = 24/25 × 14 = 13.44, comfortably above target. The SCH-003 regression (2 files × 1 point = -1 quality point) also contributed — without it, Q×F = 25/25 × 13 = 13.0.
 

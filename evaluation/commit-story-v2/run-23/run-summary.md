@@ -114,6 +114,6 @@ Files requiring ≥ 2 attempts: git-collector (3), journal-graph (3), summary-gr
 | Files partial | 1 (new) | 0 |
 | Total spans | 45 | 42 |
 | Cost | ~$5.60 | ~$8.10 |
-| Q×F (TBD) | TBD (pending rubric) | 11.0 |
+| Q×F | 12.48 | 11.0 |
 
-Quality score and Q×F pending per-file evaluation.
+Quality score: 24/25 (96%). Q×F = 24/25 × 13 committed files = 12.48.

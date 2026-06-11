@@ -186,7 +186,7 @@ The **evaluation execution branch** created by `/prd-start` from main **never me
   2. **COV-001 failed-file precedent**: Files that failed to commit but whose agent output would have passed COV-001 ("WOULD PASS" in per-file evaluation) are scored as COV-001 PASS, consistent with run-20/run-21 treatment of mcp/server.js and index.js. Apply to any failed files in run-23.
   **Rule set**: CDQ dimension is 7/7 max (CDQ-001, CDQ-002, CDQ-003, CDQ-005, CDQ-006, CDQ-007, CDQ-008). NDS-005 is now NDS-007 in per-file evaluation tables — treat as the same rule for rubric scoring.
 
-- [ ] **IS scoring run** — Follow `docs/language-extension-plan.md` step 9. Full protocol in `evaluation/is/README.md` (commit-story-v2 section).
+- [x] **IS scoring run** — Follow `docs/language-extension-plan.md` step 9. Full protocol in `evaluation/is/README.md` (commit-story-v2 section).
 
   1. **Claude runs**: `datadog-agent stop`
   2. **Claude starts** the OTel Collector in the background:
