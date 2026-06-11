@@ -153,14 +153,14 @@ The identical attributes in `auto-summarize.js` are correctly wrapped: `String(r
 
 ## §5. Carry-Forward Tracker (Open Items Entering Run-24)
 
-| ID | Title | Priority | Status | Runs Open |
-|----|-------|----------|--------|-----------|
-| RUN23-1 | SCH-003: git-collector.js `diff_size` integer-as-string | P2 | Open — new in run-23 | 1 |
-| RUN23-2 | SCH-003: commands/summarize.js `*_summaries_generated` integer-as-string | P2 | Open — new in run-23 | 1 |
-| RUN23-3 | summary-detector.js SCH-002 partial — near-synonym attribute key | P2 | Open — regression from run-21's clean 5-span commit | 1 |
-| RUN23-4 | IS SPA-002 recurrence — orphan parentSpanId b5a83f5e | Watch | Open — new instance (different from runs 19/20); run-21 clean pass was incidental | 1 |
-| IS SPA-001 | INTERNAL span count structural | Structural | 25 INTERNAL spans vs 10-span calibration limit; worsening as committed file count grows | 9 |
-| RUN21-6 | Agent notes vs committed code divergence | Watch | Not investigated in run-23 | 2 |
+| ID | Title | Priority | Status | Runs Open | spiny-orb Issue |
+|----|-------|----------|--------|-----------|-----------------|
+| RUN23-1 | SCH-003: git-collector.js `diff_size` integer-as-string | P2 | Open — new in run-23 | 1 | #928 |
+| RUN23-2 | SCH-003: commands/summarize.js `*_summaries_generated` integer-as-string | P2 | Open — new in run-23 | 1 | #928 |
+| RUN23-3 | summary-detector.js SCH-002 partial — near-synonym attribute key | P2 | Open — regression from run-21's clean 5-span commit | 1 | #925 |
+| RUN23-4 | IS SPA-002 recurrence — orphan parentSpanId b5a83f5e | Watch | Root cause confirmed: `process.exit()` drops outermost span before OTel batch flush. Fix: `provider.forceFlush()` in bootstrap before `process.exit()`. | 1 | #926 |
+| IS SPA-001 | INTERNAL span count structural | Structural | 25 INTERNAL spans vs 10-span calibration limit; worsening as committed file count grows. Research spike filed. | 9 | #929 |
+| RUN21-6 | Agent notes vs committed code divergence | Watch | Not investigated in run-23; confirmed trust problem (not just observability). Watch for second occurrence. | 2 | #927 |
 
 **Closed this run**: RUN21-1 (mcp/server.js NDS-003), RUN21-2 (index.js import expansion), RUN21-3 (CDQ-001 double-end), RUN21-4 (COV-005 skip-path), RUN21-5 (index.js subcommand attr), RUN20-5 (mcp/server.js SCH-001).
 
