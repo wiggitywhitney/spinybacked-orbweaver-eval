@@ -3,7 +3,8 @@
 **Date**: 2026-06-10
 **Duration**: ~1h 20m (exact end time not in log; started 11:09:53Z)
 **Branch**: `spiny-orb/instrument-1781089793056`
-**PR**: https://github.com/wiggitywhitney/commit-story-v2/pull/74 (auto-created ✅)
+**PR**: https://github.com/wiggitywhitney/commit-story-v2/pull/75 (auto-created ✅)
+<!-- Note: run-summary originally recorded #74 (a Jun 4 run); corrected to #75 per pr-evaluation.md. D-4 pattern. -->
 **spiny-orb**: 1.0.0 (main, post-b579e5a — fixes ee856c3, 412da5b, aad9835, b579e5a present; see pre-run notes)
 
 ---
