@@ -178,7 +178,7 @@ The **evaluation execution branch** created by `/prd-start` from main **never me
   Style reference: `Read docs/templates/eval-run-style-reference/pr-evaluation.md`
   PR: *(fill in after run-23 executes)*
 
-- [ ] **Rubric scoring** — Synthesize dimension-level scores.
+- [x] **Rubric scoring** — Synthesize dimension-level scores.
   Produces: `evaluation/commit-story-v2/run-23/rubric-scores.md`
   Style reference: `Read docs/templates/eval-run-style-reference/rubric-scores.md` (run-12 format)
   **IMPORTANT — use run-21 rubric as the primary precedent reference** (`evaluation/commit-story-v2/run-21/rubric-scores.md`), not run-12. Run-21 contains the current rule set and two critical precedents:
