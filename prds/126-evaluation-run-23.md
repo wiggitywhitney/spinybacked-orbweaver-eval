@@ -206,13 +206,13 @@ The **evaluation execution branch** created by `/prd-start` from main **never me
   7. **Claude runs**: `datadog-agent start`
   Produces: `evaluation/commit-story-v2/run-23/is-score.md`
 
-- [ ] **Baseline comparison** — Compare run-23 vs runs 2–21 (run-22 was never executed).
+- [x] **Baseline comparison** — Compare run-23 vs runs 2–21 (run-22 was never executed).
   Produces: `evaluation/commit-story-v2/run-23/baseline-comparison.md`
   Style reference: `Read docs/templates/eval-run-style-reference/baseline-comparison.md`
 
-- [ ] **Update root README** — After baseline comparison, update `README.md`: (1) add a row for run-23 to the run history table (quality, gates, files, spans, cost, push/PR, IS score); (2) update the "next run" sentence to reference run-24 and its primary goals. Note: run-22 was never executed and has no row.
+- [x] **Update root README** — After baseline comparison, update `README.md`: (1) add a row for run-23 to the run history table (quality, gates, files, spans, cost, push/PR, IS score); (2) update the "next run" sentence to reference run-24 and its primary goals. Note: run-22 was never executed and has no row.
 
-- [ ] **Actionable fix output** — Primary handoff deliverable. At milestone completion:
+- [x] **Actionable fix output** — Primary handoff deliverable. At milestone completion:
   1. Run the cross-document audit agent to verify consistency across all run-23 evaluation artifacts.
   2. *(User-facing checkpoint 2)* Give Whitney an interpreted summary of key findings — failures, root causes, notable patterns, what to watch for in run-24.
   3. Print the absolute file path of `evaluation/commit-story-v2/run-23/actionable-fix-output.md`.

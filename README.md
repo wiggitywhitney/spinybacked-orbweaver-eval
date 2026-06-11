@@ -100,10 +100,11 @@ spinybacked-orbweaver-eval/
 | 19 | 21/25 (84%) | 5/5 | 10+3p | 30 | $8.83 | YES (#71, AUTO) | 80/100 |
 | 20 | 24/25 (96%) | 5/5 | 12+1f | 42 | $9.08 | YES (#73, AUTO) | 80/100 |
 | 21 | 23/25 (92%) | 5/5 | 12+2f | 42 | ~$8.10 | YES (#74, AUTO) | 90/100 |
+| 23 | 24/25 (96%) | 5/5 | 13+1p | 45 | $7.84 | YES (#75, AUTO) | 80/100 |
 
-Files column notation: plain count = committed files; `+Np` = N partial files (instrumentation started, not fully committed); `+Nf` = N files that failed all attempts and were not committed. Cost column: `~` prefix indicates an estimated/derived cost; unprefixed values are directly reported by spiny-orb.
+Files column notation: plain count = committed files; `+Np` = N partial files (instrumentation started, not fully committed); `+Nf` = N files that failed all attempts and were not committed. Cost column: `~` prefix indicates an estimated/derived cost; unprefixed values are directly reported by spiny-orb. Run-22 was planned (PRD #115) but never executed — no row.
 
-**Run-23 is next** — verifying RUN21-1 (mcp/server.js NDS-003 blank-line-near-JSDoc fix, spiny-orb issue #917) and RUN21-2 (index.js import expansion NDS-003 fix, spiny-orb issue #916); monitoring CDQ-001 double-end pattern and COV-005 skip-path gap from run-21. Run-22 was planned (PRD #115) but never executed.
+**Run-24 is next** — primary goals: fix SCH-003 type mismatch (integer-as-string in git-collector.js and commands/summarize.js); address summary-detector.js SCH-002 oscillation (agent declared near-synonym attribute key instead of reusing existing); investigate IS SPA-002 orphan span (new in run-23, was resolved in run-21).
 
 Full run-by-run analysis: [`evaluation/commit-story-v2/`](evaluation/commit-story-v2/)
 
