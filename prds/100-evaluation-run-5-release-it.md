@@ -141,6 +141,8 @@ The feature branch for this PRD (`feature/prd-100-evaluation-run-5-release-it`) 
 
   AI role: (1) confirm readiness, (2) once Whitney provides the log output, save it and write `evaluation/release-it/run-5/run-summary.md`, (3) **push the eval branch to origin immediately** — the branch holds the only copy of run artifacts until step 13 copies them to main, (4) **if auto PR creation failed**, create the PR from the file spiny-orb already wrote to disk — do NOT write a shortened manual body: `gh pr create --body-file ~/Documents/Repositories/release-it/spiny-orb-pr-summary.md --repo wiggitywhitney/release-it --head <instrument-branch> --title "..."`
 
+  **Note on log file staging**: `spiny-orb-output.log` is matched by `*.log` in the root `.gitignore`. Stage it with `git add -f evaluation/release-it/run-5/spiny-orb-output.log` — a plain `git add` will silently skip it.
+
 - [ ] **Findings Discussion** *(user-facing checkpoint 1)*
 
   After `run-summary.md` is written, before any evaluation documents: report to Whitney with a raw overview — files committed/failed/partial, quality score if visible in log, cost, push/PR status, top 1-2 surprises. Conversational, under 10 lines. Wait for acknowledgment before proceeding.

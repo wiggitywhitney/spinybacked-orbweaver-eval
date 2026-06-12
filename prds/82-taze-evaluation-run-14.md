@@ -134,6 +134,8 @@ The eval execution branch (`feature/prd-82-taze-evaluation-run-14`) **never has 
 
   AI role: (1) create the `debug-dumps/` directory before Whitney runs; (2) confirm readiness; (3) once Whitney provides the log, save it and write `evaluation/taze/run-14/run-summary.md`; (4) **if auto PR creation failed**, create the PR from the file spiny-orb already wrote to disk — do NOT write a shortened manual body: `gh pr create --body-file ~/Documents/Repositories/taze/spiny-orb-pr-summary.md --repo wiggitywhitney/taze --head <instrument-branch> --title "..."`. **After saving artifacts and committing, push the eval branch to origin immediately.**
 
+  **Note on log file staging**: `spiny-orb-output.log` is matched by `*.log` in the root `.gitignore`. Stage it with `git add -f evaluation/taze/run-14/spiny-orb-output.log` — a plain `git add` will silently skip it.
+
 - [ ] **Findings Discussion** *(user-facing checkpoint 1)* — After `run-summary.md` is written, before any evaluation documents are started: report to Whitney: (1) files committed / failed / partial, (2) quality score, (3) cost, (4) push/PR status, (5) CDQ-006 violation count vs run-13 (was 8 across 5 files), (6) top 1-2 surprises. Conversational, under 10 lines. Wait for acknowledgment before proceeding.
 
 - [ ] **Failure deep-dives** — For each failed or partially committed file and run-level failure.

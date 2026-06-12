@@ -230,6 +230,7 @@ The **evaluation execution branch** created by `/prd-start` from main **never me
 |----|----------|-----------|------|
 | D-3 | Trace run does not need to happen during the eval — any post-eval invocation on the correct branch is sufficient | The post-commit hook runs automatically on any commit to the instrument branch. Confirmed via run-23: Whitney's "docs: add PR summary" commit to the instrument branch after the eval produced spans with the correct vcs.ref.head.revision. Added as step 4a in language-extension-plan.md and propagated to run-22 PRD. | 2026-06-10 |
 | D-4 | Branch name in run-summary.md must be extracted from the log, never written from context | Discovered when run-23 summary recorded instrument-1780596389399 (a June 4 branch) instead of the actual run-23 branch instrument-1781089793056. Root cause: agent wrote from context. Fix: `grep -m1 'Branch:' spiny-orb-output.log` — added to language-extension-plan.md step 3. | 2026-06-10 |
+| D-5 | `spiny-orb-output.log` requires `git add -f` to stage — plain `git add` silently skips it | The root `.gitignore` has a `*.log` pattern that matches `spiny-orb-output.log`. Discovered in run-23. Added note to language-extension-plan.md step 3 and propagated to all open eval PRDs (#82 taze run-14, #100 release-it run-5). Applies to all future eval runs on all targets. | 2026-06-12 |
 
 ---
 
