@@ -159,11 +159,11 @@ The **evaluation execution branch** created by `/prd-start` from main **never me
   Produces: `evaluation/commit-story-v2/run-24/per-file-evaluation.md`
   Style reference: `Read docs/templates/eval-run-style-reference/per-file-evaluation.md`
 
+  **Rule rename note**: NDS-005 (Control Flow Preserved) is called **NDS-007** in spiny-orb's validator output and in agent notes. Use NDS-007 in all per-file evaluation tables.
+
   **(D-2) Use one agent per file**: Before spawning agents, create the output directory: `mkdir -p evaluation/commit-story-v2/run-24/per-file-sections/`. Then spawn individual background Agent() calls (not Workflow) with `run_in_background: true`; each agent reads style reference, `evaluation/commit-story-v2/run-23/per-file-evaluation.md` (for rule descriptions), original source (`git show main:src/file`), committed source (`git show <instrument-branch>:src/file`), agent notes from log, debug dump if applicable, and schema (`semconv/attributes.yaml`); each agent **writes its section directly to `evaluation/commit-story-v2/run-24/per-file-sections/<filename>.md`** — do NOT pass section text back through the agent call result (assembly stalls when sections are concatenated into a large prompt). Main context assembles from the written files once all agents complete. Correct-skip files: one batch agent for RST-001 verification.
 
   **Important**: Agent notes in `.instrumentation.md` files and log output are NOT ground truth about what was committed — they reflect an earlier reasoning draft. Per-file evaluation agents must read the instrumented source file directly (`git show <instrument-branch>:src/file`); do not rely on notes alone.
-
-  **Rule rename note**: NDS-005 (Control Flow Preserved) is called **NDS-007** in spiny-orb's validator output and in agent notes. Use NDS-007 in all per-file evaluation tables.
 
   **(Trace supplement)** Each per-file evaluation agent receives the `service.instance.id` from `evaluation/commit-story-v2/run-24/trace-artifact.md`. **Before writing any evaluation section**, read `evaluation/trace-capture-protocol.md`, then use the `search_datadog_spans` Datadog MCP tool with the `query` field from the artifact as the base query, appending a space and `resource_name:<prefix>.*` to filter to spans for the file under review. The agent uses live trace data to supplement — not override — static code review for these specific checks:
   - **Attribute presence at runtime**: Does the span carry expected custom attributes with non-null values?
