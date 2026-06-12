@@ -1,6 +1,7 @@
 # PRD #23: JS Evaluation Run-23: commit-story-v2 — NDS-003 Blank-Line-Near-JSDoc & Import Expansion Fix Verification
 
-**Status:** Ready
+**Status:** Complete
+**Completed:** 2026-06-12
 **Created:** 2026-06-08
 **GitHub Issue:** #126
 **Depends on:** PRD #113 (run-21 complete, actionable fix output delivered to spiny-orb team; note: run-22 was planned in PRD #115 but never executed)
