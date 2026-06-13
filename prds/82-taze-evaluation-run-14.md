@@ -132,7 +132,13 @@ The eval execution branch (`feature/prd-82-taze-evaluation-run-14`) **never has 
   caffeinate -s env -u ANTHROPIC_CUSTOM_HEADERS -u ANTHROPIC_BASE_URL vals exec -i -f .vals.yaml -- bash -c 'GITHUB_TOKEN=$GITHUB_TOKEN_TAZE node ~/Documents/Repositories/spinybacked-orbweaver/bin/spiny-orb.js instrument src --verbose --thinking --debug-dump-dir ~/Documents/Repositories/spinybacked-orbweaver-eval/evaluation/taze/run-14/debug-dumps 2>&1 | tee ~/Documents/Repositories/spinybacked-orbweaver-eval/evaluation/taze/run-14/spiny-orb-output.log'
   ```
 
-  AI role: (1) create the `debug-dumps/` directory before Whitney runs; (2) confirm readiness; (3) once Whitney provides the log, save it and write `evaluation/taze/run-14/run-summary.md`; (4) **if auto PR creation failed**, create the PR from the file spiny-orb already wrote to disk — do NOT write a shortened manual body: `gh pr create --body-file ~/Documents/Repositories/taze/spiny-orb-pr-summary.md --repo wiggitywhitney/taze --head <instrument-branch> --title "..."`. **After saving artifacts and committing, push the eval branch to origin immediately.**
+  AI role: (1) create the `debug-dumps/` directory before Whitney runs; (2) confirm readiness; (3) once Whitney provides the log, save it and write `evaluation/taze/run-14/run-summary.md`; (4) **if auto PR creation failed**, create the PR from the file spiny-orb already wrote to disk — do NOT write a shortened manual body: `gh pr create --body-file ~/Documents/Repositories/taze/spiny-orb-pr-summary.md --repo wiggitywhitney/taze --head <instrument-branch> --title "..."`. **After saving artifacts and committing (`git add -f evaluation/taze/run-14/spiny-orb-output.log` — log files are gitignored), push the eval branch to origin immediately.**
+
+  Then create a PR for the eval branch in this repo (leave open — never merged):
+  ```bash
+  gh pr create --base main --title "eval(prd-82): taze run-14 evaluation — TBD quality, Q×F TBD, IS TBD/100" --body "Eval execution branch for taze run-14. Leave open — eval PRs are never merged. Artifacts copied to main via git checkout in the Copy artifacts milestone."
+  ```
+  Update the PR title with actual scores once rubric scoring and IS scoring complete.
 
 - [ ] **Findings Discussion** *(user-facing checkpoint 1)* — After `run-summary.md` is written, before any evaluation documents are started: report to Whitney: (1) files committed / failed / partial, (2) quality score, (3) cost, (4) push/PR status, (5) CDQ-006 violation count vs run-13 (was 8 across 5 files), (6) top 1-2 surprises. Conversational, under 10 lines. Wait for acknowledgment before proceeding.
 
@@ -188,7 +194,11 @@ The eval execution branch (`feature/prd-82-taze-evaluation-run-14`) **never has 
   3. Print absolute path of `actionable-fix-output.md`. **Pause** until Whitney confirms handoff to spiny-orb team.
   Produces: `evaluation/taze/run-14/actionable-fix-output.md`
 
-- [ ] **Draft PRD #83** — Create on a separate branch from main. Use this PRD as the milestone style reference. Carry forward both user-facing checkpoints. Merge the PRD-only PR to main.
+- [ ] **Draft PRD #83** — Before drafting:
+  1. Read `evaluation/taze/run-14/actionable-fix-output.md` and any `lessons-for-run15.md` in `evaluation/taze/run-14/`. Focus on process observations — steps that were confusing, gaps in instructions, new techniques that worked well — not target-codebase findings.
+  2. *(User-facing checkpoint — template changes require user approval)* Present proposed updates to `docs/language-extension-plan.md` in two sections: **(a) target-specific findings** that don't belong in the template; **(b) generalizable process improvements** — write the exact proposed text in fenced code blocks. If no template changes are needed, say so explicitly. Do NOT make edits without approval.
+  3. After user approves: commit approved template edits as a separate commit (`docs: update language-extension-plan with process improvements from taze run-14 [skip ci]`).
+  4. Draft PRD #83 on a separate branch from main. Use this PRD as the milestone style reference. Carry forward both user-facing checkpoints. Run `/write-prompt` on the draft before committing. Merge the PRD-only PR to main.
 
 - [ ] **Copy artifacts to main** — After PRD #83 is drafted but before `/prd-done`: switch to main, pull, then run:
   ```bash
