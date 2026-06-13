@@ -6,14 +6,16 @@ Run-14 observations to carry forward into the next evaluation run PRD.
 
 | Item | Status | Detail |
 |------|--------|--------|
-| spiny-orb build | TBD | SHA: TBD |
-| spiny-orb #728 (CDQ-006 advisory pass) | TBD | Landed / not yet landed |
-| Schema type fix (TAZE-RUN1-1) | Applied | taze.config.sources_found: int, taze.cache.hit: boolean, taze.cache.changed: boolean |
-| IS RES-001 fix (TAZE-RUN1-5) | Applied | service.instance.id: randomUUID() added to examples/instrumentation.js |
-| taze fork state | TBD | On main, clean working tree, pnpm test pass |
-| Push auth (GITHUB_TOKEN_TAZE) | TBD | Dry-run result |
-| Node version | TBD | |
-| pnpm version | TBD | |
+| spiny-orb build | Applied | SHA: 8649c86ca5a60b508ba0483a37b707dad78ee51e |
+| spiny-orb #728 (CDQ-006 advisory pass) | Landed | Merged in PR #749 — confirmed in origin/main |
+| Schema type fix (TAZE-RUN1-1) | Applied | Created semconv/agent-extensions.yaml on taze main with correct types: sources_found: int, cache.hit: boolean, cache.changed: boolean |
+| IS RES-001 fix (TAZE-RUN1-5) | Applied | service.instance.id: randomUUID() added to examples/instrumentation.js (commit f16b763) |
+| taze fork state | Partial | On main, one untracked file (spiny-orb-test-failure.log), `pnpm test` has 1 pre-existing flaky failure |
+| Push auth (GITHUB_TOKEN_TAZE) | Verified | Dry-run to spiny-orb/auth-test-run14 succeeded |
+| Node version | v25.8.0 | |
+| pnpm version | 10.33.2 | |
+
+**Pre-existing pnpm test failure**: `test/resolves.test.ts > resolveDependency > provenanceDowngraded` fails intermittently — this is a live-registry test that queries npm provenance scores. The failure is non-deterministic (not always reproducible). The `spiny-orb-test-failure.log` untracked file in the taze fork records similar prior live-registry failures. This is a known condition for taze eval runs; spiny-orb's post-instrumentation checkpoint will show the same failure in the baseline comparison.
 
 ---
 
