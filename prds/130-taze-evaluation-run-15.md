@@ -101,17 +101,17 @@ The eval execution branch (`feature/prd-83-taze-evaluation-run-15`) **never merg
 
 ## Milestones
 
-- [ ] **Step 0 — Bootstrap reading.** Before proceeding with any other milestone, read these documents in order:
+- [x] **Step 0 — Bootstrap reading.** Before proceeding with any other milestone, read these documents in order:
   1. `docs/language-extension-plan.md` — completely. Pay particular attention to: (a) Type D structure and step sequence; (b) "Two User-Facing Checkpoints" section — exact wording for Findings Discussion and handoff pause; (c) eval branch convention (never merges to main); (d) step 13 (copy artifacts to main before closing); (e) step 9.5 (SPA-001 calibration note for CLI apps — taze had 164 INTERNAL spans in run-13; treat this as structural, not a regression).
   2. `prds/82-taze-evaluation-run-14.md` — the immediately prior taze run PRD. **Taze is non-organic** (unlike commit-story-v2): the trace artifact is created during IS scoring (step 9.5), NOT during pre-run verification. The IS scoring milestone and per-file trace supplement timing differ accordingly.
   3. `evaluation/taze/run-14/actionable-fix-output.md` — prior run findings. The carry-forward items (CDQ-006 after #933, SCH-003, IS RES-001) are the primary goals for this run.
   **Do not mark this complete until you have read all three documents.**
 
-- [ ] **Step 0.5 — Cross-run process review** *(user-facing checkpoint — template changes require user approval)*. Follow the full procedure in `docs/language-extension-plan.md` Step 0.5. In brief: (1) find the most recently completed taze run (completion signal: `actionable-fix-output.md` present in `evaluation/taze/run-N/` — note run-14 was aborted so run-13 is the most recent completed taze run); (2) check all other `evaluation/` subdirectories for a more recently completed cross-target run — compare using the `captured:` field in `trace-artifact.md` if it exists, or the file modification time of `actionable-fix-output.md` as a proxy; (3) if a more recent cross-target run exists, read its `actionable-fix-output.md` and any `lessons-for-prd*.md` files; (4) compare findings against the template's milestone structure as instantiated in this PRD; (5) present the structured three-section checkpoint report to the user; (6) after user approves, make approved template edits. Do NOT make any edits without explicit user approval. If no cross-target run is more recent, note this and proceed.
+- [x] **Step 0.5 — Cross-run process review** *(user-facing checkpoint — template changes require user approval)*. Follow the full procedure in `docs/language-extension-plan.md` Step 0.5. In brief: (1) find the most recently completed taze run (completion signal: `actionable-fix-output.md` present in `evaluation/taze/run-N/` — note run-14 was aborted so run-13 is the most recent completed taze run); (2) check all other `evaluation/` subdirectories for a more recently completed cross-target run — compare using the `captured:` field in `trace-artifact.md` if it exists, or the file modification time of `actionable-fix-output.md` as a proxy; (3) if a more recent cross-target run exists, read its `actionable-fix-output.md` and any `lessons-for-prd*.md` files; (4) compare findings against the template's milestone structure as instantiated in this PRD; (5) present the structured three-section checkpoint report to the user; (6) after user approves, make approved template edits. Do NOT make any edits without explicit user approval. If no cross-target run is more recent, note this and proceed.
 
-- [ ] **Collect skeleton documents** — Create `evaluation/taze/run-15/` directory with `lessons-for-run16.md` and `spiny-orb-findings.md` skeleton files. Must run before pre-run verification.
+- [x] **Collect skeleton documents** — Create `evaluation/taze/run-15/` directory with `lessons-for-run16.md` and `spiny-orb-findings.md` skeleton files. Must run before pre-run verification.
 
-- [ ] **Pre-run verification** — Confirm all four run-14 blockers are resolved and validate prerequisites:
+- [x] **Pre-run verification** — Confirm all four run-14 blockers are resolved and validate prerequisites:
 
   1. **#933 merged** (P1 — critical blocker for run-15): Confirm spiny-orb issue #933 (CDQ-006 guard template produces block bodies in all cases) is merged to spiny-orb main. Check the current spiny-orb SHA and verify the fix is present. If #933 is not merged, stop and document — run-15 will produce the same crash.
   2. **#934 merged** (P1 — critical blocker): Confirm spiny-orb issue #934 (`stoppedByCheckpoint` fires even when baseline is already failing) is resolved. If not merged, document expected behavior: run will likely stop early again on the first checkpoint failure after a crash.
@@ -130,7 +130,7 @@ The eval execution branch (`feature/prd-83-taze-evaluation-run-15`) **never merg
   12. **Rebuild spiny-orb**: `cd ~/Documents/Repositories/spinybacked-orbweaver && npm run build`
   13. **Record environment**: Append spiny-orb SHA, Node version, and pnpm version to `evaluation/taze/run-15/lessons-for-run16.md`. **This SHA is critical for bug verification** — the four #933–#936 fixes must all be in this SHA.
 
-- [ ] **Evaluation run-15** — Whitney runs `spiny-orb instrument` in her terminal. Create `evaluation/taze/run-15/debug-dumps/` before providing the command.
+- [x] **Evaluation run-15** — Whitney runs `spiny-orb instrument` in her terminal. Create `evaluation/taze/run-15/debug-dumps/` before providing the command.
 
   ```bash
   caffeinate -s env -u ANTHROPIC_CUSTOM_HEADERS -u ANTHROPIC_BASE_URL vals exec -i -f .vals.yaml -- bash -c 'GITHUB_TOKEN=$GITHUB_TOKEN_TAZE node ~/Documents/Repositories/spinybacked-orbweaver/bin/spiny-orb.js instrument src --verbose --thinking --debug-dump-dir ~/Documents/Repositories/spinybacked-orbweaver-eval/evaluation/taze/run-15/debug-dumps 2>&1 | tee ~/Documents/Repositories/spinybacked-orbweaver-eval/evaluation/taze/run-15/spiny-orb-output.log'
