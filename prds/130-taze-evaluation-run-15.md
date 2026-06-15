@@ -155,14 +155,16 @@ The eval execution branch (`feature/prd-83-taze-evaluation-run-15`) **never merg
 
 - [ ] **Rubric scoring** — Score all dimensions against the rubric. Compare to run-13 baseline. CDQ-006 result (pass or fail) is the primary data point for this run.
 
-- [ ] **IS scoring run** — See `evaluation/is/README.md` for collector setup. Run IS scoring:
+- [x] **IS scoring run** — See `evaluation/is/README.md` for collector setup. Run IS scoring:
   ```bash
   node evaluation/is/score-is.js evaluation/is/eval-traces.json > evaluation/taze/run-15/is-score.md
   ```
   **SPA-001 note**: taze is a CLI app. SPA-001 threshold was raised from 10 to 30 for CLI pipeline workloads (eval repo issue #132). Even so, taze's 164 INTERNAL spans (run-13) structurally exceeds the new limit — document but do not treat as a regression.
   **RES-001 note**: If the `service.instance.id` fix (applied in pre-run-14) is working, RES-001 should pass for the first time. This is one of the primary verification goals.
+  **Result**: IS score 80/100 (up from run-13's 60/100). RES-001 now passes (service.instance.id present). SPA-001 still fails (45 INTERNAL spans vs limit 30 — structural). SPA-002 still fails (orphan parent span). RES-004, SPA-003, SPA-004, SPA-005 all pass.
 
-- [ ] **Capture trace artifact (step 9.5)** — Immediately after IS scoring completes, use the `search_datadog_spans` Datadog MCP tool with query `service:taze from:now-30m`. Retrieve `service.instance.id` from any span. Write `evaluation/taze/run-15/trace-artifact.md` (five fields: service.instance.id, captured, target, instrument_branch, query) using the format in `evaluation/trace-capture-protocol.md`. If no spans appear, wait up to 5 minutes and retry once.
+- [x] **Capture trace artifact (step 9.5)** — Immediately after IS scoring completes, use the `search_datadog_spans` Datadog MCP tool with query `service:taze from:now-30m`. Retrieve `service.instance.id` from any span. Write `evaluation/taze/run-15/trace-artifact.md` (five fields: service.instance.id, captured, target, instrument_branch, query) using the format in `evaluation/trace-capture-protocol.md`. If no spans appear, wait up to 5 minutes and retry once.
+  **Result**: service.instance.id `66f2f19d-4833-4b86-a4fb-abb65d19f19d` captured from 46 spans in Datadog.
 
 - [ ] **Baseline comparison** — Compare run-15 results to run-13 across all dimensions. Note: run-14 was aborted and has no valid scores. Calculate Q×F. Update root README: add a run-15 row to the taze run history table; update the "Run-16 is next" note with primary goals.
 
