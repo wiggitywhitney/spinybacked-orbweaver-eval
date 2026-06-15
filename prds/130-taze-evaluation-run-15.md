@@ -75,7 +75,7 @@ Same four-phase structure as run-13:
 
 ### Eval Branch Convention
 
-The eval execution branch (`feature/prd-83-taze-evaluation-run-15`) **never merges to main**. The PR to main is docs-only (landing this PRD file); after that PR merges, the branch continues as the eval execution branch. Eval artifacts are copied to main separately via `git checkout` in step 13. When `/prd-done` runs at completion, close issue #128 without merging or deleting the eval branch.
+The eval execution branch (`feature/prd-83-taze-evaluation-run-15`) **never merges to main**. The PR to main is docs-only (landing this PRD file); after that PR merges, the branch continues as the eval execution branch. Eval artifacts are copied to main separately via `git checkout` in step 13. When `/prd-done` runs at completion, close issue #130 without merging or deleting the eval branch.
 
 ### Key Inputs
 
@@ -136,7 +136,7 @@ The eval execution branch (`feature/prd-83-taze-evaluation-run-15`) **never merg
   caffeinate -s env -u ANTHROPIC_CUSTOM_HEADERS -u ANTHROPIC_BASE_URL vals exec -i -f .vals.yaml -- bash -c 'GITHUB_TOKEN=$GITHUB_TOKEN_TAZE node ~/Documents/Repositories/spinybacked-orbweaver/bin/spiny-orb.js instrument src --verbose --thinking --debug-dump-dir ~/Documents/Repositories/spinybacked-orbweaver-eval/evaluation/taze/run-15/debug-dumps 2>&1 | tee ~/Documents/Repositories/spinybacked-orbweaver-eval/evaluation/taze/run-15/spiny-orb-output.log'
   ```
 
-  After the run: save artifacts, commit with `git add -f` for the `.log` file, push the eval branch to origin immediately. Create PR to taze fork (`gh pr create --repo wiggitywhitney/taze`). Update PR title after rubric and IS scoring complete: `eval(prd-128): taze run-15 — <quality>/29 quality, Q×F <score>, IS <score>/100`.
+  After the run: save artifacts, commit with `git add -f` for the `.log` file, push the eval branch to origin immediately. Create PR to taze fork (`gh pr create --repo wiggitywhitney/taze`). Update PR title after rubric and IS scoring complete: `eval(prd-130): taze run-15 — <quality>/29 quality, Q×F <score>, IS <score>/100`.
 
   **If auto PR creation fails**: use `~/Documents/Repositories/taze/spiny-orb-pr-summary.md` with `--body-file`.
 
