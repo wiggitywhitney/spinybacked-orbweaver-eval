@@ -10,7 +10,7 @@
 
 ### io/resolves.ts — NDS-001 oscillation caused 0/9 functions instrumented (file 16 of 33)
 
-**Regression vs run-13**: Run-13 had 6 spans, 2 attributes. Run-15 produced **0 spans, 0 attributes**, 2 attempts, 82.4K output tokens.
+**Regression vs run-13**: Run-13 had 6 spans, 2 attributes. Run-15 produced **unknown coverage** (tool reported SUCCESS, actual result: 0 spans, 0 attributes), 2 attempts, 82.4K output tokens.
 
 6 of 9 functions were skipped:
 - `loadCache` — Oscillation detected: Duplicate errors across consecutive attempts: NDS-001 (×1)
