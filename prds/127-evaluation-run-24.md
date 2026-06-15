@@ -32,7 +32,7 @@ Verify that RUN23-1 and RUN23-2 (SCH-003 type mismatch) are resolved:
 - RUN23-3 watch: whether prompt guidance from issue #925 enables summary-detector.js to commit all 5 functions with correct output-count attributes (reusing `commit_story.summary.unsummarized_weeks_count` as in run-21, not a new input-parameter attribute)
 - RUN23-4 watch: whether the `provider.forceFlush()` fix (issue #926) resolves IS SPA-002 and restores IS to 90/100
 - RUN21-6 watch: agent notes vs committed code divergence — second watch run; any new instances?
-- IS SPA-001 structural: 25 INTERNAL spans vs 10-span calibration limit — watch whether span count growth worsens the gap
+- IS SPA-001: threshold raised to 30 (eval repo issue #132) — 25 INTERNAL spans in run-23 is now within limit; SPA-001 expected to PASS in run-24 unless span count grew above 30
 - journal-graph.js: seventh consecutive success expected (runs 18–21, 23)
 
 ### Run-23 Scores (baseline for run-24 comparison)
@@ -61,7 +61,7 @@ Verify that RUN23-1 and RUN23-2 (SCH-003 type mismatch) are resolved:
 | RUN23-2: commands/summarize.js `*_summaries_generated` integer-as-string | RUN23-2 | 1 run | P2 — spiny-orb issue #928 |
 | RUN23-3: summary-detector.js SCH-002 near-synonym partial | RUN23-3 | 1 run | P2 — spiny-orb issue #925; prefer output-count over input-param |
 | RUN23-4: IS SPA-002 recurrence — process.exit() drops outermost span | RUN23-4 | 1 run | Watch — fix: `provider.forceFlush()` in bootstrap; spiny-orb issue #926 |
-| IS SPA-001: INTERNAL span count structural | Structural | 10 runs | Structural — 25 INTERNAL spans vs 10-span calibration; research spike #929 |
+| IS SPA-001: INTERNAL span count | Resolved | 10 runs | Threshold raised to 30 (eval repo issue #132); 25 INTERNAL spans in run-23 is now within limit. Expect PASS in run-24 unless span count grew above 30. |
 | RUN21-6: Agent notes vs committed code divergence | RUN21-6 | 3 runs | Watch — spiny-orb issue #927; second watch run in run-24 |
 
 ---

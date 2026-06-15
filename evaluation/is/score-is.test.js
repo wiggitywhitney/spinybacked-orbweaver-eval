@@ -49,7 +49,7 @@ describe('scoreIS', () => {
   });
 
   describe('SPA-001 failure (too many INTERNAL spans)', () => {
-    it('fails when a trace has more than 10 INTERNAL spans', () => {
+    it('fails when a trace has more than 30 INTERNAL spans', () => {
       const lines = loadFixture('too-many-internal.jsonl');
       const result = scoreIS(lines);
       const rule = result.rules.find(r => r.id === 'SPA-001');

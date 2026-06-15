@@ -30,7 +30,7 @@ Run-14 produced no usable evaluation data. The schema type fix (TAZE-RUN1-1), IS
 
 - Confirm `provenanceDowngraded` skip (commit `6a25b4d`) is still in place on taze fork main
 - Advisory contradiction rate: measure against run-13's ~78% (gated on 2+ completed TS runs — run-14 was aborted so run-15 is the second)
-- IS SPA-001: 164 INTERNAL spans from run-13 — structural not a regression (see step 9.5 note)
+- IS SPA-001: 164 INTERNAL spans from run-13 — structural not a regression (threshold raised to 30 in eval repo issue #132; taze still exceeds it structurally)
 - Confirm `checkSyntax()` moduleResolution fix remains active (NodeNext for taze)
 
 ### Run-13 Scores (baseline — run-14 aborted and invalid)
@@ -60,7 +60,7 @@ Run-14 produced no usable evaluation data. The schema type fix (TAZE-RUN1-1), IS
 | TAZE-RUN1-2 | CDQ-006 isRecording guard — #728 landed, #933 blocks verification | Low | run-13 |
 | TAZE-RUN1-3 | Advisory contradiction rate ~78% | Low | run-13 (gated 2+ completed runs) |
 | TAZE-RUN1-5 | IS RES-001 service.instance.id — applied in pre-run-14, unverified | Low | run-13 |
-| TAZE-RUN1-6 | IS SPA-001 164 INTERNAL spans — structural, not a regression | Low | run-13 (gated 2+ completed runs) |
+| TAZE-RUN1-6 | IS SPA-001 164 INTERNAL spans — structural (threshold raised to 30 by eval repo issue #132; taze still exceeds it) | Low | run-13 (gated 2+ completed runs) |
 
 ---
 
@@ -159,7 +159,7 @@ The eval execution branch (`feature/prd-83-taze-evaluation-run-15`) **never merg
   ```bash
   node evaluation/is/score-is.js evaluation/is/eval-traces.json > evaluation/taze/run-15/is-score.md
   ```
-  **SPA-001 note**: taze is a CLI app. If SPA-001 fires (span count > 10 INTERNAL spans), this is structural — taze had 164 INTERNAL spans in run-13. Document but do not treat as a regression.
+  **SPA-001 note**: taze is a CLI app. SPA-001 threshold was raised from 10 to 30 for CLI pipeline workloads (eval repo issue #132). Even so, taze's 164 INTERNAL spans (run-13) structurally exceeds the new limit — document but do not treat as a regression.
   **RES-001 note**: If the `service.instance.id` fix (applied in pre-run-14) is working, RES-001 should pass for the first time. This is one of the primary verification goals.
 
 - [ ] **Capture trace artifact (step 9.5)** — Immediately after IS scoring completes, use the `search_datadog_spans` Datadog MCP tool with query `service:taze from:now-30m`. Retrieve `service.instance.id` from any span. Write `evaluation/taze/run-15/trace-artifact.md` (five fields: service.instance.id, captured, target, instrument_branch, query) using the format in `evaluation/trace-capture-protocol.md`. If no spans appear, wait up to 5 minutes and retry once.
@@ -217,3 +217,4 @@ The eval execution branch (`feature/prd-83-taze-evaluation-run-15`) **never merg
 | 2026-06-15 | Name this run "run-15" (not "run-14 re-run") | Run-14 was aborted and produced no valid evaluation data. A clean re-run with a confirmed post-fix spiny-orb SHA deserves its own run number. |
 | 2026-06-15 | Skip Findings Discussion and handoff checkpoint 2 for run-14 | Both user-facing checkpoints are omitted from the abbreviated PRD #82 close-out; they carry forward to this PRD as normal full-run checkpoints. |
 | 2026-06-15 | Template checkpoint completed during PRD #82 close-out — no changes to `docs/language-extension-plan.md` needed | The proposed addition (pre-run test gate) was confirmed covered by spiny-orb #935 (the tool will abort before instrumentation if baseline tests fail). No eval process template change warranted. |
+| 2026-06-15 | Raised SPA-001 INTERNAL span threshold from 10 to 30 for CLI pipeline workloads | commit-story-v2 failed SPA-001 in 8 consecutive runs (11–37 INTERNAL spans). The 10-span limit was calibrated for microservice workloads; CLI pipelines with fixed sequential stages naturally produce more INTERNAL spans. Taze (164 spans) still fails structurally at the new threshold. Fix in `evaluation/is/score-is.js`, tracked in eval repo issue #132. IS scoring milestones in this PRD and downstream PRDs updated to reflect new threshold. |

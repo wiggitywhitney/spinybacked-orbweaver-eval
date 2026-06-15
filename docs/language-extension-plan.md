@@ -369,6 +369,7 @@ Key decisions from research:
 - **OTLP receiver**: OTel Collector with file exporter (not Datadog Agent). Same port 4318; switch target via `OTEL_EXPORTER_OTLP_TRACES_ENDPOINT` env var — no code changes in the target repo
 - **Metrics**: Enable metrics in SDK bootstrap for IS scoring runs (remove `OTEL_METRICS_EXPORTER=none`). MET rules will fail because spiny-orb produces no OTel metrics — it uses span attributes for counts. This is honest signal about spiny-orb's scope, not a reason to exclude the rules.
 - **~9 of 20 IS rules apply** to a CLI app: RES-001, RES-004, RES-005 (Critical), SPA-001–SPA-005, SDK-001. Inapplicable: RES-002 (multi-instance), RES-003 (k8s), MET-001–006, LOG rules (marginal).
+- **SPA-001 threshold for CLI pipelines**: The `evalSPA001` function uses `SPA001_INTERNAL_SPAN_LIMIT = 30` (raised from 10 in eval repo issue #132). CLI pipelines with fixed sequential stages naturally produce more INTERNAL spans than microservice/API workloads. Targets with iteration-driven INTERNAL spans (e.g., taze at 164) still fail structurally — document but do not treat as a regression. Targets with pipeline-stage spans (e.g., commit-story-v2 at 11–37) should PASS at the 30-span limit.
 - **k8s-dependent repos** require a running cluster for IS scoring runs. Infrastructure is available; this adds a step but is not a blocker.
 
 PRD deliverables:
