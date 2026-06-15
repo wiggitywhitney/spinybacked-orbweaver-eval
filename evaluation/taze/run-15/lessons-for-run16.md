@@ -45,4 +45,14 @@ Files appear in a different order than run-13 (e.g., `api/check.ts` moved from p
 
 ## Process Notes for Run 16
 
-*Populated after rubric scoring, IS scoring, and per-file evaluation complete.*
+### IS scoring invocation
+
+Taze CLI modes: `default | major | minor | patch | latest | newest | next`. There is no `check` mode — use `taze major` for IS scoring runs (exercises the full check-and-resolve path without writing changes). Command from run-15:
+
+```bash
+OTEL_EXPORTER_OTLP_TRACES_ENDPOINT=http://localhost:4318/v1/traces node --import ./examples/instrumentation.js ./bin/taze.mjs major
+```
+
+Run from `~/Documents/Repositories/taze` on the instrument branch. OTel SDK packages are already in node_modules on the instrument branch — no `npm install` needed. OTel Collector must be running on port 4318 (Docker or binary). Stop Datadog Agent first to free port 4318; restart after.
+
+46 spans captured in run-15 (same trace ID, 1 trace). Datadog forwarding worked correctly via the Docker collector despite stopping the container before the Datadog exporter's batch timer fired — spans arrived in Datadog within the first retry window.
