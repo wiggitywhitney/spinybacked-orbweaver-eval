@@ -1,7 +1,8 @@
 # PRD #130: TS Evaluation Run-15: taze — CDQ-006, SCH-003, and IS RES-001 Verification (Post-Bug-Fix)
 
-**Status:** Ready
+**Status:** Complete
 **Created:** 2026-06-15
+**Completed:** 2026-06-16
 **GitHub Issue:** [#130](https://github.com/wiggitywhitney/spinybacked-orbweaver-eval/issues/130)
 **Depends on:** PRD #82 (run-14 aborted, actionable fix output delivered, four spiny-orb bugs filed: #933–#936)
 
