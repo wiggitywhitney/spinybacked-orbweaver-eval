@@ -1,12 +1,22 @@
-# OTel Collector config for IS scoring runs.
+# OTel Collector config for IS scoring runs and the observability triangle demo.
 # Receives OTLP traces on port 4318 (same port as Datadog Agent — they cannot
 # run simultaneously). Writes line-delimited JSON to eval-traces.json for IS
 # scoring, and also forwards to Datadog APM for live trace inspection.
 # Each line of eval-traces.json is an ExportTraceServiceRequest JSON object,
 # parseable by score-is.js.
 #
+# Also supports the observability triangle demo:
+#   - spanmetrics connector: derives RED metrics from spans and adds them as
+#     Datadog custom metrics, with commit_story.ai.section_type as a dimension
+#   - datadog/connector: computes Datadog-native APM stats (required since v0.95.0)
+#   - filelog receiver: scrapes /tmp/commit-story.log for JSON log lines with
+#     trace_id/span_id fields for traces<->logs correlation in Datadog Logs Explorer
+#
 # Requires DD_API_KEY to be set in the environment. Use vals exec to inject:
 #   vals exec -f .vals.yaml -- bash -c 'export PATH="/opt/homebrew/bin:$PATH" && otelcol-contrib --config evaluation/is/otelcol-config.yaml > /tmp/otelcol.log 2>&1' &
+#
+# For the demo log pipeline, tee commit-story stdout to /tmp/commit-story.log:
+#   node --import ./examples/instrumentation.js ./bin/commit-story.js 2>&1 | tee /tmp/commit-story.log
 #
 # IS spec pinned to commit 52c14ba.
 
@@ -15,6 +25,38 @@ receivers:
     protocols:
       http:
         endpoint: 0.0.0.0:4318
+  filelog:
+    # Scrapes structured JSON log lines emitted by commit-story-v2 demo branch.
+    # Each line is a JSON object with trace_id (32-char lowercase hex), span_id,
+    # commit_story.ai.section_type, and gen_ai.usage.output_tokens fields.
+    # Datadog recognizes trace_id/span_id natively — no dd.trace_id conversion needed.
+    include: [/tmp/commit-story.log]
+    operators:
+      - type: json_parser
+
+connectors:
+  spanmetrics:
+    # add_resource_attributes: true is required for env and version UST tags to
+    # appear on span-derived metrics. Without it, metrics-to-logs "View related
+    # logs" navigation returns no results even when the OTel SDK sets these attrs.
+    add_resource_attributes: true
+    dimensions:
+      # Story A: gen_ai.request.model is standard OTel GenAI semconv — maps
+      # automatically in Datadog, no extra config needed.
+      - name: gen_ai.request.model
+      # Story B: commit_story.ai.section_type is a custom Weaver schema attribute
+      # (three enum values: summary, dialogue, technical_decisions).
+      # spiny-orb guarantees every instrumented section generation span carries it.
+      - name: commit_story.ai.section_type
+    histogram:
+      # Pin to ms explicitly — upstream feature gate will change default to seconds.
+      unit: ms
+  datadog/connector:
+    # Required since otelcol-contrib v0.95.0 to compute Datadog APM stats.
+    # Without this, the APM Traces page shows individual spans but no aggregated
+    # RED metrics (request rate, error rate, latency distribution).
+    traces:
+      compute_stats_by_span_kind: true
 
 exporters:
   file:
@@ -30,4 +72,12 @@ service:
   pipelines:
     traces:
       receivers: [otlp]
-      exporters: [file, datadog]
+      # spanmetrics and datadog/connector are connectors — they appear in
+      # exporters here and in receivers of their downstream pipelines.
+      exporters: [file, datadog, spanmetrics, datadog/connector]
+    metrics:
+      receivers: [spanmetrics, datadog/connector]
+      exporters: [datadog]
+    logs:
+      receivers: [filelog]
+      exporters: [datadog]
