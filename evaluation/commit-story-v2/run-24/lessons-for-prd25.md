@@ -25,6 +25,36 @@ Run-24 observations to carry forward into the next evaluation run PRD.
   - Step 5 scope now includes category (d): oscillation-induced 0-span commits misclassified as correct pre-scan skips
   - Step 2 now includes handoff triage subagent context guidance (richer context beyond actionable-fix-output.md)
 
+### Prompt hygiene: two hardcoded commit-story-v2 values found in spiny-orb's agent prompt
+
+During run-24 pre-run analysis, two target-specific values were found embedded directly in `src/agent/prompt.ts` — spiny-orb's general-purpose agent prompt. These contaminate eval signal because the agent may get things right due to repo-specific hints rather than the general guidance working. Neither was caught by CLAUDE.md rules, code review, or prior eval runs. These are spiny-orb team issues, not eval process issues.
+
+**Finding 1 — SCH-003 rule (line 285): `diff_size` hardcoded in rule text, not in an `<examples>` block**
+
+The SCH-003 rule (type mismatch for count/size attributes) contains this sentence inline:
+
+```text
+"A `diff_size` attribute represents a size — use `type: int`."
+```
+
+`diff_size` is a commit-story-v2-specific attribute name (`commit_story.git.diff_size`, which is not even in the Weaver registry — it's the attribute name derived from the target codebase). This sentence sits directly in the rule body, not wrapped in `<examples>` tags. The agent sees it as authoritative guidance, not an example. Effect: if the agent applies SCH-003 correctly to `diff_size`-related attributes in commit-story-v2, we cannot tell whether the general `*_size` → `type: int` pattern guidance is working or whether the agent is pattern-matching on the specific name it was told about.
+
+Suggested fix for spiny-orb team: Replace `diff_size` with a neutral domain example (e.g., `payload_size`, `response_size`) or move the sentence into an `<examples>` block with a label indicating it's illustrative. The general guidance ("attributes named `*_size` or `*_count` should use `type: int`") is valid — only the specific commit-story-v2 attribute name is the problem.
+
+**Finding 2 — Count-key disambiguation (line ~152): verbatim copy of commit_story.context.messages_count attribute brief**
+
+The SCH-002 count-key semantic precision guidance contains:
+
+```text
+"A count key registered for 'messages collected from sessions' does NOT apply to 'raw journal entries being processed'"
+```
+
+"messages collected from sessions" is the exact brief of `commit_story.context.messages_count` from commit-story-v2's `semconv/attributes.yaml`. "Raw journal entries being processed" is also commit-story-v2 domain vocabulary (the `context-integrator.js` pipeline). This appears to have been written from a specific observation during a commit-story-v2 eval run, then embedded as if it's a universal rule. Effect: the agent has domain-specific disambiguation for a commit-story-v2 near-synonym scenario, which inflates SCH-002 scores on commit-story-v2 (the only eval target to date).
+
+Suggested fix for spiny-orb team: Abstract the example to non-repo-specific domain vocabulary (e.g., "A key registered for 'items retrieved from cache' does NOT apply to 'items queued for processing'"), or move the commit-story-v2-specific sentence to an `<examples>` block clearly labeled as illustrative.
+
+**Process observation**: Both instances survived all existing guardrails — CLAUDE.md rules about not hardcoding target-specific values, code review, and 20+ eval runs with no signal that the guidance was too specific. This suggests the contamination is subtle enough to not register as a violation while still being repo-specific. A future eval quality check could diff the prompt against each target's registry to flag attribute names that appear in rule text (not example blocks).
+
 ## Run-24 Execution Notes
 
 *(populate during evaluation run and per-file evaluation)*
