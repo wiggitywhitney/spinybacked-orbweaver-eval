@@ -67,7 +67,7 @@
 | src/utils/config.js | ✅ skip | 0 | 0 | 1 | RST-001 correct |
 | src/utils/journal-paths.js | ✅ committed | 1 | 0 | 1 | |
 | src/managers/journal-manager.js | ✅ committed | 2 | 0 | 1 | |
-| src/managers/summary-manager.js | ✅ committed | 9 | 0 | 1 | **RUN23-2 watch** — 0 attrs (was 1 attr/string issue in run-23); types correct |
+| src/managers/summary-manager.js | ✅ committed | 9 | 0 | 1 | **RUN23-2 CONFIRMED** — 0 attrs (was 1 attr/string issue in run-23); type issue absent |
 | src/commands/summarize.js | ✅ committed | 3 | 2 | 2 | **RUN23-2 FIXED** — `*_summaries_generated` types correct |
 | src/utils/summary-detector.js | ✅ committed | 9 | 3 | 1 | **RUN23-3 FIXED** — all 5 functions committed; was PARTIAL (4 spans) in run-23 |
 | src/managers/auto-summarize.js | ✅ committed | 3 | 0 | 1 | First attempt (was 2 in run-23) |
