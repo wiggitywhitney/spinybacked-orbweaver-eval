@@ -108,11 +108,11 @@ The **evaluation execution branch** created by `/prd-start` from main **never me
 
 ## Milestones
 
-- [ ] **Read `docs/language-extension-plan.md` completely before proceeding with any other milestone.** Pay particular attention to: (a) step 9.5 (SPA-001 calibration note for commit-story-v2 — INTERNAL span count is structural, not a defect); (b) step 9 (IS scoring protocol); (c) step 6 (per-file trace supplement procedure and prefix derivation rule). Also read `prds/126-evaluation-run-23.md` — the most recently completed commit-story-v2 run PRD. Use it as a style reference for the IS scoring milestone format and per-file evaluation structure. This document (run-24) follows the same pattern. **Do not mark this complete until you have read both documents.**
+- [x] **Read `docs/language-extension-plan.md` completely before proceeding with any other milestone.** Pay particular attention to: (a) step 9.5 (SPA-001 calibration note for commit-story-v2 — INTERNAL span count is structural, not a defect); (b) step 9 (IS scoring protocol); (c) step 6 (per-file trace supplement procedure and prefix derivation rule). Also read `prds/126-evaluation-run-23.md` — the most recently completed commit-story-v2 run PRD. Use it as a style reference for the IS scoring milestone format and per-file evaluation structure. This document (run-24) follows the same pattern. **Do not mark this complete until you have read both documents.**
 
-- [ ] **Cross-run process review** *(Step 0.5 — before any other milestones except Step 0)* — Follow the full procedure in `docs/language-extension-plan.md` Step 0.5. Brief: check whether any other eval target (taze, release-it) has a completed run more recent than commit-story-v2's most recent completed run (run-23, `evaluation/commit-story-v2/run-23/actionable-fix-output.md`). A run is complete when its directory contains `actionable-fix-output.md`. If a more recent cross-target run exists, read its `actionable-fix-output.md` and any `lessons-for-prd*.md` files; present a structured checkpoint report (steps already in template vs. missing vs. target-specific only); wait for user approval before making any template changes. Full procedure with timestamp comparison method is in `docs/language-extension-plan.md` Step 0.5.
+- [x] **Cross-run process review** *(Step 0.5 — before any other milestones except Step 0)* — Follow the full procedure in `docs/language-extension-plan.md` Step 0.5. Brief: check whether any other eval target (taze, release-it) has a completed run more recent than commit-story-v2's most recent completed run (run-23, `evaluation/commit-story-v2/run-23/actionable-fix-output.md`). A run is complete when its directory contains `actionable-fix-output.md`. If a more recent cross-target run exists, read its `actionable-fix-output.md` and any `lessons-for-prd*.md` files; present a structured checkpoint report (steps already in template vs. missing vs. target-specific only); wait for user approval before making any template changes. Full procedure with timestamp comparison method is in `docs/language-extension-plan.md` Step 0.5.
 
-- [ ] **Collect skeleton documents** — Create `evaluation/commit-story-v2/run-24/` directory with `lessons-for-prd25.md` skeleton. Must run before pre-run verification begins.
+- [x] **Collect skeleton documents** — Create `evaluation/commit-story-v2/run-24/` directory with `lessons-for-prd25.md` skeleton. Must run before pre-run verification begins.
 
 - [ ] **Pre-run verification** — Verify spiny-orb fixes and validate run prerequisites:
   1. **Handoff triage review**: Read the spiny-orb team's triage of `evaluation/commit-story-v2/run-23/actionable-fix-output.md`. Check which findings were filed and their current status.
@@ -190,9 +190,11 @@ The **evaluation execution branch** created by `/prd-start` from main **never me
 - [ ] **IS scoring run** — Follow `docs/language-extension-plan.md` step 9. Full protocol in `evaluation/is/README.md` (commit-story-v2 section).
 
   1. **Claude runs**: `datadog-agent stop`
-  2. **Claude starts** the OTel Collector in the background:
+  2. **Claude starts** the OTel Collector in the background using the installed binary:
      ```bash
-     docker run --rm -d --name otelcol-is -w /etc/otelcol -p 4318:4318 --user "$(id -u):$(id -g)" -v /Users/whitney.lee/Documents/Repositories/spinybacked-orbweaver-eval/evaluation/is:/etc/otelcol otel/opentelemetry-collector-contrib:latest --config /etc/otelcol/otelcol-config.yaml
+     vals exec -f ~/Documents/Repositories/spinybacked-orbweaver-eval/.vals.yaml -- bash -c 'export PATH="$HOME/.local/bin:/opt/homebrew/bin:$PATH" && otelcol-contrib --config ~/Documents/Repositories/spinybacked-orbweaver-eval/evaluation/is/otelcol-config.yaml > /tmp/otelcol.log 2>&1' &
+     COLLECTOR_PID=$!
+     until lsof -i :4318 >/dev/null 2>&1; do sleep 0.5; done
      ```
   3. **Claude checks out** instrument files and runs the app from `~/Documents/Repositories/commit-story-v2`:
      ```bash
@@ -201,7 +203,7 @@ The **evaluation execution branch** created by `/prd-start` from main **never me
      git checkout main -- src/ examples/
      ```
      Note: omit `COMMIT_STORY_TRACELOOP=true` — `@traceloop/instrumentation-langchain` API incompatibility crashes the process. See `evaluation/is/README.md`.
-  4. **Claude stops** the Collector: `docker stop otelcol-is`
+  4. **Claude stops** the Collector: `kill "$COLLECTOR_PID"`
   5. **Claude runs** the scorer: `node evaluation/is/score-is.js evaluation/is/eval-traces.json > evaluation/commit-story-v2/run-24/is-score.md`
   6. **Confirm IS scoring traces in Datadog**: Note the IS scoring run start time, then use the `search_datadog_spans` Datadog MCP tool with query `service:commit-story from:<run-start-time>` (use the actual timestamp, not `now-30m`, to avoid matching unrelated organic traffic from daily use). If multiple `service.instance.id` values appear, pick the one whose spans cluster around the IS scoring invocation time. Record that `service.instance.id`. This confirms the OTel Collector's Datadog exporter forwarded spans from the IS scoring run.
   7. **Claude runs**: `datadog-agent start`
