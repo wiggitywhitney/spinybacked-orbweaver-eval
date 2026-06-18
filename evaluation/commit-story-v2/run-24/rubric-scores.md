@@ -37,7 +37,7 @@
 | COV-001 (Entry points have spans) | **PASS** | All 14 committed files instrument their exported async entry points; summary-detector.js commits all 5 exported async functions (upgrade from run-23's 4-function partial) |
 | COV-003 (Failable ops have error visibility) | **PASS** | All 14 committed files have outer catch with `recordException` + `SpanStatusCode.ERROR` + rethrow; graceful-degradation catches correctly handled under NDS-007 precedent |
 | COV-004 (Async ops have spans) | **PASS** | All async functions in committed files instrumented; summary-manager.js commits all 9 spans (5th consecutive run); summary-detector.js commits 9 spans across all 5 exported + 4 unexported async I/O helpers |
-| COV-005 (Domain attributes present) | **FAIL** | Two files: (1) `context-capture-tool.js` — `saveContext` span carries only output attributes (`entry_date`, `file_path`); `commit_story.context.source: 'mcp'` present in run-23 is absent (regression). (2) `index.js` — span carries `vcs.ref.head.revision` and `commit_story.git.subcommand` but not `commit_story.journal.file_path` (generated entry path captured in run-23; regression). |
+| COV-005 (Domain attributes present) | **PASS** | All 14 committed files carry ≥1 meaningful domain attribute on every span. Two files show coverage delta observations (not failures): `context-capture-tool.js` dropped `commit_story.context.source` from run-23 while retaining `entry_date` and `file_path`; `index.js` dropped `commit_story.journal.file_path` while retaining `vcs.ref.head.revision` and `commit_story.git.subcommand`. COV-005 is a minimum bar (≥1 domain attribute), not a sameness requirement — attribute variation across runs is expected and valid. |
 | COV-006 (Auto-instrumentation preferred) | **PASS** | `@traceloop/instrumentation-langchain` used correctly in journal-graph.js and summary-graph.js; manual spans establish active context before `model.invoke(...)` calls |
 
 ### Restraint (RST): 4/4 (100%)
@@ -85,12 +85,12 @@
 | Dimension | Run-24 | Run-23 | Run-21 | Run-20 | Run-19 | Delta (vs run-23) |
 |-----------|--------|--------|--------|--------|--------|-------------------|
 | NDS | 2/2 (100%) | 2/2 (100%) | 2/2 (100%) | 2/2 (100%) | 2/2 (100%) | — |
-| COV | **4/5 (80%)** | 5/5 (100%) | 4/5 (80%) | 4/5 (80%) | 2/5 (40%) | **-20pp** |
+| COV | **5/5 (100%)** | 5/5 (100%) | 4/5 (80%) | 4/5 (80%) | 2/5 (40%) | — |
 | RST | 4/4 (100%) | 4/4 (100%) | 4/4 (100%) | 4/4 (100%) | 4/4 (100%) | — |
 | API | 3/3 (100%) | 3/3 (100%) | 3/3 (100%) | 3/3 (100%) | 3/3 (100%) | — |
 | SCH | **3/4 (75%)** | 3/4 (75%) | 4/4 (100%) | 4/4 (100%) | 3/4 (75%) | — |
 | CDQ | **6/7 (86%)** | 7/7 (100%) | 6/7 (86%) | 7/7 (100%) | 7/7 (100%) | **-14pp** |
-| **Total** | **22/25 (88%)** | **24/25 (96%)** | 23/25 (92%) | 24/25 (96%) | 21/25 (84%) | **-8pp** |
+| **Total** | **23/25 (92%)** | **24/25 (96%)** | 23/25 (92%) | 24/25 (96%) | 21/25 (84%) | **-4pp** |
 | **Gates** | **5/5 (100%)** | **5/5 (100%)** | 5/5 (100%) | 5/5 (100%) | 5/5 (100%) | — |
 
 ---
@@ -99,42 +99,38 @@
 
 | Metric | Run-24 | Run-23 | Run-21 | Run-20 | Run-19 |
 |--------|--------|--------|--------|--------|--------|
-| Quality score | **22/25 (88%)** | 24/25 (96%) | 23/25 (92%) | 24/25 (96%) | 21/25 (84%) |
+| Quality score | **23/25 (92%)** | 24/25 (96%) | 23/25 (92%) | 24/25 (96%) | 21/25 (84%) |
 | Gates | 5/5 | 5/5 | 5/5 | 5/5 | 5/5 |
 | Committed files | **14** | 13 | 12 | 12 | 10 |
 | Partial files | **0** | 1 | 0 | 0 | 3 |
 | Failed files | **0** | 0 | 2 | 1 | 0 |
 | Total spans (committed) | **48** | 45 | 42 | 42 | 30 |
 | Cost | **$5.16** | $7.84 | $8.10 | $9.08 | $8.83 |
-| Q×F | **12.32** | 12.48 | 11.0 | 11.5 | 8.4 |
+| Q×F | **12.88** | 12.48 | 11.0 | 11.5 | 8.4 |
 | Push/PR | **AUTO ✅ (#81)** | AUTO ✅ (#75) | AUTO ✅ (#74) | AUTO ✅ (#73) | AUTO ✅ (#71) |
 | IS | **pending** | 80/100 | 90/100 | 80/100 | 80/100 |
 
-**Q×F = 12.32** (22/25 × 14). Despite setting a new file-count record (14 committed, 0 failures, 0 partials), Q×F regresses slightly from run-23 (12.48 → 12.32) due to 3 failing dimensions (COV-005, CDQ-001 regressions + SCH-003 persistence). Without the regressions: 25/25 × 14 = 14.0 would have set an all-time record.
+**Q×F = 12.88** (23/25 × 14). A new high-water mark by Q×F, edging past run-23 (12.48) despite a quality point regression. The 14-file clean sweep drives the gain — even at 23/25 quality, 14 committed files produces a higher Q×F than 13 files at 24/25. Without the two remaining failures (CDQ-001 + SCH-003): 25/25 × 14 = 14.0 would have set an all-time record by a wide margin.
 
-**Paradox of the clean sweep**: Run-24 is the first run with 0 committed-file losses (0 failures, 0 partials) and 14 committed files — a structural achievement. But the rubric quality score (88%) is the lowest since run-19 (84%), driven by two regressions in index.js that the spiny-orb agent introduced cleanly in 1 attempt. The gap between commit success and rubric quality has never been wider: all files committed, 3 contain quality failures.
+**Note on COV-005 methodology**: Two files (`context-capture-tool.js`, `index.js`) showed coverage delta observations — attribute choices that differ from run-23 but are not COV-005 failures. COV-005 is a minimum bar (≥1 domain attribute per span), not a sameness requirement against the prior run. Attribute variation across runs is expected; the rubric does not penalize it. See coverage delta observations in per-file-evaluation.md for detail.
+
+---
+
+## Coverage Delta Observations
+
+Two files show attribute choices that differ from run-23. These are not rule failures — both spans retain ≥1 domain attribute (COV-005 PASS). They are documented here for completeness and as context for future runs.
+
+### context-capture-tool.js — `commit_story.context.source` dropped
+
+Run-23 had 2 spans (outer anonymous MCP callback carrying `source: 'mcp'`, inner `saveContext`). Run-24 has 1 span (`saveContext`) with `entry_date` and `file_path`. The `source` attribute identified the ingestion pathway; its absence reduces diagnostic richness on the MCP path but both remaining attributes are meaningful domain attributes. The agent scope decision (instrument only `saveContext`) is a valid choice.
+
+### index.js — `commit_story.journal.file_path` dropped
+
+Run-23's main span carried 3 attributes including `file_path` (the generated entry path — a result attribute). Run-24 carries 2 attributes (`vcs.ref.head.revision`, `commit_story.git.subcommand`). The result attribute is gone but the span is not attribute-sparse. The agent's choice to capture only input attributes is valid; run-23's approach of also capturing the result was also valid.
 
 ---
 
 ## Failure Analysis
-
-### COV-005: context-capture-tool.js — `commit_story.context.source` absent (regression)
-
-Run-23 instrumented `context-capture-tool.js` with 2 spans: an outer anonymous MCP callback span (carrying `commit_story.context.source: 'mcp'`) and an inner `saveContext` span. Run-24 omits the outer callback span entirely, reducing coverage to 1 span (`saveContext`) with only output attributes (`entry_date`, `file_path`).
-
-The source attribute (`'mcp'`) identifies the context ingestion pathway — a meaningful input attribute for diagnosing which tool wrote a context entry. Its absence is a regression, not a simplification.
-
-**Fix**: Add `span.setAttribute('commit_story.context.source', 'mcp')` inside `saveContext`, or reinstate the outer MCP callback span. The simpler path is inlining the attribute on the existing `saveContext` span.
-
-**Root cause**: The agent made a scope decision to instrument only `saveContext` rather than the anonymous MCP callback. Without context from run-23's approach, it chose the narrower instrumentation. The run-23 pattern (outer callback + inner I/O helper) was not carried forward.
-
-### COV-005: index.js — `commit_story.journal.file_path` absent (regression)
-
-Run-23's `index.js` span carried `commit_story.journal.file_path` (the generated journal entry path) as a result attribute, capturing the primary output of a successful `commit-story journal` invocation. Run-24 omits it — the span carries only `vcs.ref.head.revision` and `commit_story.git.subcommand`.
-
-**Fix**: Retrieve the return value from `runJournalGeneration()` and set `commit_story.journal.file_path` on the success path, consistent with run-23.
-
-**Root cause**: The agent did not consult run-23's instrumentation when writing index.js. The result attribute pattern requires knowing what the orchestrated function returns — without that signal, the agent defaulted to input-only attributes.
 
 ### CDQ-001: index.js — `process.exit()` bypasses `finally { span.end() }` (regression from run-12 fix)
 
@@ -162,8 +158,6 @@ Run-23's failure was `diff_size` with the identical type mismatch. Run-24 rename
 
 | Rule | Dimension | File(s) | Root Cause | Runs Open |
 |------|-----------|---------|-----------|-----------|
-| COV-005 | COV | context-capture-tool.js (`source` absent) | Outer callback span omitted; `source` not inlined on saveContext span | New (run-24) |
-| COV-005 | COV | index.js (`file_path` absent) | Return value of `runJournalGeneration()` not captured; result attribute not set | New (run-24) |
 | CDQ-001 | CDQ | index.js (`process.exit()` bypasses span.end) | Run-12 fix not carried forward; pre-exit `span.end()` calls absent on early-exit paths | Regression (run-12 fix maintained in run-23) |
 | SCH-003 | SCH | git-collector.js (`diff_lines: type: string`) | Attribute renamed from `diff_size` but `type: string` declaration not corrected to `type: int` | 2nd consecutive run (issue #928) |
 

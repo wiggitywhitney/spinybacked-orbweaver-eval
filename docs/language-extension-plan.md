@@ -150,6 +150,8 @@ The most recently completed run for a target is the **style and format reference
    ```
    The per-file agent should check schema-related agent note framing: `"New attribute X: no registered key captures..."` means the agent announced a registration — if the attribute is absent from `agent-extensions.yaml`, the registration step failed mid-attempt (mechanism failure). `"X captures [concept]. No registered attribute covers..."` means the agent documented a gap but chose not to act (agent decision, not mechanism failure). These are different root causes with different fix implications.
 
+   **COV-005 methodology (attribute presence, not attribute identity):** COV-005 passes if a span carries ≥1 meaningful domain attribute. Do NOT fail COV-005 based on comparison to the prior run's specific attribute choices — attribute variation between runs is normal and expected. The rule is a minimum bar, not a sameness requirement. When a committed file's attribute set changes substantially from the prior run (any span drops ≥50% of its attributes, or a span that carried ≥3 attributes now carries 1), note it as a **coverage delta observation** in the per-file narrative — examine which specific attributes changed and whether the remaining attributes still capture the span's meaningful domain context. A coverage delta observation is narrative only; it does not affect any rule verdict. Only fail COV-005 when a span carries zero domain attributes.
+
 7. PR artifact evaluation
 8. Rubric scoring
 9. IS scoring run

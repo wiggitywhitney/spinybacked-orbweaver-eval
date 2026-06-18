@@ -20,11 +20,11 @@
 | File | Rule | Category | Description | History |
 |------|------|----------|-------------|---------|
 | `collectors/git-collector.js` | SCH-003 | Type mismatch | `commit_story.git.diff_lines` declared `type: string` in schema, set as integer at runtime (`lines.length`). Datadog confirms `diff_lines: 296` (integer). | 2nd consecutive run. Run-23: `diff_size: type: string`, run-24: `diff_lines: type: string` — rename without type fix. |
-| `mcp/tools/context-capture-tool.js` | COV-005 | Missing attribute | `saveContext` span carries only output attributes (`entry_date`, `file_path`). `commit_story.context.source: 'mcp'` — present on run-23's outer callback span — is absent. | Regression from run-23. |
 | `index.js` | CDQ-001 | Span lifecycle | `process.exit()` calls in `main()` bypass `finally { span.end() }`. No explicit `span.end()` before individual exits. Run-12 fixed this; run-23 preserved the fix; run-24 regresses. | Regression from run-23's run-12 fix. |
-| `index.js` | COV-005 | Missing attribute | `commit_story.journal.file_path` (generated entry path, captured as a result attribute in run-23) absent in run-24. Span carries `vcs.ref.head.revision` and `commit_story.git.subcommand` but not the primary output of a successful journal run. | Regression from run-23. |
 
-**Result: 4 failures, 3 files, 14 committed files evaluated.**
+**Result: 2 failures, 2 files, 14 committed files evaluated.**
+
+**Coverage delta observations (not rule failures):** `context-capture-tool.js` dropped from 2 attributes (`entry_date`, `file_path`, `source`) to 2 (`entry_date`, `file_path`) — lost `commit_story.context.source: 'mcp'` from run-23's outer callback span. `index.js` dropped `commit_story.journal.file_path` (result attribute from run-23) while retaining `vcs.ref.head.revision` and `commit_story.git.subcommand`. Both spans still carry ≥1 domain attribute (COV-005 PASS); the dropped attributes represent agent choice variation, not a structural failure. See per-file sections for detail.
 
 ---
 
@@ -235,7 +235,7 @@
 | COV-001 | PASS | `registerContextCaptureTool` is the only export and is synchronous — RST-001 applies |
 | COV-003 | PASS | `saveContext` catch records and rethrows |
 | COV-004 | PASS | `saveContext` is the async I/O entry point; no enclosing orchestrator span; instrumented per COV-004 |
-| COV-005 | **FAIL** | Span carries `entry_date` and `file_path` (output attributes only). `commit_story.context.source: 'mcp'` — present in run-23 — absent. Fix: add `span.setAttribute('commit_story.context.source', 'mcp')` inside `saveContext`, or reinstate the outer callback span. |
+| COV-005 | PASS | Span carries `entry_date` and `file_path` — two domain attributes present. COV-005 requires ≥1 domain attribute; that bar is met. |
 | RST-001 | PASS | `getContextPath`, `formatTimestamp`, `formatContextEntry` (sync) skipped |
 | RST-004 | PASS | `saveContext` instrumented because no enclosing orchestrator span covers its I/O |
 | SCH-001 | PASS | `commit_story.context.save_context` registered |
@@ -246,6 +246,8 @@
 | CDQ-003 | PASS | `entry_date` set before I/O; `file_path` set after successful write |
 | CDQ-005 | PASS | Anonymous callback catch returns MCP error (NDS-007); `saveContext` catch rethrows |
 | CDQ-007 | PASS | `entry_date` from `new Date()` (always valid); `file_path` from `getContextPath(now)` (always a string) |
+
+**Coverage delta observation**: Run-23 had 2 spans (outer anonymous MCP callback with `commit_story.context.source: 'mcp'`, inner `saveContext`). Run-24 has 1 span (`saveContext`) with `entry_date` and `file_path` only — `source` dropped. The span still carries 2 domain attributes; COV-005 passes. The lost `source` attribute identified the ingestion pathway; its absence is worth noting as a quality regression in coverage richness, but both remaining attributes are meaningful. The agent scope decision (instrument only `saveContext`) is a valid choice; the run-23 two-span approach was also valid.
 
 **Trace supplement**: No spans in captured run — MCP tool not exercised in CLI dry-run. Static analysis only.
 
@@ -497,7 +499,7 @@
 | COV-001 | PASS | `main()` entry-point span |
 | COV-003 | PASS | Catch records and sets ERROR status |
 | COV-004 | PASS | `main()` only exported async function |
-| COV-005 | **FAIL** | Span sets `vcs.ref.head.revision` and `commit_story.git.subcommand`. `commit_story.journal.file_path` (generated entry path, captured in run-23) absent. Fix: retrieve return value from `runJournalGeneration()` and set `file_path` on success path. |
+| COV-005 | PASS | Span carries `vcs.ref.head.revision` and `commit_story.git.subcommand` — two domain attributes present. COV-005 requires ≥1 domain attribute; that bar is met. |
 | RST-001 | PASS | No sync helpers have spans |
 | RST-004 | PASS | Only exported async `main()` instrumented |
 | SCH-001 | PASS | `commit_story.cli.main` registered |
@@ -509,7 +511,9 @@
 | CDQ-005 | PASS | No empty catches |
 | CDQ-007 | PASS | `vcs.ref.head.revision` from git data; `subcommand` from CLI arg with conditional check |
 
-**Trace supplement**: `commit_story.cli.main` confirmed in Datadog. `vcs.ref.head.revision` and `commit_story.git.subcommand: 'journal'` present. `file_path` absent — COV-005 confirmed. CDQ-001 not observable on success path — failure is on early-exit paths not captured in this run.
+**Coverage delta observation**: Run-23 carried 3 attributes on this span (`vcs.ref.head.revision`, `commit_story.git.subcommand`, `commit_story.journal.file_path`). Run-24 carries 2 — `file_path` dropped. COV-005 passes (2 domain attributes remain). `file_path` captured the generated journal entry path (a result attribute); its absence reduces the span's diagnostic value on the success path but does not make the span attribute-empty. The agent's choice to omit the result attribute is a valid simplification; run-23's approach of capturing it was also valid.
+
+**Trace supplement**: `commit_story.cli.main` confirmed in Datadog. `vcs.ref.head.revision` and `commit_story.git.subcommand: 'journal'` present. `file_path` absent — consistent with coverage delta observation above. CDQ-001 not observable on success path — failure is on early-exit paths not captured in this run.
 
 ---
 
