@@ -59,6 +59,18 @@ Suggested fix for spiny-orb team: Abstract the example to non-repo-specific doma
 
 *(populate during evaluation run and per-file evaluation)*
 
+### D-2 per-file evaluation: do 5 files at a time, clear context between batches
+
+The run-24 D-2 evaluation spawned all 15 agents at once. A context compaction happened between when the agents returned their results and when the section files were written to disk. The compaction summary was detailed enough to reconstruct the sections, but this is fragile — compaction is lossy and could drop the rule-level detail needed to write accurate tables.
+
+**Process change for PRD #25**: spawn agents in batches of 5, write the section files immediately after each batch returns, then clear context before the next batch.
+
+- Whitney does the clearing (not the AI), so the section files are confirmed on disk before the clear
+- At the start of each new batch, run `ls per-file-sections/` to see what's done and pick the next 5
+- Recommended groupings by pipeline area: `(collectors + integrators)`, `(generators)`, `(managers)`, `(commands + MCP)`, `(correct-skips batch)`
+
+Root cause that would eliminate the problem entirely: agents being able to write files directly. If each D-2 agent wrote its own section file as it completed, the main context would never need to buffer the results. Flag this for spiny-orb eval infrastructure if Write tool access for subagents becomes available.
+
 ## Rubric Gaps or Clarifications Needed
 
 *(populate during per-file evaluation)*
