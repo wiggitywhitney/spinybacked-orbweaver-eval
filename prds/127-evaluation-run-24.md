@@ -114,7 +114,7 @@ The **evaluation execution branch** created by `/prd-start` from main **never me
 
 - [x] **Collect skeleton documents** — Create `evaluation/commit-story-v2/run-24/` directory with `lessons-for-prd25.md` skeleton. Must run before pre-run verification begins.
 
-- [ ] **Pre-run verification** — Verify spiny-orb fixes and validate run prerequisites:
+- [x] **Pre-run verification** — Verify spiny-orb fixes and validate run prerequisites:
   1. **Handoff triage review**: Read the spiny-orb team's triage of `evaluation/commit-story-v2/run-23/actionable-fix-output.md`. Check which findings were filed and their current status.
   2. **RUN23-1 fix** (P2): Verify whether spiny-orb issue #928 (SCH-003 type mismatch — integer-as-string for `diff_size` and `*_summaries_generated`) has been resolved. Look for prompt guidance updates instructing agents to check the declared schema type before setting an attribute from a numeric source and apply `String()` conversion if `type: string`, or schema changes declaring the attributes as `type: int`. If not fixed, still proceed — run-24 will confirm the gap persists.
   3. **RUN23-2 fix** (P2): Covered by the same issue #928 as RUN23-1 — check together.
