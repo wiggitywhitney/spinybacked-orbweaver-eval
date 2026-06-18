@@ -6,7 +6,7 @@
 # parseable by score-is.js.
 #
 # Also supports the observability triangle demo:
-#   - spanmetrics connector: derives RED metrics from spans and adds them as
+#   - span_metrics connector: derives RED metrics from spans and adds them as
 #     Datadog custom metrics, with commit_story.ai.section_type as a dimension
 #   - datadog/connector: computes Datadog-native APM stats (required since v0.95.0)
 #   - OTLP logs pipeline: receives log records from the pino bridge in commit-story-v2
@@ -14,7 +14,7 @@
 #     with trace_id/span_id for traces<->logs correlation
 #
 # Requires DD_API_KEY to be set in the environment. Use vals exec to inject:
-#   vals exec -f .vals.yaml -- bash -c 'export PATH="/opt/homebrew/bin:$PATH" && otelcol-contrib --config evaluation/is/otelcol-config.yaml > /tmp/otelcol.log 2>&1' &
+#   vals exec -f .vals.yaml -- bash -c '/Users/whitney.lee/.local/bin/otelcol-contrib --config evaluation/is/otelcol-config.yaml > /tmp/otelcol.log 2>&1' &
 #
 # IS spec pinned to commit 52c14ba.
 
@@ -25,7 +25,7 @@ receivers:
         endpoint: 0.0.0.0:4318
 
 connectors:
-  spanmetrics:
+  span_metrics:
     # add_resource_attributes: true is required for env and version UST tags to
     # appear on span-derived metrics. Without it, metrics-to-logs "View related
     # logs" navigation returns no results even when the OTel SDK sets these attrs.
@@ -64,9 +64,9 @@ service:
       receivers: [otlp]
       # spanmetrics and datadog/connector are connectors — they appear in
       # exporters here and in receivers of their downstream pipelines.
-      exporters: [file, datadog, spanmetrics, datadog/connector]
+      exporters: [file, datadog, span_metrics, datadog/connector]
     metrics:
-      receivers: [spanmetrics, datadog/connector]
+      receivers: [span_metrics, datadog/connector]
       exporters: [datadog]
     logs:
       # Receives OTLP log records from the pino bridge (same 4318 endpoint as traces).
