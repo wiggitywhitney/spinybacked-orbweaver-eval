@@ -196,9 +196,9 @@ The **evaluation execution branch** created by `/prd-start` from main **never me
      COLLECTOR_PID=$!
      timeout 30 bash -c 'until lsof -i :4318 >/dev/null 2>&1; do sleep 0.5; done' || { kill "$COLLECTOR_PID" 2>/dev/null; exit 1; }
      ```
-  3. **Claude checks out** instrument files and runs the app from `~/Documents/Repositories/commit-story-v2`:
+  3. **Claude checks out** instrument files and runs the app from `~/Documents/Repositories/commit-story-v2`. The instrument branch name is `spiny-orb/instrument-1781811083418` (confirmed in `evaluation/commit-story-v2/run-24/rubric-scores.md` line 5):
      ```bash
-     git checkout <instrument-branch> -- src/ examples/
+     git checkout spiny-orb/instrument-1781811083418 -- src/ examples/
      OTEL_EXPORTER_OTLP_TRACES_ENDPOINT=http://localhost:4318/v1/traces env -u ANTHROPIC_CUSTOM_HEADERS -u ANTHROPIC_BASE_URL vals exec -i -f .vals.yaml -- node --import ./examples/instrumentation.js src/index.js HEAD
      git checkout main -- src/ examples/
      ```
