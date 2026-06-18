@@ -30,7 +30,7 @@
 | NDS-004 (API signatures preserved) | **PASS** | 14/14 — no function signatures altered |
 | NDS-007 (Control flow preserved) | **PASS** | 14/14 — all original catches preserved; graceful-degradation catches (MCP tool pattern, ENOENT catches) correctly left unmodified throughout |
 
-### Coverage (COV): 4/5 (80%)
+### Coverage (COV): 5/5 (100%)
 
 | Rule | Result | Evidence |
 |------|--------|----------|
