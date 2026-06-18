@@ -151,7 +151,7 @@ The **evaluation execution branch** created by `/prd-start` from main **never me
   2. If no spans from the instrument branch appear yet: note this in `run-summary.md` and defer — do not block forward progress. **The trace run does not need to happen during the eval itself** — any invocation of the instrumented code on the correct branch after the eval completes is sufficient.
   3. When confirmed, record the corresponding `service.instance.id` in `trace-artifact.md` as the post-run trace reference (update from the pre-run capture if the instance differs).
 
-- [ ] **Failure deep-dives** — For each failed file AND run-level failure. Includes any partial files. Also include committed files with ≥ 3 attempts AND quality failures — see scope note in `docs/language-extension-plan.md` step 5.
+- [x] **Failure deep-dives** — For each failed file AND run-level failure. Includes any partial files. Also include committed files with ≥ 3 attempts AND quality failures — see scope note in `docs/language-extension-plan.md` step 5.
   Produces: `evaluation/commit-story-v2/run-24/failure-deep-dives.md`
   Style reference: `Read docs/templates/eval-run-style-reference/failure-deep-dives.md`
 
