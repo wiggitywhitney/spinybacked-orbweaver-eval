@@ -1,7 +1,7 @@
 # OTel Collector config for IS scoring runs and the observability triangle demo.
-# Receives OTLP traces on port 4318 (same port as Datadog Agent — they cannot
-# run simultaneously). Writes line-delimited JSON to eval-traces.json for IS
-# scoring, and also forwards to Datadog APM for live trace inspection.
+# Receives OTLP traces and logs on port 4318 (same port as Datadog Agent — they
+# cannot run simultaneously). Writes line-delimited JSON to eval-traces.json for
+# IS scoring, and also forwards to Datadog APM for live trace inspection.
 # Each line of eval-traces.json is an ExportTraceServiceRequest JSON object,
 # parseable by score-is.js.
 #
@@ -9,14 +9,12 @@
 #   - spanmetrics connector: derives RED metrics from spans and adds them as
 #     Datadog custom metrics, with commit_story.ai.section_type as a dimension
 #   - datadog/connector: computes Datadog-native APM stats (required since v0.95.0)
-#   - filelog receiver: scrapes /tmp/commit-story.log for JSON log lines with
-#     trace_id/span_id fields for traces<->logs correlation in Datadog Logs Explorer
+#   - OTLP logs pipeline: receives log records from the pino bridge in commit-story-v2
+#     via the same port 4318 endpoint as traces; routes them to Datadog Logs Explorer
+#     with trace_id/span_id for traces<->logs correlation
 #
 # Requires DD_API_KEY to be set in the environment. Use vals exec to inject:
 #   vals exec -f .vals.yaml -- bash -c 'export PATH="/opt/homebrew/bin:$PATH" && otelcol-contrib --config evaluation/is/otelcol-config.yaml > /tmp/otelcol.log 2>&1' &
-#
-# For the demo log pipeline, tee commit-story stdout to /tmp/commit-story.log:
-#   node --import ./examples/instrumentation.js ./bin/commit-story.js 2>&1 | tee /tmp/commit-story.log
 #
 # IS spec pinned to commit 52c14ba.
 
@@ -25,14 +23,6 @@ receivers:
     protocols:
       http:
         endpoint: 0.0.0.0:4318
-  filelog:
-    # Scrapes structured JSON log lines emitted by commit-story-v2 demo branch.
-    # Each line is a JSON object with trace_id (32-char lowercase hex), span_id,
-    # commit_story.ai.section_type, and gen_ai.usage.output_tokens fields.
-    # Datadog recognizes trace_id/span_id natively — no dd.trace_id conversion needed.
-    include: [/tmp/commit-story.log]
-    operators:
-      - type: json_parser
 
 connectors:
   spanmetrics:
@@ -79,5 +69,7 @@ service:
       receivers: [spanmetrics, datadog/connector]
       exporters: [datadog]
     logs:
-      receivers: [filelog]
+      # Receives OTLP log records from the pino bridge (same 4318 endpoint as traces).
+      # Datadog natively correlates trace_id/span_id fields to APM spans.
+      receivers: [otlp]
       exporters: [datadog]
