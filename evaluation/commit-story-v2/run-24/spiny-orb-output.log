@@ -1,0 +1,624 @@
+Loading config from /Users/whitney.lee/Documents/Repositories/commit-story-v2/spiny-orb.yaml
+Config loaded from /Users/whitney.lee/Documents/Repositories/commit-story-v2/spiny-orb.yaml
+Started: 2026-06-18T19:31:23.418Z
+validateCredentials: GITHUB_TOKEN present=true
+Cost ceiling: 31 files, 3100000 max tokens, estimated max cost $72.54
+Proceed? [y/N] Processing file 1 of 31: src/collectors/claude-collector.js
+  ✅ SUCCESS — 1 span, 0 attributes
+  Tokens: 5.9K output
+
+  Schema extensions
+  ────────────────────────────────────────────────────────────
+  • span.commit_story.context.collect_messages
+
+  Agent notes
+  ────────────────────────────────────────────────────────────
+
+  • getClaudeProjectsDir, encodeProjectPath, getClaudeProjectPath, findJSONLFiles, parseJSONLFile, filterMessages, and groupBySession are all pure synchronous functions with no async I/O — they are skipped per RST-001 (no spans on synchronous utilities). Their execution is captured as part of the collectChatMessages span.
+
+  • collectChatMessages is the sole exported async entry point and receives a span per COV-001 (Entry Point Spans). The span name 'commit_story.context.collect_messages' is a new extension; no existing registry span covered this Claude Code chat collection operation.
+
+  • All five attributes set on the collectChatMessages span (commit_story.context.source, commit_story.context.time_window_start, commit_story.context.time_window_end, commit_story.context.sessions_count, commit_story.context.messages_count) are already registered in the schema — no new attribute keys were invented.
+
+  • Input parameter attributes (source, time_window_start, time_window_end) are set unconditionally before the early-return guard on projectPath, ensuring those attributes are present on the early-exit span path as well as the happy path.
+
+  • The catch block inside parseJSONLFile (which swallows malformed JSON without rethrowing) was left without error recording per NDS-007 (Expected Catch Unmodified) — it is a graceful-degradation catch that represents expected control flow, not a failure condition.
+
+  Report: src/collectors/claude-collector.instrumentation.md
+
+Processing file 2 of 31: src/collectors/git-collector.js
+  ✅ SUCCESS — 6 spans, 3 attributes, 3 attempts
+  Tokens: 26.4K output
+
+  Schema extensions
+  ────────────────────────────────────────────────────────────
+  • span.commit_story.git.run
+  • span.commit_story.git.commit_metadata
+  • span.commit_story.git.commit_diff
+  • span.commit_story.git.merge_info
+  • span.commit_story.git.get_previous_commit_time
+  • span.commit_story.git.get_commit_data
+  • commit_story.git.subcommand
+  • commit_story.git.diff_lines
+  • commit_story.git.parent_count
+
+  Agent notes
+  ────────────────────────────────────────────────────────────
+
+  • commit_story.git.subcommand: No registered key captures the git subcommand (e.g. 'show', 'log', 'diff-tree'). The closest registered key, vcs.ref.head.revision, describes a commit reference — not a command name. Declaring commit_story.git.subcommand (type: string) for runGit identity.
+
+  • commit_story.git.diff_lines: No registered key captures the number of lines in a raw git diff patch. commit_story.commit.files_changed describes changed file count, not patch line count. Declaring commit_story.git.diff_lines (type: int). The lines array is already computed in the function body so no extra computation is required — CDQ-006 (isRecording Guard) guard is unnecessary.
+
+  • commit_story.git.parent_count: No registered key captures parent commit count. commit_story.context.sessions_count and similar count keys describe different domain concepts. Declaring commit_story.git.parent_count (type: int) for getMergeInfo and reused in getCommitData.
+
+  • runGit has an existing try/catch that re-throws on all paths — COV-003 (Error Recording) applies. OTel error recording is added at the top of the catch before all original conditional rethrows, preserving the existing error-handling logic intact (NDS-005 (Control Flow Preserved) Pattern A with added finally).
+
+  • getCommitMetadata sets vcs.ref.head.revision twice: once with commitRef at span open (ensures the attribute is present on all paths including early errors) and again with the resolved full hash after git output is parsed. The second assignment gives the canonical SHA rather than a symbolic ref like HEAD.
+
+  • getCommitDiff: The previous instrumentation failure (NDS-003 (Code Preserved)) was caused by wrapping the diff value in an isRecording guard combined with a null check. This version avoids that entirely — lines.length is a property access on an already-computed array, so no isRecording guard is needed per CDQ-006 (isRecording Guard), and no null check is required because lines is always defined at that point.
+
+  • getPreviousCommitTime and getCommitData are exported async entry points (COV-001 (Entry Point Spans)). They each receive their own span with commitRef captured as vcs.ref.head.revision before any conditional branching, satisfying COV-005 (Domain Attributes) input-before-guard requirement.
+
+  Report: src/collectors/git-collector.instrumentation.md
+
+Processing file 3 of 31: src/generators/prompts/guidelines/accessibility.js
+  ✅ SUCCESS — 0 spans, 0 attributes
+  Tokens: 0.0K output
+
+  Agent notes
+  ────────────────────────────────────────────────────────────
+
+  • Pre-scan: no instrumentable functions — all are pure sync utilities or unexported helpers. No LLM call made.
+
+  Report: src/generators/prompts/guidelines/accessibility.instrumentation.md
+
+Processing file 4 of 31: src/generators/prompts/guidelines/anti-hallucination.js
+  ✅ SUCCESS — 0 spans, 0 attributes
+  Tokens: 0.0K output
+
+  Agent notes
+  ────────────────────────────────────────────────────────────
+
+  • Pre-scan: no instrumentable functions — all are pure sync utilities or unexported helpers. No LLM call made.
+
+  Report: src/generators/prompts/guidelines/anti-hallucination.instrumentation.md
+
+Processing file 5 of 31: src/generators/prompts/guidelines/index.js
+  ✅ SUCCESS — 0 spans, 0 attributes
+  Tokens: 0.0K output
+
+  Agent notes
+  ────────────────────────────────────────────────────────────
+
+  • Pre-scan: no instrumentable functions — all are pure sync utilities or unexported helpers. No LLM call made.
+
+  Report: src/generators/prompts/guidelines/index.instrumentation.md
+
+Processing file 6 of 31: src/generators/prompts/sections/daily-summary-prompt.js
+  ✅ SUCCESS — 0 spans, 0 attributes
+  Tokens: 0.0K output
+
+  Agent notes
+  ────────────────────────────────────────────────────────────
+
+  • Pre-scan: no instrumentable functions — all are pure sync utilities or unexported helpers. No LLM call made.
+
+  Report: src/generators/prompts/sections/daily-summary-prompt.instrumentation.md
+
+Processing file 7 of 31: src/generators/prompts/sections/dialogue-prompt.js
+  ✅ SUCCESS — 0 spans, 0 attributes
+  Tokens: 0.0K output
+
+  Agent notes
+  ────────────────────────────────────────────────────────────
+
+  • Pre-scan: no instrumentable functions — all are pure sync utilities or unexported helpers. No LLM call made.
+
+  Report: src/generators/prompts/sections/dialogue-prompt.instrumentation.md
+
+Processing file 8 of 31: src/generators/prompts/sections/monthly-summary-prompt.js
+  ✅ SUCCESS — 0 spans, 0 attributes
+  Tokens: 0.0K output
+
+  Agent notes
+  ────────────────────────────────────────────────────────────
+
+  • Pre-scan: no instrumentable functions — all are pure sync utilities or unexported helpers. No LLM call made.
+
+  Report: src/generators/prompts/sections/monthly-summary-prompt.instrumentation.md
+
+Processing file 9 of 31: src/generators/prompts/sections/summary-prompt.js
+  ✅ SUCCESS — 0 spans, 0 attributes
+  Tokens: 0.0K output
+
+  Agent notes
+  ────────────────────────────────────────────────────────────
+
+  • Pre-scan: no instrumentable functions — all are pure sync utilities or unexported helpers. No LLM call made.
+
+  Report: src/generators/prompts/sections/summary-prompt.instrumentation.md
+
+Processing file 10 of 31: src/generators/prompts/sections/technical-decisions-prompt.js
+  ✅ SUCCESS — 0 spans, 0 attributes
+  Tokens: 0.0K output
+
+  Agent notes
+  ────────────────────────────────────────────────────────────
+
+  • Pre-scan: no instrumentable functions — all are pure sync utilities or unexported helpers. No LLM call made.
+
+  Report: src/generators/prompts/sections/technical-decisions-prompt.instrumentation.md
+
+Processing file 11 of 31: src/generators/journal-graph.js
+  ✅ SUCCESS — 4 spans, 0 attributes
+  Tokens: 30.4K output
+
+  Schema extensions
+  ────────────────────────────────────────────────────────────
+  • span.commit_story.journal.generate_summary
+  • span.commit_story.journal.generate_technical
+  • span.commit_story.journal.generate_dialogue
+  • span.commit_story.journal.generate_sections
+
+  Agent notes
+  ────────────────────────────────────────────────────────────
+
+  • summaryNode, technicalNode, and dialogueNode each have try/catch blocks that return graceful-degradation state (error strings, no rethrow). Per NDS-007 (Expected Catch Unmodified), recordException and setStatus(ERROR) were NOT added to those catches — they represent expected failure modes, not unexpected errors. span.end() is called via finally in all cases.
+
+  • The catch blocks in summaryNode, technicalNode, and dialogueNode never propagate errors upward (they return error state instead), so the LangGraph runtime always sees a resolved promise from these nodes. The outer span-level catch required by COV-003 (Error Recording) is satisfied by the existing catch clause; NDS-007 (Expected Catch Unmodified) takes precedence over adding error recording to graceful-degradation catches.
+
+  • getModel and resetModel are synchronous functions with no I/O — skipped per RST-001 (no spans on synchronous utilities).
+
+  • analyzeCommitContent, hasFunctionalCode, generateImplementationGuidance, formatSessionsForAI, formatChatMessages, escapeForJson, formatContextForSummary, formatContextForUser, cleanDialogueOutput, cleanTechnicalOutput, cleanSummaryOutput, buildGraph are all synchronous pure/data-transform functions — skipped per RST-001 (No Utility Spans).
+
+  • getGraph is unexported and its execution path is fully covered by the generateJournalSections span — skipped per RST-004 (No Internal Detail Spans).
+
+  • All four new span names use the commit_story namespace prefix consistent with existing schema spans. They are declared in schemaExtensions because no existing schema span matched these journal-generation operations.
+
+  • LangChainInstrumentation from @traceloop/instrumentation-langchain covers the getModel(...).invoke() calls inside summaryNode, technicalNode, and dialogueNode — those model.invoke() calls become child spans automatically when auto-instrumentation is active. Token usage attributes (gen_ai.usage.input_tokens, gen_ai.usage.output_tokens) are also set on the parent span from result.usage_metadata when available, guarded with != null.
+
+  • gen_ai.request.model is set to the hard-coded model string 'claude-haiku-4-5-20251001' matching the ChatAnthropic constructor — this is a static value known at instrumentation time.
+
+  • commit_story.journal.sections in generateJournalSections uses .filter(Boolean) on an inline array — CDQ-006 (isRecording Guard) isRecording guard is not required here because generateJournalSections is a COV-001 (Entry Point Spans) entry point (CDQ-006 (isRecording Guard) COV-001 (Entry Point Spans) exemption applies).
+
+  Report: src/generators/journal-graph.instrumentation.md
+
+Processing file 12 of 31: src/generators/prompts/sections/weekly-summary-prompt.js
+  ✅ SUCCESS — 0 spans, 0 attributes
+  Tokens: 0.0K output
+
+  Agent notes
+  ────────────────────────────────────────────────────────────
+
+  • Pre-scan: no instrumentable functions — all are pure sync utilities or unexported helpers. No LLM call made.
+
+  Report: src/generators/prompts/sections/weekly-summary-prompt.instrumentation.md
+
+Processing file 13 of 31: src/generators/summary-graph.js
+  ✅ SUCCESS — 6 spans, 4 attributes
+  Tokens: 31.2K output
+
+  Schema extensions
+  ────────────────────────────────────────────────────────────
+  • span.commit_story.journal.daily_summary_node
+  • span.commit_story.journal.generate_daily_summary
+  • span.commit_story.journal.weekly_summary_node
+  • span.commit_story.journal.generate_weekly_summary
+  • span.commit_story.journal.monthly_summary_node
+  • span.commit_story.journal.generate_monthly_summary
+  • commit_story.journal.entries_count
+  • commit_story.journal.week_label
+  • commit_story.journal.month_label
+  • commit_story.journal.summaries_count
+
+  Agent notes
+  ────────────────────────────────────────────────────────────
+
+  • commit_story.journal.entries_count (type: int, stability: development): Captures the number of journal entries passed into dailySummaryNode and generateDailySummary. No registered key describes 'count of journal entries being summarized' — commit_story.context.messages_count is 'messages collected from sessions' which is semantically different. A new extension key is required.
+
+  • commit_story.journal.week_label (type: string, stability: development): Captures the ISO week string (e.g., '2026-W09') passed to weeklySummaryNode and generateWeeklySummary. No registered key exists for a week period identifier — commit_story.journal.entry_date is YYYY-MM-DD daily granularity only. A new extension key is required.
+
+  • commit_story.journal.month_label (type: string, stability: development): Captures the month string (e.g., '2026-02') passed to monthlySummaryNode and generateMonthlySummary. No registered key exists for a month period identifier. A new extension key is required.
+
+  • commit_story.journal.summaries_count (type: int, stability: development): Captures the count of daily or weekly summaries being consolidated. No registered key precisely matches 'count of summaries being processed as input to a higher-level aggregation'. A new extension key is required.
+
+  • Inner catch blocks in dailySummaryNode, weeklySummaryNode, and monthlySummaryNode are graceful-degradation catches — they return fallback values without rethrowing. Per NDS-007 (Expected Catch Unmodified), recordException and setStatus(ERROR) were NOT added to these inner catches. The outer span-level catch handles any unexpected errors that escape the inner catch.
+
+  • LangChain is detected via @langchain/langgraph, @langchain/anthropic, and @langchain/core/messages imports. The LLM API calls (getModel().invoke()) inside the node functions are covered by LangChainInstrumentation auto-instrumentation. Manual spans are still applied to the application-level node and generate functions as COV-001 (Entry Point Spans) entry points.
+
+  • getModel, resetModel, formatEntriesForSummary, parseSummarySections, cleanDailySummaryOutput, buildGraph, getGraph, formatDailySummariesForWeekly, parseWeeklySummarySections, cleanWeeklySummaryOutput, buildWeeklyGraph, getWeeklyGraph, formatWeeklySummariesForMonthly, parseMonthlySummarySections, cleanMonthlySummaryOutput, buildMonthlyGraph, getMonthlyGraph — all synchronous or thin synchronous wrappers with no async I/O. Skipped per RST-001 (no spans on synchronous utilities) and RST-004 (unexported internal helpers covered by exported orchestrator spans).
+
+  • Input attributes (entry_date, entries_count, week_label, month_label, summaries_count) are set before the early-return guards inside each span, using state.entries / state.date etc. directly so they are present on all execution paths including the early-exit path.
+
+  Report: src/generators/summary-graph.instrumentation.md
+
+Processing file 14 of 31: src/integrators/filters/message-filter.js
+  ✅ SUCCESS — 0 spans, 0 attributes
+  Tokens: 0.0K output
+
+  Agent notes
+  ────────────────────────────────────────────────────────────
+
+  • Pre-scan: no instrumentable functions — all are pure sync utilities or unexported helpers. No LLM call made.
+
+  Report: src/integrators/filters/message-filter.instrumentation.md
+
+Processing file 15 of 31: src/integrators/filters/sensitive-filter.js
+  ✅ SUCCESS — 0 spans, 0 attributes
+  Tokens: 0.0K output
+
+  Agent notes
+  ────────────────────────────────────────────────────────────
+
+  • Pre-scan: no instrumentable functions — all are pure sync utilities or unexported helpers. No LLM call made.
+
+  Report: src/integrators/filters/sensitive-filter.instrumentation.md
+
+Processing file 16 of 31: src/integrators/filters/token-filter.js
+  ✅ SUCCESS — 0 spans, 0 attributes
+  Tokens: 0.0K output
+
+  Agent notes
+  ────────────────────────────────────────────────────────────
+
+  • Pre-scan: no instrumentable functions — all are pure sync utilities or unexported helpers. No LLM call made.
+
+  Report: src/integrators/filters/token-filter.instrumentation.md
+
+Processing file 17 of 31: src/integrators/context-integrator.js
+  ✅ SUCCESS — 1 span, 0 attributes
+  Tokens: 9.3K output
+
+  Schema extensions
+  ────────────────────────────────────────────────────────────
+  • span.commit_story.context.gather_context
+
+  Agent notes
+  ────────────────────────────────────────────────────────────
+
+  • gatherContextForCommit is the COV-001 (Entry Point Spans) entry point orchestrating all context collection. It receives a span named 'commit_story.context.gather_context' — no schema span existed for this orchestrating role (the schema spans for context cover the sub-operations like collect_messages, which are already instrumented in their respective callee files).
+
+  • formatContextForPrompt is a pure synchronous data transformation (no I/O, no async) — skipped per RST-001 (No Utility Spans).
+
+  • getContextSummary is a pure synchronous data transformation returning a summary object — skipped per RST-001 (No Utility Spans).
+
+  • All six attributes set on the gather_context span (vcs.ref.head.revision, commit_story.commit.message, commit_story.filter.messages_before, commit_story.filter.messages_after, commit_story.context.sessions_count, commit_story.context.messages_count) are already registered in the schema — no new attribute keys were declared.
+
+  • commit_story.commit.message is set from commitData.message (a git commit subject line from an external source). CDQ-006 (isRecording Guard) isRecording() guards do not apply to COV-001 (Entry Point Spans) entry point spans per the exemption rule.
+
+  • vcs.ref.head.revision is set before any awaited calls so it is present even if an early error occurs in getCommitData.
+
+  Report: src/integrators/context-integrator.instrumentation.md
+
+Processing file 18 of 31: src/logger.js
+  ✅ SUCCESS — 0 spans, 0 attributes
+  Tokens: 0.0K output
+
+  Agent notes
+  ────────────────────────────────────────────────────────────
+
+  • Pre-scan: no instrumentable functions — all are pure sync utilities or unexported helpers. No LLM call made.
+
+  Report: src/logger.instrumentation.md
+
+Processing file 19 of 31: src/mcp/tools/context-capture-tool.js
+  ✅ SUCCESS — 1 span, 0 attributes
+  Tokens: 4.7K output
+
+  Schema extensions
+  ────────────────────────────────────────────────────────────
+  • span.commit_story.context.save_context
+
+  Agent notes
+  ────────────────────────────────────────────────────────────
+
+  • saveContext is an unexported async function that performs filesystem I/O (mkdir + appendFile). No exported orchestrator wraps it, so RST-004 (No Internal Detail Spans) does not exempt it — it is the effective entry point for context persistence and receives a COV-004 (Async Operation Spans) span (commit_story.context.save_context).
+
+  • getContextPath, formatTimestamp, and formatContextEntry are all pure synchronous helpers with no I/O — they are skipped per RST-001 (No Utility Spans).
+
+  • registerContextCaptureTool is a synchronous exported function that registers a tool handler — it is skipped per RST-001 (No Utility Spans). The anonymous async callback it registers is not exported and delegates entirely to saveContext, which is now instrumented, so no separate span is needed for the callback.
+
+  • The anonymous async callback's catch block returns content without rethrowing — this is a graceful degradation path (NDS-007 (Expected Catch Unmodified)). No recordException or setStatus was added to that catch.
+
+  • commit_story.journal.entry_date and commit_story.journal.file_path are both registered schema attributes used on the saveContext span. No new attribute schema extensions were required.
+
+  • The file path written to commit_story.journal.file_path is project-relative (starts with 'journal/context/...'), not an absolute filesystem path, so no CDQ-007 (Attribute Data Quality) basename transformation is needed.
+
+  • span.commit_story.context.save_context is a new span name not present in the schema registry. It follows the commit_story namespace and context category consistent with existing registered spans. No existing schema span matched the 'save to filesystem' operation semantically.
+
+  Report: src/mcp/tools/context-capture-tool.instrumentation.md
+
+Processing file 20 of 31: src/mcp/tools/reflection-tool.js
+  ✅ SUCCESS — 0 spans, 0 attributes, 2 attempts
+  Tokens: 3.3K output
+
+  Agent notes
+  ────────────────────────────────────────────────────────────
+
+  • All exported functions are synchronous (registerReflectionTool) — no async I/O to trace. No LLM call made.
+
+  Report: src/mcp/tools/reflection-tool.instrumentation.md
+
+Processing file 21 of 31: src/mcp/server.js
+  ✅ SUCCESS — 1 span, 1 attribute
+  Tokens: 2.5K output
+
+  Schema extensions
+  ────────────────────────────────────────────────────────────
+  • span.commit_story.mcp.main
+  • commit_story.mcp.transport_type
+
+  Agent notes
+  ────────────────────────────────────────────────────────────
+
+  • createServer is a synchronous unexported function with no I/O that simply constructs an object and registers tools — it does not need a span (RST-001 (No Utility Spans): no spans on synchronous non-I/O utilities; RST-004 (No Internal Detail Spans): unexported with an exported orchestrator covering its execution path).
+
+  • main() is the COV-001 (Entry Point Spans) async entry point. process.exit(1) appears only in the .catch() callback at the call site outside main()'s own body, so RST-006 (No Spans on process.exit() Functions) does not apply and main() is safely spanned.
+
+  • New span name 'commit_story.mcp.main' declared as a schema extension — no existing registry span matches this MCP server startup operation.
+
+  • New attribute 'commit_story.mcp.transport_type' captures the transport mechanism ('stdio') used by the MCP server. No registered attribute key in the schema covers transport type for MCP server connections — the closest registered attributes are context source types, which are semantically distinct from server transport configuration.
+
+  • @modelcontextprotocol/sdk is in the auto-instrumentation allowlist (MCPInstrumentation) — recorded in librariesNeeded. Manual span on main() is still added as the COV-001 (Entry Point Spans) entry point; MCP tool calls become child spans via auto-instrumentation.
+
+  • pino is in the auto-instrumentation allowlist (@opentelemetry/instrumentation-pino) — recorded in librariesNeeded.
+
+  Report: src/mcp/server.instrumentation.md
+
+Processing file 22 of 31: src/traceloop-init.js
+  ✅ SUCCESS — 0 spans, 0 attributes
+  Tokens: 0.0K output
+
+  Agent notes
+  ────────────────────────────────────────────────────────────
+
+  • Pre-scan: no instrumentable functions — all are pure sync utilities or unexported helpers. No LLM call made.
+
+  Report: src/traceloop-init.instrumentation.md
+
+Processing file 23 of 31: src/utils/commit-analyzer.js
+  ✅ SUCCESS — 0 spans, 0 attributes
+  Tokens: 0.0K output
+
+  Agent notes
+  ────────────────────────────────────────────────────────────
+
+  • Pre-scan: no instrumentable functions — all are pure sync utilities or unexported helpers. No LLM call made.
+
+  Report: src/utils/commit-analyzer.instrumentation.md
+
+Processing file 24 of 31: src/utils/config.js
+  ✅ SUCCESS — 0 spans, 0 attributes
+  Tokens: 0.0K output
+
+  Agent notes
+  ────────────────────────────────────────────────────────────
+
+  • Pre-scan: no instrumentable functions — all are pure sync utilities or unexported helpers. No LLM call made.
+
+  Report: src/utils/config.instrumentation.md
+
+Processing file 25 of 31: src/utils/journal-paths.js
+  ✅ SUCCESS — 1 span, 0 attributes
+  Tokens: 5.3K output
+
+  Schema extensions
+  ────────────────────────────────────────────────────────────
+  • span.commit_story.journal.ensure_directory
+
+  Agent notes
+  ────────────────────────────────────────────────────────────
+
+  • getYearMonth, getDateString, getJournalEntryPath, getReflectionPath, getContextPath, getReflectionsDirectory, parseDateFromFilename, getJournalRoot, getISOWeekString, getSummaryPath, getSummariesDirectory are all pure synchronous functions with no I/O — skipped per RST-001 (no spans on synchronous utilities)
+
+  • ensureDirectory is the sole exported async function and the only COV-001 (Entry Point Spans) entry point — instrumented with span name commit_story.journal.ensure_directory. The registered attribute commit_story.journal.file_path was used to capture the input filePath parameter before any branching.
+
+  • span.commit_story.journal.ensure_directory is a new span name not present in the registry — declared in schemaExtensions. No existing schema span matched this filesystem directory-creation operation.
+
+  Report: src/utils/journal-paths.instrumentation.md
+
+Processing file 26 of 31: src/managers/journal-manager.js
+  ✅ SUCCESS — 2 spans, 0 attributes
+  Tokens: 12.1K output
+
+  Schema extensions
+  ────────────────────────────────────────────────────────────
+  • span.commit_story.journal.save_entry
+  • span.commit_story.journal.discover_reflections
+
+  Agent notes
+  ────────────────────────────────────────────────────────────
+
+  • formatTimestamp and formatJournalEntry are exported but are pure synchronous functions with no I/O — skipped per RST-001 (no spans on synchronous utilities regardless of export status).
+
+  • extractFilesFromDiff, countDiffLines, formatReflectionsSection, parseReflectionEntry, parseTimeString, parseReflectionsFile, isInTimeWindow, and getYearMonthRange are all unexported synchronous helpers — skipped per RST-001 (No Utility Spans) and RST-004 (No Internal Detail Spans).
+
+  • The inner try/catch in saveJournalEntry (file-not-found check) has an empty catch body — it is a graceful-degradation catch representing expected control flow (file does not yet exist). No recordException or setStatus(ERROR) was added to it per NDS-007 (Expected Catch Unmodified).
+
+  • Both inner try/catch blocks in discoverReflections (readdir and readFile failures) have empty catch bodies that continue loop iteration — these represent expected conditions (directories or files that don't exist). No error recording was added per NDS-007 (Expected Catch Unmodified).
+
+  • commit_story.journal.file_path is a raw filesystem path. basename from node:path is not in the existing import destructure list, and adding new non-OTel imports is prohibited — raw path value is used as a known limitation (CDQ-007 (Attribute Data Quality)).
+
+  • All attributes used (commit_story.commit.timestamp, commit_story.journal.file_path, commit_story.context.time_window_start, commit_story.context.time_window_end, commit_story.journal.quotes_count) are already registered in the schema — no new attribute keys were invented.
+
+  • span.commit_story.journal.save_entry is a new span name not present in the schema. No existing schema span matches the saveJournalEntry operation (writing a formatted entry to disk) — the closest registered span is commit_story.journal.ensure_directory which only covers directory creation, a sub-operation already instrumented in the callee.
+
+  • span.commit_story.journal.discover_reflections is a new span name not present in the schema. No existing schema span matches the discoverReflections operation (scanning reflection files across year-month directories and filtering by time window).
+
+  Report: src/managers/journal-manager.instrumentation.md
+
+Processing file 27 of 31: src/managers/summary-manager.js
+  ✅ SUCCESS — 9 spans, 0 attributes
+  Tokens: 32.6K output
+
+  Schema extensions
+  ────────────────────────────────────────────────────────────
+  • span.commit_story.journal.read_day_entries
+  • span.commit_story.journal.save_daily_summary
+  • span.commit_story.journal.generate_and_save_daily_summary
+  • span.commit_story.journal.read_week_daily_summaries
+  • span.commit_story.journal.save_weekly_summary
+  • span.commit_story.journal.generate_and_save_weekly_summary
+  • span.commit_story.journal.read_month_weekly_summaries
+  • span.commit_story.journal.save_monthly_summary
+  • span.commit_story.journal.generate_and_save_monthly_summary
+
+  Agent notes
+  ────────────────────────────────────────────────────────────
+
+  • formatDailySummary, formatWeeklySummary, and formatMonthlySummary are pure synchronous formatters with no I/O — they build a string from input parameters and return it. Skipped per RST-001 (no spans on synchronous utilities with no I/O).
+
+  • getWeekBoundaries and getMonthBoundaries are pure synchronous date-arithmetic utilities with no I/O — they parse a string and compute Date values. Skipped per RST-001 (No Utility Spans).
+
+  • All inner catch blocks in the instrumented functions (access check for duplicate detection, readFile for missing daily summaries, readdir for missing directories, per-file readFile for unreadable files) are graceful expected-condition catches that return default values without rethrowing. No recordException or setStatus(ERROR) was added to them per NDS-007 (Expected Catch Unmodified) — these represent normal control flow, not errors. The outer span-level catch handles any unexpected propagated errors.
+
+  • All attributes used (commit_story.journal.entry_date, commit_story.journal.entries_count, commit_story.journal.file_path, commit_story.journal.week_label, commit_story.journal.summaries_count, commit_story.journal.month_label) are already registered in the schema. No new attribute keys were invented; attributesCreated is 0.
+
+  • Nine new span names were created because no schema-defined span IDs matched these specific orchestration operations. The pre-existing schema spans for this namespace cover the generator graph nodes (generate_daily_summary, etc.) and utility operations (ensure_directory, save_entry), but not the pipeline read/save/orchestrate operations in this file.
+
+  • commit_story.journal.file_path is set only on the successful-save path (not when returning null for duplicate detection). The input context is captured via entry_date/week_label/month_label which are set unconditionally at span open, satisfying COV-005 (Domain Attributes) on all execution paths.
+
+  • The raw summaryPath filesystem value is used for commit_story.journal.file_path. The node:path basename utility is already imported (join is imported but not basename), so CDQ-007 (Attribute Data Quality) path shortening cannot be applied without adding a new non-OTel import. Noted as a known limitation — the full path is stored.
+
+  Report: src/managers/summary-manager.instrumentation.md
+
+Processing file 28 of 31: src/commands/summarize.js
+  ✅ SUCCESS — 3 spans, 2 attributes, 2 attempts
+  Tokens: 22.2K output
+
+  Schema extensions
+  ────────────────────────────────────────────────────────────
+  • span.commit_story.commands.run_summarize
+  • span.commit_story.commands.run_weekly_summarize
+  • span.commit_story.commands.run_monthly_summarize
+  • commit_story.commands.dates_count
+  • commit_story.commands.force
+
+  Agent notes
+  ────────────────────────────────────────────────────────────
+
+  • isValidDate (unexported), isValidWeekString, isValidMonthString, expandDateRange, parseSummarizeArgs, and showSummarizeHelp are all synchronous functions with no async I/O — skipped per RST-001 (no spans on synchronous utilities).
+
+  • The three inner catch(err) blocks inside runSummarize, runWeeklySummarize, and runMonthlySummarize handle per-item failures gracefully by pushing to result arrays without rethrowing. NDS-007 (Expected Catch Unmodified) applies — no recordException or setStatus added to these catches. Only the outer span-level catch gets full error recording per COV-003 (Error Recording).
+
+  • The inner catch{} block for access(summaryPath) in runSummarize is an empty graceful-degradation catch (file not found = proceed with generation). NDS-007 (Expected Catch Unmodified) applies — no error recording added.
+
+  • The validator rejected commit_story.commands.generated_count, commit_story.commands.failed_count, commit_story.commands.weeks_count, and commit_story.commands.months_count as semantic duplicates of commit_story.commands.dates_count. Per the validator's directive, commit_story.commands.dates_count is reused for the input item count in all three command functions (dates, weeks, months all represent the count of items the command was asked to process). The output result counts (generated, failed) were dropped since no valid registered key covers per-run outcome counts and the validator will not accept new extensions in this category.
+
+  • CDQ-007 (Attribute Data Quality) advisories resolved: guarded dates, weeks, and months with != null checks before accessing .length, using the pattern `x != null ? x.length : 0` to protect against null or undefined inputs from callers.
+
+  • SCH-001 (Span Names Match Registry) advisories about run_weekly_summarize and run_monthly_summarize being potential duplicates of run_summarize are informational only — these are distinct operations (weekly and monthly aggregation vs. daily generation) and warrant separate span names for independent observability.
+
+  Report: src/commands/summarize.instrumentation.md
+
+Processing file 29 of 31: src/utils/summary-detector.js
+  ✅ SUCCESS — 9 spans, 3 attributes
+  Tokens: 13.7K output
+
+  Schema extensions
+  ────────────────────────────────────────────────────────────
+  • span.commit_story.journal.get_days_with_entries
+  • span.commit_story.journal.get_summarized_days
+  • span.commit_story.journal.find_unsummarized_days
+  • span.commit_story.journal.get_summarized_weeks
+  • span.commit_story.journal.get_days_with_daily_summaries
+  • span.commit_story.journal.find_unsummarized_weeks
+  • span.commit_story.journal.get_summarized_months
+  • span.commit_story.journal.get_weeks_with_weekly_summaries
+  • span.commit_story.journal.find_unsummarized_months
+  • commit_story.journal.unsummarized_days_count
+  • commit_story.journal.unsummarized_weeks_count
+  • commit_story.journal.unsummarized_months_count
+
+  Agent notes
+  ────────────────────────────────────────────────────────────
+
+  • getTodayString is a pure synchronous helper that formats a date — it performs no I/O and has no async operations, so no span is added (RST-001 (No Utility Spans): no spans on synchronous utilities without I/O).
+
+  • getNowDate is a pure synchronous helper that constructs a Date object — it performs no I/O and has no async operations, so no span is added (RST-001 (No Utility Spans): no spans on synchronous utilities without I/O).
+
+  • The inner try/catch blocks inside getDaysWithEntries, getSummarizedDays, getDaysWithDailySummaries, getSummarizedWeeks, getSummarizedMonths, and getWeeksWithWeeklySummaries all handle readdir failures by returning empty collections or continuing — these are graceful-degradation catches with no rethrow, so recordException and setStatus(ERROR) are not added to them (NDS-007 (Expected Catch Unmodified): do not add error recording to expected-condition catches).
+
+  • Used commit_story.journal.entries_count (registered) for the count of entry dates returned by getDaysWithEntries — this attribute captures the count of journal entry days found, which matches the function's output semantically.
+
+  • Used commit_story.journal.summaries_count (registered) across getSummarizedDays, getDaysWithDailySummaries, getSummarizedWeeks, getSummarizedMonths, and getWeeksWithWeeklySummaries — its brief is the generic agent-discovered label which does not restrict to a single summary type, so it applies across daily, weekly, and monthly summary counts. The span name provides the necessary context to distinguish which summary type the count refers to.
+
+  • Declared commit_story.journal.unsummarized_days_count as a new extension (int) for findUnsummarizedDays because no registered key captures 'count of days that have entries but no daily summary' — commit_story.journal.entries_count counts all entry days (including summarized ones), making it semantically incorrect here.
+
+  • Declared commit_story.journal.unsummarized_weeks_count as a new extension (int) for findUnsummarizedWeeks — no registered key captures 'count of weeks that have daily summaries but no weekly summary'. commit_story.journal.summaries_count counts existing summaries found, not gaps remaining.
+
+  • Declared commit_story.journal.unsummarized_months_count as a new extension (int) for findUnsummarizedMonths — no registered key captures 'count of months that have weekly summaries but no monthly summary' for the same reason as unsummarized_weeks_count.
+
+  • For findUnsummarizedDays, the original return expression was return entryDays.filter(...) — a call expression — which was captured to const result using the return-value capture exception so that span.setAttribute could reference result.length before returning.
+
+  • getSummarizedDays, getSummarizedWeeks, getSummarizedMonths, and getWeeksWithWeeklySummaries are unexported async functions that perform filesystem I/O and are not covered by any auto-instrumentation library. Since they are on execution paths not directly wrapped by an exported orchestrator span (they are called from within already-spanned exported functions but each performs meaningful independent I/O), they are instrumented as COV-004 (Async Operation Spans) targets for visibility into filesystem access latency at each tier.
+
+  Report: src/utils/summary-detector.instrumentation.md
+
+Processing file 30 of 31: src/managers/auto-summarize.js
+  ✅ SUCCESS — 3 spans, 0 attributes
+  Tokens: 5.6K output
+
+  Schema extensions
+  ────────────────────────────────────────────────────────────
+  • span.commit_story.commands.trigger_auto_summaries
+  • span.commit_story.commands.trigger_auto_weekly_summaries
+  • span.commit_story.commands.trigger_auto_monthly_summaries
+
+  Agent notes
+  ────────────────────────────────────────────────────────────
+
+  • triggerAutoSummaries, triggerAutoWeeklySummaries, and triggerAutoMonthlySummaries are all COV-001 (Entry Point Spans) exported entry points and each received a span. The schema-defined span names commit_story.commands.run_summarize, run_weekly_summarize, and run_monthly_summarize were already taken by earlier files, so new names were invented: commit_story.commands.trigger_auto_summaries, trigger_auto_weekly_summaries, trigger_auto_monthly_summaries.
+
+  • getErrorMessage is a pure synchronous helper with no I/O — skipped per RST-001 (no spans on synchronous utilities) and RST-004 (unexported function whose execution path is covered by the exported orchestrator spans).
+
+  • The inner catch blocks inside each loop do not rethrow — they push to result.failed/result.errors and continue. These are graceful-degradation catches per NDS-007 (Expected Catch Unmodified), so recordException and setStatus(ERROR) were not added to them. The outer span-level catch handles unexpected errors that propagate out of the function.
+
+  • All attributes used (commit_story.journal.unsummarized_days_count, commit_story.journal.unsummarized_weeks_count, commit_story.journal.unsummarized_months_count, commit_story.journal.summaries_count) are already registered in the schema — no new attribute extensions needed.
+
+  • In triggerAutoSummaries, the summaries_count attribute is set at both the early-return path (when failures exist) and the final return path (summing daily + weekly + monthly generated counts), ensuring the attribute is present on all exit paths.
+
+  Report: src/managers/auto-summarize.instrumentation.md
+
+Processing file 31 of 31: src/index.js
+  ✅ SUCCESS — 1 span, 0 attributes
+  Tokens: 13.2K output
+
+  Schema extensions
+  ────────────────────────────────────────────────────────────
+  • span.commit_story.cli.main
+
+  Agent notes
+  ────────────────────────────────────────────────────────────
+
+  • span.commit_story.cli.main is a new span name for the CLI entry point in src/index.js. All existing schema span names (commit_story.mcp.main and the full list of already-used names) are taken; this file's main() is the CLI orchestrator, distinct from the MCP server entry point, so a new name is warranted. The namespace prefix commit_story is preserved.
+
+  • main() sets vcs.ref.head.revision with the commitRef value (the git commit reference passed at the CLI) and conditionally sets commit_story.git.subcommand with the parsed subcommand. Both are registered schema keys — no new attribute declarations are needed.
+
+  • Known limitation: main() calls process.exit() in multiple code paths (validation failures, skip conditions, success). process.exit() bypasses the finally block, so the span will not be ended on those paths. This is an inherent limitation of the process.exit() pattern in the original code; no span.end() calls are added before individual process.exit() calls per the pre-instrumentation analysis.
+
+  • handleSummarize() is an unexported async function that calls process.exit() directly in its body on multiple paths. It is skipped on two grounds: RST-004 (unexported helper whose execution path is covered by the parent main() span) and RST-006 (direct process.exit() calls in the function body would bypass the span finally block causing span leaks).
+
+  • parseArgs(), showHelp(), isGitRepository(), isValidCommitRef(), validateEnvironment(), and getPreviousCommitTime() are all synchronous functions with no async I/O — skipped per RST-001 (no spans on pure synchronous utilities).
+
+  • The inner try/catch block inside main() that wraps triggerAutoSummaries() is a graceful-degradation catch — it catches errors and logs a warning without rethrowing. Per NDS-007 (Expected Catch Unmodified), recordException() and setStatus(ERROR) are not added to this inner catch. The outer span-level catch (COV-003 (Error Recording)) handles unexpected errors that escape the main flow.
+
+  Report: src/index.instrumentation.md
+
+
+Run complete: 14 committed, 0 failed, 0 partial, 17 correct skips, 0 skipped
+  Total tokens: 110.2K input, 218.4K output (212.6K cached)
+PR summary saved to /Users/whitney.lee/Documents/Repositories/commit-story-v2/spiny-orb-pr-summary.md
+Live-check report saved to /Users/whitney.lee/Documents/Repositories/commit-story-v2/spiny-orb-live-check-report.json
+pushBranch: GITHUB_TOKEN present=true, remote=https://github.com/wiggitywhitney/commit-story-v2.git
+pushBranch: urlChanged=true, path=token-swap
+Completed in 54m 43.8s
+31 files processed: 14 committed, 0 failed, 0 partial, 17 correct skips, 0 skipped
+Live-check: OK (665 spans, 4317 advisory findings — see compliance report)
+
+╔═════════════════════════════════════════════════════════════════╗
+║   Branch: spiny-orb/instrument-1781811083418                    ║
+║   Diff:   git diff main...spiny-orb/instrument-1781811083418    ║
+║   Instrumentation report: spiny-orb-pr-summary.md               ║
+║   PR: https://github.com/wiggitywhitney/commit-story-v2/pull/81 ║
+╚═════════════════════════════════════════════════════════════════╝
