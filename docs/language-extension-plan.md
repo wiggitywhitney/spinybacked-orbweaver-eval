@@ -161,7 +161,7 @@ The most recently completed run for a target is the **style and format reference
    4. **Note for k8s repos**: IS scoring requires a running cluster; see `evaluation/is/README.md` for the Kind-based workflow
 9.5. **Capture trace artifact (non-organic targets)**: Immediately after IS scoring completes, use the `search_datadog_spans` Datadog MCP tool with query `service:<target> from:now-30m` (IS scoring takes several minutes so a 5-minute window is too tight). Retrieve `service.instance.id` from any span in the result. Write `evaluation/<target>/run-N/trace-artifact.md` (five fields: service.instance.id, captured, target, instrument_branch, query) using the format in `evaluation/trace-capture-protocol.md`. If no spans appear, wait up to 5 minutes for Datadog ingestion and retry once; if still empty, record trace absence in the artifact and note it in `run-summary.md`. **Organic targets** (e.g., commit-story-v2) capture their trace artifact during pre-run verification (step 2) — not here.
 10. Baseline comparison
-10a. **Update root README** — After baseline comparison, update `README.md`: (1) add a row for this run to the run history table with quality score, gates, files, spans, cost, push/PR status, and IS score; (2) update the "next run" sentence (the bold paragraph immediately below the run history table, above the "Full run-by-run analysis" link) to reference the upcoming run number and its primary goals.
+10a. **Update root README** — After baseline comparison, update `README.md`: (1) add a row for this run to the run history table with quality score, gates, files, spans, model, cost, push/PR status, and IS score; (2) update the "next run" sentence (the bold paragraph immediately below the run history table, above the "Full run-by-run analysis" link) to reference the upcoming run number and its primary goals.
 11. Actionable fix output *(user-facing checkpoint 2: interpreted summary + handoff pause)*
 12. **Draft next PRD** *(includes template-update checkpoint before drafting)*
 
@@ -329,7 +329,7 @@ Before committing any PRD that an AI agent will read and act on, run `/write-pro
 Every Type D PRD must include both named checkpoints:
 
 **Moment 1 — Findings Discussion** (between Evaluation run and Failure deep-dives):
-After `run-summary.md` is written, before any analysis begins, give Whitney a raw overview: files committed/failed/partial, quality score, cost, push/PR status, top 1–2 surprises. Conversational, under 10 lines. Wait for acknowledgment before proceeding.
+After `run-summary.md` is written, before any analysis begins, give Whitney a raw overview: files committed/failed/partial, quality score, model used, cost, push/PR status, top 1–2 surprises. Conversational, under 10 lines. Wait for acknowledgment before proceeding.
 
 **Moment 2 — Handoff pause** (at the end of Actionable fix output):
 After full analysis, give Whitney an interpreted summary of key findings: failures, root causes, notable patterns, what to watch for in the next run. Then print the absolute file path of `actionable-fix-output.md` and pause until Whitney confirms she has handed the document off to the spiny-orb team. Do not proceed to the next PRD until confirmed.

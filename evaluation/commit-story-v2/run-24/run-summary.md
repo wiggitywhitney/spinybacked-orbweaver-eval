@@ -19,6 +19,7 @@
 | Correct skips | 17 |
 | Total spans | 48 |
 | Total attributes | 15 |
+| Model | claude-sonnet-4-6 |
 | Tokens | 110.2K input / 218.4K output (212.6K cached) |
 | Cost | ~$3.70 (estimated from token counts) |
 | Live-check | OK (665 spans, 4317 advisory findings — see spiny-orb-live-check-report.json) |

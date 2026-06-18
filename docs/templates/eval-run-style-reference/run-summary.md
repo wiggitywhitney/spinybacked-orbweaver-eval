@@ -21,6 +21,7 @@
 | Partial | 1 |
 | Correct skips | 17 |
 | Skipped | 0 |
+| Model | claude-sonnet-4-6 |
 | Input tokens | 227.2K |
 | Output tokens | 208.1K (498.7K cached) |
 | Live-check | OK |

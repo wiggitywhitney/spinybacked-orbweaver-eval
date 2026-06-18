@@ -102,6 +102,7 @@
 | Gates | 5/5 (100%) | 5/5 (100%) | 5/5 (100%) | 5/5 (100%) |
 | Files committed | 12 + 1 partial | 13 | 12 | 12 |
 | Total spans | 31 (28 committed + 3 partial) | 39 | 28 | 26 |
+| Model | claude-sonnet-4-6 | claude-sonnet-4-6 | claude-sonnet-4-6 | claude-sonnet-4-6 |
 | Cost | $5.19 | $4.25 | $4.36 | $3.97 |
 | Push/PR | YES (#61) | YES (#60) | NO | NO |
 | Quality x Files | **11.0** | 13.0 | 11.0 | 12.0 |

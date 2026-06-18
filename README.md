@@ -78,31 +78,31 @@ spinybacked-orbweaver-eval/
 
 ## Run history: commit-story-v2
 
-| Run | Quality | Gates | Files | Spans | Cost | Push/PR | IS |
-|-----|---------|-------|-------|-------|------|---------|-----|
-| 2 | 15/21 (71%) | 3/4 | 5 | 11 | — | NO | — |
-| 3 | 19/26 (73%) | 4/4 | 7 | 15 | — | NO | — |
-| 4 | 18/26 (69%) | 4/4 | 16 | 48 | $5.84 | NO | — |
-| 5 | 23/25 (92%) | 5/5 | 9 | 17 | $9.72 | NO | — |
-| 6 | 21/25 (84%) | 5/5 | 5 | 16 | $11.02 | NO | — |
-| 7 | 22/25 (88%) | 5/5 | 13 | 28 | $3.22 | NO | — |
-| 8 | 23/25 (92%) | 5/5 | 12 | 28 | $4.00 | NO | — |
-| 9 | **25/25 (100%)** | 5/5 | 12 | 26 | $3.97 | NO | — |
-| 10 | 23/25 (92%) | 5/5 | 12 | 28 | $4.36 | NO | — |
-| 11 | **25/25 (100%)** | 5/5 | 13 | 39 | $4.25 | YES | — |
-| 12 | 23/25 (92%) | 5/5 | 12+1p | 31 | $5.19 | YES | — |
-| 13 | **25/25 (100%)** | 5/5 | 7+1p+11f | 16 | ~$6.41 | YES | — |
-| 14 | 22/25 (88%) | 5/5 | 12 | 32 | $5.59 | YES | **80/100** |
-| 15 | 24/25 (96%) | 5/5 | 14 | ~37 | $6.44 | YES | 70/100 |
-| 16 | 22/25 (88%) | 5/5 | 10+3p | ~24 | $12.29 | YES | 80/100 |
-| 17 | 22/25 (88%) | 4/5 | 10+1p | ~28 | $10.43 | YES | 90/100 |
-| 18 | 24/25 (96%) | 5/5 | 11 | 36 | $9.16 | YES | 90/100 |
-| 19 | 21/25 (84%) | 5/5 | 10+3p | 30 | ~$8.60 | YES (#71) | 80/100 |
-| 20 | 24/25 (96%) | 5/5 | 12+1f | 42 | $9.08 | YES (#73) | 80/100 |
-| 21 | 23/25 (92%) | 5/5 | 12+2f | 42 | ~$9 | YES (#74) | 90/100 |
-| 23 | 24/25 (96%) | 5/5 | 13+1p | 45 | ~$5.60 | YES (#75) | 80/100 |
+| Run | Quality | Gates | Files | Spans | Model | Cost | Push/PR | IS |
+|-----|---------|-------|-------|-------|-------|------|---------|-----|
+| 2 | 15/21 (71%) | 3/4 | 5 | 11 | — | — | NO | — |
+| 3 | 19/26 (73%) | 4/4 | 7 | 15 | — | — | NO | — |
+| 4 | 18/26 (69%) | 4/4 | 16 | 48 | — | $5.84 | NO | — |
+| 5 | 23/25 (92%) | 5/5 | 9 | 17 | — | $9.72 | NO | — |
+| 6 | 21/25 (84%) | 5/5 | 5 | 16 | — | $11.02 | NO | — |
+| 7 | 22/25 (88%) | 5/5 | 13 | 28 | — | $3.22 | NO | — |
+| 8 | 23/25 (92%) | 5/5 | 12 | 28 | — | $4.00 | NO | — |
+| 9 | **25/25 (100%)** | 5/5 | 12 | 26 | — | $3.97 | NO | — |
+| 10 | 23/25 (92%) | 5/5 | 12 | 28 | — | $4.36 | NO | — |
+| 11 | **25/25 (100%)** | 5/5 | 13 | 39 | — | $4.25 | YES | — |
+| 12 | 23/25 (92%) | 5/5 | 12+1p | 31 | — | $5.19 | YES | — |
+| 13 | **25/25 (100%)** | 5/5 | 7+1p+11f | 16 | — | ~$6.41 | YES | — |
+| 14 | 22/25 (88%) | 5/5 | 12 | 32 | — | $5.59 | YES | **80/100** |
+| 15 | 24/25 (96%) | 5/5 | 14 | ~37 | — | $6.44 | YES | 70/100 |
+| 16 | 22/25 (88%) | 5/5 | 10+3p | ~24 | — | $12.29 | YES | 80/100 |
+| 17 | 22/25 (88%) | 4/5 | 10+1p | ~28 | — | $10.43 | YES | 90/100 |
+| 18 | 24/25 (96%) | 5/5 | 11 | 36 | — | $9.16 | YES | 90/100 |
+| 19 | 21/25 (84%) | 5/5 | 10+3p | 30 | — | ~$8.60 | YES (#71) | 80/100 |
+| 20 | 24/25 (96%) | 5/5 | 12+1f | 42 | — | $9.08 | YES (#73) | 80/100 |
+| 21 | 23/25 (92%) | 5/5 | 12+2f | 42 | — | ~$9 | YES (#74) | 90/100 |
+| 23 | 24/25 (96%) | 5/5 | 13+1p | 45 | sonnet-4-6 | ~$5.60 | YES (#75) | 80/100 |
 
-Files column notation: plain count = committed files; `+Np` = N partial files (instrumentation started, not fully committed); `+Nf` = N files rolled back after a checkpoint test failure. Cost column: `~` prefix indicates an estimated/derived cost (early runs predating direct cost reporting in the tool); unprefixed values are directly reported by spiny-orb. Run-22 was skipped (no row).
+Files column notation: plain count = committed files; `+Np` = N partial files (instrumentation started, not fully committed); `+Nf` = N files rolled back after a checkpoint test failure. Model column: `—` = not tracked for that run; model tracking began with run-23. Cost column: `~` prefix indicates an estimated/derived cost (early runs predating direct cost reporting in the tool); unprefixed values are directly reported by spiny-orb. Run-22 was skipped (no row).
 
 **Run-24 is in progress** — targeting SCH-003 type mismatch fixes (count/size attributes set as strings instead of integers) and SPA-002 forceFlush (outermost span dropped before batch exporter flushes on process exit).
 
