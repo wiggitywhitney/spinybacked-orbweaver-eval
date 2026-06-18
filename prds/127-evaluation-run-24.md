@@ -213,7 +213,7 @@ The **evaluation execution branch** created by `/prd-start` from main **never me
   Produces: `evaluation/commit-story-v2/run-24/baseline-comparison.md`
   Style reference: `Read docs/templates/eval-run-style-reference/baseline-comparison.md`
 
-- [ ] **Update root README** — After baseline comparison, update `README.md`: (1) add a row for run-24 to the run history table (quality, gates, files, spans, cost, push/PR, IS score); (2) update the "next run" sentence to reference run-25 and its primary goals. Note: run-22 was never executed and has no row.
+- [x] **Update root README** — After baseline comparison, update `README.md`: (1) add a row for run-24 to the run history table (quality, gates, files, spans, cost, push/PR, IS score); (2) update the "next run" sentence to reference run-25 and its primary goals. Note: run-22 was never executed and has no row.
 
 - [ ] **Actionable fix output** — Primary handoff deliverable. At milestone completion:
   1. Run the cross-document audit agent to verify consistency across all run-24 evaluation artifacts. *(D-6: verify that the handoff document lists only SCH-003 and CDQ-001 as rule failures. Coverage delta observations for context-capture-tool.js and index.js must appear as observations only — not as COV-005 failures. Any draft that lists them as failures contradicts the corrected rubric.)*
