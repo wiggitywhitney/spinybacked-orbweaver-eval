@@ -32,7 +32,7 @@
 | RUN23-1: git-collector.js `diff_size` SCH-003 integer-as-string (issue #928) | FIXED | ✅ CONFIRMED — committed clean with correct types, 3 attempts |
 | RUN23-2: commands/summarize.js `*_summaries_generated` SCH-003 (issue #928) | FIXED | ✅ CONFIRMED — committed clean with 2 attrs (down from 3), 2 attempts |
 | RUN23-3: summary-detector.js SCH-002 near-synonym partial (issue #925) | FIXED | ✅ CONFIRMED — 9 spans, 3 attrs, 1 attempt (was PARTIAL 4 spans in run-23) |
-| RUN23-4: IS SPA-002 `process.exit()` drops outermost span (issue #926) | Watch | Pending IS scoring run |
+| RUN23-4: IS SPA-002 `process.exit()` drops outermost span (issue #926) | Watch | ❌ RECURS — IS 80/100; SPA-002 still failing (orphan parentSpanId) |
 | RUN21-6: Agent notes vs committed code divergence (issue #927) | Watch | Pending per-file evaluation |
 
 ---
@@ -117,4 +117,4 @@ run-24 processed 31 files vs run-23's 30 — `src/logger.js` was added via commi
 | Cost | **~$3.70** | ~$5.60 |
 | Q×F projection | **14.0** (if 25/25) | 12.48 |
 
-Quality score and IS score pending per-file evaluation and IS scoring run.
+Quality score: **23/25 (92%)**. IS score: **80/100** (SPA-001 structural + SPA-002 recurrence — RUN23-4 not fixed).

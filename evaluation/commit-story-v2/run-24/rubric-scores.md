@@ -108,7 +108,7 @@
 | Cost | **~$3.70** | ~$5.60 | $8.10 | $9.08 | $8.83 |
 | Q×F | **12.88** | 12.48 | 11.0 | 11.5 | 8.4 |
 | Push/PR | **AUTO ✅ (#81)** | AUTO ✅ (#75) | AUTO ✅ (#74) | AUTO ✅ (#73) | AUTO ✅ (#71) |
-| IS | **pending** | 80/100 | 90/100 | 80/100 | 80/100 |
+| IS | **80/100** | 80/100 | 90/100 | 80/100 | 80/100 |
 
 **Q×F = 12.88** (23/25 × 14). A new high-water mark by Q×F, edging past run-23 (12.48) despite a quality point regression. The 14-file clean sweep drives the gain — even at 23/25 quality, 14 committed files produces a higher Q×F than 13 files at 24/25. Without the two remaining failures (CDQ-001 + SCH-003): 25/25 × 14 = 14.0 would have set an all-time record by a wide margin.
 

@@ -29,6 +29,13 @@ with `HEAD` as the git ref argument, stored literally. Branch confirmed indirect
 commit-story-v2 was checked out to the run-24 instrument branch at the time of the
 organic run.
 
+# IS Scoring Run Trace (2026-06-18T22:22:51Z)
+
+IS scoring run `service.instance.id`: `d481ee52-0f31-4efd-b880-c9fb6387379f`
+Confirmed in Datadog: 31 spans, all at 22:22–22:22 UTC. Root span: `commit_story.cli.main`.
+`commit_story.journal.generate_sections` present with `sections: ["summary","dialogue","technical_decisions"]`.
+OTel Collector's Datadog exporter forwarded traces successfully.
+
 # SCH-003 Pre-Run Observation
 
 From the run-23 instrument branch trace:
