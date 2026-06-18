@@ -14,7 +14,7 @@
 #     with trace_id/span_id for traces<->logs correlation
 #
 # Requires DD_API_KEY to be set in the environment. Use vals exec to inject:
-#   vals exec -f .vals.yaml -- bash -c '/Users/whitney.lee/.local/bin/otelcol-contrib --config evaluation/is/otelcol-config.yaml > /tmp/otelcol.log 2>&1' &
+#   vals exec -f .vals.yaml -- bash -c '~/.local/bin/otelcol-contrib --config evaluation/is/otelcol-config.yaml > /tmp/otelcol.log 2>&1' &
 #
 # IS spec pinned to commit 52c14ba.
 
@@ -62,7 +62,7 @@ service:
   pipelines:
     traces:
       receivers: [otlp]
-      # spanmetrics and datadog/connector are connectors — they appear in
+      # span_metrics and datadog/connector are connectors — they appear in
       # exporters here and in receivers of their downstream pipelines.
       exporters: [file, datadog, span_metrics, datadog/connector]
     metrics:
