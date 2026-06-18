@@ -192,9 +192,9 @@ The **evaluation execution branch** created by `/prd-start` from main **never me
   1. **Claude runs**: `datadog-agent stop`
   2. **Claude starts** the OTel Collector in the background using the installed binary:
      ```bash
-     vals exec -f ~/Documents/Repositories/spinybacked-orbweaver-eval/.vals.yaml -- bash -c 'export PATH="$HOME/.local/bin:/opt/homebrew/bin:$PATH" && otelcol-contrib --config ~/Documents/Repositories/spinybacked-orbweaver-eval/evaluation/is/otelcol-config.yaml > /tmp/otelcol.log 2>&1' &
+     vals exec -f ~/Documents/Repositories/spinybacked-orbweaver-eval/.vals.yaml -- ~/.local/bin/otelcol-contrib --config ~/Documents/Repositories/spinybacked-orbweaver-eval/evaluation/is/otelcol-config.yaml > /tmp/otelcol.log 2>&1 &
      COLLECTOR_PID=$!
-     until lsof -i :4318 >/dev/null 2>&1; do sleep 0.5; done
+     timeout 30 bash -c 'until lsof -i :4318 >/dev/null 2>&1; do sleep 0.5; done' || { kill "$COLLECTOR_PID" 2>/dev/null; exit 1; }
      ```
   3. **Claude checks out** instrument files and runs the app from `~/Documents/Repositories/commit-story-v2`:
      ```bash
