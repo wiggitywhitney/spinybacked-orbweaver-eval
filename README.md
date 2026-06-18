@@ -97,10 +97,14 @@ spinybacked-orbweaver-eval/
 | 16 | 22/25 (88%) | 5/5 | 10+3p | ~24 | $12.29 | YES | 80/100 |
 | 17 | 22/25 (88%) | 4/5 | 10+1p | ~28 | $10.43 | YES | 90/100 |
 | 18 | 24/25 (96%) | 5/5 | 11 | 36 | $9.16 | YES | 90/100 |
+| 19 | 21/25 (84%) | 5/5 | 10+3p | 30 | ~$8.60 | YES (#71) | 80/100 |
+| 20 | 24/25 (96%) | 5/5 | 12+1f | 42 | $9.08 | YES (#73) | 80/100 |
+| 21 | 23/25 (92%) | 5/5 | 12+2f | 42 | ~$9 | YES (#74) | 90/100 |
+| 23 | 24/25 (96%) | 5/5 | 13+1p | 45 | ~$5.60 | YES (#75) | 80/100 |
 
-Files column notation: plain count = committed files; `+Np` = N partial files (instrumentation started, not fully committed); `+Nf` = N files rolled back after a checkpoint test failure. Cost column: `~` prefix indicates an estimated/derived cost (early runs predating direct cost reporting in the tool); unprefixed values are directly reported by spiny-orb.
+Files column notation: plain count = committed files; `+Np` = N partial files (instrumentation started, not fully committed); `+Nf` = N files rolled back after a checkpoint test failure. Cost column: `~` prefix indicates an estimated/derived cost (early runs predating direct cost reporting in the tool); unprefixed values are directly reported by spiny-orb. Run-22 was skipped (no row).
 
-**Run-19 is next** — verifying NDS-003 reconciler gap fix (PRD #845, content-aware diff) for context-capture-tool.js, reflection-tool.js, index.js, and summary-graph.js; monitoring SCH-002 recurrence on journal-manager.js `quotes_count` attribute.
+**Run-24 is in progress** — targeting SCH-003 type mismatch fixes (count/size attributes set as strings instead of integers) and SPA-002 forceFlush (outermost span dropped before batch exporter flushes on process exit).
 
 Full run-by-run analysis: [`evaluation/commit-story-v2/`](evaluation/commit-story-v2/)
 
