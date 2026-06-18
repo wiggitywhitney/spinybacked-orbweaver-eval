@@ -209,7 +209,7 @@ The **evaluation execution branch** created by `/prd-start` from main **never me
   7. **Claude runs**: `datadog-agent start`
   Produces: `evaluation/commit-story-v2/run-24/is-score.md`
 
-- [ ] **Baseline comparison** — Compare run-24 vs runs 2–23 (run-22 was never executed).
+- [x] **Baseline comparison** — Compare run-24 vs runs 2–23 (run-22 was never executed).
   Produces: `evaluation/commit-story-v2/run-24/baseline-comparison.md`
   Style reference: `Read docs/templates/eval-run-style-reference/baseline-comparison.md`
 
