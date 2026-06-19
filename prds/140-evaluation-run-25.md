@@ -145,7 +145,7 @@ The **evaluation execution branch** created by `/prd-start` from main **never me
 - [ ] **Findings Discussion** *(user-facing checkpoint 1)* — After `run-summary.md` is written, before any evaluation documents are started: report to Whitney: (1) files committed / failed / partial, (2) whether any checkpoint failures occurred, (3) RUN24-1 fix result — did index.js commit cleanly with CDQ-001 resolved?, (4) RUN24-2 fix result — did git-collector.js commit with `diff_lines` type-correct?, (5) journal-graph.js result — eighth consecutive?, (6) 3-attempt rate — any change from run-24's pattern (3 multi-attempt files)?, (7) quality score if visible, (8) cost, (9) push/PR status (auto or manual?), (10) overall attempt-count distribution. Keep it conversational, under 12 lines. Wait for acknowledgment before proceeding.
 
 - [ ] **Post-run Datadog verification** — After the Findings Discussion checkpoint, confirm the new instrument branch spans appear in Datadog:
-  1. Use the `search_datadog_spans` Datadog MCP tool with query `service:commit-story` filtered to spans newer than the eval run's start timestamp. Check `vcs.ref.head.revision` on `commit_story.journal.save_journal_entry` spans to confirm the new instrument branch SHA appears.
+  1. Use the `search_datadog_spans` Datadog MCP tool with query `service:commit-story` filtered to spans newer than the eval run's start timestamp. Check `vcs.ref.head.revision` on `commit_story.journal.save_entry` spans to confirm the new instrument branch SHA appears. Note: `commit_story.journal.save_journal_entry` no longer exists — the current entry-writing span is `commit_story.journal.save_entry` (confirmed in run-25 pre-run verification).
   2. If no spans from the instrument branch appear yet: note this in `run-summary.md` and defer — do not block forward progress. **The trace run does not need to happen during the eval itself** — any invocation of the instrumented code on the correct branch after the eval completes is sufficient.
   3. When confirmed, record the corresponding `service.instance.id` in `trace-artifact.md` as the post-run trace reference (update from the pre-run capture if the instance differs).
 
@@ -230,5 +230,6 @@ The **evaluation execution branch** created by `/prd-start` from main **never me
 | ID | Decision | Rationale | Date |
 |----|----------|-----------|------|
 | D-1 | SCH-003 fix = deterministic type enforcement (auto-wrap `String()` when `type: string` declared + integer assigned). Schema stays as-is. | Inherited from run-24 D-7. Schema is the source of truth; intentional type declarations stay; agents must comply. Reverse case (`type: int` + string) is not safely auto-fixable and should be passed back to the agent. | 2026-06-18 |
+| D-4 | Extract instrument branch name from log output (`grep -m1 'Branch:' spiny-orb-output.log`), never from conversation context or memory. | Prevents recording stale branch names from prior runs. `run-summary.md` is the canonical record — it must reflect what spiny-orb actually created, not what we expected it to create. | 2026-06-19 |
 
 ---
