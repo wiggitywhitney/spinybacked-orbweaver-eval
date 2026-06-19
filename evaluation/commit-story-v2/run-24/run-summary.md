@@ -30,7 +30,7 @@
 
 | Item | Expected | Result |
 |------|----------|--------|
-| RUN23-1: git-collector.js `diff_size` SCH-003 integer-as-string (issue #928) | FIXED | ✅ CONFIRMED — committed clean with correct types, 3 attempts |
+| RUN23-1: git-collector.js `diff_size` SCH-003 integer-as-string (issue #928) | FIXED | ❌ RECURS — attribute renamed (diff_size → diff_lines) but `type: string` declaration not corrected to `type: int`; 3 attempts |
 | RUN23-2: commands/summarize.js `*_summaries_generated` SCH-003 (issue #928) | FIXED | ✅ CONFIRMED — committed clean with 2 attrs (down from 3), 2 attempts |
 | RUN23-3: summary-detector.js SCH-002 near-synonym partial (issue #925) | FIXED | ✅ CONFIRMED — 9 spans, 3 attrs, 1 attempt (was PARTIAL 4 spans in run-23) |
 | RUN23-4: IS SPA-002 `process.exit()` drops outermost span (issue #926) | Watch | ❌ RECURS — IS 80/100; SPA-002 still failing (orphan parentSpanId) |
@@ -43,7 +43,7 @@
 | File | Result | Spans | Attrs | Attempts | Notes |
 |------|--------|-------|-------|----------|-------|
 | src/collectors/claude-collector.js | ✅ committed | 1 | 0 | 1 | |
-| src/collectors/git-collector.js | ✅ committed | 6 | 3 | 3 | **RUN23-1 FIXED** — types correct |
+| src/collectors/git-collector.js | ✅ committed | 6 | 3 | 3 | **RUN23-1 RECURS** — renamed diff_size→diff_lines but `type: string` persists (SCH-003 FAIL) |
 | src/generators/prompts/guidelines/accessibility.js | ✅ skip | 0 | 0 | 1 | RST-001 correct |
 | src/generators/prompts/guidelines/anti-hallucination.js | ✅ skip | 0 | 0 | 1 | RST-001 correct |
 | src/generators/prompts/guidelines/index.js | ✅ skip | 0 | 0 | 1 | RST-001 correct |
@@ -82,9 +82,11 @@
 
 0 failures, 0 partials — the first run with no committed-file losses across 24 runs. Previous best was run-23 (13+1p) and run-11 (13, 100% quality score). Run-24 sets new records: 14 committed files, 0 failures, 0 partials.
 
-### All three RUN23 fixes confirmed
+### Two of three RUN23 fixes confirmed; RUN23-1 recurs
 
-**RUN23-1/RUN23-2 (SCH-003, issue #928)**: Type mismatch guidance worked. git-collector committed with correct attribute types. summary-manager dropped to 0 attributes — the `monthly_summaries_generated` string-wrapping issue is gone. commands/summarize.js committed with types correct.
+**RUN23-1 (SCH-003, issue #928) — RECURS**: The `diff_size` attribute was renamed to `diff_lines` (correct semantic change), but the `type: string` declaration was not corrected to `type: int`. SCH-003 fails again under the renamed attribute.
+
+**RUN23-2 (SCH-003, issue #928) — FIXED**: Type mismatch guidance worked for commands/summarize.js. summary-manager dropped to 0 attributes — the `monthly_summaries_generated` string-wrapping issue is gone. commands/summarize.js committed with types correct.
 
 **RUN23-3 (SCH-002, issue #925)**: Biggest win. summary-detector.js went from PARTIAL (4/5 functions, `base_path` near-synonym rejected) to 9 spans across all 5 functions in a single attempt. The near-synonym guidance completely resolved the oscillation.
 
