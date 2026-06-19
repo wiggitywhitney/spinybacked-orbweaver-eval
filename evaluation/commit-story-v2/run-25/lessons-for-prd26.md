@@ -13,7 +13,7 @@ Process observations captured during run-25. Populated incrementally as the run 
 
 *(Observations about the eval process itself that may warrant template updates)*
 
-- TBD
+- **Add log-trace correlation check to post-run Datadog verification**: commit-story-v2 has a pino log bridge (PRD #77 M1–M2) that injects `trace_id`/`span_id` into structured log records. This feature can be silently broken by spiny-orb instrumentation disrupting bootstrap order. A one-query check (`search_datadog_logs service:commit-story from:<run-start>`) confirming that correlated logs appear is low-cost and catches regressions that IS scoring would never surface. Proposed template addition: add this as a commit-story-v2-specific sub-step in the "Post-run Datadog verification" milestone with a note that it applies only to targets with an active log bridge. Run-25 baseline: 4 correlated logs from the run-24 instrument branch (12:16–12:23 UTC 2026-06-19).
 
 ## Pre-Run Observations
 
