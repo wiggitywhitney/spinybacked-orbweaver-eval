@@ -57,6 +57,29 @@ describe('scoreIS', () => {
     });
   });
 
+  describe('SPA-001 per-target threshold', () => {
+    it('marks SPA-001 as not_applicable for taze (deferred calibration)', () => {
+      const lines = loadFixture('too-many-internal.jsonl');
+      const result = scoreIS(lines, 'taze');
+      const rule = result.rules.find(r => r.id === 'SPA-001');
+      expect(rule.status).toBe('not_applicable');
+    });
+
+    it('falls back to global default for unknown targets (31 spans exceeds 30 limit)', () => {
+      const lines = loadFixture('too-many-internal.jsonl');
+      const result = scoreIS(lines, 'unknown-target');
+      const rule = result.rules.find(r => r.id === 'SPA-001');
+      expect(rule.status).toBe('fail');
+    });
+
+    it('uses global default when no target is specified', () => {
+      const lines = loadFixture('too-many-internal.jsonl');
+      const result = scoreIS(lines);
+      const rule = result.rules.find(r => r.id === 'SPA-001');
+      expect(rule.status).toBe('fail');
+    });
+  });
+
   describe('MET rules', () => {
     it('marks MET-001 through MET-006 as not_applicable, never as fail', () => {
       const lines = loadFixture('all-pass.jsonl');
