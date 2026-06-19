@@ -50,7 +50,7 @@ OTEL_EXPORTER_OTLP_TRACES_ENDPOINT=http://localhost:4318/v1/traces node --import
 From the repo root:
 
 ```bash
-node evaluation/is/score-is.js evaluation/is/eval-traces.json > evaluation/<target>/run-<N>/is-score.md
+node evaluation/is/score-is.js evaluation/is/eval-traces.json --target <target> > evaluation/<target>/run-<N>/is-score.md
 ```
 
 Output includes an overall weighted IS score (0–100) and per-rule pass/fail breakdown, written to `is-score.md`.

@@ -379,14 +379,14 @@ function formatOutput(result) {
 if (import.meta.url === pathToFileURL(process.argv[1]).href) {
   const filePath = process.argv[2];
   if (!filePath) {
-    console.error('Usage: node score-is.js <path-to-otlp-json-file>');
+    console.error('Usage: node score-is.js <path-to-otlp-json-file> [--target <target-name>]');
     process.exit(1);
   }
   const content = readFileSync(filePath, 'utf8');
   const lines = content.trim().split('\n').filter(Boolean);
-  // Infer eval target from path pattern evaluation/<target>/run-N/...
-  const targetMatch = /evaluation\/([^/]+)\//.exec(filePath);
-  const target = targetMatch ? targetMatch[1] : null;
+  // Accept optional --target <name> flag for per-target SPA-001 threshold lookup
+  const targetFlagIdx = process.argv.indexOf('--target');
+  const target = targetFlagIdx !== -1 ? process.argv[targetFlagIdx + 1] : null;
   const result = scoreIS(lines, target);
   console.log(formatOutput(result)); // eslint-disable-line no-console
   process.exit(0);

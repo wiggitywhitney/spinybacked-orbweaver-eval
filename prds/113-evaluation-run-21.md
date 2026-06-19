@@ -172,7 +172,7 @@ The **evaluation execution branch** created by `/prd-start` from main **never me
      ```
      Note: omit `COMMIT_STORY_TRACELOOP=true` — `@traceloop/instrumentation-langchain` API incompatibility crashes the process. See `evaluation/is/README.md`.
   3. **Claude stops** the Collector: `docker stop otelcol-is`
-  4. **Claude runs** the scorer: `node evaluation/is/score-is.js evaluation/is/eval-traces.json > evaluation/commit-story-v2/run-21/is-score.md`
+  4. **Claude runs** the scorer: `node evaluation/is/score-is.js evaluation/is/eval-traces.json --target commit-story-v2 > evaluation/commit-story-v2/run-21/is-score.md`
   Produces: `evaluation/commit-story-v2/run-21/is-score.md`
 
 - [ ] **Baseline comparison** — Compare run-21 vs runs 2–20.

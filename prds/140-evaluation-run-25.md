@@ -199,7 +199,7 @@ The **evaluation execution branch** created by `/prd-start` from main **never me
      ```
      Note: omit `COMMIT_STORY_TRACELOOP=true` — `@traceloop/instrumentation-langchain` API incompatibility crashes the process. See `evaluation/is/README.md`.
   3. **Claude stops** the Collector: `kill "$COLLECTOR_PID"`
-  4. **Claude runs** the scorer: `node evaluation/is/score-is.js evaluation/is/eval-traces.json > evaluation/commit-story-v2/run-25/is-score.md`
+  4. **Claude runs** the scorer: `node evaluation/is/score-is.js evaluation/is/eval-traces.json --target commit-story-v2 > evaluation/commit-story-v2/run-25/is-score.md`
   5. **Correlated signals check**: Use the `service.instance.id` from `trace-artifact.md` as the correlation handle. Run all three checks:
      - **Traces**: `search_datadog_spans` with query `service:commit-story @service.instance.id:<uuid>` — confirm spans appear for the instrument branch run.
      - **Logs**: `search_datadog_logs` with query `service:commit-story @otel_resource_attributes.service.instance.id:<uuid>` — confirm log records carry `trace_id` and `span_id` fields, and that at least one `trace_id` matches a span from that run.

@@ -1,5 +1,5 @@
 // ABOUTME: Vitest tests for the IS scoring script (evaluation/is/score-is.js).
-// ABOUTME: Covers all 9 applicable IS rules with 5 scenarios per the PRD spec.
+// ABOUTME: Covers all 9 applicable IS rules with 6 scenarios per the PRD spec.
 
 import { describe, it, expect } from 'vitest';
 import { readFileSync } from 'fs';
