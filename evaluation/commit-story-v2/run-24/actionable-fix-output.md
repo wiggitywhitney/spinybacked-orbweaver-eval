@@ -1,0 +1,220 @@
+// ABOUTME: Run-24 actionable fix handoff for the spiny-orb team — rule failures, coverage delta observations, and tool-level findings.
+# Actionable Fix Output — Run-24
+
+Self-contained handoff from evaluation run-24 to the spiny-orb team.
+
+**Run-24 result**: 23/25 (92%) canonical quality, 14 committed, 0 partial, 0 failed, 48 spans, ~$3.70 cost (claude-sonnet-4-6). Gates 5/5. IS 80/100. Q×F 12.88 (new high-water mark — first clean sweep in 24 runs).
+
+**Run-23 → Run-24 delta**: Quality -4pp (96% → 92%), COV holds at 5/5, CDQ -14pp (7/7 → 6/7 — CDQ-001 regression), SCH holds at 3/4 (SCH-003 recurs under renamed attribute), IS holds at 80/100, files +1 (13+1p → 14 committed), spans +3 (45 → 48 all-time record), cost -$1.90 (~$5.60 → ~$3.70), Q×F +0.40 (12.48 → 12.88).
+
+**Target repo**: commit-story-v2 (same as runs 9–24)
+**Branch**: `spiny-orb/instrument-1781811083418`
+**PR**: https://github.com/wiggitywhitney/commit-story-v2/pull/81
+**spiny-orb version**: 1.0.0 (main, confirmed pre-run)
+
+*Note on run-23 cost*: run-23's actionable-fix-output.md stated "$7.84" but run-23's run-summary.md records ~$5.60 — $5.60 is the correct figure; $7.84 was a data entry error in the run-23 handoff doc.
+
+---
+
+## §1. Run-24 Score Summary
+
+| Dimension | Score | Run-23 | Delta |
+|-----------|-------|--------|-------|
+| NDS | 2/2 (100%) | 2/2 (100%) | — |
+| COV | 5/5 (100%) | 5/5 (100%) | — |
+| RST | 4/4 (100%) | 4/4 (100%) | — |
+| API | 3/3 (100%) | 3/3 (100%) | — |
+| SCH | **3/4 (75%)** | 3/4 (75%) | — |
+| CDQ | **6/7 (86%)** | 7/7 (100%) | **-14pp** |
+| **Total** | **23/25 (92%)** | **24/25 (96%)** | **-4pp** |
+| **Gates** | **5/5** | **5/5** | **—** |
+| **Files** | **14 (0 partial, 0 failed)** | **13+1p** | **+1 committed** |
+| **Model** | **claude-sonnet-4-6** | claude-sonnet-4-6 | — |
+| **Cost** | **~$3.70** | ~$5.60 | **-$1.90** |
+| **IS** | **80/100** | **80/100** | **—** |
+| **Q×F** | **12.88** | **12.48** | **+0.40** |
+
+---
+
+## §2. Prior Findings Assessment
+
+| # | Finding | Priority | Status in Run-24 |
+|---|---------|----------|-----------------|
+| RUN23-1 | SCH-003 — git-collector.js `diff_size` integer-as-string type mismatch | P2 | **PARTIALLY ADDRESSED** — `diff_size` attribute eliminated; agent renamed to `diff_lines` (semantically correct: line count). However, `diff_lines` also carries `type: string` declaration while set as integer — same root cause recurs under new attribute name. Tracked as new SCH-003 failure below. |
+| RUN23-2 | SCH-003 — commands/summarize.js `*_summaries_generated` integer-as-string type mismatch | P2 | **RESOLVED** — committed clean; `*_summaries_generated` attributes absent (agent chose 0 custom attrs on summary-manager spans); `commands/summarize.js` committed with correct types on both `dates_count` (int) and `force` (boolean). |
+| RUN23-3 | summary-detector.js partial — SCH-002 near-synonym oscillation | P2 | **RESOLVED** — all 5 exported functions committed (9 spans total, 3 attrs), 1 attempt. Near-synonym guidance worked; `unsummarized_*_count` output-count attributes used throughout; `base_path` input-parameter approach completely absent. |
+| RUN23-4 | IS SPA-002 recurrence — orphan parentSpanId | Watch | **NOT RESOLVED** — `commit_story.index.main` still drops before batch flush. IS remains 80/100. Pre-run check confirmed `shutdownAndExit` fix is present in target repo's `instrumentation.js`; spiny-orb may not be following the existing shutdown pattern. **Note on #926**: This issue is closed on GitHub with root cause described as "add forceFlush to bootstrap" — but that fix is already present in commit-story-v2 as of run-24. The root cause has shifted: spiny-orb is not routing through the existing shutdown pattern. #926 should be reopened with the corrected root cause description. |
+| RUN21-6 | Agent notes vs committed code divergence | Watch | **WATCH** — no new instances flagged in run-24 per-file evaluation. Pattern not re-investigated. |
+
+---
+
+## §3. New Run-24 Rule Findings
+
+| # | Title | Priority | Category |
+|---|-------|----------|----------|
+| RUN24-1 | CDQ-001 — index.js `process.exit()` bypasses `finally { span.end() }` (regression from run-12 fix) | P2 | Code Quality / CDQ-001 |
+| RUN24-2 | SCH-003 — git-collector.js `diff_lines` declared `type: string`, set as integer (second consecutive run) | P2 | Schema Fidelity / SCH-003 |
+
+---
+
+### RUN24-1: CDQ-001 — index.js `process.exit()` Bypasses `finally { span.end() }` (P2)
+
+**What happened**: `index.js`'s `main()` function wraps its body in `startActiveSpan`. Two early-exit paths call `process.exit(1)` directly inside that callback — one when no commit hash is found, one for unsupported subcommands. These calls terminate Node.js synchronously, bypassing `finally { span.end() }`.
+
+**History**: Run-12 fixed this by adding explicit `span.end()` calls before each `process.exit(1)`. That fix was present in run-23. Run-24 regresses — the pre-exit calls are absent. **This is the third cycle: fixed → present → absent.** Prompt guidance alone has not held across three runs.
+
+**No Datadog signal**: The IS scoring run and Datadog traces only capture successful executions. The CDQ-001 violation on early-exit paths is not observable from run traces alone — the fix must be verified via static code review.
+
+**Required fix — two parts**:
+
+```javascript
+// Before each process.exit(1) inside the startActiveSpan callback:
+span.end();        // must come before process.exit()
+process.exit(1);   // process terminates — finally block never runs
+```
+
+1. **Prompt guidance**: instruct the agent that any `process.exit()` inside a `startActiveSpan` callback must be preceded by `span.end()`.
+2. **Static detection backstop**: add a post-generation check that flags any `process.exit()` inside a `startActiveSpan` callback without a preceding `span.end()` as a CDQ-001 validation failure. Do not auto-fix — the agent must name the correct span variable explicitly.
+
+Both are needed. The three-regression history shows prompt guidance alone reverts under agent variation. The static backstop provides a deterministic guarantee.
+
+**Root cause**: Early-exit paths are exercised rarely and produce no telemetry on success-path traces. The agent has no runtime signal that the pattern was wrong. Because the violation is invisible to the agent at instrumentation time, guidance that relies on agent awareness will continue to regress; only static detection makes the failure observable before commit.
+
+---
+
+### RUN24-2: SCH-003 — git-collector.js `diff_lines` Declared `type: string`, Set as Integer (P2)
+
+**What happened**: `git-collector.js` declares `commit_story.git.diff_lines` as `type: string` in `agent-extensions.yaml`, but the committed instrumentation sets it with a bare integer:
+
+```javascript
+span.setAttribute('commit_story.git.diff_lines', lines.length);
+// lines.length is a number — should be String(lines.length) per schema
+```
+
+Datadog confirms: `diff_lines: 296` (integer).
+
+**History**: Run-23 had `diff_size` with the identical type mismatch. Run-24 renamed the attribute (semantically valid change: line count is more precise than diff size) but did not follow the `type: string` declaration when setting the value.
+
+**This is a second consecutive SCH-003 failure on the same attribute slot under a new name.**
+
+**Do not change the schema.** `type: string` stays in `agent-extensions.yaml` as declared. The schema is the source of truth. Even if `type: string` for a line count looks like a mistake, the agent's job is to follow the schema — `String(lines.length)` — not to override it with what seems semantically better. Leaving the declaration as-is intentionally tests whether the agent follows the schema rather than its own judgment.
+
+**Root cause**: The agent is not following the declared schema type. It set an integer where the schema says string. The correct behavior is `String(lines.length)`.
+
+**Recommended fix — deterministic type enforcement in spiny-orb**: Add a pre-commit check that inspects each `setAttribute(key, value)` call and compares the value expression's inferred type against the declared `type:` in `agent-extensions.yaml`. When `type: string` is declared and the value is an integer expression (`.length`, numeric literal, arithmetic), auto-wrap with `String()` and commit — no agent round-trip needed. This is mechanically deterministic: the schema declared the intent; the fix enforces it.
+
+The reverse case (`type: int` declared, string passed) cannot be auto-fixed safely (a string value might not be numeric) and should be passed back to the agent as a failure. But the string-type + integer-value case is unambiguous — `String()` wrapping always produces the correct result.
+
+**Why not a prompt guidance fix**: Prompt guidance is non-deterministic — it may work on some runs and not others. A deterministic type-enforcement step runs every time, catches any attribute (not just the known ones), and does not consume agent tokens on a mechanical transformation.
+
+---
+
+## §4. Coverage Delta Observations
+
+Two committed files show attribute choices that differ from run-23. These are **not rule failures** — both files retain ≥1 meaningful domain attribute on every span (COV-005 PASS). They are documented here as context for future runs.
+
+### context-capture-tool.js — `commit_story.context.source` dropped
+
+Run-23 had 2 spans: an outer anonymous MCP callback carrying `source: 'mcp'` and an inner `saveContext`. Run-24 has 1 span (`saveContext`) with `entry_date` and `file_path`. The `source` attribute identified the ingestion pathway; its absence reduces observability on the MCP entry path. Both retained attributes are meaningful. The agent's decision to instrument only `saveContext` is a valid scope choice.
+
+**Not a COV-005 failure.** The `saveContext` span carries domain attributes. Attribute richness decreased; the minimum bar was met.
+
+### index.js — `commit_story.journal.file_path` dropped
+
+Run-23's main span carried 3 attributes including `file_path` (the generated entry path — a result attribute). Run-24 carries 2 attributes (`vcs.ref.head.revision`, `commit_story.git.subcommand`). The result attribute is gone; the span is not attribute-sparse.
+
+**Not a COV-005 failure.** Two domain attributes remain. The agent's choice to capture only input attributes is valid; run-23's approach of also capturing the result was also valid.
+
+---
+
+## §5. Notable Positives
+
+**First clean sweep in 24 runs.** 0 failed files, 0 partial files — the first time every processed file was either committed or correctly skipped. Previous best: run-23 (13+1p).
+
+**All three RUN23 fix targets confirmed**:
+- RUN23-2 (`*_summaries_generated` types): resolved
+- RUN23-3 (summary-detector.js near-synonym): resolved cleanly in 1 attempt — the most dramatic improvement of the run (was PARTIAL 4 spans in run-23; now 9 spans across all 5 functions)
+
+**Attempt rate improvement**: 3 multi-attempt files vs 7 in run-23. journal-graph.js dropped from 2–3 attempts to 1; summary-graph.js from 2 to 1.
+
+**journal-graph.js: 7th consecutive success** (runs 18, 19, 20, 21, [22 never ran], 23, 24).
+
+**Cost reduction to ~$3.70** — 34% lower than run-23's ~$5.60. Fewer retry chains (3 vs 7 multi-attempt files) and high cache utilization (212.6K of 322.8K total input) drove the reduction.
+
+**New file correctly handled**: `src/logger.js` (pino + OTLP log bridge, added via PR #80) was correctly identified as RST-001 utility skip in 1 attempt — confirming generalization to new file types.
+
+---
+
+## §6. Tool-Level Observation
+
+**Spiny-orb PR summary and log output: include model alongside cost.**
+
+Spiny-orb's run output includes cost figures (e.g., `~$3.70`) without the model identifier. When tracking quality across runs or comparing costs, the model is essential context — the same token count costs substantially different amounts across model tiers, and model changes between runs can explain cost swings that look like efficiency improvements.
+
+**Recommended change**: Include the model ID (e.g., `claude-sonnet-4-6`) alongside cost in:
+- PR body summary (the cost line)
+- Log output (wherever cost is printed at run end)
+
+The eval framework now tracks model in all per-run artifacts; the upstream tool should surface this information so it's visible without cross-referencing documentation.
+
+---
+
+## §7. Carry-Forward Tracker (Open Items Entering Run-25)
+
+| ID | Title | Priority | Status | Runs Open | spiny-orb Issue |
+|----|-------|----------|--------|-----------|-----------------|
+| RUN24-1 | CDQ-001: index.js `process.exit()` bypasses `span.end()` (regression) | P2 | Open — new in run-24 (regression from run-12 fix) | 1 | — |
+| RUN24-2 | SCH-003: git-collector.js `diff_lines` declared `type: string`, set as integer | P2 | Open — recurrence under new attribute name. Fix: deterministic type enforcement in spiny-orb (auto-wrap `String()` when `type: string` declared + integer assigned). Schema stays as-is. | 2 (consecutive) | — |
+| RUN23-4 | IS SPA-002: `commit_story.index.main` drops before batch flush | Watch | Root cause: `process.exit()` terminates before OTel flush. `shutdownAndExit` fix present in target repo's `instrumentation.js`. spiny-orb may not be following the existing shutdown pattern. **#926 is closed** with the original root cause ("add forceFlush to bootstrap") — but that fix is already in the target repo as of run-24. Root cause has shifted. #926 needs to be reopened with corrected description. | 2 | #926 (closed, needs reopen) |
+| IS SPA-001 | INTERNAL span count structural | Structural | 45 INTERNAL spans vs 10-span calibration limit; structural mismatch, not a defect. Research spike filed. | 10+ | #929 |
+| RUN21-6 | Agent notes vs committed code divergence | Watch | Not re-investigated in run-24. Pattern documented; confirmed as trust problem. | 3 | #927 |
+
+**Closed this run**: RUN23-2 (commands/summarize.js `*_summaries_generated` types), RUN23-3 (summary-detector.js SCH-002 near-synonym partial).
+
+---
+
+## §8. Score Projection — Run-25
+
+| Scenario | Assumption | Projected Score | Q×F |
+|----------|------------|-----------------|-----|
+| Both fixed | CDQ-001 and SCH-003 resolved; 14 files committed | 25/25 (100%), 14 files | **14.0** — all-time record |
+| One fixed | One failure remains | 24/25 (96%), 14 files | 13.44 |
+| Neither fixed | Both failures recur | 23/25 (92%), 14 files | 12.88 (same as run-24) |
+
+**Key insight**: Both RUN24-1 (CDQ-001) and RUN24-2 (SCH-003) have known, targeted fixes. CDQ-001 fix: add `span.end()` before `process.exit()` in `index.js` (prompt guidance or agent correction). SCH-003 fix: deterministic type enforcement in spiny-orb — auto-wrap `String()` when `type: string` is declared and an integer expression is assigned (the schema declaration stays as-is; no schema change). If both land, run-25 would set a new all-time Q×F record of 14.0. The 14-file base is now stable — the question is whether both point failures can be eliminated.
+
+**IS path**: SPA-002 remains the primary IS blocker (10pp). If the `shutdownAndExit` fix interaction is diagnosed and resolved, IS recovery to 90/100 is available. SPA-001 is structural (commit-story-v2 INTERNAL span count exceeds calibration limit) and will not improve without a calibration change.
+
+---
+
+## §9. Prompt Hygiene Findings — Hardcoded Commit-Story-v2 Values in Agent Prompt
+
+Two commit-story-v2-specific values were found embedded directly in `src/agent/prompt.ts` — spiny-orb's general-purpose agent prompt. Both contaminate eval signal on this target: the agent may score correctly because the prompt contains target-specific hints, not because the general guidance is working. Both survived CLAUDE.md rules, code review, and 20+ eval runs without detection.
+
+### Finding 1 — SCH-003 rule body (line ~285): `diff_size` hardcoded in rule text
+
+The SCH-003 type mismatch rule contains this sentence directly in the rule body (not in an `<examples>` block):
+
+```text
+"A `diff_size` attribute represents a size — use `type: int`."
+```
+
+`diff_size` is a commit-story-v2-specific attribute name (`commit_story.git.diff_size`, not in the Weaver registry — derived from the target codebase). As inline rule text (not an example), the agent treats it as authoritative guidance. When the agent applies SCH-003 correctly to `diff_size`-related attributes in commit-story-v2, there is no way to tell whether the general pattern guidance is working or whether the agent is pattern-matching on the specific name it was told.
+
+**Recommended fix**: Replace `diff_size` with a neutral domain example (e.g., `payload_size`, `response_size`), or move the sentence into an `<examples>` block with a label indicating it is illustrative. The general guidance — attributes named `*_size` or `*_count` should use `type: int` — is valid; only the specific commit-story-v2 attribute name is the problem.
+
+### Finding 2 — SCH-002 count-key disambiguation (line ~152): verbatim commit-story-v2 domain vocabulary
+
+The SCH-002 count-key semantic precision guidance contains:
+
+```text
+"A count key registered for 'messages collected from sessions' does NOT apply to 'raw journal entries being processed'"
+```
+
+"Messages collected from sessions" is the exact brief of `commit_story.context.messages_count` from commit-story-v2's `semconv/attributes.yaml`. "Raw journal entries being processed" is also commit-story-v2 pipeline vocabulary (`context-integrator.js`). This appears to have been written from a specific observation during a commit-story-v2 eval run, then embedded as if it's a universal rule. Effect: the agent has domain-specific disambiguation for a commit-story-v2 near-synonym scenario, which inflates SCH-002 scores on this target (the only eval target to date).
+
+**Recommended fix**: Abstract the example to non-repo-specific vocabulary (e.g., "A key registered for 'items retrieved from cache' does NOT apply to 'items queued for processing'"), or move the commit-story-v2-specific sentence to an `<examples>` block clearly labeled as illustrative.
+
+### Why these are hard to detect
+
+Both instances are subtle — they read as plausible general guidance. No existing guardrail catches repo-specific values inside rule text (as opposed to `<examples>` blocks). A future prompt quality check could diff the agent prompt against each target's Weaver registry to flag attribute names that appear in rule text; anything matching a known target attribute and not wrapped in `<examples>` is a candidate for abstraction.
