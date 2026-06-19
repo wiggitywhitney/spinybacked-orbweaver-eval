@@ -19,7 +19,7 @@ Process observations captured during run-25. Populated incrementally as the run 
 
 *(Populated during pre-run verification)*
 
-- **Datadog MCP domain config lost after plugin update**: The `ddsetup` skill stores domain and toolsets to disk (`/Users/whitney.lee/.claude/plugins/data/datadog-claude-plugins-official/domain` and `toolsets`), but a plugin cache update to v0.7.14 reset the registration file. The recovery flow (run `/ddsetup`, re-apply saved config, `/reload-plugins`, re-auth OAuth) added ~30 min to the pre-run setup. Consider adding a note in PRD #26's pre-run milestone explicitly checking for Datadog MCP health BEFORE starting the session rather than mid-verification.
+- **Datadog MCP domain config lost after plugin update**: The `ddsetup` skill stores domain and toolsets to disk (`$HOME/.claude/plugins/data/datadog-claude-plugins-official/domain` and `toolsets`), but a plugin cache update to v0.7.14 reset the registration file. The recovery flow (run `/ddsetup`, re-apply saved config, `/reload-plugins`, re-auth OAuth) added ~30 min to the pre-run setup. Consider adding a note in PRD #26's pre-run milestone explicitly checking for Datadog MCP health BEFORE starting the session rather than mid-verification.
 
 - **commit-story-v2 target was on run-24 instrument branch at session start**: The target repo was on `spiny-orb/instrument-1781811083418` (run-24 branch). Whitney ran commit-story from it this morning, generating today's traces in Datadog with `git.commit.sha: bb08c9c...`. Had to `git checkout main` before starting run-25. The PRD pre-run checklist (step 4) already covers this, but it's worth confirming explicitly at session start before doing anything else.
 
