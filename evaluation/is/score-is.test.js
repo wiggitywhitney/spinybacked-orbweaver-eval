@@ -72,6 +72,13 @@ describe('scoreIS', () => {
       expect(rule.status).toBe('fail');
     });
 
+    it('passes SPA-001 for commit-story-v2 with 31 spans (below 55 limit)', () => {
+      const lines = loadFixture('too-many-internal.jsonl');
+      const result = scoreIS(lines, 'commit-story-v2');
+      const rule = result.rules.find(r => r.id === 'SPA-001');
+      expect(rule.status).toBe('pass');
+    });
+
     it('uses global default when no target is specified', () => {
       const lines = loadFixture('too-many-internal.jsonl');
       const result = scoreIS(lines);

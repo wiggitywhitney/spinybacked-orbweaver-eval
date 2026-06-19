@@ -179,6 +179,10 @@ const SPA001_PER_TARGET_LIMITS = {
   // Spans scale with npm package collection size — no fixed threshold applies.
   // Calibration decision deferred; do not invent a number.
   taze: null,
+  // Workload-dependent: ~30 spans (no summaries due) vs. ~45-50 spans (summarization active).
+  // Calibrated against runs 15-24 (range: 11-48, observed max 48 in run-24). Threshold of 55
+  // gives headroom above the max and the spiny-orb team's estimated ceiling of 50-55 spans.
+  'commit-story-v2': 55,
 };
 
 function evalSPA001(traces, limit) {
