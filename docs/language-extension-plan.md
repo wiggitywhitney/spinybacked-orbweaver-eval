@@ -152,10 +152,15 @@ The most recently completed run for a target is the **style and format reference
 8. Rubric scoring
 9. IS scoring run
    1. **Prerequisites**: OTel Collector running with `evaluation/is/otelcol-config.yaml` (see `evaluation/is/README.md` for install and start instructions). No metrics-exporter override needed — MET rules are marked `not_applicable` by the scorer regardless.
-   2. **Action**: Run the target app with the Collector as OTLP receiver; collect `evaluation/is/eval-traces.json`; run `node evaluation/is/score-is.js evaluation/is/eval-traces.json > evaluation/[TARGET]/run-[N]/is-score.md`
+   2. **Action**: Run the target app with the Collector as OTLP receiver; collect `evaluation/is/eval-traces.json`; run `node evaluation/is/score-is.js evaluation/is/eval-traces.json --target [TARGET] > evaluation/[TARGET]/run-[N]/is-score.md`
    3. **Output**: `evaluation/[TARGET]/run-[N]/is-score.md` is written by the command above.
    4. **Note for k8s repos**: IS scoring requires a running cluster; see `evaluation/is/README.md` for the Kind-based workflow
 9.5. **Capture trace artifact (non-organic targets)**: Immediately after IS scoring completes, use the `search_datadog_spans` Datadog MCP tool with query `service:<target> from:now-30m` (IS scoring takes several minutes so a 5-minute window is too tight). Retrieve `service.instance.id` from any span in the result. Write `evaluation/<target>/run-N/trace-artifact.md` (five fields: service.instance.id, captured, target, instrument_branch, query) using the format in `evaluation/trace-capture-protocol.md`. If no spans appear, wait up to 5 minutes for Datadog ingestion and retry once; if still empty, record trace absence in the artifact and note it in `run-summary.md`. **Organic targets** (e.g., commit-story-v2) capture their trace artifact during pre-run verification (step 2) — not here.
+9.6. **Correlated signals check**: Use the `service.instance.id` from `trace-artifact.md` as the correlation handle. Run all three checks:
+   - **Traces**: `search_datadog_spans` with query `service:<target> @service.instance.id:<uuid>` — confirm spans appear for the instrument branch run.
+   - **Logs**: `search_datadog_logs` with query `service:<target> @otel_resource_attributes.service.instance.id:<uuid>` — confirm log records carry `trace_id` and `span_id` fields, and that at least one `trace_id` matches a span from that run.
+   - **Metrics**: `search_datadog_metrics` for `traces.span.metrics.calls` and `traces.span.metrics.duration` filtered to `service:<target>` — confirm span-based metrics are visible.
+   Pass criteria: spans present; logs carry correlated `trace_id`; span metrics visible. If any check fails, note the gap in `run-summary.md` — do not block the eval run on a signals gap.
 10. Baseline comparison
 10a. **Update root README** — After baseline comparison, update `README.md`: (1) add a row for this run to the run history table with quality score, gates, files, spans, cost, push/PR status, and IS score; (2) update the "next run" sentence (the bold paragraph immediately below the run history table, above the "Full run-by-run analysis" link) to reference the upcoming run number and its primary goals.
 11. Actionable fix output *(user-facing checkpoint 2: interpreted summary + handoff pause)*

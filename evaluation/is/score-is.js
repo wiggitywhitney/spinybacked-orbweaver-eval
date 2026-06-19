@@ -164,11 +164,35 @@ function evalRES005(resourceSpans) {
   return { status: 'fail', reason: 'service.name absent from resource attributes' };
 }
 
-function evalSPA001(traces) {
+// SPA-001 threshold: calibrated for CLI pipeline workloads (not microservice defaults).
+// The spec rationale ("services producing an excessive number of internal spans") applies
+// to microservice workloads. CLI pipelines with sequential stages produce more INTERNAL
+// spans per invocation — each representing a distinct, observable operation, not redundant
+// sub-spans. Spec uses "SHOULD" (RFC 2119 advisory), explicitly allowing calibration with
+// justification. Spec commit: 52c14ba.
+const SPA001_INTERNAL_SPAN_LIMIT = 30;
+
+// Per-target SPA-001 INTERNAL span limits.
+// null = deferred (no calibration decision made; SPA-001 becomes not_applicable for this target).
+// Omitted target = SPA001_INTERNAL_SPAN_LIMIT (global default) applies.
+const SPA001_PER_TARGET_LIMITS = {
+  // Spans scale with npm package collection size — no fixed threshold applies.
+  // Calibration decision deferred; do not invent a number.
+  taze: null,
+  // Workload-dependent: ~30 spans (no summaries due) vs. ~45-50 spans (summarization active).
+  // Calibrated against runs 15-24 (range: 11-48, observed max 48 in run-24). Threshold of 55
+  // gives headroom above the max and the spiny-orb team's estimated ceiling of 50-55 spans.
+  'commit-story-v2': 55,
+};
+
+function evalSPA001(traces, limit) {
+  if (limit === null) {
+    return { status: 'not_applicable', reason: 'SPA-001 threshold not yet calibrated for this target' };
+  }
   for (const [traceId, spans] of traces) {
     const internalCount = spans.filter(s => spanKindInt(s.kind) === SPAN_KIND_INTERNAL).length;
-    if (internalCount > 10) {
-      return { status: 'fail', reason: `trace ${traceId.slice(0, 8)} has ${internalCount} INTERNAL spans (limit 10)` };
+    if (internalCount > limit) {
+      return { status: 'fail', reason: `trace ${traceId.slice(0, 8)} has ${internalCount} INTERNAL spans (limit ${limit})` };
     }
   }
   const totalInternal = [...traces.values()].reduce(
@@ -272,16 +296,20 @@ const MET_NOT_APPLICABLE = { status: 'not_applicable', reason: 'spiny-orb produc
 
 // ── Main scorer ───────────────────────────────────────────────────────────────
 
-export function scoreIS(lines) {
+export function scoreIS(lines, target = null) {
   const resourceSpans = collectResourceSpans(lines);
   const allSpans = getAllSpans(resourceSpans);
   const traces = getTraces(allSpans);
+
+  const spa001Limit = (target !== null && Object.hasOwn(SPA001_PER_TARGET_LIMITS, target))
+    ? SPA001_PER_TARGET_LIMITS[target]
+    : SPA001_INTERNAL_SPAN_LIMIT;
 
   const ruleResults = [
     { id: 'RES-005', name: 'service.name present',               weight: WEIGHT_CRITICAL, critical: true,  ...evalRES005(resourceSpans) },
     { id: 'RES-001', name: 'service.instance.id present',        weight: WEIGHT_NORMAL,   critical: false, ...evalRES001(resourceSpans) },
     { id: 'RES-004', name: 'semconv at correct OTLP level',      weight: WEIGHT_NORMAL,   critical: false, ...evalRES004(resourceSpans) },
-    { id: 'SPA-001', name: 'INTERNAL span count within limit',   weight: WEIGHT_NORMAL,   critical: false, ...evalSPA001(traces) },
+    { id: 'SPA-001', name: 'INTERNAL span count within limit',   weight: WEIGHT_NORMAL,   critical: false, ...evalSPA001(traces, spa001Limit) },
     { id: 'SPA-002', name: 'no orphan spans',                    weight: WEIGHT_NORMAL,   critical: false, ...evalSPA002(traces) },
     { id: 'SPA-003', name: 'span name cardinality',              weight: WEIGHT_NORMAL,   critical: false, ...evalSPA003(allSpans) },
     { id: 'SPA-004', name: 'root spans not CLIENT kind',         weight: WEIGHT_NORMAL,   critical: false, ...evalSPA004(traces) },
@@ -351,12 +379,15 @@ function formatOutput(result) {
 if (import.meta.url === pathToFileURL(process.argv[1]).href) {
   const filePath = process.argv[2];
   if (!filePath) {
-    console.error('Usage: node score-is.js <path-to-otlp-json-file>');
+    console.error('Usage: node score-is.js <path-to-otlp-json-file> [--target <target-name>]');
     process.exit(1);
   }
   const content = readFileSync(filePath, 'utf8');
   const lines = content.trim().split('\n').filter(Boolean);
-  const result = scoreIS(lines);
+  // Accept optional --target <name> flag for per-target SPA-001 threshold lookup
+  const targetFlagIdx = process.argv.indexOf('--target');
+  const target = targetFlagIdx !== -1 ? process.argv[targetFlagIdx + 1] : null;
+  const result = scoreIS(lines, target);
   console.log(formatOutput(result)); // eslint-disable-line no-console
   process.exit(0);
 }

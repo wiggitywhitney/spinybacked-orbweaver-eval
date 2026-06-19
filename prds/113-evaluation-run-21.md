@@ -160,21 +160,19 @@ The **evaluation execution branch** created by `/prd-start` from main **never me
 
 - [ ] **IS scoring run** — Follow `docs/language-extension-plan.md` step 9. Full protocol in `evaluation/is/README.md` (commit-story-v2 section).
 
-  1. **Claude runs**: `datadog-agent stop`
-  2. **Claude starts** the OTel Collector in the background:
+  1. **Claude starts** the OTel Collector in the background:
      ```bash
      docker run --rm -d --name otelcol-is -w /etc/otelcol -p 4318:4318 --user "$(id -u):$(id -g)" -v /Users/whitney.lee/Documents/Repositories/spinybacked-orbweaver-eval/evaluation/is:/etc/otelcol otel/opentelemetry-collector-contrib:latest --config /etc/otelcol/otelcol-config.yaml
      ```
-  3. **Claude checks out** instrument files and runs the app from `~/Documents/Repositories/commit-story-v2`:
+  2. **Claude checks out** instrument files and runs the app from `~/Documents/Repositories/commit-story-v2`:
      ```bash
      git checkout spiny-orb/instrument-XXXXXXXXXX -- src/ examples/
      OTEL_EXPORTER_OTLP_TRACES_ENDPOINT=http://localhost:4318/v1/traces env -u ANTHROPIC_CUSTOM_HEADERS -u ANTHROPIC_BASE_URL vals exec -i -f .vals.yaml -- node --import ./examples/instrumentation.js src/index.js HEAD
      git checkout main -- src/ examples/
      ```
      Note: omit `COMMIT_STORY_TRACELOOP=true` — `@traceloop/instrumentation-langchain` API incompatibility crashes the process. See `evaluation/is/README.md`.
-  4. **Claude stops** the Collector: `docker stop otelcol-is`
-  5. **Claude runs** the scorer: `node evaluation/is/score-is.js evaluation/is/eval-traces.json > evaluation/commit-story-v2/run-21/is-score.md`
-  6. **Claude runs**: `datadog-agent start`
+  3. **Claude stops** the Collector: `docker stop otelcol-is`
+  4. **Claude runs** the scorer: `node evaluation/is/score-is.js evaluation/is/eval-traces.json --target commit-story-v2 > evaluation/commit-story-v2/run-21/is-score.md`
   Produces: `evaluation/commit-story-v2/run-21/is-score.md`
 
 - [ ] **Baseline comparison** — Compare run-21 vs runs 2–20.

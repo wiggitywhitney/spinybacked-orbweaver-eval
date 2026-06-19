@@ -185,26 +185,26 @@ The **evaluation execution branch** created by `/prd-start` from main **never me
 
 - [ ] **IS scoring run** — Follow `docs/language-extension-plan.md` step 9. Full protocol in `evaluation/is/README.md` (commit-story-v2 section).
 
-  **Prerequisite before running**: Update `evaluation/is/score-is.js` to use threshold 55 for commit-story-v2 (issue #139). The current threshold is 10, which causes SPA-001 to pass incorrectly given commit-story-v2's 48 INTERNAL spans. Update the threshold before running — do not run IS scoring with the old threshold of 10.
-
-  1. **Claude runs**: `datadog-agent stop`
-  2. **Claude starts** the OTel Collector in the background using the installed binary:
+  1. **Claude starts** the OTel Collector in the background using the installed binary:
      ```bash
      vals exec -f ~/Documents/Repositories/spinybacked-orbweaver-eval/.vals.yaml -- ~/.local/bin/otelcol-contrib --config ~/Documents/Repositories/spinybacked-orbweaver-eval/evaluation/is/otelcol-config.yaml > /tmp/otelcol.log 2>&1 &
      COLLECTOR_PID=$!
      timeout 30 bash -c 'until lsof -i :4318 >/dev/null 2>&1; do sleep 0.5; done' || { kill "$COLLECTOR_PID" 2>/dev/null; exit 1; }
      ```
-  3. **Claude checks out** instrument files and runs the app from `~/Documents/Repositories/commit-story-v2`. The instrument branch name is available in `evaluation/commit-story-v2/run-25/run-summary.md` once the eval run completes:
+  2. **Claude checks out** instrument files and runs the app from `~/Documents/Repositories/commit-story-v2`. The instrument branch name is available in `evaluation/commit-story-v2/run-25/run-summary.md` once the eval run completes:
      ```bash
      git checkout <instrument-branch> -- src/ examples/
      OTEL_EXPORTER_OTLP_TRACES_ENDPOINT=http://localhost:4318/v1/traces env -u ANTHROPIC_CUSTOM_HEADERS -u ANTHROPIC_BASE_URL vals exec -i -f .vals.yaml -- node --import ./examples/instrumentation.js src/index.js HEAD
      git checkout main -- src/ examples/
      ```
      Note: omit `COMMIT_STORY_TRACELOOP=true` — `@traceloop/instrumentation-langchain` API incompatibility crashes the process. See `evaluation/is/README.md`.
-  4. **Claude stops** the Collector: `kill "$COLLECTOR_PID"`
-  5. **Claude runs** the scorer: `node evaluation/is/score-is.js evaluation/is/eval-traces.json > evaluation/commit-story-v2/run-25/is-score.md`
-  6. **Confirm IS scoring traces in Datadog**: Note the IS scoring run start time, then use the `search_datadog_spans` Datadog MCP tool with query `service:commit-story from:<run-start-time>` (use the actual timestamp to avoid matching organic traffic). Record the `service.instance.id`. This confirms the OTel Collector's Datadog exporter forwarded spans from the IS scoring run.
-  7. **Claude runs**: `datadog-agent start`
+  3. **Claude stops** the Collector: `kill "$COLLECTOR_PID"`
+  4. **Claude runs** the scorer: `node evaluation/is/score-is.js evaluation/is/eval-traces.json --target commit-story-v2 > evaluation/commit-story-v2/run-25/is-score.md`
+  5. **Correlated signals check**: Use the `service.instance.id` from `trace-artifact.md` as the correlation handle. Run all three checks:
+     - **Traces**: `search_datadog_spans` with query `service:commit-story @service.instance.id:<uuid>` — confirm spans appear for the instrument branch run.
+     - **Logs**: `search_datadog_logs` with query `service:commit-story @otel_resource_attributes.service.instance.id:<uuid>` — confirm log records carry `trace_id` and `span_id` fields, and that at least one `trace_id` matches a span from that run.
+     - **Metrics**: `search_datadog_metrics` for `traces.span.metrics.calls` and `traces.span.metrics.duration` filtered to `service:commit-story` — confirm span-based metrics are visible.
+     Pass criteria: spans present; logs carry correlated `trace_id`; span metrics visible. If any check fails, note the gap in `run-summary.md` — do not block the eval run on a signals gap.
   Produces: `evaluation/commit-story-v2/run-25/is-score.md`
 
 - [ ] **Baseline comparison** — Compare run-25 vs runs 2–24 (run-22 was never executed).

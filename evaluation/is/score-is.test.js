@@ -1,5 +1,5 @@
 // ABOUTME: Vitest tests for the IS scoring script (evaluation/is/score-is.js).
-// ABOUTME: Covers all 9 applicable IS rules with 5 scenarios per the PRD spec.
+// ABOUTME: Covers all 9 applicable IS rules with 6 scenarios per the PRD spec.
 
 import { describe, it, expect } from 'vitest';
 import { readFileSync } from 'fs';
@@ -49,7 +49,37 @@ describe('scoreIS', () => {
   });
 
   describe('SPA-001 failure (too many INTERNAL spans)', () => {
-    it('fails when a trace has more than 10 INTERNAL spans', () => {
+    it('fails when a trace exceeds the SPA-001 INTERNAL span limit', () => {
+      const lines = loadFixture('too-many-internal.jsonl');
+      const result = scoreIS(lines);
+      const rule = result.rules.find(r => r.id === 'SPA-001');
+      expect(rule.status).toBe('fail');
+    });
+  });
+
+  describe('SPA-001 per-target threshold', () => {
+    it('marks SPA-001 as not_applicable for taze (deferred calibration)', () => {
+      const lines = loadFixture('too-many-internal.jsonl');
+      const result = scoreIS(lines, 'taze');
+      const rule = result.rules.find(r => r.id === 'SPA-001');
+      expect(rule.status).toBe('not_applicable');
+    });
+
+    it('falls back to global default for unknown targets (31 spans exceeds 30 limit)', () => {
+      const lines = loadFixture('too-many-internal.jsonl');
+      const result = scoreIS(lines, 'unknown-target');
+      const rule = result.rules.find(r => r.id === 'SPA-001');
+      expect(rule.status).toBe('fail');
+    });
+
+    it('passes SPA-001 for commit-story-v2 with 31 spans (below 55 limit)', () => {
+      const lines = loadFixture('too-many-internal.jsonl');
+      const result = scoreIS(lines, 'commit-story-v2');
+      const rule = result.rules.find(r => r.id === 'SPA-001');
+      expect(rule.status).toBe('pass');
+    });
+
+    it('uses global default when no target is specified', () => {
       const lines = loadFixture('too-many-internal.jsonl');
       const result = scoreIS(lines);
       const rule = result.rules.find(r => r.id === 'SPA-001');
