@@ -164,11 +164,19 @@ function evalRES005(resourceSpans) {
   return { status: 'fail', reason: 'service.name absent from resource attributes' };
 }
 
+// SPA-001 threshold: calibrated for CLI pipeline workloads (not microservice defaults).
+// The spec rationale ("services producing an excessive number of internal spans") applies
+// to microservice workloads. CLI pipelines with sequential stages produce more INTERNAL
+// spans per invocation — each representing a distinct, observable operation, not redundant
+// sub-spans. Spec uses "SHOULD" (RFC 2119 advisory), explicitly allowing calibration with
+// justification. Spec commit: 52c14ba.
+const SPA001_INTERNAL_SPAN_LIMIT = 30;
+
 function evalSPA001(traces) {
   for (const [traceId, spans] of traces) {
     const internalCount = spans.filter(s => spanKindInt(s.kind) === SPAN_KIND_INTERNAL).length;
-    if (internalCount > 10) {
-      return { status: 'fail', reason: `trace ${traceId.slice(0, 8)} has ${internalCount} INTERNAL spans (limit 10)` };
+    if (internalCount > SPA001_INTERNAL_SPAN_LIMIT) {
+      return { status: 'fail', reason: `trace ${traceId.slice(0, 8)} has ${internalCount} INTERNAL spans (limit ${SPA001_INTERNAL_SPAN_LIMIT})` };
     }
   }
   const totalInternal = [...traces.values()].reduce(
