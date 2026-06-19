@@ -71,6 +71,18 @@ The run-24 D-2 evaluation spawned all 15 agents at once. A context compaction ha
 
 Root cause that would eliminate the problem entirely: agents being able to write files directly. If each D-2 agent wrote its own section file as it completed, the main context would never need to buffer the results. Flag this for spiny-orb eval infrastructure if Write tool access for subagents becomes available.
 
-## Rubric Gaps or Clarifications Needed
+## Process Improvements for Next Template Update
 
-*(populate during per-file evaluation)*
+### Handoff checkpoint: spoken summary with root cause and generalization check
+
+When delivering the handoff doc at user-facing checkpoint 2 (the pause before Draft PRD), also provide a spoken summary with three elements:
+
+1. **Main points** — the key failures, their category, and priority in plain language
+2. **Root cause vs. symptom** — for each recommended fix, explain whether it addresses the root cause or a known symptom, and if symptom, why the root cause isn't reachable directly. Fixes that only suppress the symptom for one attribute or one run are not sufficient unless the root cause is genuinely unreachable.
+3. **Every-user generalization check** — explain how the fix helps any spiny-orb user instrumenting any target repo, not just someone using this eval target. A fix that only works because of target-specific hardcoding or a one-off schema change fails this check.
+
+**Why this matters**: In run-24, the initial SCH-003 recommendation (schema change) passed the "the schema is wrong" symptom test but failed both the root cause test (agents override declared type with semantic judgment — a schema change doesn't fix that) and the every-user test (changing `agent-extensions.yaml` helps nobody else). The spoken summary would have surfaced this earlier.
+
+**Template location**: Add as a required subsection of the Actionable fix output milestone, immediately before the pause instruction. Label it "Spoken summary (root cause + generalization)". It does not need to be written into the handoff doc itself — it's a verbal checkpoint between the AI and the user at delivery time.
+
+**Propagate to**: `docs/language-extension-plan.md` step 11 (actionable fix output) AND all open eval run PRDs that have an unchecked Actionable fix output milestone.
