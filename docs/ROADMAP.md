@@ -3,6 +3,8 @@
 Execution order within each tier matters. Items are listed in dependency order — complete earlier items before starting later ones. See `docs/language-extension-plan.md` for the full dependency chain (Steps 1-7).
 
 ## Short-term
+- Post-#972 cleanup + correlated signals eval step ([issue #138](https://github.com/wiggitywhitney/spinybacked-orbweaver-eval/issues/138)) — Phase 1 blocked on spiny-orb #972 (agent stop/start removal); Phase 2 unblocked (add observability triangle verification using Datadog MCP after IS scoring)
+- SPA-001: raise per-target threshold for commit-story-v2 to 55 ([issue #139](https://github.com/wiggitywhitney/spinybacked-orbweaver-eval/issues/139)) — workload-dependent span count (30 baseline, 45–50 when summarization fires); 10-span OllyGarden default structurally unsuitable for this target
 - ~~JS evaluation run-13: NDS-003 truthy fix verification (PRD #37)~~ ✅ Complete
 - ~~JS evaluation run-14: commit-story-v2 — smart rollback + type-safety verification (PRD #55)~~ ✅ Complete — 22/25, 12 files, IS 80/100, PR #65
 - ~~JS evaluation run-15: commit-story-v2 — catch-block consistency + COV-004 audit (PRD #61)~~ ✅ Complete — 24/25, 14 files, IS 70/100, Q×F 13.4 (new record), PR #66
