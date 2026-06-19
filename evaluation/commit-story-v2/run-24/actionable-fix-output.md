@@ -43,7 +43,7 @@ Self-contained handoff from evaluation run-24 to the spiny-orb team.
 | RUN23-1 | SCH-003 — git-collector.js `diff_size` integer-as-string type mismatch | P2 | **PARTIALLY ADDRESSED** — `diff_size` attribute eliminated; agent renamed to `diff_lines` (semantically correct: line count). However, `diff_lines` also carries `type: string` declaration while set as integer — same root cause recurs under new attribute name. Tracked as new SCH-003 failure below. |
 | RUN23-2 | SCH-003 — commands/summarize.js `*_summaries_generated` integer-as-string type mismatch | P2 | **RESOLVED** — committed clean; `*_summaries_generated` attributes absent (agent chose 0 custom attrs on summary-manager spans); `commands/summarize.js` committed with correct types on both `dates_count` (int) and `force` (boolean). |
 | RUN23-3 | summary-detector.js partial — SCH-002 near-synonym oscillation | P2 | **RESOLVED** — all 5 exported functions committed (9 spans total, 3 attrs), 1 attempt. Near-synonym guidance worked; `unsummarized_*_count` output-count attributes used throughout; `base_path` input-parameter approach completely absent. |
-| RUN23-4 | IS SPA-002 recurrence — orphan parentSpanId | Watch | **NOT RESOLVED** — `commit_story.index.main` still drops before batch flush. IS remains 80/100. Pre-run check confirmed `shutdownAndExit` fix is present in target repo's `instrumentation.js`; spiny-orb may not be following the existing shutdown pattern. |
+| RUN23-4 | IS SPA-002 recurrence — orphan parentSpanId | Watch | **NOT RESOLVED** — `commit_story.index.main` still drops before batch flush. IS remains 80/100. Pre-run check confirmed `shutdownAndExit` fix is present in target repo's `instrumentation.js`; spiny-orb may not be following the existing shutdown pattern. **Note on #926**: This issue is closed on GitHub with root cause described as "add forceFlush to bootstrap" — but that fix is already present in commit-story-v2 as of run-24. The root cause has shifted: spiny-orb is not routing through the existing shutdown pattern. #926 should be reopened with the corrected root cause description. |
 | RUN21-6 | Agent notes vs committed code divergence | Watch | **WATCH** — no new instances flagged in run-24 per-file evaluation. Pattern not re-investigated. |
 
 ---
@@ -61,11 +61,11 @@ Self-contained handoff from evaluation run-24 to the spiny-orb team.
 
 **What happened**: `index.js`'s `main()` function wraps its body in `startActiveSpan`. Two early-exit paths call `process.exit(1)` directly inside that callback — one when no commit hash is found, one for unsupported subcommands. These calls terminate Node.js synchronously, bypassing `finally { span.end() }`.
 
-**History**: Run-12 fixed this by adding explicit `span.end()` calls before each `process.exit(1)`. That fix was present in run-23. Run-24 regresses — the pre-exit calls are absent.
+**History**: Run-12 fixed this by adding explicit `span.end()` calls before each `process.exit(1)`. That fix was present in run-23. Run-24 regresses — the pre-exit calls are absent. **This is the third cycle: fixed → present → absent.** Prompt guidance alone has not held across three runs.
 
 **No Datadog signal**: The IS scoring run and Datadog traces only capture successful executions. The CDQ-001 violation on early-exit paths is not observable from run traces alone — the fix must be verified via static code review.
 
-**Required fix**:
+**Required fix — two parts**:
 
 ```javascript
 // Before each process.exit(1) inside the startActiveSpan callback:
@@ -73,9 +73,12 @@ span.end();        // must come before process.exit()
 process.exit(1);   // process terminates — finally block never runs
 ```
 
-The run-12 pattern is the correct model. Each `process.exit(1)` call inside `startActiveSpan` needs a preceding `span.end()`.
+1. **Prompt guidance**: instruct the agent that any `process.exit()` inside a `startActiveSpan` callback must be preceded by `span.end()`.
+2. **Static detection backstop**: add a post-generation check that flags any `process.exit()` inside a `startActiveSpan` callback without a preceding `span.end()` as a CDQ-001 validation failure. Do not auto-fix — the agent must name the correct span variable explicitly.
 
-**Root cause**: Early-exit paths are exercised rarely (no commit hash found, unsupported subcommand) and do not appear in telemetry from success-path traces. Agents have no runtime signal that the pattern was wrong; the guidance needs to proactively flag this pattern.
+Both are needed. The three-regression history shows prompt guidance alone reverts under agent variation. The static backstop provides a deterministic guarantee.
+
+**Root cause**: Early-exit paths are exercised rarely and produce no telemetry on success-path traces. The agent has no runtime signal that the pattern was wrong. Because the violation is invisible to the agent at instrumentation time, guidance that relies on agent awareness will continue to regress; only static detection makes the failure observable before commit.
 
 ---
 
@@ -162,7 +165,7 @@ The eval framework now tracks model in all per-run artifacts; the upstream tool 
 |----|-------|----------|--------|-----------|-----------------|
 | RUN24-1 | CDQ-001: index.js `process.exit()` bypasses `span.end()` (regression) | P2 | Open — new in run-24 (regression from run-12 fix) | 1 | — |
 | RUN24-2 | SCH-003: git-collector.js `diff_lines` declared `type: string`, set as integer | P2 | Open — recurrence under new attribute name. Fix: deterministic type enforcement in spiny-orb (auto-wrap `String()` when `type: string` declared + integer assigned). Schema stays as-is. | 2 (consecutive) | — |
-| RUN23-4 | IS SPA-002: `commit_story.index.main` drops before batch flush | Watch | Root cause: `process.exit()` terminates before OTel flush. `shutdownAndExit` fix present in target repo's `instrumentation.js`. spiny-orb may not be following the existing shutdown pattern. | 2 | #926 |
+| RUN23-4 | IS SPA-002: `commit_story.index.main` drops before batch flush | Watch | Root cause: `process.exit()` terminates before OTel flush. `shutdownAndExit` fix present in target repo's `instrumentation.js`. spiny-orb may not be following the existing shutdown pattern. **#926 is closed** with the original root cause ("add forceFlush to bootstrap") — but that fix is already in the target repo as of run-24. Root cause has shifted. #926 needs to be reopened with corrected description. | 2 | #926 (closed, needs reopen) |
 | IS SPA-001 | INTERNAL span count structural | Structural | 45 INTERNAL spans vs 10-span calibration limit; structural mismatch, not a defect. Research spike filed. | 10+ | #929 |
 | RUN21-6 | Agent notes vs committed code divergence | Watch | Not re-investigated in run-24. Pattern documented; confirmed as trust problem. | 3 | #927 |
 
@@ -181,3 +184,37 @@ The eval framework now tracks model in all per-run artifacts; the upstream tool 
 **Key insight**: Both RUN24-1 (CDQ-001) and RUN24-2 (SCH-003) have known, targeted fixes. CDQ-001 fix: add `span.end()` before `process.exit()` in `index.js` (prompt guidance or agent correction). SCH-003 fix: deterministic type enforcement in spiny-orb — auto-wrap `String()` when `type: string` is declared and an integer expression is assigned (the schema declaration stays as-is; no schema change). If both land, run-25 would set a new all-time Q×F record of 14.0. The 14-file base is now stable — the question is whether both point failures can be eliminated.
 
 **IS path**: SPA-002 remains the primary IS blocker (10pp). If the `shutdownAndExit` fix interaction is diagnosed and resolved, IS recovery to 90/100 is available. SPA-001 is structural (commit-story-v2 INTERNAL span count exceeds calibration limit) and will not improve without a calibration change.
+
+---
+
+## §9. Prompt Hygiene Findings — Hardcoded Commit-Story-v2 Values in Agent Prompt
+
+Two commit-story-v2-specific values were found embedded directly in `src/agent/prompt.ts` — spiny-orb's general-purpose agent prompt. Both contaminate eval signal on this target: the agent may score correctly because the prompt contains target-specific hints, not because the general guidance is working. Both survived CLAUDE.md rules, code review, and 20+ eval runs without detection.
+
+### Finding 1 — SCH-003 rule body (line ~285): `diff_size` hardcoded in rule text
+
+The SCH-003 type mismatch rule contains this sentence directly in the rule body (not in an `<examples>` block):
+
+```text
+"A `diff_size` attribute represents a size — use `type: int`."
+```
+
+`diff_size` is a commit-story-v2-specific attribute name (`commit_story.git.diff_size`, not in the Weaver registry — derived from the target codebase). As inline rule text (not an example), the agent treats it as authoritative guidance. When the agent applies SCH-003 correctly to `diff_size`-related attributes in commit-story-v2, there is no way to tell whether the general pattern guidance is working or whether the agent is pattern-matching on the specific name it was told.
+
+**Recommended fix**: Replace `diff_size` with a neutral domain example (e.g., `payload_size`, `response_size`), or move the sentence into an `<examples>` block with a label indicating it is illustrative. The general guidance — attributes named `*_size` or `*_count` should use `type: int` — is valid; only the specific commit-story-v2 attribute name is the problem.
+
+### Finding 2 — SCH-002 count-key disambiguation (line ~152): verbatim commit-story-v2 domain vocabulary
+
+The SCH-002 count-key semantic precision guidance contains:
+
+```text
+"A count key registered for 'messages collected from sessions' does NOT apply to 'raw journal entries being processed'"
+```
+
+"Messages collected from sessions" is the exact brief of `commit_story.context.messages_count` from commit-story-v2's `semconv/attributes.yaml`. "Raw journal entries being processed" is also commit-story-v2 pipeline vocabulary (`context-integrator.js`). This appears to have been written from a specific observation during a commit-story-v2 eval run, then embedded as if it's a universal rule. Effect: the agent has domain-specific disambiguation for a commit-story-v2 near-synonym scenario, which inflates SCH-002 scores on this target (the only eval target to date).
+
+**Recommended fix**: Abstract the example to non-repo-specific vocabulary (e.g., "A key registered for 'items retrieved from cache' does NOT apply to 'items queued for processing'"), or move the commit-story-v2-specific sentence to an `<examples>` block clearly labeled as illustrative.
+
+### Why these are hard to detect
+
+Both instances are subtle — they read as plausible general guidance. No existing guardrail catches repo-specific values inside rule text (as opposed to `<examples>` blocks). A future prompt quality check could diff the agent prompt against each target's Weaver registry to flag attribute names that appear in rule text; anything matching a known target attribute and not wrapped in `<examples>` is a candidate for abstraction.

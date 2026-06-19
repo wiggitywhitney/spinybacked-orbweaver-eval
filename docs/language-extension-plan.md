@@ -163,6 +163,19 @@ The most recently completed run for a target is the **style and format reference
 10. Baseline comparison
 10a. **Update root README** — After baseline comparison, update `README.md`: (1) add a row for this run to the run history table with quality score, gates, files, spans, model, cost, push/PR status, and IS score; (2) update the "next run" sentence (the bold paragraph immediately below the run history table, above the "Full run-by-run analysis" link) to reference the upcoming run number and its primary goals.
 11. Actionable fix output *(user-facing checkpoint 2: interpreted summary + handoff pause)*
+
+   **Before writing the handoff doc**, apply these three checks:
+
+   - **Carry-forward root cause check**: For each carry-forward item from §2 of the handoff template, verify that the original root cause description still holds given this run's evidence. If the root cause has shifted (e.g., a fix was present but a different mechanism caused the same failure), update the §2 status cell and the §7 carry-forward row. Do not leave a closed-with-wrong-root-cause issue in the carry-forward tracker without noting it.
+
+   - **Recurrence count and structural fix evaluation**: For any finding that recurs across 2 or more runs, state the recurrence count explicitly in the handoff ("This is the Nth consecutive run with this failure"). Then evaluate: has prompt guidance alone proven insufficient? If so, recommend a structural fix (static detection, validator enforcement, or post-generation check) alongside any prompt update. Prompt-only fixes that have already failed once are not sufficient on their own.
+
+   - **Routing rule — spiny-orb team findings belong in the handoff**: Any finding where the action owner is the spiny-orb team (not the eval process) belongs in `actionable-fix-output.md`, regardless of how or where it was discovered during the run (including discoveries recorded in `lessons-for-prd*.md`). `lessons-for-prd*.md` is for eval process observations; spiny-orb team issues belong in the handoff doc.
+
+   **Spoken summary at delivery (required)**: When presenting the handoff to Whitney at Moment 2, provide a spoken summary with three elements before printing the file path:
+   1. **Main points** — the key failures, their category, and priority in plain language
+   2. **Root cause vs. symptom** — for each fix, state whether it addresses the root cause or a symptom; if symptom, explain why the root cause is not directly reachable
+   3. **Every-user generalization check** — explain how each fix helps any spiny-orb user instrumenting any target repo, not just this one
 12. **Draft next PRD** *(includes template-update checkpoint before drafting)*
 
    1. **Review current run artifacts for process observations**: Before drafting the next PRD, read `evaluation/<target>/run-N/actionable-fix-output.md` and any `lessons-for-prd*.md` files in `evaluation/<target>/run-N/` (if no `lessons-for-prd*.md` files exist, proceed without them). Focus on observations about the eval process itself — not findings about the target codebase, but: steps that were confusing or under-specified, gaps in instructions that caused extra back-and-forth, new tools or techniques that worked well, steps that took longer than expected because the template lacked guidance. Separate these from target-specific findings (bugs in the target codebase, target-specific IS scoring details, organic/non-organic behavior).
@@ -332,7 +345,7 @@ Every Type D PRD must include both named checkpoints:
 After `run-summary.md` is written, before any analysis begins, give Whitney a raw overview: files committed/failed/partial, quality score, model used, cost, push/PR status, top 1–2 surprises. Conversational, under 10 lines. Wait for acknowledgment before proceeding.
 
 **Moment 2 — Handoff pause** (at the end of Actionable fix output):
-After full analysis, give Whitney an interpreted summary of key findings: failures, root causes, notable patterns, what to watch for in the next run. Then print the absolute file path of `actionable-fix-output.md` and pause until Whitney confirms she has handed the document off to the spiny-orb team. Do not proceed to the next PRD until confirmed.
+After full analysis, deliver a spoken summary with three elements (see step 11 for detail): main points, root cause vs. symptom for each fix, and the every-user generalization check. Then print the absolute file path of `actionable-fix-output.md` and pause until Whitney confirms she has handed the document off to the spiny-orb team. Do not proceed to the next PRD until confirmed.
 
 ---
 

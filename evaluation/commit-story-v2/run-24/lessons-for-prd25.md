@@ -73,6 +73,8 @@ Root cause that would eliminate the problem entirely: agents being able to write
 
 ## Process Improvements for Next Template Update
 
+*Status: applied to `docs/language-extension-plan.md` step 11 and Moment 2 section (2026-06-19) — no further propagation needed at PRD #25 template-update checkpoint for these items.*
+
 ### Handoff checkpoint: spoken summary with root cause and generalization check
 
 When delivering the handoff doc at user-facing checkpoint 2 (the pause before Draft PRD), also provide a spoken summary with three elements:
