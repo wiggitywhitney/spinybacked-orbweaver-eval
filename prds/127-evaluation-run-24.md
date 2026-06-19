@@ -223,10 +223,17 @@ The **evaluation execution branch** created by `/prd-start` from main **never me
 
 - [ ] **Draft PRD #25** — Follow `docs/language-extension-plan.md` step 12. Complete the template-update checkpoint (steps 12.1–12.3) first — review `evaluation/commit-story-v2/run-24/actionable-fix-output.md` and any `lessons-for-prd25.md` files for process observations; present proposed template updates; get user approval; commit approved changes as a separate commit before drafting the PRD. Then draft PRD #25 using this PRD as the style reference. Create on a separate branch from main. Merge the PRD PR to main so `/prd-start` can pick it up. Carry forward both user-facing checkpoints into PRD #25's milestone structure. IS scoring milestone must use the same format as this PRD's IS scoring milestone. Per-file evaluation milestone must specify the D-2 per-agent approach. *(D-6: when drafting PRD #25, verify that the per-file evaluation milestone explicitly includes the coverage delta observation methodology from `docs/language-extension-plan.md` step 6 before submitting — do not rely on the template reader picking it up implicitly.)* *(D-7: when describing RUN24-2 carry-forward in PRD #25's problem statement, frame the SCH-003 fix as deterministic type enforcement in spiny-orb — auto-wrap `String()` when `type: string` declared + integer assigned. Do not describe or imply a schema change. The schema stays as-is intentionally.)*
 
-  **Session context for cold AI**: One item from the 2026-06-19 session that affects PRD #25:
-  1. **SPA-001 threshold**: eval repo issue #139 tracks raising the commit-story-v2 IS scoring threshold in `score-is.js` from 10 to 55. PRD #25's IS scoring milestone should note this as a prerequisite step — update `evaluation/is/score-is.js` to use threshold 55 for commit-story-v2 before running the IS scoring run.
+  **Session context for cold AI**:
 
-  Note: The D-2 batch-of-5 process change has already been propagated to `docs/language-extension-plan.md` step 6 and to PRD #100 (release-it run-5). The template-update checkpoint at the start of this milestone does not need to re-evaluate it — it is done.
+  **Template-update checkpoint (steps 12.1–12.3) is fully complete** — do not re-run it. The following changes were already made and committed in the 2026-06-19 session:
+  - D-2 batch-of-5 per-file evaluation guidance added to `docs/language-extension-plan.md` step 6
+  - Propagation policy in step 12.3 changed from "do NOT propagate to open PRDs" to target-agnostic discovery-based propagation via `actionable-fix-output.md`
+  - Both improvements propagated to PRD #100 (release-it run-5)
+  - Spoken summary requirement propagated to PRD #100's actionable fix output milestone
+  - `lessons-for-prd25.md` fully reviewed; no remaining generalizable improvements to propagate
+
+  Proceed directly to step 12.4 — draft PRD #25. One item from the session that affects PRD #25:
+  1. **SPA-001 threshold**: eval repo issue #139 tracks raising the commit-story-v2 IS scoring threshold in `score-is.js` from 10 to 55. PRD #25's IS scoring milestone should note this as a prerequisite step — update `evaluation/is/score-is.js` to use threshold 55 for commit-story-v2 before running the IS scoring run.
 
 - [ ] **Copy artifacts to main** — From main, run `git checkout <eval-branch> -- evaluation/commit-story-v2/run-24/` to copy all artifacts. Commit to main with message `eval: save run-24 artifacts to main [skip ci]`. Add one row to `evaluation/commit-story-v2/run-log.md` for run-24 and commit with `eval: update run-log for run-24 [skip ci]`. Push main. This step runs before `/prd-done` so the artifacts land on main while the eval branch is still reachable.
 
