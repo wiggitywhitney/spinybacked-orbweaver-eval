@@ -14,20 +14,6 @@ docker pull otel/opentelemetry-collector-contrib:latest
 **Binary download:**
 Download the `otelcol-contrib` binary for your platform from the [OpenTelemetry Collector Contrib releases page](https://github.com/open-telemetry/opentelemetry-collector-contrib/releases). Place it on your PATH.
 
-### 2. Stop the Datadog Agent
-
-The OTel Collector receives on port 4318 — the same port the Datadog Agent uses. They cannot run simultaneously. Stop the Datadog Agent before starting the Collector:
-
-```bash
-sudo launchctl stop com.datadoghq.agent
-```
-
-Restart it after your IS scoring run is complete:
-
-```bash
-sudo launchctl start com.datadoghq.agent
-```
-
 ## Running an IS Scoring Session
 
 ### Step 1: Start the OTel Collector
