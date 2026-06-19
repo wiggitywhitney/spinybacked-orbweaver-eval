@@ -85,18 +85,24 @@ The run-12 pattern is the correct model. Each `process.exit(1)` call inside `sta
 
 ```javascript
 span.setAttribute('commit_story.git.diff_lines', lines.length);
-// lines.length is a number — passed without String() conversion
+// lines.length is a number — should be String(lines.length) per schema
 ```
 
 Datadog confirms: `diff_lines: 296` (integer).
 
-**History**: Run-23 had `diff_size` with the identical type mismatch. Run-24 renamed the attribute (correctly — `diff_lines` is semantically more precise for a line count) but did not update the `type: string` declaration in `agent-extensions.yaml`.
+**History**: Run-23 had `diff_size` with the identical type mismatch. Run-24 renamed the attribute (semantically valid change: line count is more precise than diff size) but did not follow the `type: string` declaration when setting the value.
 
-**This is a second consecutive SCH-003 failure on the same attribute slot.** The rename fixed the semantic (RUN23-1 goal), but the type declaration was not corrected alongside it.
+**This is a second consecutive SCH-003 failure on the same attribute slot under a new name.**
 
-**Required fix**: Change `type: string` → `type: int` in `agent-extensions.yaml` for `commit_story.git.diff_lines`. The instrumented code is already correct (integer semantics appropriate for a line count); only the schema declaration needs updating.
+**Do not change the schema.** `type: string` stays in `agent-extensions.yaml` as declared. The schema is the source of truth. Even if `type: string` for a line count looks like a mistake, the agent's job is to follow the schema — `String(lines.length)` — not to override it with what seems semantically better. Leaving the declaration as-is intentionally tests whether the agent follows the schema rather than its own judgment.
 
-**Root cause**: The agent updated the attribute name to be semantically correct but did not revisit the `type` field when registering the new attribute. Type declarations appear to default to `string` conservatively. A guidance reminder — "when registering an attribute whose value will be a `.length`, count, or size expression, declare `type: int`" — would prevent this class of failure.
+**Root cause**: The agent is not following the declared schema type. It set an integer where the schema says string. The correct behavior is `String(lines.length)`.
+
+**Recommended fix — deterministic type enforcement in spiny-orb**: Add a pre-commit check that inspects each `setAttribute(key, value)` call and compares the value expression's inferred type against the declared `type:` in `agent-extensions.yaml`. When `type: string` is declared and the value is an integer expression (`.length`, numeric literal, arithmetic), auto-wrap with `String()` and commit — no agent round-trip needed. This is mechanically deterministic: the schema declared the intent; the fix enforces it.
+
+The reverse case (`type: int` declared, string passed) cannot be auto-fixed safely (a string value might not be numeric) and should be passed back to the agent as a failure. But the string-type + integer-value case is unambiguous — `String()` wrapping always produces the correct result.
+
+**Why not a prompt guidance fix**: Prompt guidance is non-deterministic — it may work on some runs and not others. A deterministic type-enforcement step runs every time, catches any attribute (not just the known ones), and does not consume agent tokens on a mechanical transformation.
 
 ---
 
@@ -155,7 +161,7 @@ The eval framework now tracks model in all per-run artifacts; the upstream tool 
 | ID | Title | Priority | Status | Runs Open | spiny-orb Issue |
 |----|-------|----------|--------|-----------|-----------------|
 | RUN24-1 | CDQ-001: index.js `process.exit()` bypasses `span.end()` (regression) | P2 | Open — new in run-24 (regression from run-12 fix) | 1 | — |
-| RUN24-2 | SCH-003: git-collector.js `diff_lines` declared `type: string`, set as integer | P2 | Open — recurrence under new attribute name | 2 (consecutive) | #928 |
+| RUN24-2 | SCH-003: git-collector.js `diff_lines` declared `type: string`, set as integer | P2 | Open — recurrence under new attribute name. Fix: deterministic type enforcement in spiny-orb (auto-wrap `String()` when `type: string` declared + integer assigned). Schema stays as-is. | 2 (consecutive) | — |
 | RUN23-4 | IS SPA-002: `commit_story.index.main` drops before batch flush | Watch | Root cause: `process.exit()` terminates before OTel flush. `shutdownAndExit` fix present in target repo's `instrumentation.js`. spiny-orb may not be following the existing shutdown pattern. | 2 | #926 |
 | IS SPA-001 | INTERNAL span count structural | Structural | 45 INTERNAL spans vs 10-span calibration limit; structural mismatch, not a defect. Research spike filed. | 10+ | #929 |
 | RUN21-6 | Agent notes vs committed code divergence | Watch | Not re-investigated in run-24. Pattern documented; confirmed as trust problem. | 3 | #927 |
@@ -172,6 +178,6 @@ The eval framework now tracks model in all per-run artifacts; the upstream tool 
 | One fixed | One failure remains | 24/25 (96%), 14 files | 13.44 |
 | Neither fixed | Both failures recur | 23/25 (92%), 14 files | 12.88 (same as run-24) |
 
-**Key insight**: Both RUN24-1 (CDQ-001) and RUN24-2 (SCH-003) have known, targeted fixes. CDQ-001 fix is a code change (add `span.end()` before `process.exit()` in `index.js`); SCH-003 fix is a schema change (change `type: string` → `type: int` for `diff_lines` in `agent-extensions.yaml`). If both land, run-25 would set a new all-time Q×F record of 14.0. The 14-file base is now stable — the question is whether both point failures can be eliminated.
+**Key insight**: Both RUN24-1 (CDQ-001) and RUN24-2 (SCH-003) have known, targeted fixes. CDQ-001 fix: add `span.end()` before `process.exit()` in `index.js` (prompt guidance or agent correction). SCH-003 fix: deterministic type enforcement in spiny-orb — auto-wrap `String()` when `type: string` is declared and an integer expression is assigned (the schema declaration stays as-is; no schema change). If both land, run-25 would set a new all-time Q×F record of 14.0. The 14-file base is now stable — the question is whether both point failures can be eliminated.
 
 **IS path**: SPA-002 remains the primary IS blocker (10pp). If the `shutdownAndExit` fix interaction is diagnosed and resolved, IS recovery to 90/100 is available. SPA-001 is structural (commit-story-v2 INTERNAL span count exceeds calibration limit) and will not improve without a calibration change.
