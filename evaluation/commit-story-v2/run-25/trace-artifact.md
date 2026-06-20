@@ -2,7 +2,7 @@
 service.instance.id: bcb5e6b0-0bfd-4dcd-afc8-22dd60a389f3
 captured: 2026-06-19T12:22:43Z
 target: commit-story-v2
-instrument_branch: (pre-run — not yet available; update after run-25 instrument completes)
+instrument_branch: spiny-orb/instrument-1781909345452
 query: service:commit-story @service.instance.id:bcb5e6b0-0bfd-4dcd-afc8-22dd60a389f3
 
 # Notes
