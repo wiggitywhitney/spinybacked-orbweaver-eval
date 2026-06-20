@@ -1,6 +1,6 @@
 # PRD #25: JS Evaluation Run-25: commit-story-v2 — CDQ-001 Regression Fix & SCH-003 Deterministic Type Enforcement
 
-**Status:** Ready
+**Status:** Complete (2026-06-20)
 **Created:** 2026-06-19
 **GitHub Issue:** #140
 **Depends on:** PRD #24 (run-24 complete, actionable fix output delivered to spiny-orb team)
@@ -219,9 +219,9 @@ The **evaluation execution branch** created by `/prd-start` from main **never me
   3. Print the absolute file path of `evaluation/commit-story-v2/run-25/actionable-fix-output.md`.
   4. **Pause.** Do not proceed to Draft PRD #26 until Whitney confirms she has handed the document off to the spiny-orb team.
 
-- [ ] **Draft PRD #26** — Follow `docs/language-extension-plan.md` step 12. Complete the template-update checkpoint (steps 12.1–12.3) first — review `evaluation/commit-story-v2/run-25/actionable-fix-output.md` and any `lessons-for-prd26.md` files for process observations; present proposed template updates; get user approval; commit approved changes as a separate commit before drafting the PRD. Then draft PRD #26 using this PRD as the style reference. Create on a separate branch from main. Merge the PRD PR to main so `/prd-start` can pick it up. Carry forward both user-facing checkpoints into PRD #26's milestone structure. IS scoring milestone must use the same format as this PRD's IS scoring milestone. Per-file evaluation milestone must specify the D-2 batch-of-5 approach.
+- [x] **Draft PRD #26** — Follow `docs/language-extension-plan.md` step 12. Complete the template-update checkpoint (steps 12.1–12.3) first — review `evaluation/commit-story-v2/run-25/actionable-fix-output.md` and any `lessons-for-prd26.md` files for process observations; present proposed template updates; get user approval; commit approved changes as a separate commit before drafting the PRD. Then draft PRD #26 using this PRD as the style reference. Create on a separate branch from main. Merge the PRD PR to main so `/prd-start` can pick it up. Carry forward both user-facing checkpoints into PRD #26's milestone structure. IS scoring milestone must use the same format as this PRD's IS scoring milestone. Per-file evaluation milestone must specify the D-2 batch-of-5 approach.
 
-- [ ] **Copy artifacts to main** — From main, run `git checkout <eval-branch> -- evaluation/commit-story-v2/run-25/` to copy all artifacts. Commit to main with message `eval: save run-25 artifacts to main [skip ci]`. Add one row to `evaluation/commit-story-v2/run-log.md` for run-25 and commit with `eval: update run-log for run-25 [skip ci]`. Push main. This step runs before `/prd-done` so the artifacts land on main while the eval branch is still reachable.
+- [x] **Copy artifacts to main** — From main, run `git checkout <eval-branch> -- evaluation/commit-story-v2/run-25/` to copy all artifacts. Commit to main with message `eval: save run-25 artifacts to main [skip ci]`. Add one row to `evaluation/commit-story-v2/run-log.md` for run-25 and commit with `eval: update run-log for run-25 [skip ci]`. Push main. This step runs before `/prd-done` so the artifacts land on main while the eval branch is still reachable.
 
 ---
 
