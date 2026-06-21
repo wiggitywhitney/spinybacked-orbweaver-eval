@@ -129,7 +129,7 @@ The eval execution branch (`feature/prd-146-taze-evaluation-run-16`) **never mer
   9. **File inventory**: Count `.ts` files in `~/Documents/Repositories/taze/src/` — should be 33.
   10. **Record environment**: Append spiny-orb SHA, Node version, and pnpm version to `evaluation/taze/run-16/lessons-for-run17.md`.
 
-- [ ] **Evaluation run-16** — Whitney runs `spiny-orb instrument` in her terminal. The `debug-dumps/` directory must exist before running (created in skeleton step above).
+- [x] **Evaluation run-16** — Whitney runs `spiny-orb instrument` in her terminal. The `debug-dumps/` directory must exist before running (created in skeleton step above).
 
   ```bash
   caffeinate -s env -u ANTHROPIC_CUSTOM_HEADERS -u ANTHROPIC_BASE_URL vals exec -i -f .vals.yaml -- bash -c 'GITHUB_TOKEN=$GITHUB_TOKEN_TAZE node ~/Documents/Repositories/spinybacked-orbweaver/bin/spiny-orb.js instrument src --verbose --thinking --debug-dump-dir ~/Documents/Repositories/spinybacked-orbweaver-eval/evaluation/taze/run-16/debug-dumps 2>&1 | tee ~/Documents/Repositories/spinybacked-orbweaver-eval/evaluation/taze/run-16/spiny-orb-output.log'
