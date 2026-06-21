@@ -141,7 +141,7 @@ The eval execution branch (`feature/prd-146-taze-evaluation-run-16`) **never mer
 
   **resolves.ts debug dump watch**: After the run, immediately check `evaluation/taze/run-16/debug-dumps/` for a `resolves.ts` debug dump. If present: run `tsc --noEmit` on that file from the taze fork root to capture the actual error. Document the error in `spiny-orb-findings.md`. This is the key diagnostic data for #954.
 
-- [ ] **Findings Discussion** *(user-facing checkpoint 1 — raw signal before analysis)* — Present raw findings from the log: committed files, failed files, pre-scan skips, cost, resolves.ts outcome (debug dump captured? oscillation or fix?), CDQ-006 guard status. Do not interpret yet. Wait for Whitney's response before proceeding to failure deep-dives.
+- [x] **Findings Discussion** *(user-facing checkpoint 1 — raw signal before analysis)* — Present raw findings from the log: committed files, failed files, pre-scan skips, cost, resolves.ts outcome (debug dump captured? oscillation or fix?), CDQ-006 guard status. Do not interpret yet. Wait for Whitney's response before proceeding to failure deep-dives.
 
 - [ ] **Failure deep-dives** — For each failed file (0 committed spans), partially committed file, and committed file requiring ≥ 3 attempts with a quality failure: analyze debug dumps, verbose log, thinking blocks, companion `.instrumentation.md` files. Follow the diagnostic protocol from `docs/language-extension-plan.md` (all 5 dimensions). For `resolves.ts`: if a debug dump exists, run `tsc --noEmit` manually and capture the full error output. Document in `evaluation/taze/run-16/spiny-orb-findings.md`.
 
