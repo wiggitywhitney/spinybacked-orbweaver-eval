@@ -6,6 +6,9 @@ Entry format: `- (YYYY-MM-DD) Description of feature-level change (PRD #X, miles
 
 ## [Unreleased]
 
+### Changed
+- (2026-06-21) Updated eval tooling documentation to reflect spiny-orb flag changes: `--thinking` now captures thinking blocks for all files (previously failed files only); `--thinking-fail` is the new flag for failures-only behavior; `--debug-dump-dir` now also writes dumps for partial and success-with-0-spans files. Updated diagnostic protocol in `docs/language-extension-plan.md` and marked two PRD #144 watch items as resolved — debug dump coverage gap and thinking block persistence were both addressed by this spiny-orb release.
+
 ### Added
 - (2026-06-20) Completed commit-story-v2 evaluation run-25 (PRD #140): CDQ-001 regression fix confirmed (fixProcessExitSpanEnd() AST restructure in spiny-orb); SCH-003 de-facto resolved (agent omitted diff_lines entirely); IS score improved to 100/100 (new all-time record); SPA-002 de-facto resolved (SimpleSpanProcessor + shutdownAndExit() makes batch-flush race structurally impossible). Quality 24/25 (96%), 13 committed files + 1 partial (summary-manager.js), Q×F 12.48. New finding: RUN25-1 — COV-004 validator false positive on conditional-rethrow ENOENT pattern (isExpectedConditionCatch cannot distinguish positive guard from negated form). Cost $7.38. PRD #26 (run-26) drafted and merged. Artifacts copied to main.
 - (2026-06-19) Raised SPA-001 INTERNAL span limit from 10 to 30 in `evaluation/is/score-is.js` and extracted it as a named constant (`SPA001_INTERNAL_SPAN_LIMIT`). The original calibration of 10 targeted microservice deployments, not CLI pipelines that commonly emit 20–50 spans per invocation. Closes issue #132.
