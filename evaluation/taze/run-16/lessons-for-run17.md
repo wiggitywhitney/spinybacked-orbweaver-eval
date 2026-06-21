@@ -25,15 +25,17 @@ Process observations captured during run-16. Populated incrementally as the run 
 
 *(Observations about the eval process itself that may warrant template updates)*
 
-### Per-file evaluation must use the D-2 parallel subagent approach — one agent per file, 5 in parallel
+### Per-file evaluation must use the D-2 parallel subagent approach — one agent per file, batches of 5
 
 During run-16, the per-file evaluation was initially written as a single-pass sequential document without spawning subagents (Decision 6 in PRD #146). Whitney identified this as incorrect. The correct process:
 
 - Spawn one subagent per committed file
-- Run in batches of 5 in parallel
+- Run in batches of **5 in parallel — no more**
 - Each subagent independently reads: the instrumented .ts file, the Agent thinking + Agent notes blocks from the log, the companion .instrumentation.md, the run-15 baseline entry, and the rubric
 
 **Why this matters**: Sequential single-pass analysis is vulnerable to anchoring (earlier findings bias later ones) and misses cross-file patterns that parallel independent evaluation can surface. The run-17 validated this: 16 parallel agents found gaps that 8+ sequential runs missed.
+
+**Why 5 max**: Each batch of 5 subagents generates enough output to exhaust the context window. Launching more than 5 in one message causes context overflow and agent rejections (validated in run-16 — 9 agents were launched, 6 were rejected). Required sequence per batch: spawn 5 agents → collect results → append to `per-file-evaluation.md` → `/prd-update-progress` → `/clear` → spawn next 5. With 13 committed files: batch 1 = files 1–5, batch 2 = files 6–10, batch 3 = files 11–13.
 
 ### spiny-orb-output.log is the primary source of agent reasoning — debug-dumps is empty when all files succeed
 
