@@ -167,7 +167,7 @@ The eval execution branch (`feature/prd-146-taze-evaluation-run-16`) **never mer
 
 - [ ] **Rubric scoring** — Score all dimensions against the rubric. Compare to run-15 baseline. resolves.ts outcome (fixed vs. still oscillating) is the primary data point.
 
-- [ ] **IS scoring run** — See `evaluation/is/README.md` for collector setup.
+- [x] **IS scoring run** — See `evaluation/is/README.md` for collector setup.
 
   IS scoring invocation for taze (from `evaluation/taze/run-15/lessons-for-run16.md`):
   ```bash
@@ -182,9 +182,9 @@ The eval execution branch (`feature/prd-146-taze-evaluation-run-16`) **never mer
 
   **SPA-001 note**: taze is a CLI app. If SPA-001 fires, this is structural — taze had 37 INTERNAL spans in run-15. Document but do not treat as a regression.
 
-- [ ] **Capture trace artifact (step 9.5)** — Immediately after IS scoring completes, use the `search_datadog_spans` Datadog MCP tool with query `service:taze from:now-30m`. Retrieve `service.instance.id` from any span. Write `evaluation/taze/run-16/trace-artifact.md` (five fields: service.instance.id, captured, target, instrument_branch, query) using the format in `evaluation/trace-capture-protocol.md`. If no spans appear, wait up to 5 minutes and retry once.
+- [x] **Capture trace artifact (step 9.5)** — Immediately after IS scoring completes, use the `search_datadog_spans` Datadog MCP tool with query `service:taze from:now-30m`. Retrieve `service.instance.id` from any span. Write `evaluation/taze/run-16/trace-artifact.md` (five fields: service.instance.id, captured, target, instrument_branch, query) using the format in `evaluation/trace-capture-protocol.md`. If no spans appear, wait up to 5 minutes and retry once.
 
-- [ ] **Correlated signals check (step 9.6)** — Use the `service.instance.id` from `trace-artifact.md` as the correlation handle:
+- [x] **Correlated signals check (step 9.6)** — Use the `service.instance.id` from `trace-artifact.md` as the correlation handle:
   - **Traces**: `search_datadog_spans` with `service:taze @service.instance.id:<uuid>` — confirm spans appear.
   - **Logs**: `search_datadog_logs` with `service:taze @otel_resource_attributes.service.instance.id:<uuid>` — confirm log records carry `trace_id` and `span_id` fields.
   - **Metrics**: `search_datadog_metrics` for `traces.span.metrics.calls` and `traces.span.metrics.duration` filtered to `service:taze`.
