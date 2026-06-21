@@ -39,7 +39,7 @@ During run-16, the per-file evaluation was initially written as a single-pass se
 
 `--debug-dump-dir` only writes dumps for **failed**, **partial**, and **zero-span** files. When all files succeed (as in run-16), the debug-dumps directory is entirely empty. The `Agent thinking` and `Agent notes` blocks in `spiny-orb-output.log` are the only source of agent reasoning for successful files.
 
-**Log extraction pattern**: Each file's section is bounded by `Processing file N of 33: src/path/to/file.ts` at the start and the next `Processing file` line at the end. Use `grep -n "Processing file" spiny-orb-output.log` to find the line numbers, then extract the section between them.
+**Log extraction pattern**: Each file's section is bounded by `Processing file N of M: src/path/to/file.ts` at the start and the next `Processing file` line at the end (run-16 had 33 total files; M will differ in later runs). Use `grep -n "Processing file" spiny-orb-output.log` to find the line numbers, then extract the section between them.
 
 **Per-file agents must read the log**: Before concluding any per-file evaluation, each subagent must read the Agent thinking and Agent notes blocks for that file from the log — not just the committed code and companion .instrumentation.md. The thinking blocks reveal rejected alternatives, constraint reasoning, and why specific instrumentation choices were made.
 
