@@ -11,6 +11,7 @@ Execution order within each tier matters. Items are listed in dependency order �
 - ~~JS evaluation run-17: commit-story-v2 — adaptive thinking budget fix verification (PRD #102)~~ ✅ Complete — 22/25, 10 files, IS 90/100, Q×F 8.8, PR #69; NDS-003 reconciler gap revealed; per-agent evaluation approach validated
 - JS evaluation run-3: release-it — first committed baseline (PRD #77)
 - ~~TS evaluation run-15: taze — CDQ-006, SCH-003, IS RES-001 verification ([PRD #130](https://github.com/wiggitywhitney/spinybacked-orbweaver-eval/issues/130))~~ ✅ Complete — 27/29 (93%), 14 files, IS 80/100, Q×F 9.45; CDQ-006 partially verified (6/8 files pass, yarnWorkspaces.ts failed), SCH-003 resolved, RES-001 resolved
+- TS evaluation run-16: taze — resolves.ts oscillation investigation with expanded debug coverage ([PRD #146](https://github.com/wiggitywhitney/spinybacked-orbweaver-eval/issues/146)) — primary goal: diagnose resolves.ts NDS-001 oscillation using new #989 debug dump coverage; recovering 6 functions raises Q×F from 10.2 to ~17
 
 ## Medium-term (in order)
 1. ~~Repo generalization (PRD #43)~~ ✅ Complete
