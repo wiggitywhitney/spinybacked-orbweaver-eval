@@ -6,6 +6,9 @@ Entry format: `- (YYYY-MM-DD) Description of feature-level change (PRD #X, miles
 
 ## [Unreleased]
 
+### Added
+- (2026-06-21) Started taze evaluation run-16 (PRD #146): completed bootstrap reading, cross-run process review (commit-story-v2 run-25 was the more recent cross-target run), skeleton document creation, and all 10 pre-run verification steps. Two process improvements applied from run-25 cross-target review: Datadog MCP health check moved to the first pre-run step (not mid-setup), and per-file evaluation now explicitly tracks attribute count changes ≥50% vs. prior run as a CDQ-006 regression signal. Pre-run decision: `taze.io.catalogs_found` left absent from main to test whether agent independently infers `type: int` on a second encounter rather than pre-seeding the answer. Run is ready — instrument command handed off to Whitney.
+
 ### Changed
 - (2026-06-21) Updated eval tooling documentation to reflect spiny-orb flag changes: `--thinking` now captures thinking blocks for all files (previously failed files only); `--thinking-fail` is the new flag for failures-only behavior; `--debug-dump-dir` now also writes dumps for partial and success-with-0-spans files. Updated diagnostic protocol in `docs/language-extension-plan.md` and marked two PRD #144 watch items as resolved — debug dump coverage gap and thinking block persistence were both addressed by this spiny-orb release.
 
