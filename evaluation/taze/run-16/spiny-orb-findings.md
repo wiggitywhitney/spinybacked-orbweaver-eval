@@ -1,4 +1,4 @@
-// ABOUTME: Per-file findings from spiny-orb run-16 on taze — failure deep-dives, debug dump analysis, and individual file observations.
+<!-- ABOUTME: Per-file findings from spiny-orb run-16 on taze — failure deep-dives, debug dump analysis, and individual file observations. -->
 # Spiny-orb Findings — taze Run-16
 
 Per-file analysis from run-16. Populated during failure deep-dives and per-file evaluation.

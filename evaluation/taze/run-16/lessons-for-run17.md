@@ -1,4 +1,4 @@
-// ABOUTME: Process observations from run-16 to inform PRD #147 template and milestone drafting.
+<!-- ABOUTME: Process observations from run-16 to inform PRD #147 template and milestone drafting. -->
 # Lessons for PRD #147 — taze Run-16
 
 Process observations captured during run-16. Populated incrementally as the run progresses.
