@@ -20,9 +20,9 @@ Additionally, process/tool observations from run-25:
 
 2. **Attribute selection guidance gap (P2)** — Three-run declining richness on `context-capture-tool.js` (3→2→1 attrs); `summary-detector.js` collapsed from 3 extension attrs to 0 on identical source; `summarize.js` jumped from 2 to 6. Agent lacks a principled framework for attribute selection. Three asks delivered to spiny-orb team in actionable-fix-output.md §5: (a) minimum-attribute threshold guidance, (b) registered-vs-extension decision guidance, (c) industry practice research spike. Watch run-26 for improvement.
 
-3. **Debug dump coverage gap (P2)** — `--debug-dump-dir` only writes files for `buildFailedResult` path (failed files). Partial files (e.g., summary-manager.js run-25) produce no dump. Spiny-orb ask: also write `lastInstrumentedCode` for partial results. Delivered in actionable-fix-output.md §5.
+3. **Debug dump coverage gap (P2)** — ~~`--debug-dump-dir` only writes files for `buildFailedResult` path (failed files). Partial files (e.g., summary-manager.js run-25) produce no dump.~~ **RESOLVED** — spiny-orb now writes `--debug-dump-dir` output for partial and success-with-0-spans files in addition to failed files.
 
-4. **Thinking block persistence Watch** — Attribute variance in run-25 cannot be diagnosed from agent notes alone. PRD #752 (thinking block persistence to companion files) would address this. Spiny-orb team asked to elevate to short-term priority.
+4. **Thinking block persistence Watch** — ~~Attribute variance in run-25 cannot be diagnosed from agent notes alone. PRD #752 (thinking block persistence to companion files) would address this.~~ **RESOLVED** — thinking blocks are now always written to `.instrumentation.md` companion files on the instrument branch regardless of which display flags are passed.
 
 ### Primary Goals
 
@@ -34,7 +34,6 @@ Verify that RUN25-1 is resolved:
 - **Attribute selection guidance**: Did prompt changes from §5 asks land? Watch for improvement across files with prior variance.
 - **context-capture-tool.js declining richness** (watch, 4th run): Does `commit_story.context.capture` gain back `entry_date` and `source`, or continue declining?
 - **RUN21-6 watch** (fifth run): Any new agent notes vs committed code divergence. spiny-orb issue #927.
-- **Debug dump coverage** (watch): Does run-26 produce dumps for partial files?
 - **PH-1 first signal**: Run-25 was the first post-fix run (PR #982 removed hardcoded commit-story-v2 values from agent prompt). Does abstracted guidance generalize correctly in run-26?
 - **journal-graph.js**: Ninth consecutive success expected (runs 18–21, 23–25).
 
