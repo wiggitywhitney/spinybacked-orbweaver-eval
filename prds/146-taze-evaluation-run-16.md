@@ -149,7 +149,7 @@ The eval execution branch (`feature/prd-146-taze-evaluation-run-16`) **never mer
 
   **Updated per Decision 4 (2026-06-21): use parallel subagent evaluation — 5 files at a time, one subagent per file.** Single-pass single-context evaluation misses findings that per-file subagents catch. Do NOT write the evaluation as a single sequential document. For spawning mechanics, follow the D-2 protocol in `docs/language-extension-plan.md` step 6.
 
-  **Updated per Decision 7 (2026-06-21): spawn exactly 5 agents per batch — no more.** Each batch of 5 generates enough output to exhaust the context window. Required sequence per batch: spawn 5 agents → collect results → append results to `per-file-evaluation.md` → `/prd-update-progress` → `/clear` → spawn next 5. With 13 committed files: batch 1 = files 1–5, batch 2 = files 6–10, batch 3 = files 11–13. `per-file-evaluation.md` is written incrementally across batches — do not wait for all 13 before writing.
+  **Updated per Decision 7 (2026-06-21): spawn up to 5 agents per batch — no more than 5.** Each batch of 5 generates enough output to exhaust the context window. Required sequence per batch: spawn 5 agents → collect results → append results to `per-file-evaluation.md` → `/prd-update-progress` → `/clear` → spawn next 5. With 13 committed files: batch 1 = files 1–5, batch 2 = files 6–10, batch 3 = files 11–13. `per-file-evaluation.md` is written incrementally across batches — do not wait for all 13 before writing.
 
   **Output format**: Follow the per-file format from `prds/done/130-taze-evaluation-run-15.md` exactly — one section per committed file, rule table per span, failures summary table at the end.
 
