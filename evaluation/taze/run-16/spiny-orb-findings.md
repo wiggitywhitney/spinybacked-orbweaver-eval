@@ -5,7 +5,7 @@ Per-file analysis from run-16. Populated during failure deep-dives and per-file 
 
 ## Metric Clarification — "0 attributes" in run output
 
-When spiny-orb reports "N spans, 0 attributes" for a file, **0 attributes means 0 NEW schema attribute extensions declared**, not 0 attributes used. Files that use only already-registered attributes (e.g., `taze.config.sources_found`, `taze.cache.hit`, `taze.cache.changed`) report 0 new attributes even if they use many setAttribute calls. Run-16's 4 new attributes are: `taze.catalog.count`, `taze.package.file_path`, `taze.package.deps_count`, and `taze.write.changes_count` (declared by their first-appearing file; subsequent files use them without incrementing the counter).
+When spiny-orb reports "N spans, 0 attributes" for a file, **0 attributes means 0 NEW schema attribute extensions declared**, not 0 attributes used. Files that use only already-registered attributes (e.g., `taze.config.sources_found`, `taze.cache.hit`, `taze.cache.changed`) report 0 new attributes even if they use many setAttribute calls. Run-16's 3 new attributes are: `taze.catalog.count`, `taze.package.file_path`, and `taze.package.deps_count` (declared by their first-appearing file; subsequent files use them without incrementing the counter). `taze.write.changes_count` was already registered in a prior run and is not counted as new.
 
 ## Run Summary
 
@@ -17,7 +17,7 @@ When spiny-orb reports "N spans, 0 attributes" for a file, **0 attributes means 
 | Oscillation (false SUCCESS) | **0** | 1 (resolves.ts) | 0 |
 | Failed | **0** | 1 (yarnWorkspaces.ts) | 0 |
 | Total spans | **35** | 27 | 30 |
-| New schema attributes | **4** | 1 | 3 |
+| New schema attributes | **3** | 1 | 3 |
 | Multi-attempt files | 7 | 5 | 3 |
 | Cost | **$4.36** | $4.82 | $4.93 |
 | Duration | 42m 57s | — | 54m 45s |
