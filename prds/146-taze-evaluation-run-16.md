@@ -198,6 +198,8 @@ The eval execution branch (`feature/prd-146-taze-evaluation-run-16`) **never mer
 
 - [ ] **Draft next PRD** *(includes template-update checkpoint before drafting)* — Follow `docs/language-extension-plan.md` step 12: (1) review `lessons-for-run17.md` and `actionable-fix-output.md` for process observations; (2) present two-section checkpoint to user (target-specific vs. generalizable); (3) after approval, commit any template changes as a separate commit; (4) draft the next taze run PRD using this PRD as the style reference; (5) run `/write-prompt` before committing.
 
+  **Steps 1–3 complete** (committed separately): three process improvements added to `docs/language-extension-plan.md` step 11 and cascaded to: `evaluation/taze/run-16/lessons-for-run17.md`, `.claude/CLAUDE.md`, PRD #144 (commit-story-v2 run-26), PRD #100 (release-it run-5). Step 12.3 also updated: "Do NOT propagate" changed to cascade requirement. **Remaining: draft PRD #147.**
+
   **Updated per Decisions 4, 5, and 6 (2026-06-21)**: The template changes in step 3 must include updating `docs/language-extension-plan.md` to codify: (a) per-file evaluation uses the parallel subagent approach — one subagent per file, 5 in parallel; (b) each subagent's required evidence set includes the `Agent thinking` and `Agent notes` blocks from `spiny-orb-output.log` for that file, plus the companion `.instrumentation.md` from the instrument branch; (c) `--debug-dump-dir` only fires for failures/partials/zero-span — when all files succeed, the debug-dumps directory is empty and the log is the sole source of agent reasoning. These are now required process elements, not optional enhancements.
 
 - [ ] **Copy artifacts to main** — Switch to main, pull, then run:
