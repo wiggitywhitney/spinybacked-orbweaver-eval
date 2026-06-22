@@ -167,7 +167,7 @@ The **evaluation execution branch** created by `/prd-start` from main **never me
 
   **COV-005 methodology (attribute presence, not attribute identity)**: COV-005 passes if a span carries ≥1 meaningful domain attribute. Attribute variation between runs is normal. When a committed file's attribute set changes substantially from run-25, note it as a **coverage delta observation** in the per-file narrative — do not fail COV-005 for it.
 
-  **Important**: Per-file evaluation agents must read the instrumented source directly (`git show <instrument-branch>:src/file`); do not rely on agent notes alone.
+  **Important**: Per-file evaluation agents must read the instrumented source directly (`git show <instrument-branch>:src/file`); do not rely on agent notes alone. Additionally, each agent must read the `Agent thinking` and `Agent notes` blocks for that file from `spiny-orb-output.log` — this is the primary evidence source for understanding why the agent made specific instrumentation decisions. Note: `--debug-dump-dir` only fires for failed, partial, and zero-span files; if all files succeed, debug-dumps/ is empty and the log is the sole source of agent reasoning. Companion `.instrumentation.md` files on the instrument branch also contain structured rationale per file. (Updated per PRD #146 Decision 5, 2026-06-21.)
 
   **(D-2 trace supplement)** Each per-file evaluation agent receives the `service.instance.id` from `evaluation/commit-story-v2/run-26/trace-artifact.md`. Before writing any section, use `search_datadog_spans` with the artifact query + `resource_name:<prefix>.*`. Note: run-26 may not have been organically invoked yet — run-25 traces (`service.instance.id: bcb5e6b0-0bfd-4dcd-afc8-22dd60a389f3`) are from the run-24 instrument branch. Note in each section which run's trace data is being used.
 
@@ -229,7 +229,12 @@ The **evaluation execution branch** created by `/prd-start` from main **never me
   3. Print the absolute file path of `evaluation/commit-story-v2/run-26/actionable-fix-output.md`.
   4. **Pause.** Do not proceed to Draft PRD #27 until Whitney confirms handoff to spiny-orb team.
 
-- [ ] **Draft PRD #27** — Follow `docs/language-extension-plan.md` step 12. Complete the template-update checkpoint first. Draft PRD #27 using this PRD as the style reference. Create on a separate branch from main. Merge the PRD PR to main so `/prd-start` can pick it up. Carry forward both user-facing checkpoints.
+  **Handoff framing guidance** (from taze run-16):
+  - **Fix language targets spiny-orb components, not target files.** "Fix:" entries should describe the spiny-orb component gap — auto-fix, validator, prompt, or fix-loop. Do not write "remove String() at line 42 of file.ts." Target repo files are overwritten every run; patching them is not durable and can mislead the team about the root cause.
+  - **Attribute disappearance is not automatically a finding.** If an attribute appeared in a prior run and is absent now, investigate before calling it wrong. Consider: does the attribute have a semconv basis? Is the absence a defensible agent decision? The spiny-orb team applies their own judgment — give them evidence and honest characterization, not a decision-free list.
+  - **Carry-forward table: consider distinguishing findings from observations.** Entries with a plausible spiny-orb root cause ("finding") vs. entries worth watching but without a clear industry basis for calling them wrong ("observation") serve different purposes for the team.
+
+- [ ] **Draft PRD #27** — Follow `docs/language-extension-plan.md` step 12. Complete the template-update checkpoint first. Cascade approved process improvements to three places: (1) the template, (2) all other currently active open eval PRDs, and (3) the affected milestones of PRD #27 itself before committing — a cold AI reading only PRD #27 will not re-read the template during the run. Draft PRD #27 using this PRD as the style reference. Create on a separate branch from main. Merge the PRD PR to main so `/prd-start` can pick it up. Carry forward both user-facing checkpoints.
 
 - [ ] **Copy artifacts to main** — From main, run `git checkout <eval-branch> -- evaluation/commit-story-v2/run-26/` to copy all artifacts. Commit to main with message `eval: save run-26 artifacts to main [skip ci]`. Add one row to `evaluation/commit-story-v2/run-log.md` for run-26. Push main. This step runs before `/prd-done`.
 

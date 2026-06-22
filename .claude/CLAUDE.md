@@ -104,6 +104,8 @@ Two required behaviors ensure process improvements don't silo in a single eval t
 
 **At the end of each eval run** (within step 12 — draft next PRD): Before drafting the next PRD, review the current run's `actionable-fix-output.md` and any `lessons-for-prd*.md` files for process observations (not target-codebase findings). Present a two-section checkpoint — target-specific findings and proposed template improvements — and wait for user approval. Commit approved template changes as a separate commit before drafting the next PRD.
 
+**Template update cascade (required)**: Any time `docs/language-extension-plan.md` is updated with a process improvement, cascade the relevant guidance to all currently **active** open eval PRDs — specifically their "Actionable fix output" milestone. "Active" means the PRD will actually be executed next for that target (not stale/superseded PRDs sitting in the prds/ directory). Open PRDs do not automatically pick up template changes; the cascade is manual. Also update the current run's `lessons-for-<next-run>.md` with the same improvement if it belongs there.
+
 **PRD quality gate**: Any time a PRD file is created or modified in this project, two steps are required before the PR can merge: (1) run `/write-prompt` on the changed PRD file, and (2) ensure the PR receives a CodeRabbit review. These requirements exist globally (global CLAUDE.md and git-workflow rules) — this entry makes them explicitly visible in the project context.
 
 ## PR Auto-Creation Failure Recovery

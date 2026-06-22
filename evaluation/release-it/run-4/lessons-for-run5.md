@@ -54,6 +54,12 @@ caffeinate -s env -u ANTHROPIC_CUSTOM_HEADERS -u ANTHROPIC_BASE_URL HOME="$HOME"
 
 *(fill in during and after the run)*
 
+### Per-file evaluation subagents must run in batches of 5 — not all at once
+
+Each batch of 5 subagents generates enough output to exhaust the context window. Launching more than 5 agents in a single message causes context overflow and agent rejections (validated in taze run-16 — 9 agents launched, 6 rejected). release-it has more committed files than 5 — plan for multiple batches.
+
+Required sequence per batch: spawn 5 agents → collect results → append to `per-file-evaluation.md` → `/prd-update-progress` → `/clear` → spawn next 5. Do not launch all agents at once even if the total file count seems manageable.
+
 ---
 
 ## Carry-Forward Items for Run 5

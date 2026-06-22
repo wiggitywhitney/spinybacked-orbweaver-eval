@@ -200,11 +200,16 @@ The feature branch for this PRD (`feature/prd-100-evaluation-run-5-release-it`) 
   3. Print the absolute file path of `evaluation/release-it/run-5/actionable-fix-output.md`.
   4. **Pause.** Do not proceed until Whitney confirms handoff.
 
+  **Handoff framing guidance** (from taze run-16):
+  - **Fix language targets spiny-orb components, not target files.** "Fix:" entries should describe the spiny-orb component gap — auto-fix, validator, prompt, or fix-loop. Do not write "remove X at line Y of file.ts." Target repo files are overwritten every run; patching them is not durable.
+  - **Attribute disappearance is not automatically a finding.** Investigate before calling it wrong — consider semconv basis and whether the absence is a defensible agent decision. Give the spiny-orb team evidence and honest characterization, not a decision-free action list.
+  - **Carry-forward table: consider distinguishing findings from observations** — entries with a plausible spiny-orb root cause vs. watch items without a clear basis for calling them wrong.
+
   Produces: `evaluation/release-it/run-5/actionable-fix-output.md`
 
 - [ ] **Draft Run-6 PRD**
 
-  Create on a separate branch from main. Use Type D structure from `docs/language-extension-plan.md` and this PRD as the milestone style reference. Carry forward both user-facing checkpoints. Merge the PRD-only PR to main so `/prd-start` can pick it up.
+  Follow `docs/language-extension-plan.md` step 12. Complete the template-update checkpoint first. Cascade approved process improvements to three places: (1) the template, (2) all other currently active open eval PRDs, and (3) the affected milestones of the Run-6 PRD itself before committing — a cold AI reading only the Run-6 PRD will not re-read the template during the run. Use Type D structure from `docs/language-extension-plan.md` and this PRD as the milestone style reference. Carry forward both user-facing checkpoints. Merge the PRD-only PR to main so `/prd-start` can pick it up.
 
 - [ ] **Copy artifacts to main**
 
