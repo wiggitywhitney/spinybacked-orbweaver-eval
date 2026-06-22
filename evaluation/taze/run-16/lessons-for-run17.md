@@ -25,6 +25,18 @@ Process observations captured during run-16. Populated incrementally as the run 
 
 *(Observations about the eval process itself that may warrant template updates)*
 
+### Handoff "Fix" language should describe spiny-orb component gaps, not target repo edits
+
+When writing "Fix:" entries in the actionable fix output, describe the spiny-orb component where the behavior originates — auto-fix, validator, prompt, or fix-loop. Do not prescribe edits to target repo source files. Target repo files are overwritten every run; a "Fix: remove String() at line 42 of checkGlobal.ts" is not a durable fix and can mislead the spiny-orb team about where the gap is. Instead: "spiny-orb's SCH-003 auto-fix does not handle reverse coercion (int schema, String() cast)." The spiny-orb team exercises their own judgment about how to fix it.
+
+### Attribute disappearance is not automatically a finding
+
+If an attribute appeared in a prior run and is absent in the current run, that warrants investigation — but it is not automatically a finding. Before including it as a "Fix" item, consider: does the attribute have a semconv/industry-standard basis? Does its absence meaningfully reduce observability? Could the agent have made a defensible coverage choice? The spiny-orb team applies their own judgment when reviewing the handoff. The goal is to give them good evidence and honest characterization, not a decision-free action list.
+
+### Carry-forward table: consider distinguishing findings from observations
+
+The carry-forward table benefits from distinguishing entries with a plausible spiny-orb root cause worth investigating ("finding") from entries that happened and are worth watching but lack a clear basis for calling them wrong ("observation"). This is a judgment call, not a rule — use it to help the spiny-orb team triage without removing their agency.
+
 ### Per-file evaluation must use the D-2 parallel subagent approach — one agent per file, batches of 5
 
 During run-16, the per-file evaluation was initially written as a single-pass sequential document without spawning subagents (Decision 6 in PRD #146). Whitney identified this as incorrect. The correct process:

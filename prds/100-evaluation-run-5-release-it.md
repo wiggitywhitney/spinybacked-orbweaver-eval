@@ -200,6 +200,11 @@ The feature branch for this PRD (`feature/prd-100-evaluation-run-5-release-it`) 
   3. Print the absolute file path of `evaluation/release-it/run-5/actionable-fix-output.md`.
   4. **Pause.** Do not proceed until Whitney confirms handoff.
 
+  **Handoff framing guidance** (from taze run-16):
+  - **Fix language targets spiny-orb components, not target files.** "Fix:" entries should describe the spiny-orb component gap — auto-fix, validator, prompt, or fix-loop. Do not write "remove X at line Y of file.ts." Target repo files are overwritten every run; patching them is not durable.
+  - **Attribute disappearance is not automatically a finding.** Investigate before calling it wrong — consider semconv basis and whether the absence is a defensible agent decision. Give the spiny-orb team evidence and honest characterization, not a decision-free action list.
+  - **Carry-forward table: consider distinguishing findings from observations** — entries with a plausible spiny-orb root cause vs. watch items without a clear basis for calling them wrong.
+
   Produces: `evaluation/release-it/run-5/actionable-fix-output.md`
 
 - [ ] **Draft Run-6 PRD**

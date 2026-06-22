@@ -229,6 +229,11 @@ The **evaluation execution branch** created by `/prd-start` from main **never me
   3. Print the absolute file path of `evaluation/commit-story-v2/run-26/actionable-fix-output.md`.
   4. **Pause.** Do not proceed to Draft PRD #27 until Whitney confirms handoff to spiny-orb team.
 
+  **Handoff framing guidance** (from taze run-16):
+  - **Fix language targets spiny-orb components, not target files.** "Fix:" entries should describe the spiny-orb component gap — auto-fix, validator, prompt, or fix-loop. Do not write "remove String() at line 42 of file.ts." Target repo files are overwritten every run; patching them is not durable and can mislead the team about the root cause.
+  - **Attribute disappearance is not automatically a finding.** If an attribute appeared in a prior run and is absent now, investigate before calling it wrong. Consider: does the attribute have a semconv basis? Is the absence a defensible agent decision? The spiny-orb team applies their own judgment — give them evidence and honest characterization, not a decision-free list.
+  - **Carry-forward table: consider distinguishing findings from observations.** Entries with a plausible spiny-orb root cause ("finding") vs. entries worth watching but without a clear industry basis for calling them wrong ("observation") serve different purposes for the team.
+
 - [ ] **Draft PRD #27** — Follow `docs/language-extension-plan.md` step 12. Complete the template-update checkpoint first. Draft PRD #27 using this PRD as the style reference. Create on a separate branch from main. Merge the PRD PR to main so `/prd-start` can pick it up. Carry forward both user-facing checkpoints.
 
 - [ ] **Copy artifacts to main** — From main, run `git checkout <eval-branch> -- evaluation/commit-story-v2/run-26/` to copy all artifacts. Commit to main with message `eval: save run-26 artifacts to main [skip ci]`. Add one row to `evaluation/commit-story-v2/run-log.md` for run-26. Push main. This step runs before `/prd-done`.
