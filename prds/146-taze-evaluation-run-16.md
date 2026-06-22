@@ -145,7 +145,7 @@ The eval execution branch (`feature/prd-146-taze-evaluation-run-16`) **never mer
 
 - [x] **Failure deep-dives** — For each failed file (0 committed spans), partially committed file, and committed file requiring ≥ 3 attempts with a quality failure: analyze debug dumps, verbose log, thinking blocks, companion `.instrumentation.md` files. Follow the diagnostic protocol from `docs/language-extension-plan.md` (all 5 dimensions). For `resolves.ts`: if a debug dump exists, run `tsc --noEmit` manually and capture the full error output. Document in `evaluation/taze/run-16/spiny-orb-findings.md`.
 
-- [ ] **Per-file evaluation** *(complete IS scoring and step 9.5 trace capture first — taze is non-organic; trace artifact does not exist until after IS scoring)* — Evaluate each committed file against the rubric.
+- [x] **Per-file evaluation** *(complete IS scoring and step 9.5 trace capture first — taze is non-organic; trace artifact does not exist until after IS scoring)* — Evaluate each committed file against the rubric.
 
   **Updated per Decision 4 (2026-06-21): use parallel subagent evaluation — 5 files at a time, one subagent per file.** Single-pass single-context evaluation misses findings that per-file subagents catch. Do NOT write the evaluation as a single sequential document. For spawning mechanics, follow the D-2 protocol in `docs/language-extension-plan.md` step 6.
 
