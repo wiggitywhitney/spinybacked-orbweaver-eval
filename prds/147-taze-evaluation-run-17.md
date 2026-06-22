@@ -216,10 +216,10 @@ The eval execution branch (`feature/prd-147-taze-evaluation-run-17`) **never mer
 
 ### Conservative (carry-forward findings recur, resolves.ts drops)
 
-- **Quality**: 25/29 (86%) — packument.ts COV-005 + bunWorkspaces.ts CDQ-006 + SCH-003 recur; resolves.ts oscillation drops 6 spans
+- **Quality**: 26/29 (90%) — carry-forward findings (COV-005, CDQ-006, SCH-003) persist unfixed; resolves.ts oscillation drops 6 spans but does not add a new dimension failure
 - **Files**: 12 (resolves.ts oscillates back to 0)
 - **IS Score**: 88/100 (stable)
-- **Q×F**: ~9.3
+- **Q×F**: ~10.8
 
 ### Target (all three carry-forward quality findings resolved, resolves.ts holds)
 
