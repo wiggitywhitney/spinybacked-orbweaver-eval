@@ -125,6 +125,25 @@ Full run-by-run analysis: [`evaluation/release-it/`](evaluation/release-it/)
 
 ---
 
+## Run history: taze
+
+taze is the TypeScript evaluation target. It is a dependency-update CLI for Node.js — no LangGraph, no LLM calls, a clean async I/O profile (file reads, npm registry HTTP, workspace file parsing), and a strict TypeScript project setup. It gives spiny-orb a structurally simpler challenge than commit-story-v2 while validating TypeScript-specific instrumentation patterns. The primary metric is **Q×F** = (quality/total) × files_committed, which combines quality score and coverage breadth.
+
+| Run | Quality | Q×F | Gates | Files | Spans | Cost | Push/PR | IS |
+|-----|---------|-----|-------|-------|-------|------|---------|-----|
+| 13 | 27/29 (93%) | 13.0 | 2/2 | 14 | 30 | $4.93 | YES (#8) | 60/100 |
+| 14 | N/A (aborted) | — | N/A | 0 | 0 | — | YES (#9) | — |
+| 15 | 27/29 (93%) | 10.2 | 2/2 | 11 | 27 | $4.82 | YES (#10) | 80/100 |
+| 16 | 26/29 (90%) | 11.7 | 2/2 | 13 | 35 | $4.36 | YES (#11) | 88.9/100 |
+
+Run-14 was aborted after 5 files due to a ts-morph crash (#933) and a checkpoint stop on a known baseline failure. Run-15 introduced the IS RES-001 fix (+20 IS) but suffered a resolves.ts oscillation (lost 6 spans) and a yarnWorkspaces.ts regex error. Run-16 recovered both files and improved Q×F to 11.7, with IS improving to 88.9/100.
+
+**Run-17 is next** — primary goals: COV-005 packument.ts (taze.package.latest_version dropped), SCH-003 String() cast pattern (checkGlobal.ts + bunWorkspaces.ts), CDQ-006 bunWorkspaces.ts (3 unguarded post-await setAttribute calls), resolves.ts stability verification, IS SPA-002 orphan span.
+
+Full run-by-run analysis: [`evaluation/taze/`](evaluation/taze/)
+
+---
+
 ## Adding a new evaluation target
 
 The complete process is in [`docs/language-extension-plan.md`](docs/language-extension-plan.md). The step most likely to cause silent failures:

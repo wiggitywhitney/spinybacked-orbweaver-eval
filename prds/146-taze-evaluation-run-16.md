@@ -165,9 +165,9 @@ The eval execution branch (`feature/prd-146-taze-evaluation-run-16`) **never mer
 
   **Step 0 — Trace supplement**: complete IS scoring (step 9) and trace capture (step 9.5) before returning here for trace supplement on each file. Use `search_datadog_spans` with the artifact query to supplement static code review. For each committed file, record attribute count vs. run-15 baseline. If the baseline is 0 (file was not committed or failed in run-15), flag any non-zero count explicitly; otherwise, flag any file where count changed by ≥50% in either direction. This is the primary signal for attribute selection guidance regressions (e.g., CDQ-006 guard removal leading to zero attributes on formerly-instrumented spans).
 
-- [ ] **PR artifact evaluation** — Evaluate the instrument branch PR: diff completeness, span registration accuracy, schema accuracy in `agent-extensions.yaml`, `traceloop-init.ts` registration block.
+- [x] **PR artifact evaluation** — Evaluate the instrument branch PR: diff completeness, span registration accuracy, schema accuracy in `agent-extensions.yaml`, `traceloop-init.ts` registration block.
 
-- [ ] **Rubric scoring** — Score all dimensions against the rubric. Compare to run-15 baseline. resolves.ts outcome (fixed vs. still oscillating) is the primary data point.
+- [x] **Rubric scoring** — Score all dimensions against the rubric. Compare to run-15 baseline. resolves.ts outcome (fixed vs. still oscillating) is the primary data point.
 
 - [x] **IS scoring run** — See `evaluation/is/README.md` for collector setup.
 
@@ -192,9 +192,9 @@ The eval execution branch (`feature/prd-146-taze-evaluation-run-16`) **never mer
   - **Metrics**: `search_datadog_metrics` for `traces.span.metrics.calls` and `traces.span.metrics.duration` filtered to `service:taze`.
   Note any gaps in `run-summary.md` — do not block the eval run on signals gaps.
 
-- [ ] **Baseline comparison** — Compare run-16 results to run-15 across all dimensions. Calculate Q×F. Update root README: add a run-16 row to the taze run history table; update the "Run-17 is next" note with primary goals.
+- [x] **Baseline comparison** — Compare run-16 results to run-15 across all dimensions. Calculate Q×F. Update root README: add a run-16 row to the taze run history table; update the "Run-17 is next" note with primary goals.
 
-- [ ] **Actionable fix output** *(user-facing checkpoint 2 — interpreted summary + handoff pause)* — Write `evaluation/taze/run-16/actionable-fix-output.md` with the full structured format: what happened, resolves.ts outcome (oscillation diagnosed/fixed/still unknown), CDQ-006 status, SCH-003 status, IS score, new findings, updated carry-forward table. When complete, print the absolute path: `/Users/whitney.lee/Documents/Repositories/spinybacked-orbweaver-eval/evaluation/taze/run-16/actionable-fix-output.md`. Pause until Whitney confirms she has handed the document to the spiny-orb team. Do not proceed to the next PRD until confirmed.
+- [x] **Actionable fix output** *(user-facing checkpoint 2 — interpreted summary + handoff pause)* — Write `evaluation/taze/run-16/actionable-fix-output.md` with the full structured format: what happened, resolves.ts outcome (oscillation diagnosed/fixed/still unknown), CDQ-006 status, SCH-003 status, IS score, new findings, updated carry-forward table. When complete, print the absolute path: `/Users/whitney.lee/Documents/Repositories/spinybacked-orbweaver-eval/evaluation/taze/run-16/actionable-fix-output.md`. Pause until Whitney confirms she has handed the document to the spiny-orb team. Do not proceed to the next PRD until confirmed.
 
 - [ ] **Draft next PRD** *(includes template-update checkpoint before drafting)* — Follow `docs/language-extension-plan.md` step 12: (1) review `lessons-for-run17.md` and `actionable-fix-output.md` for process observations; (2) present two-section checkpoint to user (target-specific vs. generalizable); (3) after approval, commit any template changes as a separate commit; (4) draft the next taze run PRD using this PRD as the style reference; (5) run `/write-prompt` before committing.
 
@@ -204,7 +204,7 @@ The eval execution branch (`feature/prd-146-taze-evaluation-run-16`) **never mer
   ```bash
   git checkout feature/prd-146-taze-evaluation-run-16 -- evaluation/taze/run-16/
   ```
-  Commit to main with message `eval: save taze run-16 artifacts to main [skip ci]`. Update `evaluation/taze/run-log.md` with a run-16 row. Push to origin/main. Then return to the eval branch and run `/prd-done`.
+  Commit to main with message `eval: save taze run-16 artifacts to main [skip ci]`. The run-16 row in `evaluation/taze/run-log.md` and the taze run history section in `README.md` were added on the eval branch — verify they are present after the checkout and do NOT duplicate them. Push to origin/main. Then return to the eval branch and run `/prd-done`.
 
 ---
 
