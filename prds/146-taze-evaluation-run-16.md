@@ -208,7 +208,7 @@ The eval execution branch (`feature/prd-146-taze-evaluation-run-16`) **never mer
 
   **Updated per Decisions 4, 5, and 6 (2026-06-21)**: The template changes in step 3 must include updating `docs/language-extension-plan.md` to codify: (a) per-file evaluation uses the parallel subagent approach — one subagent per file, 5 in parallel; (b) each subagent's required evidence set includes the `Agent thinking` and `Agent notes` blocks from `spiny-orb-output.log` for that file, plus the companion `.instrumentation.md` from the instrument branch; (c) `--debug-dump-dir` only fires for failures/partials/zero-span — when all files succeed, the debug-dumps directory is empty and the log is the sole source of agent reasoning. These are now required process elements, not optional enhancements.
 
-- [ ] **Copy artifacts to main** — Switch to main, pull, then run:
+- [x] **Copy artifacts to main** — Switch to main, pull, then run:
   ```bash
   git checkout feature/prd-146-taze-evaluation-run-16 -- evaluation/taze/run-16/
   ```
