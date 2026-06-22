@@ -4,25 +4,15 @@ Execution order within each tier matters. Items are listed in dependency order �
 
 ## Short-term
 - Content Manager real instrumentation run: spiny-orb on a production project + template recommendation ([PRD #143](https://github.com/wiggitywhitney/spinybacked-orbweaver-eval/issues/143)) — first run where instrument branch merges; includes Pino log-trace correlation, span-based metrics exploration, and template recommendation for repeatable real-instrumentation runs
-- ~~JS evaluation run-13: NDS-003 truthy fix verification (PRD #37)~~ ✅ Complete
-- ~~JS evaluation run-14: commit-story-v2 — smart rollback + type-safety verification (PRD #55)~~ ✅ Complete — 22/25, 12 files, IS 80/100, PR #65
-- ~~JS evaluation run-15: commit-story-v2 — catch-block consistency + COV-004 audit (PRD #61)~~ ✅ Complete — 24/25, 14 files, IS 70/100, Q×F 13.4 (new record), PR #66
-- ~~JS evaluation run-16: commit-story-v2 — summary-detector.js outer catch fix (PRD #86)~~ ✅ Complete — 22/25, 10 files, IS 80/100, Q×F 8.8, PR #68
-- ~~JS evaluation run-17: commit-story-v2 — adaptive thinking budget fix verification (PRD #102)~~ ✅ Complete — 22/25, 10 files, IS 90/100, Q×F 8.8, PR #69; NDS-003 reconciler gap revealed; per-agent evaluation approach validated
-- JS evaluation run-3: release-it — first committed baseline (PRD #77)
-- ~~TS evaluation run-15: taze — CDQ-006, SCH-003, IS RES-001 verification ([PRD #130](https://github.com/wiggitywhitney/spinybacked-orbweaver-eval/issues/130))~~ ✅ Complete — 27/29 (93%), 14 files, IS 80/100, Q×F 9.45; CDQ-006 partially verified (6/8 files pass, yarnWorkspaces.ts failed), SCH-003 resolved, RES-001 resolved
-- ~~TS evaluation run-16: taze — resolves.ts oscillation investigation with expanded debug coverage ([PRD #146](https://github.com/wiggitywhitney/spinybacked-orbweaver-eval/issues/146))~~ ✅ Complete — 26/29 (90%), 13 files, IS 88.9/100, Q×F 11.7; resolves.ts oscillation root cause identified (#954 tsc error captured); CDQ-006 yarnWorkspaces.ts partial fix; COV-005 packument.ts new gap
+- JS evaluation run-3: release-it — first committed baseline ([PRD #77](https://github.com/wiggitywhitney/spinybacked-orbweaver-eval/issues/77))
+- JS evaluation run-5: release-it — LINT/NDS-003 indentation conflict resolution ([PRD #100](https://github.com/wiggitywhitney/spinybacked-orbweaver-eval/issues/100))
+- JS evaluation runs 18–22: commit-story-v2 — queued runs ([PRDs #104](https://github.com/wiggitywhitney/spinybacked-orbweaver-eval/issues/104), [#107](https://github.com/wiggitywhitney/spinybacked-orbweaver-eval/issues/107), [#113](https://github.com/wiggitywhitney/spinybacked-orbweaver-eval/issues/113), [#115](https://github.com/wiggitywhitney/spinybacked-orbweaver-eval/issues/115))
+- JS evaluation run-26: commit-story-v2 — COV-004 ENOENT fix verification ([PRD #144](https://github.com/wiggitywhitney/spinybacked-orbweaver-eval/issues/144))
+- TS evaluation run-17: taze — COV-005 packument.ts + SCH-003 + CDQ-006 resolution verification ([PRD #147](https://github.com/wiggitywhitney/spinybacked-orbweaver-eval/issues/147)) — primary goal: close COV-005 (packument.ts) and verify SCH-003 String() cast pattern fix
 
 ## Medium-term (in order)
-1. ~~Repo generalization (PRD #43)~~ ✅ Complete
-2. ~~Source cleanup: remove commit-story source code from eval repo (PRD #47)~~ ✅ Complete
-3. ~~IS integration: scoring script, OTel Collector config, Type D template update (PRD #44)~~ ✅ Complete
-4. ~~Research spike: eval target criteria — redo scorecard + find 12 candidates (PRD #45)~~ ✅ Complete
-5. ~~TypeScript eval setup + Run-1: taze — first TypeScript baseline (PRD #50)~~ ✅ Complete — 27/29 (93%), 14 files, Q×F 13.0, IS 60/100; run-14 PRD #82 queued
-6. JavaScript eval setup + Run-1: target selection from 3 candidates (PRD #53) — JS provider already exists; sequenced after TypeScript eval
-6. ~~Live Datadog trace capture for eval verification ([PRD #117](https://github.com/wiggitywhitney/spinybacked-orbweaver-eval/issues/117))~~ ✅ Complete
-7. ~~Eval process propagation — template-as-source-of-truth + cross-run review milestone ([PRD #122](https://github.com/wiggitywhitney/spinybacked-orbweaver-eval/issues/122))~~ ✅ Complete
+1. JavaScript eval setup + Run-1: target selection from 3 candidates ([PRD #53](https://github.com/wiggitywhitney/spinybacked-orbweaver-eval/issues/53)) — JS provider already exists; sequenced after TypeScript eval
 
 ## Long-term (blocked by language providers)
-8. Python eval setup + Run-1: target selection from 3 candidates (PRD #51) — depends on Python provider landing
-9. Go eval setup + Run-1: target selection from 3 candidates (PRD #52) — depends on Go provider landing
+2. Python eval setup + Run-1: target selection from 3 candidates ([PRD #51](https://github.com/wiggitywhitney/spinybacked-orbweaver-eval/issues/51)) — depends on Python provider landing
+3. Go eval setup + Run-1: target selection from 3 candidates ([PRD #52](https://github.com/wiggitywhitney/spinybacked-orbweaver-eval/issues/52)) — depends on Go provider landing
