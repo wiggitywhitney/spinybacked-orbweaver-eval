@@ -198,7 +198,13 @@ The eval execution branch (`feature/prd-146-taze-evaluation-run-16`) **never mer
 
 - [ ] **Draft next PRD** *(includes template-update checkpoint before drafting)* — Follow `docs/language-extension-plan.md` step 12: (1) review `lessons-for-run17.md` and `actionable-fix-output.md` for process observations; (2) present two-section checkpoint to user (target-specific vs. generalizable); (3) after approval, commit any template changes as a separate commit; (4) draft the next taze run PRD using this PRD as the style reference; (5) run `/write-prompt` before committing.
 
-  **Steps 1–3 complete** (committed separately): three process improvements added to `docs/language-extension-plan.md` step 11 and cascaded to: `evaluation/taze/run-16/lessons-for-run17.md`, `.claude/CLAUDE.md`, PRD #144 (commit-story-v2 run-26), PRD #100 (release-it run-5). Step 12.3 also updated: "Do NOT propagate" changed to cascade requirement. **Remaining: draft PRD #147.**
+  **Steps 1–3 complete** (committed separately): three process improvements added to `docs/language-extension-plan.md` step 11 and cascaded to: `evaluation/taze/run-16/lessons-for-run17.md`, `.claude/CLAUDE.md`, PRD #144 (commit-story-v2 run-26), PRD #100 (release-it run-5). Step 12.3 also updated: "Do NOT propagate" changed to cascade requirement.
+
+  **Remaining: draft PRD #147.** Key inputs for the draft:
+  - Run-17 primary goals: `evaluation/taze/run-16/actionable-fix-output.md` §"Run-17 Priority Goals" (COV-005 packument.ts, SCH-003 String() cast pattern, CDQ-006 bunWorkspaces.ts, resolves.ts stability, IS SPA-002 watch)
+  - Run-16 scores (baseline): 26/29 (90%) quality, Q×F 11.7, IS 88.9/100, 13 committed files
+  - Style reference: this PRD (`prds/146-taze-evaluation-run-16.md`)
+  - `git add -f prds/147-taze-evaluation-run-17.md` required (global .gitignore blocks prds/)
 
   **Updated per Decisions 4, 5, and 6 (2026-06-21)**: The template changes in step 3 must include updating `docs/language-extension-plan.md` to codify: (a) per-file evaluation uses the parallel subagent approach — one subagent per file, 5 in parallel; (b) each subagent's required evidence set includes the `Agent thinking` and `Agent notes` blocks from `spiny-orb-output.log` for that file, plus the companion `.instrumentation.md` from the instrument branch; (c) `--debug-dump-dir` only fires for failures/partials/zero-span — when all files succeed, the debug-dumps directory is empty and the log is the sole source of agent reasoning. These are now required process elements, not optional enhancements.
 
