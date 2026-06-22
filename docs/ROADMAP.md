@@ -9,10 +9,13 @@ Execution order within each tier matters. Items are listed in dependency order �
 - JS evaluation runs 18–22: commit-story-v2 — queued runs ([PRDs #104](https://github.com/wiggitywhitney/spinybacked-orbweaver-eval/issues/104), [#107](https://github.com/wiggitywhitney/spinybacked-orbweaver-eval/issues/107), [#113](https://github.com/wiggitywhitney/spinybacked-orbweaver-eval/issues/113), [#115](https://github.com/wiggitywhitney/spinybacked-orbweaver-eval/issues/115))
 - JS evaluation run-26: commit-story-v2 — COV-004 ENOENT fix verification ([PRD #144](https://github.com/wiggitywhitney/spinybacked-orbweaver-eval/issues/144))
 - TS evaluation run-17: taze — COV-005 packument.ts + SCH-003 + CDQ-006 resolution verification ([PRD #147](https://github.com/wiggitywhitney/spinybacked-orbweaver-eval/issues/147)) — primary goal: close COV-005 (packument.ts) and verify SCH-003 String() cast pattern fix
+- New target repo onboarding checklist: add SPA-001 calibration spike and SPA-002 forceFlush as required steps ([#133](https://github.com/wiggitywhitney/spinybacked-orbweaver-eval/issues/133))
+- taze: CDQ-006 systematic fix verification, SCH-003, and advisory contradiction rate measurement ([#135](https://github.com/wiggitywhitney/spinybacked-orbweaver-eval/issues/135))
 
 ## Medium-term (in order)
-1. JavaScript eval setup + Run-1: target selection from 3 candidates ([PRD #53](https://github.com/wiggitywhitney/spinybacked-orbweaver-eval/issues/53)) — JS provider already exists; sequenced after TypeScript eval
+1. Reorganize evaluation/ directory by language instead of target repo ([#81](https://github.com/wiggitywhitney/spinybacked-orbweaver-eval/issues/81))
+2. JavaScript eval setup + Run-1: target selection from 3 candidates ([PRD #53](https://github.com/wiggitywhitney/spinybacked-orbweaver-eval/issues/53)) — JS provider already exists; sequenced after TypeScript eval
 
 ## Long-term (blocked by language providers)
-2. Python eval setup + Run-1: target selection from 3 candidates ([PRD #51](https://github.com/wiggitywhitney/spinybacked-orbweaver-eval/issues/51)) — depends on Python provider landing
-3. Go eval setup + Run-1: target selection from 3 candidates ([PRD #52](https://github.com/wiggitywhitney/spinybacked-orbweaver-eval/issues/52)) — depends on Go provider landing
+3. Python eval setup + Run-1: target selection from 3 candidates ([PRD #51](https://github.com/wiggitywhitney/spinybacked-orbweaver-eval/issues/51)) — depends on Python provider landing
+4. Go eval setup + Run-1: target selection from 3 candidates ([PRD #52](https://github.com/wiggitywhitney/spinybacked-orbweaver-eval/issues/52)) — depends on Go provider landing
