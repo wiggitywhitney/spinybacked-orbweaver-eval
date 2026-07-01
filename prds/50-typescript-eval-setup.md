@@ -77,7 +77,7 @@ The feature branch for this PRD **never merges to main**. The PR exists for Code
   1. Apply the test fix from the 2026-04-24 Decision Log: in `test/versions.test.ts`, relax the 'newest' mode assertions (lines ~71–75) from `expect(newest).toBe(getMaxSatisfying(...))` to `expect(getMaxSatisfying(...)).toBeTruthy()`. This eliminates the pre-existing live-registry test failure that would confuse checkpoint interpretation.
   2. Also add `@opentelemetry/api` to `devDependencies` so checkpoint tests can resolve the import after instrumentation adds `import { trace } from '@opentelemetry/api'` to source files: `pnpm add -D @opentelemetry/api`
   3. Commit both changes to fork main and push.
-  4. Create `evaluation/taze/run-1/` directory in the eval repo with skeleton files: `lessons-for-run2.md`, `spiny-orb-findings.md`.
+  4. Create `evaluation/typescript/taze/run-1/` directory in the eval repo with skeleton files: `lessons-for-run2.md`, `spiny-orb-findings.md`.
 
   Reference `~/Documents/Repositories/commit-story-v2/spiny-orb.yaml` and `~/Documents/Repositories/commit-story-v2/semconv/` as working examples for prerequisites.
 
@@ -88,7 +88,7 @@ The feature branch for this PRD **never merges to main**. The PR exists for Code
   In the forked target repo:
   1. Create `spiny-orb.yaml` configuration (adapt from commit-story-v2 reference, adjusting for TypeScript)
   2. Create initial `semconv/` Weaver schema directory for the target's domain
-  3. Create TypeScript OTel init file — same mechanism as Node.js (`--import` flag with SDK setup using `@opentelemetry/sdk-node`). Include `@opentelemetry/exporter-trace-otlp-http`. Add graceful shutdown: register `SIGTERM` and `SIGINT` handlers that call `sdk.shutdown()` and then `process.exit(0)` — do not intercept `process.exit()` directly
+  3. Create TypeScript OTel init file — same mechanism as Node.js (`--import` flag with SDK setup using `@opentelemetry/sdk-node`). Include `@opentelemetry/exporter-trace-otlp-http`. Use a `SimpleSpanProcessor` (not batch) and intercept `process.exit()` directly to call `sdk.shutdown()` (which flushes pending spans) before exiting — CLI apps call `process.exit()`, which kills the event loop before a `BatchSpanProcessor` can flush, dropping the outermost span (SPA-002). Register `SIGTERM`/`SIGINT` handlers that route through the same shutdown helper with a guard against double-invocation. Reference implementation: `~/Documents/Repositories/commit-story-v2/examples/instrumentation.js`. *(Corrected 2026-06-30 per issue #133 — see Decision Log. The original guidance here, to avoid intercepting `process.exit()`, was wrong; that interception is the actual fix that resolved spiny-orb issue #926.)*
   4. Add OTel `@opentelemetry/api` as a peerDependency in package.json
 
   Success criteria: All prerequisites present. Forked repo builds and tests pass.
@@ -121,6 +121,17 @@ The feature branch for this PRD **never merges to main**. The PR exists for Code
 
   Success criteria: All prerequisites verified; file inventory recorded.
 
+- [ ] **SPA-002 bootstrap fix and SPA-001 calibration spike** (required before Evaluation run-1)
+
+  Two required pre-run-1 steps, added per issue #133:
+
+  1. **SPA-002 bootstrap fix**: Confirm the target's OTel init file intercepts `process.exit()` directly and flushes spans via `sdk.shutdown()`/`forceFlush()` before exiting (see corrected bullet 3 in "Add spiny-orb prerequisites to target repo" above). Without this, `process.exit()` drops the outermost span before a batch exporter can flush it. Reference: `~/Documents/Repositories/commit-story-v2/examples/instrumentation.js` (resolved spiny-orb issue #926).
+  2. **SPA-001 calibration spike**: Before scoring IS, characterize the target's span structure — fixed pipeline stages vs. per-item iteration vs. other. Reference `docs/research/otel-spa001-calibration.md` (spiny-orb repo) for the microservice→CLI-pipeline recalibration history (10 → 30 spans). If the target's span count scales with input size (e.g., per-item iteration over a variable-length collection), do not force a fixed threshold — add a per-target entry to `SPA001_PER_TARGET_LIMITS` in `evaluation/is/score-is.js` instead, with `null` if no defensible number exists yet — do not invent one. See eval-repo issue #134 for the taze precedent.
+
+  Success criteria: Bootstrap fix confirmed present (or target-specific equivalent). SPA-001 threshold decision documented — either the global default applies, or a per-target override is added with rationale.
+
+  **Note (added retroactively, 2026-06-30):** This target's (taze) run-1 executed before this step was formalized. It is documented here to establish the required pattern for this and all subsequent language setup PRDs — see Decision Log and the taze per-target `SPA001_PER_TARGET_LIMITS` entry already in `evaluation/is/score-is.js`.
+
 - [x] **Evaluation run-1**
 
   Whitney runs `spiny-orb instrument` in her own terminal. **Do NOT run the command yourself.** Copy the command template from `docs/language-extension-plan.md` (line ~72). Replace `commit-story-v2` with the chosen target name, `run-N` with `run-1`, and `src` with the target's source directory.
@@ -130,7 +141,7 @@ The feature branch for this PRD **never merges to main**. The PR exists for Code
 
   **Run-1 result (2026-04-24)**: Run aborted at file 3/33. All 3 processed files failed NDS-001 (TypeScript compilation errors). Two distinct root causes: (1) no-function files (re-exports, pure sync utilities) routed through agent instead of skipped pre-agent; (2) `startActiveSpan()` return type incompatible with void synchronous methods. A third cause was cross-file optional property access rejected by tsc. Consecutive-failure abort threshold stopped the run before the remaining 30 files were reached. 0 files committed, no PR created. Artifacts: `spiny-orb-output.log`, `run-summary.md`. See `spiny-orb-findings.md` for P1 findings filed against the TS provider.
 
-  **Run-3 result (2026-04-28)**: Run aborted at file 3/33. All 3 processed files failed NDS-001. Root cause is new and fully diagnosed: spiny-orb's `checkSyntax()` hardcodes `--module NodeNext --moduleResolution NodeNext` for per-file tsc invocation, but taze uses `"moduleResolution": "Bundler"`. Every taze file has extensionless relative imports (valid under Bundler, invalid under NodeNext), causing NDS-001 on the original unmodified source. `npx tsc --noEmit` from the project root passes with zero errors. Instrumentation quality in file 3 (`src/api/check.ts`) was good — correct RST-004 skip, null guards, schema reasoning — but blocked at the validator. Debug dump captured at `evaluation/taze/run-3/debug/` (run-3 was executed without `--debug-dump-dir`; future runs use `debug-dumps/` per the command template). See `evaluation/taze/run-3/spiny-orb-findings.md` for the new P1.
+  **Run-3 result (2026-04-28)**: Run aborted at file 3/33. All 3 processed files failed NDS-001. Root cause is new and fully diagnosed: spiny-orb's `checkSyntax()` hardcodes `--module NodeNext --moduleResolution NodeNext` for per-file tsc invocation, but taze uses `"moduleResolution": "Bundler"`. Every taze file has extensionless relative imports (valid under Bundler, invalid under NodeNext), causing NDS-001 on the original unmodified source. `npx tsc --noEmit` from the project root passes with zero errors. Instrumentation quality in file 3 (`src/api/check.ts`) was good — correct RST-004 skip, null guards, schema reasoning — but blocked at the validator. Debug dump captured at `evaluation/typescript/taze/run-3/debug/` (run-3 was executed without `--debug-dump-dir`; future runs use `debug-dumps/` per the command template). See `evaluation/typescript/taze/run-3/spiny-orb-findings.md` for the new P1.
 
 - [x] **Pre-run verification (run-3+)**
 
@@ -142,7 +153,7 @@ The feature branch for this PRD **never merges to main**. The PR exists for Code
   - `testCommand: pnpm test` added to `~/Documents/Repositories/taze/spiny-orb.yaml` and pushed to fork
   - GITHUB_TOKEN_TAZE push auth verified
 
-  Details and instrument command: `evaluation/taze/run-2/lessons-for-run3.md`
+  Details and instrument command: `evaluation/typescript/taze/run-2/lessons-for-run3.md`
 
   **Diagnostic protocol**: When a file fails, examine available dimensions before diagnosing — do NOT diagnose from errorProgression summaries alone. Available in CLI eval runs (in `spiny-orb-output.log`): **(3) full validator error messages** (complete tsc error text, NDS-005 block previews — appears via `--verbose` since PRD #582 M8); **(4) agent notes** (always in `--verbose`). Also available: **(2) actual instrumented code** written to `<debug-dump-dir>/` when `--debug-dump-dir` is in the command — create that dir before running and read it after a failure. Not available in CLI runs: **(1) run history** and **(5) agent thinking** — those require the spiny-orb test harness.
 
@@ -154,46 +165,46 @@ The feature branch for this PRD **never merges to main**. The PR exists for Code
 
 - [ ] **Failure deep-dives**
 
-  When analyzing each failed file: check `spiny-orb-output.log` for full validator error text and tsc error codes (dimension 3, via `--verbose`); read `evaluation/taze/<first-successful-run>/debug-dumps/<filename>` for the actual instrumented code the agent produced (dimension 2, via `--debug-dump-dir`). Both available since PRD #582 M8 — do not diagnose from rule IDs alone. (Updated per 2026-04-28 decision.)
-  Produces: `evaluation/taze/<first-successful-run>/failure-deep-dives.md`
+  When analyzing each failed file: check `spiny-orb-output.log` for full validator error text and tsc error codes (dimension 3, via `--verbose`); read `evaluation/typescript/taze/<first-successful-run>/debug-dumps/<filename>` for the actual instrumented code the agent produced (dimension 2, via `--debug-dump-dir`). Both available since PRD #582 M8 — do not diagnose from rule IDs alone. (Updated per 2026-04-28 decision.)
+  Produces: `evaluation/typescript/taze/<first-successful-run>/failure-deep-dives.md`
   Style reference: `Read docs/templates/eval-run-style-reference/failure-deep-dives.md`
 
 - [ ] **Per-file evaluation**
 
   Full 32-rule rubric on ALL processed files.
-  Produces: `evaluation/taze/<first-successful-run>/per-file-evaluation.md`
+  Produces: `evaluation/typescript/taze/<first-successful-run>/per-file-evaluation.md`
   Style reference: `Read docs/templates/eval-run-style-reference/per-file-evaluation.md`
 
 - [ ] **PR artifact evaluation**
 
-  Produces: `evaluation/taze/<first-successful-run>/pr-evaluation.md`
+  Produces: `evaluation/typescript/taze/<first-successful-run>/pr-evaluation.md`
   Style reference: `Read docs/templates/eval-run-style-reference/pr-evaluation.md`
 
 - [ ] **Rubric scoring**
 
   First TypeScript run — establish baseline.
-  Produces: `evaluation/taze/<first-successful-run>/rubric-scores.md`
+  Produces: `evaluation/typescript/taze/<first-successful-run>/rubric-scores.md`
   Style reference: `Read docs/templates/eval-run-style-reference/rubric-scores.md`
 
 - [ ] **Baseline comparison**
 
   No prior TypeScript baseline. Compare against most recent JS run for cross-language context. Compare: overall rubric score, per-dimension scores (NDS/COV/RST/API/SCH/CDQ), file counts, skip rate, and cost. Highlight dimensions where scores differ.
-  Produces: `evaluation/taze/<first-successful-run>/baseline-comparison.md`
+  Produces: `evaluation/typescript/taze/<first-successful-run>/baseline-comparison.md`
 
 - [ ] **IS scoring run**
 
   1. **Prerequisites**: OTel Collector running with `evaluation/is/otelcol-config.yaml` (see `evaluation/is/README.md` for install and start instructions). No metrics-exporter override needed — MET rules are marked `not_applicable` by the scorer regardless.
-  2. **Action**: Run the target app with the Collector as OTLP receiver; collect `evaluation/is/eval-traces.json`; run `node evaluation/is/score-is.js evaluation/is/eval-traces.json > evaluation/taze/<first-successful-run>/is-score.md`
-  3. **Output**: `evaluation/taze/<first-successful-run>/is-score.md` is written by the command above.
+  2. **Action**: Run the target app with the Collector as OTLP receiver; collect `evaluation/is/eval-traces.json`; run `node evaluation/is/score-is.js evaluation/is/eval-traces.json > evaluation/typescript/taze/<first-successful-run>/is-score.md`
+  3. **Output**: `evaluation/typescript/taze/<first-successful-run>/is-score.md` is written by the command above.
   4. **Note for k8s repos**: IS scoring requires a running cluster; see `evaluation/is/README.md` for the Kind-based workflow
-  Produces: `evaluation/taze/<first-successful-run>/is-score.md`
+  Produces: `evaluation/typescript/taze/<first-successful-run>/is-score.md`
 
 - [ ] **Actionable fix output**
 
   1. Run cross-document audit agent.
   2. *(User-facing checkpoint 2)* Interpreted summary for Whitney.
   3. Print absolute path. **Pause** until Whitney confirms handoff.
-  Produces: `evaluation/taze/<first-successful-run>/actionable-fix-output.md`
+  Produces: `evaluation/typescript/taze/<first-successful-run>/actionable-fix-output.md`
 
 - [ ] **Draft next run PRD**
 
@@ -231,6 +242,7 @@ The feature branch for this PRD **never merges to main**. The PR exists for Code
 | 2026-04-27 | `error as Error` cast in catch blocks fails strict-mode tsc | `span.recordException(error as Error)` rejected by tsc when `error` is `unknown` (strict mode). Root cause of NDS-001 on `src/api/check.ts` in runs 1 and 2. Correct pattern: `span.recordException(error instanceof Error ? error : new Error(String(error)))`. Spiny-orb team adding this to TypeScript prompt. | Added to run-3 readiness checklist — confirm fix is in prompt before running. |
 | 2026-04-28 | spiny-orb `checkSyntax()` hardcodes `--moduleResolution NodeNext`, breaking all Bundler-resolution TypeScript projects | Diagnosed in run-3: every taze file fails NDS-001 on original unmodified source because taze uses `"moduleResolution": "Bundler"` but spiny-orb's per-file tsc check requires `.js` extensions (NodeNext). `npx tsc --noEmit` from project root passes with zero errors. Fix: spiny-orb must read the project's `tsconfig.json` moduleResolution and use it (or pass `--project tsconfig.json`). | Pre-run verification (run-4+) must confirm this fix is merged before running. All Type C and Type D TypeScript PRDs affected — add confirmation step to their pre-run checklists. |
 | 2026-04-28 | `--debug-dump-dir` added to all eval instrument commands; diagnostic protocol updated for CLI context | PRD #582 M8 merged (`[eval-flag]`): dimension 3 (full validator error messages, including tsc codes and NDS-005 block previews) and dimension 4 (agent notes) now appear in `spiny-orb-output.log` automatically via `--verbose`. Dimension 2 (actual instrumented code) available via `--debug-dump-dir <path>`. Dimensions 1 (run history) and 5 (agent thinking) remain test-harness/CI only. | Instrument command template in `docs/language-extension-plan.md` updated. Diagnostic protocol in Pre-run verification milestones updated. Propagated to open Type C PRDs (#51, #52, #53). |
+| 2026-06-30 | Corrected the OTel bootstrap guidance to require intercepting `process.exit()` directly (not avoid it), and added a required pre-run-1 SPA-002 bootstrap fix + SPA-001 calibration spike step | Issue #133: the original "do not intercept `process.exit()` directly" line was wrong — the actual fix that resolved spiny-orb issue #926 (orphan spans from `process.exit()` killing the event loop before a batch exporter flushes) does exactly that, verified against `commit-story-v2/examples/instrumentation.js`. SPA-001's fixed threshold (10 → 30) doesn't generalize to targets whose span count scales with input size (e.g., per-item iteration); the real fix is the per-target `SPA001_PER_TARGET_LIMITS` mechanism in `evaluation/is/score-is.js` (eval-repo issue #134), not the originally-planned `otel-spa001-calibration-iteration.md` research doc (spiny-orb issue #951, closed without that deliverable — superseded by #134). | Bootstrap bullet in "Add spiny-orb prerequisites to target repo" corrected; new "SPA-002 bootstrap fix and SPA-001 calibration spike" milestone added before Evaluation run-1. Propagated to all Type C PRDs (#51, #52, #53) that don't already include equivalent steps. |
 
 ## Progress Log
 
@@ -239,6 +251,6 @@ The feature branch for this PRD **never merges to main**. The PR exists for Code
 | 2026-04-11 | PRD created (revised from initial Cluster Whisperer-assumed version) | Draft | Await Gates 1 and 2 |
 | 2026-04-24 | Weaver schema expanded (fetch/write groups, 3 deliberate omissions); taze test suite verified clean (16 files, 73 tests) | In Progress | Pre-run verification |
 | 2026-04-24 | Run-1 attempted — aborted at 3/33 files (NDS-001 TypeScript failures). Key findings: language: field required in spiny-orb.yaml; no-function pre-agent detection missing; startActiveSpan void type incompatibility; consecutive-failure abort too aggressive. | In Progress | Findings Discussion — run findings surfaced even without committed output |
-| 2026-04-24 | Run-2 attempted (SHA 14a2fb0, includes void-callback prompt fix) — aborted identically at 3/33 files. Prompt fix insufficient; early-exit in PRD #582 M2 is the required fix. New finding: checkpoint test failures from live-registry timeouts (pre-existing, unrelated to instrumentation). Spiny-orb handoff written at `evaluation/taze/spiny-orb-handoff.md`. | Blocked | Waiting for PRD #582 M2 (early-exit), CLI verbose error messages, and error-as-Error prompt fix from spiny-orb team |
+| 2026-04-24 | Run-2 attempted (SHA 14a2fb0, includes void-callback prompt fix) — aborted identically at 3/33 files. Prompt fix insufficient; early-exit in PRD #582 M2 is the required fix. New finding: checkpoint test failures from live-registry timeouts (pre-existing, unrelated to instrumentation). Spiny-orb handoff written at `evaluation/typescript/taze/spiny-orb-handoff.md`. | Blocked | Waiting for PRD #582 M2 (early-exit), CLI verbose error messages, and error-as-Error prompt fix from spiny-orb team |
 | 2026-04-28 | All three gate fixes confirmed on spiny-orb main (SHA 0fce097). TypeScript provider merged to main. testCommand: pnpm test added to taze spiny-orb.yaml. GITHUB_TOKEN_TAZE verified. Run-3 directory created. Pre-run verification complete. | In Progress | Run-3 |
 | 2026-04-28 | Run-3 attempted (SHA 0fce097, includes hasInstrumentableFunctions early-exit, instanceof Error fix, CLI verbose) — aborted at 3/33. New root cause diagnosed: checkSyntax() hardcodes --moduleResolution NodeNext but taze uses Bundler. Every file fails NDS-001 on original unmodified source. Instrumentation quality in check.ts was good. Debug dump captured. New P1 filed. | Blocked | Waiting for spiny-orb checkSyntax() moduleResolution fix |

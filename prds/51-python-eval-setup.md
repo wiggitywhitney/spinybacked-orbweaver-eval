@@ -115,6 +115,15 @@ The feature branch for this PRD **never merges to main**. The PR exists for Code
   6. Record version info
   7. Append to lessons-for-run2.md
 
+- [ ] **SPA-002 bootstrap fix and SPA-001 calibration spike** (required before Evaluation run-1)
+
+  Two required pre-run-1 steps, added per issue #133:
+
+  1. **SPA-002 bootstrap fix**: Confirm the atexit hook flushes spans via the exporter/provider's `force_flush()` before the interpreter exits. `atexit` handlers run on `sys.exit()` (which raises `SystemExit`) but NOT on `os._exit()` or an unhandled fatal signal — verify the target doesn't bypass `atexit` via one of those paths. If it does, add the same flush call to the SIGTERM/SIGINT handlers already required in the bootstrap module. Reference the analogous Node.js fix: `~/Documents/Repositories/commit-story-v2/examples/instrumentation.js` (resolved spiny-orb issue #926 — same root cause, different exit primitive).
+  2. **SPA-001 calibration spike**: Before scoring IS, characterize the target's span structure — fixed pipeline stages vs. per-item iteration vs. other. Reference `docs/research/otel-spa001-calibration.md` (spiny-orb repo) for the microservice→CLI-pipeline recalibration history (10 → 30 spans). If the target's span count scales with input size, do not force a fixed threshold — add a per-target entry to `SPA001_PER_TARGET_LIMITS` in `evaluation/is/score-is.js` instead, with `null` if no defensible number exists yet — do not invent one. See eval-repo issue #134 for the taze precedent.
+
+  Success criteria: Bootstrap fix confirmed present. SPA-001 threshold decision documented — either the global default applies, or a per-target override is added with rationale.
+
 - [ ] **Evaluation run-1**
 
   Whitney runs `spiny-orb instrument`. **Do NOT run yourself.** Copy the command template from `docs/language-extension-plan.md` (line ~72). Replace `commit-story-v2` with the chosen target name, `run-N` with `run-1`, and `src` with the target's source directory (Python repos may use `commitizen/`, `src/`, or the package name as the source dir). Create `evaluation/<target>/run-1/debug-dumps/` before running.
@@ -191,6 +200,7 @@ The feature branch for this PRD **never merges to main**. The PR exists for Code
 
 | Date | Decision | Rationale | Impact |
 |------|----------|-----------|--------|
+| 2026-06-30 | Added a required pre-run-1 SPA-002 bootstrap fix + SPA-001 calibration spike step | Issue #133: both bugs surfaced independently in commit-story-v2 and taze and were previously caught after multiple failed runs instead of before run-1. SPA-002 (spiny-orb #926) is a batch-exporter-vs-process-exit race; SPA-001's fixed threshold doesn't generalize to per-item-iteration targets — the real fix is the per-target `SPA001_PER_TARGET_LIMITS` mechanism in `evaluation/is/score-is.js` (eval-repo issue #134), not a research-spike doc (spiny-orb issue #951, closed without that deliverable). | New "SPA-002 bootstrap fix and SPA-001 calibration spike" milestone added before Evaluation run-1. Mirrors the same addition in PRDs #50, #52, #53. |
 | 2026-04-11 | 3 candidates evaluated in milestone 0 | Hands-on validation beats desk research | Milestone 0 added |
 | 2026-04-11 | Python auto-instrumentation library list is a milestone | Python provider needs its own KNOWN_FRAMEWORK_PACKAGES | Contribution to spiny-orb |
 

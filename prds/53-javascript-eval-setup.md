@@ -82,7 +82,7 @@ If this PRD proceeds past milestone 0 (i.e., a new target is selected), the feat
   In the forked target repo, add all required spiny-orb configuration:
   1. Create `spiny-orb.yaml` configuration (adapt from commit-story-v2 reference). **Required fields**: `language: javascript` (set explicitly even though JavaScript is currently the default — required for forward compatibility as new providers are added); `targetType: short-lived` for CLI tools that exit after running, or `long-lived` for servers/daemons. (Updated per 2026-04-24 decision in PRD #50.)
   2. Create initial `semconv/` Weaver schema directory for the target's domain
-  3. Create JavaScript OTel init file (`--import` flag with SDK setup using `@opentelemetry/sdk-node`). Add graceful shutdown: register `SIGTERM` and `SIGINT` handlers that call `sdk.shutdown()` and then `process.exit(0)` — do not intercept `process.exit()` directly
+  3. Create JavaScript OTel init file (`--import` flag with SDK setup using `@opentelemetry/sdk-node`). Use a `SimpleSpanProcessor` (not batch) and intercept `process.exit()` directly to call `sdk.shutdown()` (which flushes pending spans) before exiting — CLI apps call `process.exit()`, which kills the event loop before a `BatchSpanProcessor` can flush, dropping the outermost span (SPA-002). Register `SIGTERM`/`SIGINT` handlers that route through the same shutdown helper with a guard against double-invocation. Reference implementation: `~/Documents/Repositories/commit-story-v2/examples/instrumentation.js`. *(Corrected 2026-06-30 per issue #133 — see PRD #50's Decision Log. The original guidance here, to avoid intercepting `process.exit()`, was wrong.)*
   4. Add OTel `@opentelemetry/api` as a peerDependency in package.json
 
   Success criteria: spiny-orb.yaml, semconv/, OTel init file, and peerDependency all present. Forked repo builds and tests pass.
@@ -114,6 +114,15 @@ If this PRD proceeds past milestone 0 (i.e., a new target is selected), the feat
   6. Append observations to `evaluation/<target-name>/run-1/lessons-for-run2.md`
 
   Success criteria: All prerequisites verified; file inventory recorded; spiny-orb built; push auth confirmed.
+
+- [ ] **SPA-002 bootstrap fix and SPA-001 calibration spike** (required before Evaluation run-1)
+
+  Two required pre-run-1 steps, added per issue #133:
+
+  1. **SPA-002 bootstrap fix**: Confirm the target's OTel init file intercepts `process.exit()` directly and flushes spans via `sdk.shutdown()`/`forceFlush()` before exiting (see corrected bullet 3 in "Add spiny-orb prerequisites to target repo" above). Without this, `process.exit()` drops the outermost span before a batch exporter can flush it. Reference: `~/Documents/Repositories/commit-story-v2/examples/instrumentation.js` (resolved spiny-orb issue #926).
+  2. **SPA-001 calibration spike**: Before scoring IS, characterize the target's span structure — fixed pipeline stages vs. per-item iteration vs. other. Reference `docs/research/otel-spa001-calibration.md` (spiny-orb repo) for the microservice→CLI-pipeline recalibration history (10 → 30 spans). If the target's span count scales with input size, do not force a fixed threshold — add a per-target entry to `SPA001_PER_TARGET_LIMITS` in `evaluation/is/score-is.js` instead, with `null` if no defensible number exists yet — do not invent one. See eval-repo issue #134 for the taze precedent.
+
+  Success criteria: Bootstrap fix confirmed present. SPA-001 threshold decision documented — either the global default applies, or a per-target override is added with rationale.
 
 - [ ] **Evaluation run-1**
 
@@ -197,6 +206,7 @@ If this PRD proceeds past milestone 0 (i.e., a new target is selected), the feat
 
 | Date | Decision | Rationale | Impact |
 |------|----------|-----------|--------|
+| 2026-06-30 | Corrected the OTel bootstrap guidance to require intercepting `process.exit()` directly (not avoid it), and added a required pre-run-1 SPA-002 bootstrap fix + SPA-001 calibration spike step | Issue #133: the original "do not intercept `process.exit()` directly" line was wrong — the actual fix that resolved spiny-orb issue #926 does exactly that, verified against `commit-story-v2/examples/instrumentation.js`. SPA-001's fixed threshold doesn't generalize to per-item-iteration targets; the real fix is the per-target `SPA001_PER_TARGET_LIMITS` mechanism in `evaluation/is/score-is.js` (eval-repo issue #134). | Bootstrap bullet corrected; new "SPA-002 bootstrap fix and SPA-001 calibration spike" milestone added before Evaluation run-1. Mirrors the same correction in PRD #50. |
 | 2026-04-11 | JS gets its own Type C PRD with early exit | commit-story-v2 should be formally evaluated, not assumed correct. Early exit if it wins keeps this low-cost. | PRD created |
 | 2026-04-11 | commit-story-v2 must be one of the 3 candidates | 12 runs of history is valuable; it should compete on merit, not be excluded | Candidate shortlist includes it |
 

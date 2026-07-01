@@ -116,10 +116,10 @@ The **evaluation execution branch** created by `/prd-start` from main **never me
 
 - [ ] **Read `docs/language-extension-plan.md` completely before proceeding with any other milestone.** Pay particular attention to step 9.5 (SPA-001 calibration note for commit-story-v2) and step 9 (IS scoring protocol). **Do not mark this complete until you have read both sections.**
 
-- [ ] **Collect skeleton documents** — Create `evaluation/commit-story-v2/run-18/` directory with `lessons-for-prd19.md` skeleton. Must run before pre-run verification step 9.
+- [ ] **Collect skeleton documents** — Create `evaluation/javascript/commit-story-v2/run-18/` directory with `lessons-for-prd19.md` skeleton. Must run before pre-run verification step 9.
 
 - [ ] **Pre-run verification** — Verify spiny-orb fixes and validate run prerequisites:
-  1. **Handoff triage review**: Read the spiny-orb team's triage of `evaluation/commit-story-v2/run-17/actionable-fix-output.md`. Check which issues were filed (RUN17-1: NDS-003 reconciler gap + PRD #845 update; RUN17-2: thinking budget cap issue; RUN17-3+RUN17-4: coverage/schema bundle; RUN17-5+RUN17-6: reliability/UX bundle) and confirm their status.
+  1. **Handoff triage review**: Read the spiny-orb team's triage of `evaluation/javascript/commit-story-v2/run-17/actionable-fix-output.md`. Check which issues were filed (RUN17-1: NDS-003 reconciler gap + PRD #845 update; RUN17-2: thinking budget cap issue; RUN17-3+RUN17-4: coverage/schema bundle; RUN17-5+RUN17-6: reliability/UX bundle) and confirm their status.
   2. **RUN17-1 fix** (P1 — critical): In the NDS-003 reconciler, verify the offset calculation now handles `startActiveSpan` wrapping inside nested callbacks. Check that context-capture-tool.js `saveContext` (original 121 lines) and reflection-tool.js `saveReflection` (original 113 lines) — both MCP `server.tool()` callback structures — would produce output the validator accepts. The key check: does the reconciler correctly skip re-indented lines inside span wrappers rather than counting them as removals? If PRD #845 M2 has a regression fixture for this pattern, confirm it passes.
   3. **RUN17-2 fix** (P1 — critical): Verify the thinking budget for file-level calls is sufficient for complex files (journal-graph.js is 629 lines with nested template literals and regex arrays). The issue was tracking whether 65% of max_tokens is the right cap. Check if the cap was raised or made dynamic.
   4. **RUN17-3 fix** (P2): Verify that the pre-scan AST or agent directive now identifies `getCommitData` in git-collector.js as a COV-001 target. Confirm the fix is on spiny-orb main.
@@ -130,15 +130,15 @@ The **evaluation execution branch** created by `/prd-start` from main **never me
   9. **File inventory**: Count .js files in commit-story-v2's `src/` directory.
   10. Rebuild spiny-orb from **main**: `cd ~/Documents/Repositories/spinybacked-orbweaver && npm install && npm run build`
   11. Record version and findings status.
-  12. Append observations to `evaluation/commit-story-v2/run-18/lessons-for-prd19.md`.
+  12. Append observations to `evaluation/javascript/commit-story-v2/run-18/lessons-for-prd19.md`.
 
-- [ ] **Evaluation run-18** — Whitney runs `spiny-orb instrument` in her own terminal. **Do NOT run the command yourself.** AI role: (1) confirm readiness with Whitney, (2) once Whitney provides the log output, save it to `evaluation/commit-story-v2/run-18/spiny-orb-output.log` and write `evaluation/commit-story-v2/run-18/run-summary.md`, (3) **if auto PR creation failed**, create the PR from the file spiny-orb already wrote to disk — do NOT write a shortened manual body: `gh pr create --body-file ~/Documents/Repositories/commit-story-v2/spiny-orb-pr-summary.md --repo wiggitywhitney/commit-story-v2 --head <instrument-branch> --title "..."`
+- [ ] **Evaluation run-18** — Whitney runs `spiny-orb instrument` in her own terminal. **Do NOT run the command yourself.** AI role: (1) confirm readiness with Whitney, (2) once Whitney provides the log output, save it to `evaluation/javascript/commit-story-v2/run-18/spiny-orb-output.log` and write `evaluation/javascript/commit-story-v2/run-18/run-summary.md`, (3) **if auto PR creation failed**, create the PR from the file spiny-orb already wrote to disk — do NOT write a shortened manual body: `gh pr create --body-file ~/Documents/Repositories/commit-story-v2/spiny-orb-pr-summary.md --repo wiggitywhitney/commit-story-v2 --head <instrument-branch> --title "..."`
 
-  AI must create `evaluation/commit-story-v2/run-18/debug-dumps/` before handing Whitney the command.
+  AI must create `evaluation/javascript/commit-story-v2/run-18/debug-dumps/` before handing Whitney the command.
 
   **Exact command** (run from `~/Documents/Repositories/commit-story-v2`):
   ```bash
-  caffeinate -s env -u ANTHROPIC_CUSTOM_HEADERS -u ANTHROPIC_BASE_URL vals exec -i -f .vals.yaml -- node ~/Documents/Repositories/spinybacked-orbweaver/bin/spiny-orb.js instrument src --verbose --thinking --debug-dump-dir ~/Documents/Repositories/spinybacked-orbweaver-eval/evaluation/commit-story-v2/run-18/debug-dumps 2>&1 | tee ~/Documents/Repositories/spinybacked-orbweaver-eval/evaluation/commit-story-v2/run-18/spiny-orb-output.log
+  caffeinate -s env -u ANTHROPIC_CUSTOM_HEADERS -u ANTHROPIC_BASE_URL vals exec -i -f .vals.yaml -- node ~/Documents/Repositories/spinybacked-orbweaver/bin/spiny-orb.js instrument src --verbose --thinking --debug-dump-dir ~/Documents/Repositories/spinybacked-orbweaver-eval/evaluation/javascript/commit-story-v2/run-18/debug-dumps 2>&1 | tee ~/Documents/Repositories/spinybacked-orbweaver-eval/evaluation/javascript/commit-story-v2/run-18/spiny-orb-output.log
   ```
 
   **After saving artifacts and committing, push the eval branch to origin immediately** (`git push -u origin <eval-branch>`). The branch holds the only copy of run-18 artifacts until the "Copy artifacts to main" milestone runs — do not leave it local-only.
@@ -146,23 +146,23 @@ The **evaluation execution branch** created by `/prd-start` from main **never me
 - [ ] **Findings Discussion** *(user-facing checkpoint 1)* — After `run-summary.md` is written, before any evaluation documents are started: report to Whitney: (1) files committed / failed / partial, (2) whether any checkpoint failures occurred, (3) RUN17-1 fix result — specifically whether context-capture-tool.js, reflection-tool.js, index.js, and summary-manager.js all 3 generate functions committed with spans, (4) RUN17-2 fix result — whether journal-graph.js committed and if so whether the template literal `}` corruption is gone; if still failed, note whether the failure is the same content corruption or a different NDS-003 pattern, (5) RUN17-3 result — whether git-collector.js getCommitData has a span, (6) quality score if visible, (7) cost, (8) push/PR status, (9) overall attempt-count distribution (D-1 signal). Keep it conversational, under 10 lines. Wait for acknowledgment before proceeding.
 
 - [ ] **Failure deep-dives** — For each failed file AND run-level failure. Includes any partial files.
-  Produces: `evaluation/commit-story-v2/run-18/failure-deep-dives.md`
+  Produces: `evaluation/javascript/commit-story-v2/run-18/failure-deep-dives.md`
   Style reference: `Read docs/templates/eval-run-style-reference/failure-deep-dives.md`
 
 - [ ] **Per-file evaluation** — Full rubric on ALL files (no spot-checking). Evaluate all rules across all committed and partial files.
-  Produces: `evaluation/commit-story-v2/run-18/per-file-evaluation.md`
+  Produces: `evaluation/javascript/commit-story-v2/run-18/per-file-evaluation.md`
   Style reference: `Read docs/templates/eval-run-style-reference/per-file-evaluation.md`
 
-  **(D-2) Use one agent per file**: Spawn one agent per file in parallel; each agent reads style reference, `evaluation/commit-story-v2/run-17/per-file-evaluation.md` (for rule descriptions), original source (`git show main:src/file`), committed source (`git show <instrument-branch>:src/file`), agent notes from log, debug dump if applicable, and schema (`semconv/attributes.yaml`); each writes its section to `evaluation/commit-story-v2/run-18/per-file-sections/<filename>.md`; main context assembles into per-file-evaluation.md. Correct-skip files: one batch agent for RST-001 verification. This approach surfaced two previously undetected quality gaps in run-17 (git-collector COV-001, summary-graph SCH-002); use it for run-18.
+  **(D-2) Use one agent per file**: Spawn one agent per file in parallel; each agent reads style reference, `evaluation/javascript/commit-story-v2/run-17/per-file-evaluation.md` (for rule descriptions), original source (`git show main:src/file`), committed source (`git show <instrument-branch>:src/file`), agent notes from log, debug dump if applicable, and schema (`semconv/attributes.yaml`); each writes its section to `evaluation/javascript/commit-story-v2/run-18/per-file-sections/<filename>.md`; main context assembles into per-file-evaluation.md. Correct-skip files: one batch agent for RST-001 verification. This approach surfaced two previously undetected quality gaps in run-17 (git-collector COV-001, summary-graph SCH-002); use it for run-18.
 
   **(D-1) Track attempt counts**: For each file, note attempts. Assess whether ≥2-attempt files show better quality (real NDS-003 fixes) vs noise (formatting churn).
 
 - [ ] **PR artifact evaluation** — Evaluate PR quality.
-  Produces: `evaluation/commit-story-v2/run-18/pr-evaluation.md`
+  Produces: `evaluation/javascript/commit-story-v2/run-18/pr-evaluation.md`
   Style reference: `Read docs/templates/eval-run-style-reference/pr-evaluation.md`
 
 - [ ] **Rubric scoring** — Synthesize dimension-level scores.
-  Produces: `evaluation/commit-story-v2/run-18/rubric-scores.md`
+  Produces: `evaluation/javascript/commit-story-v2/run-18/rubric-scores.md`
   Style reference: `Read docs/templates/eval-run-style-reference/rubric-scores.md`
 
 - [ ] **IS scoring run** — Follow `docs/language-extension-plan.md` step 9. Full protocol in `evaluation/is/README.md` (commit-story-v2 section).
@@ -180,12 +180,12 @@ The **evaluation execution branch** created by `/prd-start` from main **never me
      ```
      Note: omit `COMMIT_STORY_TRACELOOP=true` — `@traceloop/instrumentation-langchain` API incompatibility crashes the process. See `evaluation/is/README.md`.
   4. **Claude stops** the Collector: `docker stop otelcol-is`
-  5. **Claude runs** the scorer: `node evaluation/is/score-is.js evaluation/is/eval-traces.json > evaluation/commit-story-v2/run-18/is-score.md`
+  5. **Claude runs** the scorer: `node evaluation/is/score-is.js evaluation/is/eval-traces.json > evaluation/javascript/commit-story-v2/run-18/is-score.md`
   6. **Claude runs**: `datadog-agent start`
-  Produces: `evaluation/commit-story-v2/run-18/is-score.md`
+  Produces: `evaluation/javascript/commit-story-v2/run-18/is-score.md`
 
 - [ ] **Baseline comparison** — Compare run-18 vs runs 2-17.
-  Produces: `evaluation/commit-story-v2/run-18/baseline-comparison.md`
+  Produces: `evaluation/javascript/commit-story-v2/run-18/baseline-comparison.md`
   Style reference: `Read docs/templates/eval-run-style-reference/baseline-comparison.md`
 
 - [ ] **Update root README** — After baseline comparison, update `README.md`: (1) add a row for run-18 to the run history table (quality, gates, files, spans, cost, push/PR, IS score); (2) update the "next run" sentence at the bottom to reference run-19 and its primary goals.
@@ -193,12 +193,12 @@ The **evaluation execution branch** created by `/prd-start` from main **never me
 - [ ] **Actionable fix output** — Primary handoff deliverable. At milestone completion:
   1. Run the cross-document audit agent to verify consistency across all run-18 evaluation artifacts.
   2. *(User-facing checkpoint 2)* Give Whitney an interpreted summary of key findings — failures, root causes, notable patterns, what to watch for in run-19.
-  3. Print the absolute file path of `evaluation/commit-story-v2/run-18/actionable-fix-output.md`.
+  3. Print the absolute file path of `evaluation/javascript/commit-story-v2/run-18/actionable-fix-output.md`.
   4. **Pause.** Do not proceed to Draft PRD #19 until Whitney confirms she has handed the document off to the spiny-orb team.
 
 - [ ] **Draft PRD #19** — Create on a separate branch from main. Merge the PRD PR to main so `/prd-start` can pick it up. Carry forward both user-facing checkpoints into PRD #19's milestone structure. IS scoring milestone must use the same format as this PRD's IS scoring milestone. Per-file evaluation milestone must specify the D-2 per-agent approach.
 
-- [ ] **Copy artifacts to main** — From main, run `git checkout <eval-branch> -- evaluation/commit-story-v2/run-18/` to copy all artifacts. Commit to main with message `eval: save run-18 artifacts to main [skip ci]`. Add one row to `evaluation/commit-story-v2/run-log.md` for run-18 and commit with `eval: update run-log for run-18 [skip ci]`. Push main. This step runs before `/prd-done` so the artifacts land on main while the eval branch is still reachable.
+- [ ] **Copy artifacts to main** — From main, run `git checkout <eval-branch> -- evaluation/javascript/commit-story-v2/run-18/` to copy all artifacts. Commit to main with message `eval: save run-18 artifacts to main [skip ci]`. Add one row to `evaluation/javascript/commit-story-v2/run-log.md` for run-18 and commit with `eval: update run-log for run-18 [skip ci]`. Push main. This step runs before `/prd-done` so the artifacts land on main while the eval branch is still reachable.
 
 ---
 

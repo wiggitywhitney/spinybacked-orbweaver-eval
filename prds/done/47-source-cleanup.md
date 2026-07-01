@@ -22,7 +22,7 @@ This repo was originally forked from commit-story-v2 and contains a tracked copy
 
 - **Primary**: `git ls-files src/ tests/` returns empty
 - **Secondary**: `docs/research/source-cleanup-audit.md` exists, classifying every removed or retained file
-- **Validation**: Instrument command runs cleanly against `../commit-story-v2` with output tee'd to `evaluation/commit-story-v2/run-N/` as before; no eval workflow step depends on local source
+- **Validation**: Instrument command runs cleanly against `../commit-story-v2` with output tee'd to `evaluation/javascript/commit-story-v2/run-N/` as before; no eval workflow step depends on local source
 
 ## Requirements
 
@@ -135,7 +135,7 @@ This repo was originally forked from commit-story-v2 and contains a tracked copy
 - [x] **Verify eval workflow runs end-to-end**
 
   Read `prds/37-evaluation-run-13.md` and locate the prerequisites or pre-run verification milestone. Step through each item, confirming it works without local source. If no explicit checklist exists in that PRD, verify these three things manually:
-  1. The instrument command from `docs/language-extension-plan.md` can be assembled and would run without error (the target path `../commit-story-v2/src` exists; the output path `evaluation/commit-story-v2/run-N/` exists)
+  1. The instrument command from `docs/language-extension-plan.md` can be assembled and would run without error (the target path `../commit-story-v2/src` exists; the output path `evaluation/javascript/commit-story-v2/run-N/` exists)
   2. No step in the eval workflow requires `npm install` or `npm test` in this repo
   3. The `spiny-orb.yaml` config still points at the correct target
 

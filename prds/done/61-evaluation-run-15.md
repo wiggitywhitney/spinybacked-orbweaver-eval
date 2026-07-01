@@ -78,8 +78,8 @@ Same as runs 9–14.
 
 ### Key Inputs
 
-- **Run-14 results** (eval repo): `evaluation/commit-story-v2/run-14/` on branch `feature/prd-55-evaluation-run-14`
-- **Run-14 actionable fix output**: `evaluation/commit-story-v2/run-14/actionable-fix-output.md`
+- **Run-14 results** (eval repo): `evaluation/javascript/commit-story-v2/run-14/` on branch `feature/prd-55-evaluation-run-14`
+- **Run-14 actionable fix output**: `evaluation/javascript/commit-story-v2/run-14/actionable-fix-output.md`
 - **Evaluation rubric** (spiny-orb repo): `spinybacked-orbweaver/research/evaluation-rubric.md` (32 rules)
 - **Style references**: `docs/templates/eval-run-style-reference/`
 
@@ -107,10 +107,10 @@ The **evaluation execution branch** created by `/prd-start` from main **never me
 
 ## Milestones
 
-- [ ] **Collect skeleton documents** — Create `evaluation/commit-story-v2/run-15/` directory with `lessons-for-prd16.md` skeleton. Must run before pre-run verification step 9.
+- [ ] **Collect skeleton documents** — Create `evaluation/javascript/commit-story-v2/run-15/` directory with `lessons-for-prd16.md` skeleton. Must run before pre-run verification step 9.
 
 - [ ] **Pre-run verification** — Verify spiny-orb fixes and validate run prerequisites:
-  1. **Handoff triage review**: Read the spiny-orb team's triage of `evaluation/commit-story-v2/run-14/actionable-fix-output.md`. Check which findings were filed as issues.
+  1. **Handoff triage review**: Read the spiny-orb team's triage of `evaluation/javascript/commit-story-v2/run-14/actionable-fix-output.md`. Check which findings were filed as issues.
   2. **Catch-block consistency fix** (P1 — critical, RUN14-1): Verify the fix for summaryNode's missing error recording landed. The fix involves prompt guidance for consistent `span.recordException() + span.setStatus(ERROR)` across all LangGraph node catch blocks in `journal-graph.js`. Confirm the relevant issue/PR is closed and merged to spiny-orb main.
   3. **COV-004 outcome from PRD #483 M2**: Check whether PRD #483 Milestone M2 completed and what decision was made for COV-004. Three outcomes are possible:
      - COV-004 promoted to blocking → summary-manager.js will commit with all 9 functions if the fix was also made
@@ -122,13 +122,13 @@ The **evaluation execution branch** created by `/prd-start` from main **never me
   6. **File inventory**: Count .js files in commit-story-v2's `src/` directory.
   7. Rebuild spiny-orb from **main**.
   8. Record version and findings status.
-  9. Append observations to `evaluation/commit-story-v2/run-15/lessons-for-prd16.md`.
+  9. Append observations to `evaluation/javascript/commit-story-v2/run-15/lessons-for-prd16.md`.
 
-- [ ] **Evaluation run-15** — Whitney runs `spiny-orb instrument` in her own terminal. **Do NOT run the command yourself.** AI role: (1) confirm readiness with Whitney, (2) once Whitney provides the log output, save it to `evaluation/commit-story-v2/run-15/spiny-orb-output.log` and write `evaluation/commit-story-v2/run-15/run-summary.md`.
+- [ ] **Evaluation run-15** — Whitney runs `spiny-orb instrument` in her own terminal. **Do NOT run the command yourself.** AI role: (1) confirm readiness with Whitney, (2) once Whitney provides the log output, save it to `evaluation/javascript/commit-story-v2/run-15/spiny-orb-output.log` and write `evaluation/javascript/commit-story-v2/run-15/run-summary.md`.
 
   **Exact command** (run from `~/Documents/Repositories/commit-story-v2`):
   ```bash
-  caffeinate -s env -u ANTHROPIC_CUSTOM_HEADERS -u ANTHROPIC_BASE_URL vals exec -i -f .vals.yaml -- node ~/Documents/Repositories/spinybacked-orbweaver/bin/spiny-orb.js instrument src --verbose --thinking 2>&1 | tee ~/Documents/Repositories/spinybacked-orbweaver-eval/evaluation/commit-story-v2/run-15/spiny-orb-output.log
+  caffeinate -s env -u ANTHROPIC_CUSTOM_HEADERS -u ANTHROPIC_BASE_URL vals exec -i -f .vals.yaml -- node ~/Documents/Repositories/spinybacked-orbweaver/bin/spiny-orb.js instrument src --verbose --thinking 2>&1 | tee ~/Documents/Repositories/spinybacked-orbweaver-eval/evaluation/javascript/commit-story-v2/run-15/spiny-orb-output.log
   ```
 
   **After saving artifacts and committing, push the eval branch to origin immediately** (`git push -u origin feature/prd-61-evaluation-run-15`). The branch holds the only copy of run-15 artifacts until the "Copy artifacts to main" milestone runs — do not leave it local-only.
@@ -136,19 +136,19 @@ The **evaluation execution branch** created by `/prd-start` from main **never me
 - [ ] **Findings Discussion** *(user-facing checkpoint 1)* — After `run-summary.md` is written, before any evaluation documents are started: report to Whitney: (1) files committed / failed / partial, (2) whether any checkpoint failures occurred, (3) whether summaryNode catch block looks consistent with the other nodes (signal for RUN14-1 fix), (4) quality score if visible, (5) cost, (6) push/PR status. Keep it conversational, under 10 lines. Wait for acknowledgment before proceeding.
 
 - [ ] **Failure deep-dives** — For each failed file AND run-level failure. Includes any partial files.
-  Produces: `evaluation/commit-story-v2/run-15/failure-deep-dives.md`
+  Produces: `evaluation/javascript/commit-story-v2/run-15/failure-deep-dives.md`
   Style reference: `Read docs/templates/eval-run-style-reference/failure-deep-dives.md`
 
 - [ ] **Per-file evaluation** — Full rubric on ALL files (no spot-checking). Evaluate all 32 rules across all committed and partial files.
-  Produces: `evaluation/commit-story-v2/run-15/per-file-evaluation.md`
+  Produces: `evaluation/javascript/commit-story-v2/run-15/per-file-evaluation.md`
   Style reference: `Read docs/templates/eval-run-style-reference/per-file-evaluation.md`
 
 - [ ] **PR artifact evaluation** — Evaluate PR quality.
-  Produces: `evaluation/commit-story-v2/run-15/pr-evaluation.md`
+  Produces: `evaluation/javascript/commit-story-v2/run-15/pr-evaluation.md`
   Style reference: `Read docs/templates/eval-run-style-reference/pr-evaluation.md`
 
 - [ ] **Rubric scoring** — Synthesize dimension-level scores.
-  Produces: `evaluation/commit-story-v2/run-15/rubric-scores.md`
+  Produces: `evaluation/javascript/commit-story-v2/run-15/rubric-scores.md`
   Style reference: `Read docs/templates/eval-run-style-reference/rubric-scores.md`
 
 - [ ] **IS scoring run** — Follow `docs/language-extension-plan.md` step 9. Full protocol in `evaluation/is/README.md` (commit-story-v2 section).
@@ -166,12 +166,12 @@ The **evaluation execution branch** created by `/prd-start` from main **never me
      ```
      Note: omit `COMMIT_STORY_TRACELOOP=true` — `@traceloop/instrumentation-langchain` API incompatibility crashes the process. See `evaluation/is/README.md`.
   4. **Claude stops** the Collector: `docker stop otelcol-is`
-  5. **Claude runs** the scorer: `node evaluation/is/score-is.js evaluation/is/eval-traces.json > evaluation/commit-story-v2/run-15/is-score.md`
+  5. **Claude runs** the scorer: `node evaluation/is/score-is.js evaluation/is/eval-traces.json > evaluation/javascript/commit-story-v2/run-15/is-score.md`
   6. **Claude runs**: `datadog-agent start`
-  Produces: `evaluation/commit-story-v2/run-15/is-score.md`
+  Produces: `evaluation/javascript/commit-story-v2/run-15/is-score.md`
 
 - [ ] **Baseline comparison** — Compare run-15 vs runs 2-14.
-  Produces: `evaluation/commit-story-v2/run-15/baseline-comparison.md`
+  Produces: `evaluation/javascript/commit-story-v2/run-15/baseline-comparison.md`
   Style reference: `Read docs/templates/eval-run-style-reference/baseline-comparison.md`
 
 - [ ] **Update root README** — After baseline comparison, update `README.md`: (1) add a row for run-15 to the run history table (quality, gates, files, spans, cost, push/PR, IS score); (2) update the "next run" sentence at the bottom to reference run-16 and its primary goals.
@@ -179,13 +179,13 @@ The **evaluation execution branch** created by `/prd-start` from main **never me
 - [ ] **Actionable fix output** — Primary handoff deliverable. At milestone completion:
   1. Run the cross-document audit agent to verify consistency across all run-15 evaluation artifacts.
   2. *(User-facing checkpoint 2)* Give Whitney an interpreted summary of key findings — failures, root causes, notable patterns, what to watch for in run-16.
-  3. **Advisory findings document for PRD #483** (if PRD #483 is still active): Create `evaluation/commit-story-v2/run-15/advisory-findings-for-audit.md` using the same format as run-14's version. Hard data only — rule ID, finding text, TP/FP classification.
-  4. Print the absolute file path of `evaluation/commit-story-v2/run-15/actionable-fix-output.md`.
+  3. **Advisory findings document for PRD #483** (if PRD #483 is still active): Create `evaluation/javascript/commit-story-v2/run-15/advisory-findings-for-audit.md` using the same format as run-14's version. Hard data only — rule ID, finding text, TP/FP classification.
+  4. Print the absolute file path of `evaluation/javascript/commit-story-v2/run-15/actionable-fix-output.md`.
   5. **Pause.** Do not proceed to Draft PRD #16 until Whitney confirms she has handed the document off to the spiny-orb team.
 
 - [ ] **Draft PRD #16** — Create on a separate branch from main. Merge the PRD PR to main so `/prd-start` can pick it up. Carry forward both user-facing checkpoints into PRD #16's milestone structure. IS scoring milestone must use the same format as this PRD's IS scoring milestone.
 
-- [ ] **Copy artifacts to main** — From main, run `git checkout feature/prd-61-evaluation-run-15 -- evaluation/commit-story-v2/run-15/` to copy all artifacts. Commit to main with message `eval: save run-15 artifacts to main [skip ci]`. Add one row to `evaluation/commit-story-v2/run-log.md` for run-15 and commit with `eval: update run-log for run-15 [skip ci]`. Push main. This step runs before `/prd-done` so the artifacts land on main while the eval branch is still reachable.
+- [ ] **Copy artifacts to main** — From main, run `git checkout feature/prd-61-evaluation-run-15 -- evaluation/javascript/commit-story-v2/run-15/` to copy all artifacts. Commit to main with message `eval: save run-15 artifacts to main [skip ci]`. Add one row to `evaluation/javascript/commit-story-v2/run-log.md` for run-15 and commit with `eval: update run-log for run-15 [skip ci]`. Push main. This step runs before `/prd-done` so the artifacts land on main while the eval branch is still reachable.
 
 ---
 

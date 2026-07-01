@@ -3,7 +3,7 @@
 **Status:** Ready
 **Created:** 2026-05-07
 **GitHub Issue:** #100
-**Depends on:** PRD #88 (run-4 complete, findings in `evaluation/release-it/run-4/actionable-fix-output.md`)
+**Depends on:** PRD #88 (run-4 complete, findings in `evaluation/javascript/release-it/run-4/actionable-fix-output.md`)
 
 ---
 
@@ -98,15 +98,15 @@ The feature branch for this PRD (`feature/prd-100-evaluation-run-5-release-it`) 
 - [ ] **Step 0 — Bootstrap reading.** Before proceeding with any other milestone, read these documents in order:
   1. `docs/language-extension-plan.md` — completely.
   2. `prds/115-evaluation-run-22.md` — canonical Type D milestone style reference. **Release-it is non-organic** (unlike commit-story-v2): the trace artifact is created during IS scoring (step 9.5), NOT during pre-run verification. The IS scoring milestone and per-file trace supplement timing differ accordingly — read both PRDs side by side to understand where release-it diverges.
-  3. `evaluation/release-it/run-4/actionable-fix-output.md` — prior run findings. RUN4-1 (LINT/NDS-003 indentation-width conflict) and RUN4-2 (PR body E2BIG) are the P1 blockers that drive run-5's pre-run verification.
+  3. `evaluation/javascript/release-it/run-4/actionable-fix-output.md` — prior run findings. RUN4-1 (LINT/NDS-003 indentation-width conflict) and RUN4-2 (PR body E2BIG) are the P1 blockers that drive run-5's pre-run verification.
   **Do not mark this complete until you have read all three documents.**
 
-- [ ] **Step 0.5 — Cross-run process review** *(user-facing checkpoint — template changes require user approval)*. Follow the full procedure in `docs/language-extension-plan.md` Step 0.5. In brief: (1) find the most recently completed release-it run (completion signal: `actionable-fix-output.md` present in `evaluation/release-it/run-N/`); (2) check all other `evaluation/` subdirectories for a more recently completed cross-target run — compare using the `captured:` field in `trace-artifact.md` if it exists, or the file modification time of `actionable-fix-output.md` as a proxy; if release-it has no completed runs, treat it as timestamp zero so any cross-target run qualifies; (3) if a more recent cross-target run exists, read its `actionable-fix-output.md` and any `lessons-for-prd*.md` files; (4) compare findings against the template's milestone structure as instantiated in this PRD (from `docs/language-extension-plan.md`); (5) present the structured three-section checkpoint report to the user (already in template, missing from template with proposed text, target-specific only); (6) after user approves, make the approved template edits. Do NOT make any edits without explicit user approval. If no cross-target run is more recent, note this in the report and proceed.
+- [ ] **Step 0.5 — Cross-run process review** *(user-facing checkpoint — template changes require user approval)*. Follow the full procedure in `docs/language-extension-plan.md` Step 0.5. In brief: (1) find the most recently completed release-it run (completion signal: `actionable-fix-output.md` present in `evaluation/javascript/release-it/run-N/`); (2) check all other `evaluation/` subdirectories for a more recently completed cross-target run — compare using the `captured:` field in `trace-artifact.md` if it exists, or the file modification time of `actionable-fix-output.md` as a proxy; if release-it has no completed runs, treat it as timestamp zero so any cross-target run qualifies; (3) if a more recent cross-target run exists, read its `actionable-fix-output.md` and any `lessons-for-prd*.md` files; (4) compare findings against the template's milestone structure as instantiated in this PRD (from `docs/language-extension-plan.md`); (5) present the structured three-section checkpoint report to the user (already in template, missing from template with proposed text, target-specific only); (6) after user approves, make the approved template edits. Do NOT make any edits without explicit user approval. If no cross-target run is more recent, note this in the report and proceed.
 
 - [ ] **Collect skeleton documents**
 
-  Create `evaluation/release-it/run-5/` directory in the eval repo with skeleton files:
-  - `lessons-for-run6.md` (copy structure from `evaluation/release-it/run-4/lessons-for-run5.md`)
+  Create `evaluation/javascript/release-it/run-5/` directory in the eval repo with skeleton files:
+  - `lessons-for-run6.md` (copy structure from `evaluation/javascript/release-it/run-4/lessons-for-run5.md`)
   - `spiny-orb-findings.md` (fresh skeleton with P1/P2/P3 sections)
 
 - [ ] **Pre-run verification**
@@ -122,7 +122,7 @@ The feature branch for this PRD (`feature/prd-100-evaluation-run-5-release-it`) 
   7. **File inventory**: Confirm 23 `.js` files in `lib/` — run `find lib -name "*.js" | wc -l` from `~/Documents/Repositories/release-it/`.
   8. **Rebuild spiny-orb**: Rebuild from **main**. Record SHA.
   9. **Record versions**: Node.js version, spiny-orb version/SHA, release-it version.
-  10. Append observations to `evaluation/release-it/run-5/lessons-for-run6.md`.
+  10. Append observations to `evaluation/javascript/release-it/run-5/lessons-for-run6.md`.
 
   **If RUN4-1 is not fixed**: proceed anyway. Document the miss. Q×F will remain near 6.7 but run-5 still produces valid evaluation data.
 
@@ -130,16 +130,16 @@ The feature branch for this PRD (`feature/prd-100-evaluation-run-5-release-it`) 
 
   Whitney runs `spiny-orb instrument` in her own terminal. **Do NOT run the command yourself.**
 
-  AI must create `evaluation/release-it/run-5/debug-dumps/` before handing Whitney the command.
+  AI must create `evaluation/javascript/release-it/run-5/debug-dumps/` before handing Whitney the command.
 
   **Instrument command** (run from `~/Documents/Repositories/release-it/`):
   ```bash
-  caffeinate -s env -u ANTHROPIC_CUSTOM_HEADERS -u ANTHROPIC_BASE_URL HOME="$HOME" GIT_CONFIG_GLOBAL=/Users/whitney.lee/.config/spiny-orb-eval/gitconfig vals exec -i -f ~/Documents/Repositories/release-it/.vals.yaml -- bash -c 'GITHUB_TOKEN=$GITHUB_TOKEN_RELEASE_IT node ~/Documents/Repositories/spinybacked-orbweaver/bin/spiny-orb.js instrument lib --verbose --thinking --debug-dump-dir ~/Documents/Repositories/spinybacked-orbweaver-eval/evaluation/release-it/run-5/debug-dumps 2>&1 | tee ~/Documents/Repositories/spinybacked-orbweaver-eval/evaluation/release-it/run-5/spiny-orb-output.log'
+  caffeinate -s env -u ANTHROPIC_CUSTOM_HEADERS -u ANTHROPIC_BASE_URL HOME="$HOME" GIT_CONFIG_GLOBAL=/Users/whitney.lee/.config/spiny-orb-eval/gitconfig vals exec -i -f ~/Documents/Repositories/release-it/.vals.yaml -- bash -c 'GITHUB_TOKEN=$GITHUB_TOKEN_RELEASE_IT node ~/Documents/Repositories/spinybacked-orbweaver/bin/spiny-orb.js instrument lib --verbose --thinking --debug-dump-dir ~/Documents/Repositories/spinybacked-orbweaver-eval/evaluation/javascript/release-it/run-5/debug-dumps 2>&1 | tee ~/Documents/Repositories/spinybacked-orbweaver-eval/evaluation/javascript/release-it/run-5/spiny-orb-output.log'
   ```
 
   Note: `HOME="$HOME"` is required — weaver prerequisite check needs HOME for `~/.weaver/vdir_cache/`. `vals exec` reads from release-it fork's `.vals.yaml` (NOT the eval repo's). Source directory is `lib/`.
 
-  AI role: (1) confirm readiness, (2) once Whitney provides the log output, save it and write `evaluation/release-it/run-5/run-summary.md`, (3) **push the eval branch to origin immediately** — the branch holds the only copy of run artifacts until step 13 copies them to main, (4) **if auto PR creation failed**, create the PR from the file spiny-orb already wrote to disk — do NOT write a shortened manual body: `gh pr create --body-file ~/Documents/Repositories/release-it/spiny-orb-pr-summary.md --repo wiggitywhitney/release-it --head <instrument-branch> --title "..."`
+  AI role: (1) confirm readiness, (2) once Whitney provides the log output, save it and write `evaluation/javascript/release-it/run-5/run-summary.md`, (3) **push the eval branch to origin immediately** — the branch holds the only copy of run artifacts until step 13 copies them to main, (4) **if auto PR creation failed**, create the PR from the file spiny-orb already wrote to disk — do NOT write a shortened manual body: `gh pr create --body-file ~/Documents/Repositories/release-it/spiny-orb-pr-summary.md --repo wiggitywhitney/release-it --head <instrument-branch> --title "..."`
 
 - [ ] **Findings Discussion** *(user-facing checkpoint 1)*
 
@@ -150,43 +150,43 @@ The feature branch for this PRD (`feature/prd-100-evaluation-run-5-release-it`) 
 - [ ] **Failure deep-dives**
 
   Root cause analysis for each failed/partial file and run-level failures.
-  Produces: `evaluation/release-it/run-5/failure-deep-dives.md`
+  Produces: `evaluation/javascript/release-it/run-5/failure-deep-dives.md`
   Style reference: `Read docs/templates/eval-run-style-reference/failure-deep-dives.md`
 
 - [ ] **Per-file evaluation**
 
-  **Step 0 — Trace supplement:** Release-it is a non-organic target — the trace artifact is created during IS scoring (see IS scoring milestone below). If IS scoring has not yet run, complete the IS scoring milestone first, then return here to complete Step 0. Once the artifact exists: first read `evaluation/trace-capture-protocol.md` for full guidance. Then read `evaluation/release-it/run-5/trace-artifact.md` and use the `search_datadog_spans` Datadog MCP tool with the `query` field from the artifact as the base query. First run the base query without a prefix filter, inspect the returned `resource_name` values to derive the correct prefix for the file under review, then rerun with `resource_name:<derived_prefix>.*` appended. The prefix comes from actual span data — do not hardcode it. Example: if the artifact's `query` is `service:release-it @service.instance.id:a1b2c3d4...` and returned spans show `resource_name: release_it.publish`, rerun as `service:release-it @service.instance.id:a1b2c3d4... resource_name:release_it.*`. Use live trace data to supplement — not override — static code review for: attribute values at runtime, parent-child span relationships, early exit detection (span with `gen_ai.operation.name` but no `gen_ai.response.id`), and CDQ-001 double-end signal. If the trace has no spans for the file's namespace, note it — do not fail the file solely on trace absence.
+  **Step 0 — Trace supplement:** Release-it is a non-organic target — the trace artifact is created during IS scoring (see IS scoring milestone below). If IS scoring has not yet run, complete the IS scoring milestone first, then return here to complete Step 0. Once the artifact exists: first read `evaluation/trace-capture-protocol.md` for full guidance. Then read `evaluation/javascript/release-it/run-5/trace-artifact.md` and use the `search_datadog_spans` Datadog MCP tool with the `query` field from the artifact as the base query. First run the base query without a prefix filter, inspect the returned `resource_name` values to derive the correct prefix for the file under review, then rerun with `resource_name:<derived_prefix>.*` appended. The prefix comes from actual span data — do not hardcode it. Example: if the artifact's `query` is `service:release-it @service.instance.id:a1b2c3d4...` and returned spans show `resource_name: release_it.publish`, rerun as `service:release-it @service.instance.id:a1b2c3d4... resource_name:release_it.*`. Use live trace data to supplement — not override — static code review for: attribute values at runtime, parent-child span relationships, early exit detection (span with `gen_ai.operation.name` but no `gen_ai.response.id`), and CDQ-001 double-end signal. If the trace has no spans for the file's namespace, note it — do not fail the file solely on trace absence.
 
   Full 32-rule rubric on ALL processed files.
-  Produces: `evaluation/release-it/run-5/per-file-evaluation.md`
+  Produces: `evaluation/javascript/release-it/run-5/per-file-evaluation.md`
   Style reference: `Read docs/templates/eval-run-style-reference/per-file-evaluation.md`
 
 - [ ] **PR artifact evaluation**
 
-  Produces: `evaluation/release-it/run-5/pr-evaluation.md`
+  Produces: `evaluation/javascript/release-it/run-5/pr-evaluation.md`
   Style reference: `Read docs/templates/eval-run-style-reference/pr-evaluation.md`
 
 - [ ] **Rubric scoring**
 
-  Produces: `evaluation/release-it/run-5/rubric-scores.md`
+  Produces: `evaluation/javascript/release-it/run-5/rubric-scores.md`
   Style reference: `Read docs/templates/eval-run-style-reference/rubric-scores.md`
 
-- [ ] **IS scoring run** — **AI runs all commands.** If 0 files committed on the instrument branch: write `NOT EVALUABLE — 0 files committed` to `evaluation/release-it/run-5/is-score.md` and stop.
+- [ ] **IS scoring run** — **AI runs all commands.** If 0 files committed on the instrument branch: write `NOT EVALUABLE — 0 files committed` to `evaluation/javascript/release-it/run-5/is-score.md` and stop.
 
   **IS scoring gotchas for release-it**: (1) Docker may be blocked by Datadog MDM policy — download `otelcol-contrib` binary directly from GitHub releases (darwin_arm64) if Docker is unavailable; (2) OTel SDK packages (`@opentelemetry/sdk-node`, `exporter-trace-otlp-http`, `sdk-trace-base`, `resources`) are not in release-it devDependencies — temporarily install via `npm install --save-dev` for the IS scoring run, then revert with `git restore package.json package-lock.json`; (3) `--dry-run` flag is required — without it, release-it will attempt an actual release.
 
   1. **Prerequisites**: Start OTel Collector with `evaluation/is/otelcol-config.yaml` — use binary if Docker is unavailable (see `evaluation/is/README.md` for binary download instructions). Pre-create output file: `touch evaluation/is/eval-traces.json`.
-  2. **Setup**: Find the instrument branch name from the end of `evaluation/release-it/run-5/spiny-orb-output.log` (look for `Branch:` in the final summary box) or run `gh pr list --repo wiggitywhitney/release-it --json number,headRefName`. In `~/Documents/Repositories/release-it`, run: `git fetch && git checkout <instrument-branch> -- lib/ examples/`. Install SDK packages temporarily: `npm install --save-dev @opentelemetry/sdk-node @opentelemetry/exporter-trace-otlp-http @opentelemetry/sdk-trace-base @opentelemetry/resources`.
-  3. **Action**: Run release-it with the Collector receiving: `OTEL_EXPORTER_OTLP_TRACES_ENDPOINT=http://localhost:4318/v1/traces node --import ./examples/instrumentation.js ./bin/release-it.js --dry-run`. Then: `node evaluation/is/score-is.js evaluation/is/eval-traces.json --target release-it > evaluation/release-it/run-5/is-score.md`
+  2. **Setup**: Find the instrument branch name from the end of `evaluation/javascript/release-it/run-5/spiny-orb-output.log` (look for `Branch:` in the final summary box) or run `gh pr list --repo wiggitywhitney/release-it --json number,headRefName`. In `~/Documents/Repositories/release-it`, run: `git fetch && git checkout <instrument-branch> -- lib/ examples/`. Install SDK packages temporarily: `npm install --save-dev @opentelemetry/sdk-node @opentelemetry/exporter-trace-otlp-http @opentelemetry/sdk-trace-base @opentelemetry/resources`.
+  3. **Action**: Run release-it with the Collector receiving: `OTEL_EXPORTER_OTLP_TRACES_ENDPOINT=http://localhost:4318/v1/traces node --import ./examples/instrumentation.js ./bin/release-it.js --dry-run`. Then: `node evaluation/is/score-is.js evaluation/is/eval-traces.json --target release-it > evaluation/javascript/release-it/run-5/is-score.md`
   4. **Restore**: `git restore package.json package-lock.json` in the release-it fork; `git checkout main -- lib/ examples/`.
-  5. **Capture trace artifact** (release-it is a non-organic target — traces only exist during IS scoring, not from daily developer use): Read `evaluation/trace-capture-protocol.md` for the artifact format and full guidance. Then use the `search_datadog_spans` Datadog MCP tool with query `service:release-it from:now-30m` (IS scoring takes several minutes so a 5-minute window is too tight). Retrieve `service.instance.id` from any span in the result. Write `evaluation/release-it/run-5/trace-artifact.md` — the `query` field should be `service:release-it @service.instance.id:<uuid>`. If no spans appear, wait up to 5 minutes for Datadog ingestion and retry once; if still empty, record trace absence in the artifact and note it in `run-summary.md`.
+  5. **Capture trace artifact** (release-it is a non-organic target — traces only exist during IS scoring, not from daily developer use): Read `evaluation/trace-capture-protocol.md` for the artifact format and full guidance. Then use the `search_datadog_spans` Datadog MCP tool with query `service:release-it from:now-30m` (IS scoring takes several minutes so a 5-minute window is too tight). Retrieve `service.instance.id` from any span in the result. Write `evaluation/javascript/release-it/run-5/trace-artifact.md` — the `query` field should be `service:release-it @service.instance.id:<uuid>`. If no spans appear, wait up to 5 minutes for Datadog ingestion and retry once; if still empty, record trace absence in the artifact and note it in `run-summary.md`.
 
-  Produces: `evaluation/release-it/run-5/is-score.md`, `evaluation/release-it/run-5/trace-artifact.md`
+  Produces: `evaluation/javascript/release-it/run-5/is-score.md`, `evaluation/javascript/release-it/run-5/trace-artifact.md`
 
 - [ ] **Baseline comparison**
 
-  Compare run-5 against run-4 and run-3, and against the most recent commit-story-v2 run (check `evaluation/commit-story-v2/run-log.md`). Highlight dimensions that differ by more than 1 point from commit-story-v2.
-  Produces: `evaluation/release-it/run-5/baseline-comparison.md`
+  Compare run-5 against run-4 and run-3, and against the most recent commit-story-v2 run (check `evaluation/javascript/commit-story-v2/run-log.md`). Highlight dimensions that differ by more than 1 point from commit-story-v2.
+  Produces: `evaluation/javascript/release-it/run-5/baseline-comparison.md`
   Style reference: `Read docs/templates/eval-run-style-reference/baseline-comparison.md`
 
 - [ ] **Update root README**
@@ -197,7 +197,7 @@ The feature branch for this PRD (`feature/prd-100-evaluation-run-5-release-it`) 
 
   1. Run the cross-document audit agent to verify consistency across all run-5 evaluation artifacts.
   2. Give Whitney an interpreted summary of key findings — failures, root causes, notable patterns, what to watch for in run-6.
-  3. Print the absolute file path of `evaluation/release-it/run-5/actionable-fix-output.md`.
+  3. Print the absolute file path of `evaluation/javascript/release-it/run-5/actionable-fix-output.md`.
   4. **Pause.** Do not proceed until Whitney confirms handoff.
 
   **Handoff framing guidance** (from taze run-16):
@@ -205,7 +205,7 @@ The feature branch for this PRD (`feature/prd-100-evaluation-run-5-release-it`) 
   - **Attribute disappearance is not automatically a finding.** Investigate before calling it wrong — consider semconv basis and whether the absence is a defensible agent decision. Give the spiny-orb team evidence and honest characterization, not a decision-free action list.
   - **Carry-forward table: consider distinguishing findings from observations** — entries with a plausible spiny-orb root cause vs. watch items without a clear basis for calling them wrong.
 
-  Produces: `evaluation/release-it/run-5/actionable-fix-output.md`
+  Produces: `evaluation/javascript/release-it/run-5/actionable-fix-output.md`
 
 - [ ] **Draft Run-6 PRD**
 
@@ -215,9 +215,9 @@ The feature branch for this PRD (`feature/prd-100-evaluation-run-5-release-it`) 
 
   From main, run:
   ```bash
-  git checkout feature/prd-100-evaluation-run-5-release-it -- evaluation/release-it/run-5/
+  git checkout feature/prd-100-evaluation-run-5-release-it -- evaluation/javascript/release-it/run-5/
   ```
-  Commit with message `eval: save release-it run-5 artifacts to main [skip ci]`. Update `evaluation/release-it/run-log.md` with a new row for this run. Push. This step runs before `/prd-done` so artifacts land on main while the eval branch is still reachable.
+  Commit with message `eval: save release-it run-5 artifacts to main [skip ci]`. Update `evaluation/javascript/release-it/run-log.md` with a new row for this run. Push. This step runs before `/prd-done` so artifacts land on main while the eval branch is still reachable.
 
 ---
 
@@ -278,5 +278,5 @@ The feature branch for this PRD (`feature/prd-100-evaluation-run-5-release-it`) 
 - **PRD #68**: run-2 evaluation (this repo, branch `feature/prd-68-evaluation-run-2-release-it`)
 - **PRD #77**: run-3 evaluation (this repo, branch `feature/prd-77-evaluation-run-3-release-it`)
 - **PRD #88**: run-4 evaluation (this repo, branch `feature/prd-88-evaluation-run-4-release-it`)
-- **evaluation/release-it/run-4/actionable-fix-output.md**: P1/P2 findings, blockers for run-5
+- **evaluation/javascript/release-it/run-4/actionable-fix-output.md**: P1/P2 findings, blockers for run-5
 - **spinybacked-orbweaver/research/evaluation-rubric.md**: 32-rule rubric

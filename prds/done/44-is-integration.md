@@ -22,7 +22,7 @@ Full research findings live in `docs/research/instrumentation-score-integration.
 
 - **Primary**: `evaluation/is/score-is.js` runs against a captured JSON file and outputs a weighted IS score with per-rule pass/fail results
 - **Secondary**: `evaluation/is/otelcol-config.yaml` starts the OTel Collector and captures OTLP traces to a local file
-- **Validation**: Run the scorer against an existing `evaluation/commit-story-v2/run-*/` trace capture (if one exists) or a minimal synthetic JSON fixture; confirm the weighted score and rule breakdown match manual calculation
+- **Validation**: Run the scorer against an existing `evaluation/javascript/commit-story-v2/run-*/` trace capture (if one exists) or a minimal synthetic JSON fixture; confirm the weighted score and rule breakdown match manual calculation
 
 ## Requirements
 
@@ -37,7 +37,7 @@ Full research findings live in `docs/research/instrumentation-score-integration.
 ### Non-Functional Requirements
 
 - Scoring script must be deterministic: same OTLP input → same score every run
-- Do NOT start this PRD until PRD #43 (repo generalization) is merged — IS infrastructure must land at `evaluation/commit-story-v2/` not the old flat structure
+- Do NOT start this PRD until PRD #43 (repo generalization) is merged — IS infrastructure must land at `evaluation/javascript/commit-story-v2/` not the old flat structure
 - The OTel Collector binary is not bundled — the milestone documents how to install it (Docker or `otelcol-contrib` binary)
 - Pin the IS spec to commit `52c14ba` — the spec is at v0.1 and rules may change
 
@@ -133,7 +133,7 @@ Full research findings live in `docs/research/instrumentation-score-integration.
 
 ## Dependencies and Constraints
 
-- **Depends on**: PRD #43 (repo generalization) — IS infrastructure must land in `evaluation/commit-story-v2/` not the old flat structure. Do NOT start this PRD until #43 is merged.
+- **Depends on**: PRD #43 (repo generalization) — IS infrastructure must land in `evaluation/javascript/commit-story-v2/` not the old flat structure. Do NOT start this PRD until #43 is merged.
 - **Depends on**: `docs/research/instrumentation-score-integration.md` — all implementation decisions come from this document
 - **Blocks**: Every future Type D run PRD — IS scoring becomes step 9 in all subsequent runs
 
