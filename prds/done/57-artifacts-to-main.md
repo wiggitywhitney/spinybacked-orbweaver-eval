@@ -20,9 +20,9 @@ This PRD adds a repeatable end-of-run step: copy all generated artifacts to main
 
 ## Success Metrics
 
-- **Primary**: `evaluation/commit-story-v2/run-14/per-file-evaluation.md` exists on main
-- **Secondary**: `evaluation/commit-story-v2/run-log.md` exists on main with one row per run (2 through 14)
-- **Validation**: A `git log --oneline main -- evaluation/commit-story-v2/` shows one commit per run
+- **Primary**: `evaluation/javascript/commit-story-v2/run-14/per-file-evaluation.md` exists on main
+- **Secondary**: `evaluation/javascript/commit-story-v2/run-log.md` exists on main with one row per run (2 through 14)
+- **Validation**: A `git log --oneline main -- evaluation/javascript/commit-story-v2/` shows one commit per run
 
 ## Requirements
 
@@ -51,23 +51,23 @@ This PRD adds a repeatable end-of-run step: copy all generated artifacts to main
   4. Run log location: `evaluation/<target>/run-log.md` on main (one file per target, not per run)
   5. Run log row format: `| N | YYYY-MM-DD | score/total | files_committed | Q×F | push_status | Top finding 1; Top finding 2 |`
 
-  Also create `evaluation/commit-story-v2/run-log.md` on main with the correct header row and column descriptions, but no data rows yet (those come in the backfill milestone).
+  Also create `evaluation/javascript/commit-story-v2/run-log.md` on main with the correct header row and column descriptions, but no data rows yet (those come in the backfill milestone).
 
-  Success criteria: `docs/eval-artifacts-convention.md` exists and documents the five items above; `evaluation/commit-story-v2/run-log.md` exists with the header row.
+  Success criteria: `docs/eval-artifacts-convention.md` exists and documents the five items above; `evaluation/javascript/commit-story-v2/run-log.md` exists with the header row.
 
 - [x] **Backfill commit-story-v2 runs 2–14**
 
   For each run from 2 through 14, in order:
-  1. On main: `git checkout <eval-branch> -- evaluation/commit-story-v2/run-N/`
-  2. Verify only files under `evaluation/commit-story-v2/run-N/` are staged — do NOT stage anything else
+  1. On main: `git checkout <eval-branch> -- evaluation/javascript/commit-story-v2/run-N/`
+  2. Verify only files under `evaluation/javascript/commit-story-v2/run-N/` are staged — do NOT stage anything else
   3. `git commit -m "eval: save run-N artifacts to main [skip ci]"`
-  4. Add one row to `evaluation/commit-story-v2/run-log.md` and commit immediately: `git commit -m "eval: update run-log for run-N [skip ci]"`
+  4. Add one row to `evaluation/javascript/commit-story-v2/run-log.md` and commit immediately: `git commit -m "eval: update run-log for run-N [skip ci]"`
 
-  To find eval branches: `git branch -r | grep 'prd.*evaluation-run'`; also check `git branch -a` for local-only branches. Run-1 had a flat structure before generalization (pre-PRD #43) — skip run-1 if `evaluation/commit-story-v2/run-1/` does not exist on the branch.
+  To find eval branches: `git branch -r | grep 'prd.*evaluation-run'`; also check `git branch -a` for local-only branches. Run-1 had a flat structure before generalization (pre-PRD #43) — skip run-1 if `evaluation/javascript/commit-story-v2/run-1/` does not exist on the branch.
 
   If a branch was deleted or unavailable, add the row with available data from PROGRESS.md and PRD files, mark the artifact path as unavailable: `| N | YYYY-MM-DD | score/total | files | Q×F | push | Top findings | — (branch unavailable) |`
 
-  Success criteria: `evaluation/commit-story-v2/run-log.md` has one row per available run (runs where a branch existed); `evaluation/commit-story-v2/run-N/` directories exist on main for all those runs.
+  Success criteria: `evaluation/javascript/commit-story-v2/run-log.md` has one row per available run (runs where a branch existed); `evaluation/javascript/commit-story-v2/run-N/` directories exist on main for all those runs.
 
 - [x] **Add artifact copy as the final step in the Type D milestone template**
 
@@ -102,7 +102,7 @@ This PRD adds a repeatable end-of-run step: copy all generated artifacts to main
 |------|----------|-----------|--------|
 | 2026-04-13 | Copy all artifacts, no curation | Per-file analysis across runs requires full artifacts; markdown files are tiny (<500KB/run); no decision overhead per run | Everything lands on main; ~7MB total for 14 runs |
 | 2026-04-13 | After run-14, not before | Backfilling all 14 runs at once gives complete history from day one; run-14 is time-sensitive for spiny-orb fix verification | Run-14 uses old workflow; PRD #57 cleans up after |
-| 2026-04-13 | Separate commit per run, not one big commit | Per-run traceability: `git log -- evaluation/commit-story-v2/run-9/` returns exactly one commit | Slightly more backfill work; much cleaner history |
+| 2026-04-13 | Separate commit per run, not one big commit | Per-run traceability: `git log -- evaluation/javascript/commit-story-v2/run-9/` returns exactly one commit | Slightly more backfill work; much cleaner history |
 
 ## Progress Log
 

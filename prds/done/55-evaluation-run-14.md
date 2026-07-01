@@ -18,7 +18,7 @@ The two checkpoint failures reveal a new class of type-safety gap in agent attri
 
 Additionally, `summaryNode` in `journal-graph.js` has been skipped due to NDS-003 (Code Preserved) for 3 consecutive runs (runs 11–13).
 
-Run-13 actionable fix output: `evaluation/commit-story-v2/run-13/actionable-fix-output.md`
+Run-13 actionable fix output: `evaluation/javascript/commit-story-v2/run-13/actionable-fix-output.md`
 
 ### Primary Goal
 
@@ -86,8 +86,8 @@ Same as runs 9-13.
 
 ### Key Inputs
 
-- **Run-13 results** (eval repo): `evaluation/commit-story-v2/run-13/` on branch `feature/prd-37-evaluation-run-13`
-- **Run-13 actionable fix output**: `evaluation/commit-story-v2/run-13/actionable-fix-output.md`
+- **Run-13 results** (eval repo): `evaluation/javascript/commit-story-v2/run-13/` on branch `feature/prd-37-evaluation-run-13`
+- **Run-13 actionable fix output**: `evaluation/javascript/commit-story-v2/run-13/actionable-fix-output.md`
 - **Evaluation rubric** (spiny-orb repo): `spinybacked-orbweaver/research/evaluation-rubric.md` (32 rules)
 - **Style references**: `docs/templates/eval-run-style-reference/`
 
@@ -116,10 +116,10 @@ The **evaluation execution branch** created by `/prd-start` from main **never me
 
 ## Milestones
 
-- [ ] **Collect skeleton documents** — Create `evaluation/commit-story-v2/run-14/` directory with `lessons-for-prd15.md` skeleton. Must run before pre-run verification step 9.
+- [ ] **Collect skeleton documents** — Create `evaluation/javascript/commit-story-v2/run-14/` directory with `lessons-for-prd15.md` skeleton. Must run before pre-run verification step 9.
 
 - [ ] **Pre-run verification** — Verify spiny-orb fixes and validate run prerequisites:
-  1. **Handoff triage review**: Read the spiny-orb team's triage of `evaluation/commit-story-v2/run-13/actionable-fix-output.md`. Check which findings were filed as issues.
+  1. **Handoff triage review**: Read the spiny-orb team's triage of `evaluation/javascript/commit-story-v2/run-13/actionable-fix-output.md`. Check which findings were filed as issues.
   2. **Smart checkpoint rollback fix** (P1 — critical, #437 + #447 confirmed closed): Verify both issues merged. #437 — rollback parses the test stack trace and reverts only the failing file, not the full window. #447 — schema extensions from reverted files are cleaned up.
   3. **Type-safety setAttribute guidance** (P1 — critical, #435 + #436 confirmed closed): Verify both issues merged. #435 — prompt guidance for `!= null` over `!== undefined`. #436 — prompt guidance against assuming string type when calling string methods on attribute values.
   4. **summaryNode NDS-003 fix** (P1, #438 confirmed closed): Verify merged. Check that either the NDS-003 allowlist or the agent prompt addresses template literal modification in summaryNode.
@@ -130,49 +130,49 @@ The **evaluation execution branch** created by `/prd-start` from main **never me
   9. **File inventory**: Count .js files in commit-story-v2's `src/` directory.
   10. Rebuild spiny-orb from **main** (LLM judge and all prior fixes will be on main at run time).
   11. Record version and findings status.
-  12. Append observations to `evaluation/commit-story-v2/run-14/lessons-for-prd15.md`.
+  12. Append observations to `evaluation/javascript/commit-story-v2/run-14/lessons-for-prd15.md`.
 
-- [ ] **Evaluation run-14** — Whitney runs `spiny-orb instrument` in her own terminal. **Do NOT run the command yourself.** AI role in this milestone: (1) confirm readiness with Whitney, (2) once Whitney provides the log output, save it to `evaluation/commit-story-v2/run-14/spiny-orb-output.log` and write `evaluation/commit-story-v2/run-14/run-summary.md`.
+- [ ] **Evaluation run-14** — Whitney runs `spiny-orb instrument` in her own terminal. **Do NOT run the command yourself.** AI role in this milestone: (1) confirm readiness with Whitney, (2) once Whitney provides the log output, save it to `evaluation/javascript/commit-story-v2/run-14/spiny-orb-output.log` and write `evaluation/javascript/commit-story-v2/run-14/run-summary.md`.
 
   **Exact command** (run from `~/Documents/Repositories/commit-story-v2`):
   ```bash
-  caffeinate -s env -u ANTHROPIC_CUSTOM_HEADERS -u ANTHROPIC_BASE_URL vals exec -i -f .vals.yaml -- node ~/Documents/Repositories/spinybacked-orbweaver/bin/spiny-orb.js instrument src --verbose 2>&1 | tee ~/Documents/Repositories/spinybacked-orbweaver-eval/evaluation/commit-story-v2/run-14/spiny-orb-output.log
+  caffeinate -s env -u ANTHROPIC_CUSTOM_HEADERS -u ANTHROPIC_BASE_URL vals exec -i -f .vals.yaml -- node ~/Documents/Repositories/spinybacked-orbweaver/bin/spiny-orb.js instrument src --verbose 2>&1 | tee ~/Documents/Repositories/spinybacked-orbweaver-eval/evaluation/javascript/commit-story-v2/run-14/spiny-orb-output.log
   ```
 
 - [ ] **Findings Discussion** *(user-facing checkpoint 1)* — After `run-summary.md` is written, before any evaluation documents are started: report to Whitney: (1) files committed / failed / partial, (2) whether checkpoint failures occurred and how many files were rolled back (signal for whether smart rollback fix worked), (3) quality score if visible in log, (4) cost, (5) push/PR status. Keep it conversational, under 10 lines. Wait for her acknowledgment before proceeding.
 
 - [ ] **Failure deep-dives** — For each failed file AND run-level failure. Includes any partial files.
-  Produces: `evaluation/commit-story-v2/run-14/failure-deep-dives.md`
+  Produces: `evaluation/javascript/commit-story-v2/run-14/failure-deep-dives.md`
   Style reference: `Read docs/templates/eval-run-style-reference/failure-deep-dives.md`
 
 - [ ] **Per-file evaluation** — Full rubric on ALL files (no spot-checking). Evaluate all 32 rules across all committed and partial files.
-  Produces: `evaluation/commit-story-v2/run-14/per-file-evaluation.md`
+  Produces: `evaluation/javascript/commit-story-v2/run-14/per-file-evaluation.md`
   Style reference: `Read docs/templates/eval-run-style-reference/per-file-evaluation.md`
 
 - [ ] **PR artifact evaluation** — Evaluate PR quality.
-  Produces: `evaluation/commit-story-v2/run-14/pr-evaluation.md`
+  Produces: `evaluation/javascript/commit-story-v2/run-14/pr-evaluation.md`
   Style reference: `Read docs/templates/eval-run-style-reference/pr-evaluation.md`
 
 - [ ] **Rubric scoring** — Synthesize dimension-level scores.
-  Produces: `evaluation/commit-story-v2/run-14/rubric-scores.md`
+  Produces: `evaluation/javascript/commit-story-v2/run-14/rubric-scores.md`
   Style reference: `Read docs/templates/eval-run-style-reference/rubric-scores.md`
 
 - [ ] **IS scoring run**
 
   1. **Prerequisites**: OTel Collector running with `evaluation/is/otelcol-config.yaml` (see `evaluation/is/README.md` for install and start instructions). No metrics-exporter override needed — MET rules are marked `not_applicable` by the scorer regardless.
-  2. **Action**: Run the target app with the Collector as OTLP receiver; collect `evaluation/is/eval-traces.json`; run `node evaluation/is/score-is.js evaluation/is/eval-traces.json > evaluation/commit-story-v2/run-14/is-score.md`
-  3. **Output**: `evaluation/commit-story-v2/run-14/is-score.md` is written by the command above.
+  2. **Action**: Run the target app with the Collector as OTLP receiver; collect `evaluation/is/eval-traces.json`; run `node evaluation/is/score-is.js evaluation/is/eval-traces.json > evaluation/javascript/commit-story-v2/run-14/is-score.md`
+  3. **Output**: `evaluation/javascript/commit-story-v2/run-14/is-score.md` is written by the command above.
   4. **Note for k8s repos**: IS scoring requires a running cluster; see `evaluation/is/README.md` for the Kind-based workflow
-  Produces: `evaluation/commit-story-v2/run-14/is-score.md`
+  Produces: `evaluation/javascript/commit-story-v2/run-14/is-score.md`
 
 - [ ] **Baseline comparison** — Compare run-14 vs runs 2-13.
-  Produces: `evaluation/commit-story-v2/run-14/baseline-comparison.md`
+  Produces: `evaluation/javascript/commit-story-v2/run-14/baseline-comparison.md`
   Style reference: `Read docs/templates/eval-run-style-reference/baseline-comparison.md`
 
 - [ ] **Actionable fix output** — Primary handoff deliverable. At milestone completion:
   1. Run the cross-document audit agent to verify consistency across all run-14 evaluation artifacts.
   2. *(User-facing checkpoint 2)* Give Whitney an interpreted summary of key findings — failures, root causes, notable patterns, what to watch for in run-15.
-  3. Print the absolute file path of `evaluation/commit-story-v2/run-14/actionable-fix-output.md` (derive from current working directory).
+  3. Print the absolute file path of `evaluation/javascript/commit-story-v2/run-14/actionable-fix-output.md` (derive from current working directory).
   4. **Pause.** Do not proceed to Draft PRD #15 until Whitney confirms she has handed the document off to the spiny-orb team.
 
 - [ ] **Draft PRD #15** — Create on a separate branch from main. Merge the PRD PR to main so `/prd-start` can pick it up. Carry forward both user-facing checkpoints (Findings Discussion + handoff pause) into PRD #15's milestone structure.

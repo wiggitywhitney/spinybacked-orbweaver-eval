@@ -102,7 +102,7 @@ Files column notation: plain count = committed files; `+Np` = N partial files (i
 
 **Run-19 is next** — verifying NDS-003 reconciler gap fix (PRD #845, content-aware diff) for context-capture-tool.js, reflection-tool.js, index.js, and summary-graph.js; monitoring SCH-002 recurrence on journal-manager.js `quotes_count` attribute.
 
-Full run-by-run analysis: [`evaluation/commit-story-v2/`](evaluation/commit-story-v2/)
+Full run-by-run analysis: [`evaluation/javascript/commit-story-v2/`](evaluation/javascript/commit-story-v2/)
 
 ---
 
@@ -121,7 +121,7 @@ IS column: N/E = Not Evaluable (no instrumented files survived to the working tr
 
 **Run-3 is next** — two P1 blockers must be resolved before running: (1) OTel module resolution at checkpoint (`@opentelemetry/api` not resolvable under peerDependencies strategy — needs devDependency or install step before checkpoint tests); (2) PAT scope in GCP Secret Manager (`github-token-release-it` lacks `pull_requests:write`).
 
-Full run-by-run analysis: [`evaluation/release-it/`](evaluation/release-it/)
+Full run-by-run analysis: [`evaluation/javascript/release-it/`](evaluation/javascript/release-it/)
 
 ---
 
@@ -140,7 +140,7 @@ Run-14 was aborted after 5 files due to a ts-morph crash (#933) and a checkpoint
 
 **Run-17 is next** — primary goals: COV-005 packument.ts (taze.package.latest_version dropped), SCH-003 String() cast pattern (checkGlobal.ts + bunWorkspaces.ts), CDQ-006 bunWorkspaces.ts (3 unguarded post-await setAttribute calls), resolves.ts stability verification, IS SPA-002 orphan span.
 
-Full run-by-run analysis: [`evaluation/taze/`](evaluation/taze/)
+Full run-by-run analysis: [`evaluation/typescript/taze/`](evaluation/typescript/taze/)
 
 ---
 

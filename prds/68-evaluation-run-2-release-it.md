@@ -65,10 +65,10 @@ Same twelve-milestone structure as all Type D eval runs. Pre-run verification ex
 
 ### Key Inputs
 
-- **Run-1 results** (eval repo): `evaluation/release-it/run-1/` on branch `feature/prd-53-javascript-eval-setup`
-- **Run-1 actionable fix output**: `evaluation/release-it/run-1/actionable-fix-output.md`
-- **Run-1 findings**: `evaluation/release-it/run-1/spiny-orb-findings.md`
-- **Run-1 lessons**: `evaluation/release-it/run-1/lessons-for-run2.md`
+- **Run-1 results** (eval repo): `evaluation/javascript/release-it/run-1/` on branch `feature/prd-53-javascript-eval-setup`
+- **Run-1 actionable fix output**: `evaluation/javascript/release-it/run-1/actionable-fix-output.md`
+- **Run-1 findings**: `evaluation/javascript/release-it/run-1/spiny-orb-findings.md`
+- **Run-1 lessons**: `evaluation/javascript/release-it/run-1/lessons-for-run2.md`
 - **Evaluation rubric** (spiny-orb repo): `research/evaluation-rubric.md` (32 rules)
 
 ### Eval Branch Convention
@@ -92,8 +92,8 @@ The feature branch for this PRD (`feature/prd-68-evaluation-run-2-release-it`) *
 
 - [ ] **Collect skeleton documents**
 
-  Create `evaluation/release-it/run-2/` directory in the eval repo with skeleton files:
-  - `lessons-for-run3.md` (copy structure from `evaluation/release-it/run-1/lessons-for-run2.md`)
+  Create `evaluation/javascript/release-it/run-2/` directory in the eval repo with skeleton files:
+  - `lessons-for-run3.md` (copy structure from `evaluation/javascript/release-it/run-1/lessons-for-run2.md`)
   - `spiny-orb-findings.md` (fresh skeleton with P1/P2/P3 sections)
 
 - [ ] **Pre-run verification**
@@ -104,10 +104,10 @@ The feature branch for this PRD (`feature/prd-68-evaluation-run-2-release-it`) *
   2. **RUN1-3 (PAT) — MUST PASS**: Verify GITHUB_TOKEN has `pull_request:write` for wiggitywhitney/release-it. Run `vals exec -i -f .vals.yaml -- gh auth status` and confirm the token's scopes include `pull_request:write`, or run a test PR creation dry-run if scope output is unclear.
   3. **RUN1-2 (LINT arrowParens)**: Check if spiny-orb has merged a fix for the Prettier diff surfacing issue. If landed, config.js and index.js should commit this run. If not landed, note it — they will likely fail again.
   4. **Target repo readiness**: Verify release-it fork is on `main`, working tree is clean, `spiny-orb.yaml` and `semconv/` exist.
-  5. **File inventory**: Confirm 23 `.js` files in `lib/` (match run-1 inventory in `evaluation/release-it/run-1/lessons-for-run2.md`).
+  5. **File inventory**: Confirm 23 `.js` files in `lib/` (match run-1 inventory in `evaluation/javascript/release-it/run-1/lessons-for-run2.md`).
   6. **Rebuild spiny-orb**: Rebuild from current branch (not necessarily main). Record SHA.
   7. **Record versions**: Node.js version, spiny-orb version/SHA, release-it version.
-  8. Append observations to `evaluation/release-it/run-2/lessons-for-run3.md`.
+  8. Append observations to `evaluation/javascript/release-it/run-2/lessons-for-run3.md`.
 
   **Do not proceed if RUN1-1 or RUN1-3 are unresolved.** The run will halt early or produce no PR.
 
@@ -117,10 +117,10 @@ The feature branch for this PRD (`feature/prd-68-evaluation-run-2-release-it`) *
 
   **Instrument command** (run from `~/Documents/Repositories/release-it/`):
   ```bash
-  caffeinate -s env -u ANTHROPIC_CUSTOM_HEADERS -u ANTHROPIC_BASE_URL vals exec -i -f .vals.yaml -- node ~/Documents/Repositories/spinybacked-orbweaver/bin/spiny-orb.js instrument lib --verbose --thinking 2>&1 | tee ~/Documents/Repositories/spinybacked-orbweaver-eval/evaluation/release-it/run-2/spiny-orb-output.log
+  caffeinate -s env -u ANTHROPIC_CUSTOM_HEADERS -u ANTHROPIC_BASE_URL vals exec -i -f .vals.yaml -- node ~/Documents/Repositories/spinybacked-orbweaver/bin/spiny-orb.js instrument lib --verbose --thinking 2>&1 | tee ~/Documents/Repositories/spinybacked-orbweaver-eval/evaluation/javascript/release-it/run-2/spiny-orb-output.log
   ```
 
-  AI role: (1) confirm readiness, (2) once Whitney provides the log output, save it and write `evaluation/release-it/run-2/run-summary.md`, (3) **push the eval branch to origin immediately** — the branch holds the only copy of run artifacts until step 13 copies them to main.
+  AI role: (1) confirm readiness, (2) once Whitney provides the log output, save it and write `evaluation/javascript/release-it/run-2/run-summary.md`, (3) **push the eval branch to origin immediately** — the branch holds the only copy of run artifacts until step 13 copies them to main.
 
 - [ ] **Findings Discussion** *(user-facing checkpoint 1)*
 
@@ -131,23 +131,23 @@ The feature branch for this PRD (`feature/prd-68-evaluation-run-2-release-it`) *
 - [ ] **Failure deep-dives**
 
   Root cause analysis for each failed/partial file and run-level failures.
-  Produces: `evaluation/release-it/run-2/failure-deep-dives.md`
+  Produces: `evaluation/javascript/release-it/run-2/failure-deep-dives.md`
   Style reference: `Read docs/templates/eval-run-style-reference/failure-deep-dives.md`
 
 - [ ] **Per-file evaluation**
 
   Full 32-rule rubric on ALL processed files.
-  Produces: `evaluation/release-it/run-2/per-file-evaluation.md`
+  Produces: `evaluation/javascript/release-it/run-2/per-file-evaluation.md`
   Style reference: `Read docs/templates/eval-run-style-reference/per-file-evaluation.md`
 
 - [ ] **PR artifact evaluation**
 
-  Produces: `evaluation/release-it/run-2/pr-evaluation.md`
+  Produces: `evaluation/javascript/release-it/run-2/pr-evaluation.md`
   Style reference: `Read docs/templates/eval-run-style-reference/pr-evaluation.md`
 
 - [ ] **Rubric scoring**
 
-  Produces: `evaluation/release-it/run-2/rubric-scores.md`
+  Produces: `evaluation/javascript/release-it/run-2/rubric-scores.md`
   Style reference: `Read docs/templates/eval-run-style-reference/rubric-scores.md`
 
 - [ ] **IS scoring run**
@@ -163,17 +163,17 @@ The feature branch for this PRD (`feature/prd-68-evaluation-run-2-release-it`) *
 
   Then from `~/Documents/Repositories/spinybacked-orbweaver-eval/`:
   ```bash
-  node evaluation/is/score-is.js evaluation/is/eval-traces.json > evaluation/release-it/run-2/is-score.md
+  node evaluation/is/score-is.js evaluation/is/eval-traces.json > evaluation/javascript/release-it/run-2/is-score.md
   ```
 
   Restart Datadog Agent when done: `sudo launchctl start com.datadoghq.agent`
 
-  Produces: `evaluation/release-it/run-2/is-score.md`
+  Produces: `evaluation/javascript/release-it/run-2/is-score.md`
 
 - [ ] **Baseline comparison**
 
   Compare run-2 against commit-story-v2 run-13 (most recent cross-target reference) and against release-it run-1. Highlight dimensions that differ by more than 1 point from commit-story-v2.
-  Produces: `evaluation/release-it/run-2/baseline-comparison.md`
+  Produces: `evaluation/javascript/release-it/run-2/baseline-comparison.md`
   Style reference: `Read docs/templates/eval-run-style-reference/baseline-comparison.md`
 
 - [ ] **Update root README**
@@ -184,10 +184,10 @@ The feature branch for this PRD (`feature/prd-68-evaluation-run-2-release-it`) *
 
   1. Run the cross-document audit agent to verify consistency across all run-2 evaluation artifacts.
   2. Give Whitney an interpreted summary of key findings — failures, root causes, notable patterns, what to watch for in run-3.
-  3. Print the absolute file path of `evaluation/release-it/run-2/actionable-fix-output.md`.
+  3. Print the absolute file path of `evaluation/javascript/release-it/run-2/actionable-fix-output.md`.
   4. **Pause.** Do not proceed until Whitney confirms handoff.
 
-  Produces: `evaluation/release-it/run-2/actionable-fix-output.md`
+  Produces: `evaluation/javascript/release-it/run-2/actionable-fix-output.md`
 
 - [ ] **Draft Run-3 PRD**
 
@@ -197,9 +197,9 @@ The feature branch for this PRD (`feature/prd-68-evaluation-run-2-release-it`) *
 
   From main, run:
   ```bash
-  git checkout feature/prd-68-evaluation-run-2-release-it -- evaluation/release-it/run-2/
+  git checkout feature/prd-68-evaluation-run-2-release-it -- evaluation/javascript/release-it/run-2/
   ```
-  Commit with message `eval: save release-it run-2 artifacts to main [skip ci]`. Update `evaluation/release-it/run-log.md` with a new row for this run (create the file if it doesn't exist, using the same format as `evaluation/commit-story-v2/run-log.md`). Push. This step runs before `/prd-done` so artifacts land on main while the eval branch is still reachable.
+  Commit with message `eval: save release-it run-2 artifacts to main [skip ci]`. Update `evaluation/javascript/release-it/run-log.md` with a new row for this run (create the file if it doesn't exist, using the same format as `evaluation/javascript/commit-story-v2/run-log.md`). Push. This step runs before `/prd-done` so artifacts land on main while the eval branch is still reachable.
 
 ---
 
@@ -253,6 +253,6 @@ The feature branch for this PRD (`feature/prd-68-evaluation-run-2-release-it`) *
 ## Prior Art
 
 - **PRD #53**: run-1 evaluation (this repo, branch `feature/prd-53-javascript-eval-setup`)
-- **evaluation/release-it/run-1/**: Full run-1 documentation
-- **evaluation/release-it/run-1/actionable-fix-output.md**: 8 findings, 3 run-2 prerequisites
+- **evaluation/javascript/release-it/run-1/**: Full run-1 documentation
+- **evaluation/javascript/release-it/run-1/actionable-fix-output.md**: 8 findings, 3 run-2 prerequisites
 - **spinybacked-orbweaver/research/evaluation-rubric.md**: 32-rule rubric

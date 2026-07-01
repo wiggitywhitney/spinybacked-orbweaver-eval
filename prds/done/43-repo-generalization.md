@@ -15,12 +15,12 @@ Full context for this work lives in `docs/language-extension-plan.md`. Read the 
 ## User Impact
 
 - **Who benefits**: Any agent or human setting up a new language/target evaluation chain (TypeScript, Python, Go)
-- **What changes**: `evaluation/commit-story-v2/run-*/` directories move under a target-scoped path; PRD titles gain target names; `.claude/CLAUDE.md` gains a section that ensures future agents know to read `docs/language-extension-plan.md` before starting any new language eval chain
+- **What changes**: `evaluation/javascript/commit-story-v2/run-*/` directories move under a target-scoped path; PRD titles gain target names; `.claude/CLAUDE.md` gains a section that ensures future agents know to read `docs/language-extension-plan.md` before starting any new language eval chain
 - **Why now**: Steps 2 and 3 of the plan land infrastructure in this repo — those PRDs need the correct structure to be in place first
 
 ## Success Metrics
 
-- **Primary**: All existing evaluation runs are accessible at `evaluation/commit-story-v2/run-*/`; no broken path references remain
+- **Primary**: All existing evaluation runs are accessible at `evaluation/javascript/commit-story-v2/run-*/`; no broken path references remain
 - **Secondary**: `.claude/CLAUDE.md` has an "Adding a New Language Evaluation Chain" section that references `docs/language-extension-plan.md` as the canonical source and instructs future agents to include it as the first milestone of any new Type C or Type D PRD
 - **Validation**: A grep for old paths (`evaluation/run-`) returns no hits in any PRD file, CLAUDE.md, or script
 
@@ -28,7 +28,7 @@ Full context for this work lives in `docs/language-extension-plan.md`. Read the 
 
 ### Functional Requirements
 
-- **Must Have**: Move all `evaluation/run-*/` directories to `evaluation/commit-story-v2/run-*/`
+- **Must Have**: Move all `evaluation/run-*/` directories to `evaluation/javascript/commit-story-v2/run-*/`
 - **Must Have**: Update all internal references to old evaluation paths in PRD files, CLAUDE.md, scripts, and docs
 - **Must Have**: Update PRD titles and prior art references to include target name (`commit-story-v2`)
 - **Must Have**: Document "how to add a new language eval" in `.claude/CLAUDE.md`, pointing to `docs/language-extension-plan.md` as the canonical reference and instructing that each new Type C/D PRD must include an explicit "read the plan doc" first milestone
@@ -44,21 +44,21 @@ Full context for this work lives in `docs/language-extension-plan.md`. Read the 
 
 - [x] **Move evaluation run directories to target-scoped path**
 
-  Move all directories matching `evaluation/run-*/` into `evaluation/commit-story-v2/`. Use `git mv` (not `mv`) so git history is preserved. After moving, verify: (1) `ls evaluation/commit-story-v2/` shows all run directories, (2) `ls evaluation/` shows only `commit-story-v2/` and any non-run directories (e.g., `is/`), (3) `git status` shows the moves as renames not deletes+adds. Commit with `[skip ci]`.
+  Move all directories matching `evaluation/run-*/` into `evaluation/javascript/commit-story-v2/`. Use `git mv` (not `mv`) so git history is preserved. After moving, verify: (1) `ls evaluation/javascript/commit-story-v2/` shows all run directories, (2) `ls evaluation/` shows only `commit-story-v2/` and any non-run directories (e.g., `is/`), (3) `git status` shows the moves as renames not deletes+adds. Commit with `[skip ci]`.
 
-  Success criteria: `evaluation/commit-story-v2/run-N/` exists for every run that previously existed at `evaluation/run-N/`. No run directories remain directly under `evaluation/`.
+  Success criteria: `evaluation/javascript/commit-story-v2/run-N/` exists for every run that previously existed at `evaluation/run-N/`. No run directories remain directly under `evaluation/`.
 
 - [x] **Update all internal path references to use the new evaluation directory structure**
 
-  Scan every PRD file in `prds/`, `.claude/CLAUDE.md`, any `.sh` scripts, and `docs/` for references to `evaluation/run-` and update them to `evaluation/commit-story-v2/run-`. Also check `docs/language-extension-plan.md` — it contains an example instrument command with the path `commit-story-v2-eval/evaluation/run-N/`. Update that example. After updating, run: `grep -r "evaluation/run-" prds/ .claude/ docs/ scripts/ 2>/dev/null` and confirm zero hits. Commit with `[skip ci]`.
+  Scan every PRD file in `prds/`, `.claude/CLAUDE.md`, any `.sh` scripts, and `docs/` for references to `evaluation/run-` and update them to `evaluation/javascript/commit-story-v2/run-`. Also check `docs/language-extension-plan.md` — it contains an example instrument command with the path `commit-story-v2-eval/evaluation/run-N/`. Update that example. After updating, run: `grep -r "evaluation/run-" prds/ .claude/ docs/ scripts/ 2>/dev/null` and confirm zero hits. Commit with `[skip ci]`.
 
-  Success criteria: Zero grep hits for `evaluation/run-[0-9]` in any file outside of `evaluation/commit-story-v2/`.
+  Success criteria: Zero grep hits for `evaluation/run-[0-9]` in any file outside of `evaluation/javascript/commit-story-v2/`.
 
 - [x] **Update PRD titles to include target name**
 
   For each PRD file in `prds/` that describes a JavaScript evaluation run, update its title (the `# ...` heading) to include the target name: e.g., "Evaluation Run 13" → "JS Evaluation Run 13: commit-story-v2". Commit with `[skip ci]`.
 
-  Note: File-path references (e.g., `evaluation/run-12/`) were already updated to `evaluation/commit-story-v2/run-12/` in the previous milestone. This milestone covers only the PRD title headings.
+  Note: File-path references (e.g., `evaluation/run-12/`) were already updated to `evaluation/javascript/commit-story-v2/run-12/` in the previous milestone. This milestone covers only the PRD title headings.
 
   Scope: Evaluation-run PRDs only — filenames matching `prds/*evaluation-run-*.md`. Infrastructure and research PRDs (like this one) do not get target names added. Do NOT update narrative prose references (e.g., "compared to run-12 results") — these remain as-is.
 
@@ -106,7 +106,7 @@ Full context for this work lives in `docs/language-extension-plan.md`. Read the 
 | Date | Decision | Rationale | Impact |
 |------|----------|-----------|--------|
 | 2026-04-09 | Generalize one repo (not separate repos per language) | Methodology evolves from artifacts; cross-language comparisons stay natural | All language eval chains live in one place |
-| 2026-04-09 | Scope existing runs under `evaluation/commit-story-v2/` | Distinguishes JS runs from future TypeScript/Python/Go runs | File moves required; path refs must be updated |
+| 2026-04-09 | Scope existing runs under `evaluation/javascript/commit-story-v2/` | Distinguishes JS runs from future TypeScript/Python/Go runs | File moves required; path refs must be updated |
 | 2026-04-11 | ROADMAP.md excluded from this PRD's scope | Already created in PRD #41 | No duplicate work |
 | 2026-04-11 | Drop PRD template files (Milestone 4) | `docs/language-extension-plan.md` already documents full Type C and Type D structure, the two user-facing checkpoints with exact wording, the instrument command, and prerequisites — templates would duplicate this and drift stale; the most recent eval run PRD is a better living reference | Milestone 4 removed; Milestone 5 updated to point to plan doc directly |
 | 2026-04-11 | Reference `docs/language-extension-plan.md` in multiple places | Single reference risks agents missing it at the wrong moment; CLAUDE.md is the session-level trigger, but each future Type C/D PRD also needs an explicit "Step 0: read the plan doc" first milestone so the reference propagates forward automatically | Milestone 5 expanded to instruct that the CLAUDE.md entry must tell future agents to include the plan doc reference as the first milestone of every Type C/D PRD they create |

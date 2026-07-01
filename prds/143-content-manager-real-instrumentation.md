@@ -158,7 +158,7 @@ Evaluation artifacts live at `evaluation/content-manager/run-1/` in this repo (s
 - [ ] **Rubric scoring** — Synthesize dimension-level scores.
   Produces: `evaluation/content-manager/run-1/rubric-scores.md`
   Style reference: `Read docs/templates/eval-run-style-reference/rubric-scores.md`
-  Use `evaluation/commit-story-v2/run-24/rubric-scores.md` as the precedent reference for CDQ-006 advisory treatment, COV-001 failed-file treatment, and the 7/7 CDQ rule set. This is run-1 for content-manager — there are no prior run precedents for this target.
+  Use `evaluation/javascript/commit-story-v2/run-24/rubric-scores.md` as the precedent reference for CDQ-006 advisory treatment, COV-001 failed-file treatment, and the 7/7 CDQ rule set. This is run-1 for content-manager — there are no prior run precedents for this target.
 
 - [ ] **IS scoring run** — Follow `docs/language-extension-plan.md` step 9.
 

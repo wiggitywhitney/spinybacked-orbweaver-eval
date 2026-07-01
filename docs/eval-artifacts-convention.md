@@ -59,7 +59,7 @@ One run-log file per target, on `main`:
 evaluation/<target>/run-log.md
 ```
 
-For commit-story-v2: `evaluation/commit-story-v2/run-log.md`.
+For commit-story-v2: `evaluation/javascript/commit-story-v2/run-log.md`.
 
 When a new target language is added, create its run-log at `evaluation/<new-target>/run-log.md` before or during that target's first run.
 

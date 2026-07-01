@@ -107,10 +107,10 @@ The invocation command for each target is in that target's eval PRD's IS scoring
   Two changes are needed in `prds/82-taze-evaluation-run-14.md`:
 
   1. **IS scoring milestone** — after the existing "Action" step (running taze modes with the Collector), add a new step:
-     > After IS scoring completes: query `service:taze` in Datadog MCP immediately after the run (filter `from: now-30m` — the IS scoring run takes several minutes so a 5-minute window is too tight). Retrieve `service.instance.id` from any span in the result. Write `evaluation/taze/run-14/trace-artifact.md` using the format in `evaluation/trace-capture-protocol.md`. The `query` field in the artifact is a ready-to-paste Datadog MCP search for all spans from this run.
+     > After IS scoring completes: query `service:taze` in Datadog MCP immediately after the run (filter `from: now-30m` — the IS scoring run takes several minutes so a 5-minute window is too tight). Retrieve `service.instance.id` from any span in the result. Write `evaluation/typescript/taze/run-14/trace-artifact.md` using the format in `evaluation/trace-capture-protocol.md`. The `query` field in the artifact is a ready-to-paste Datadog MCP search for all spans from this run.
 
   2. **Per-file evaluation milestone** — prepend a Step 0 before the existing evaluation instructions:
-     > **Step 0 — Trace supplement:** Read `evaluation/taze/run-14/trace-artifact.md`. Query Datadog MCP using the `query` field from the artifact, filtered by `resourcename` prefix matching the file under review (e.g., `taze.*`). Use live trace data to supplement static code review for: attribute values at runtime, parent-child span relationships, early exit detection (span with `gen_ai.operation.name` but no `gen_ai.response.id`), and CDQ-001 double-end signal. If the trace has no spans for the file's namespace, note it but do not fail the file solely on trace absence. See `evaluation/trace-capture-protocol.md` for full guidance.
+     > **Step 0 — Trace supplement:** Read `evaluation/typescript/taze/run-14/trace-artifact.md`. Query Datadog MCP using the `query` field from the artifact, filtered by `resourcename` prefix matching the file under review (e.g., `taze.*`). Use live trace data to supplement static code review for: attribute values at runtime, parent-child span relationships, early exit detection (span with `gen_ai.operation.name` but no `gen_ai.response.id`), and CDQ-001 double-end signal. If the trace has no spans for the file's namespace, note it but do not fail the file solely on trace absence. See `evaluation/trace-capture-protocol.md` for full guidance.
 
   After making both edits: verify the inserted text reads naturally in context. Save the file.
 
@@ -124,10 +124,10 @@ The invocation command for each target is in that target's eval PRD's IS scoring
   Two changes are needed in `prds/100-evaluation-run-5-release-it.md`:
 
   1. **IS scoring milestone** — after the existing IS scoring action step, add a new step:
-     > After IS scoring completes: query `service:release-it` in Datadog MCP immediately after the run (filter `from: now-30m`). Retrieve `service.instance.id` from any span in the result. Write `evaluation/release-it/run-5/trace-artifact.md` using the format in `evaluation/trace-capture-protocol.md`.
+     > After IS scoring completes: query `service:release-it` in Datadog MCP immediately after the run (filter `from: now-30m`). Retrieve `service.instance.id` from any span in the result. Write `evaluation/javascript/release-it/run-5/trace-artifact.md` using the format in `evaluation/trace-capture-protocol.md`.
 
   2. **Per-file evaluation milestone** — prepend a Step 0 before the existing evaluation instructions:
-     > **Step 0 — Trace supplement:** Read `evaluation/release-it/run-5/trace-artifact.md`. Query Datadog MCP using the `query` field from the artifact, filtered by `resourcename` prefix matching the file under review (e.g., `release_it.*`). Use live trace data to supplement static code review for: attribute values at runtime, parent-child span relationships, early exit detection, and CDQ-001 double-end signal. If the trace has no spans for the file's namespace, note it but do not fail the file solely on trace absence. See `evaluation/trace-capture-protocol.md` for full guidance.
+     > **Step 0 — Trace supplement:** Read `evaluation/javascript/release-it/run-5/trace-artifact.md`. Query Datadog MCP using the `query` field from the artifact, filtered by `resourcename` prefix matching the file under review (e.g., `release_it.*`). Use live trace data to supplement static code review for: attribute values at runtime, parent-child span relationships, early exit detection, and CDQ-001 double-end signal. If the trace has no spans for the file's namespace, note it but do not fail the file solely on trace absence. See `evaluation/trace-capture-protocol.md` for full guidance.
 
   After making both edits: verify the inserted text reads naturally in context. Save the file.
 
@@ -153,7 +153,7 @@ The invocation command for each target is in that target's eval PRD's IS scoring
   After making all three edits: verify each insertion reads naturally in context and the organic/non-organic distinction is clear throughout the Type D step sequence. Save the file.
 
 - [x] **Update PRD template and PRD #22** — Propagate the three Datadog steps into the eval process:
-  1. Read `evaluation/commit-story-v2/run-22/` — if it already exists, PRD #22 is in-progress; update its milestones in place.
+  1. Read `evaluation/javascript/commit-story-v2/run-22/` — if it already exists, PRD #22 is in-progress; update its milestones in place.
   2. Add pre-run Datadog verification to the pre-run milestone (after the existing token/auth checks).
   3. Add trace capture step to the IS scoring milestone. **Organic targets** capture their trace during pre-run verification (from existing workflow spans — no IS scoring step needed). **Non-organic targets** capture their trace during IS scoring itself — the OTel Collector forwards to Datadog via the Datadog exporter (spinybacked-orbweaver#899). No separate pre-IS-scoring invocation with the DD Agent is needed for either path.
   4. Add trace supplement instructions to the per-file evaluation milestone (agents receive `service.instance.id` from `trace-artifact.md`).

@@ -108,15 +108,15 @@ The **evaluation execution branch** created by `/prd-start` from main **never me
 
 ## Milestones
 
-- [ ] **Read `docs/language-extension-plan.md` completely before proceeding with any other milestone.** Pay particular attention to: (a) step 9.5 (SPA-001 calibration note — commit-story-v2 threshold is 55, updated by PR #142); (b) step 9 (IS scoring protocol); (c) step 6 (per-file trace supplement procedure and D-2 batch-of-5 approach). Also read these two documents in order: (b) `prds/140-evaluation-run-25.md` — the most recently completed commit-story-v2 run PRD; use it as a style reference for the IS scoring milestone format and per-file evaluation structure; (c) `evaluation/commit-story-v2/run-25/actionable-fix-output.md` — drives the current run's goals. **Do not mark this complete until you have read all three documents.**
+- [ ] **Read `docs/language-extension-plan.md` completely before proceeding with any other milestone.** Pay particular attention to: (a) step 9.5 (SPA-001 calibration note — commit-story-v2 threshold is 55, updated by PR #142); (b) step 9 (IS scoring protocol); (c) step 6 (per-file trace supplement procedure and D-2 batch-of-5 approach). Also read these two documents in order: (b) `prds/140-evaluation-run-25.md` — the most recently completed commit-story-v2 run PRD; use it as a style reference for the IS scoring milestone format and per-file evaluation structure; (c) `evaluation/javascript/commit-story-v2/run-25/actionable-fix-output.md` — drives the current run's goals. **Do not mark this complete until you have read all three documents.**
 
-- [ ] **Cross-run process review** *(Step 0.5 — before any other milestones except Step 0)* — Follow the full procedure in `docs/language-extension-plan.md` Step 0.5. Check whether any other eval target (taze, release-it) has a completed run more recent than run-25 (`evaluation/commit-story-v2/run-25/actionable-fix-output.md`). If so, read its `actionable-fix-output.md` and any `lessons-for-prd*.md` files; present a structured checkpoint report; wait for user approval before making any template changes.
+- [ ] **Cross-run process review** *(Step 0.5 — before any other milestones except Step 0)* — Follow the full procedure in `docs/language-extension-plan.md` Step 0.5. Check whether any other eval target (taze, release-it) has a completed run more recent than run-25 (`evaluation/javascript/commit-story-v2/run-25/actionable-fix-output.md`). If so, read its `actionable-fix-output.md` and any `lessons-for-prd*.md` files; present a structured checkpoint report; wait for user approval before making any template changes.
 
-- [ ] **Collect skeleton documents** — Create `evaluation/commit-story-v2/run-26/` directory with `lessons-for-prd27.md` skeleton. Must run before pre-run verification begins.
+- [ ] **Collect skeleton documents** — Create `evaluation/javascript/commit-story-v2/run-26/` directory with `lessons-for-prd27.md` skeleton. Must run before pre-run verification begins.
 
 - [ ] **Pre-run verification** — Verify spiny-orb fixes and validate run prerequisites:
   1. **Datadog MCP health check** *(first, before any other pre-run step)*: Run `search_datadog_spans` with `service:commit-story` for the last 1 hour. If it fails or returns an unexpected error (not just "no results"), re-run `/ddsetup`, then `/reload-plugins`. Do not proceed until Datadog MCP queries succeed.
-  2. **Handoff triage review**: Read the spiny-orb team's triage of `evaluation/commit-story-v2/run-25/actionable-fix-output.md`. Check which findings were filed and their current status.
+  2. **Handoff triage review**: Read the spiny-orb team's triage of `evaluation/javascript/commit-story-v2/run-25/actionable-fix-output.md`. Check which findings were filed and their current status.
   3. **RUN25-1 fix** (P2): Verify whether the COV-004 validator fix has landed. Look for a change in `isExpectedConditionCatch` (in `cov003.ts`) that recognizes the negated ENOENT pattern (`if (err.code !== 'ENOENT') throw err`) as graceful degradation (returns `true`) rather than flagging it. If not fixed, still proceed — run-26 will confirm the gap persists. Note whether Option A (validator fix) or Option B (prompt guidance workaround) was implemented.
   4. **Attribute selection guidance** (P2): Check whether any of the three asks from actionable-fix-output.md §5 were implemented: (a) minimum-attribute threshold guidance in agent prompt; (b) registered-vs-extension decision guidance; (c) research spike PR. Note status of each.
   5. **Debug dump coverage** (P2): Check whether `lastInstrumentedCode` is now populated for partial results (`validation.passed` partial path). If not, run-26 will have the same gap as run-25.
@@ -131,16 +131,16 @@ The **evaluation execution branch** created by `/prd-start` from main **never me
   14. **README check**: Verify `README.md` on main has a row for run-25.
   15. **Datadog pre-run health check**: Use `search_datadog_spans` with `service:commit-story` (last 7 days). If no results, check Datadog Agent status. Do not start the eval run until spans appear.
   16. **Instrument branch confirmation**: Check `git.commit.sha` on recent `commit_story.journal.save_entry` spans (note: NOT `vcs.ref.head.revision` — that attribute is the CLI argument, not the instrument branch HEAD; see D-6). The `git.commit.sha` value is the HEAD SHA of whichever instrument branch is running. The run-25 instrument branch was `spiny-orb/instrument-1781909345452` — to get its HEAD SHA: `git -C ~/Documents/Repositories/commit-story-v2 rev-parse spiny-orb/instrument-1781909345452`. Spans showing this SHA are from the run-25 instrument branch. If target is still on the run-25 branch organically, that is expected and fine — confirm the target repo itself is on `main`.
-  17. **Capture trace artifact** (organic target): Read `evaluation/trace-capture-protocol.md`. Use `search_datadog_spans` with `service:commit-story` (last 7 days). From the most recent complete journal generation run, record `service.instance.id`. Write `evaluation/commit-story-v2/run-26/trace-artifact.md`.
-  18. Append observations to `evaluation/commit-story-v2/run-26/lessons-for-prd27.md`.
+  17. **Capture trace artifact** (organic target): Read `evaluation/trace-capture-protocol.md`. Use `search_datadog_spans` with `service:commit-story` (last 7 days). From the most recent complete journal generation run, record `service.instance.id`. Write `evaluation/javascript/commit-story-v2/run-26/trace-artifact.md`.
+  18. Append observations to `evaluation/javascript/commit-story-v2/run-26/lessons-for-prd27.md`.
 
-- [ ] **Evaluation run-26** — Whitney runs `spiny-orb instrument` in her own terminal. **Do NOT run the command yourself.** AI role: (1) confirm readiness with Whitney, (2) once Whitney provides the log output, save it to `evaluation/commit-story-v2/run-26/spiny-orb-output.log` using `git add -f` and write `evaluation/commit-story-v2/run-26/run-summary.md`, (3) **if auto PR creation failed**, create the PR from the file spiny-orb already wrote: `gh pr create --body-file ~/Documents/Repositories/commit-story-v2/spiny-orb-pr-summary.md --repo wiggitywhitney/commit-story-v2 --head <instrument-branch> --title "..."`
+- [ ] **Evaluation run-26** — Whitney runs `spiny-orb instrument` in her own terminal. **Do NOT run the command yourself.** AI role: (1) confirm readiness with Whitney, (2) once Whitney provides the log output, save it to `evaluation/javascript/commit-story-v2/run-26/spiny-orb-output.log` using `git add -f` and write `evaluation/javascript/commit-story-v2/run-26/run-summary.md`, (3) **if auto PR creation failed**, create the PR from the file spiny-orb already wrote: `gh pr create --body-file ~/Documents/Repositories/commit-story-v2/spiny-orb-pr-summary.md --repo wiggitywhitney/commit-story-v2 --head <instrument-branch> --title "..."`
 
-  AI must create `evaluation/commit-story-v2/run-26/debug-dumps/` before handing Whitney the command. When writing `run-summary.md`, extract the instrument branch name directly from the log (`grep -m1 'Branch:' spiny-orb-output.log`) — do not write it from context (D-4).
+  AI must create `evaluation/javascript/commit-story-v2/run-26/debug-dumps/` before handing Whitney the command. When writing `run-summary.md`, extract the instrument branch name directly from the log (`grep -m1 'Branch:' spiny-orb-output.log`) — do not write it from context (D-4).
 
   **Exact command** (run from `~/Documents/Repositories/commit-story-v2`):
   ```bash
-  caffeinate -s env -u ANTHROPIC_CUSTOM_HEADERS -u ANTHROPIC_BASE_URL vals exec -i -f .vals.yaml -- node ~/Documents/Repositories/spinybacked-orbweaver/bin/spiny-orb.js instrument src --verbose --thinking --debug-dump-dir ~/Documents/Repositories/spinybacked-orbweaver-eval/evaluation/commit-story-v2/run-26/debug-dumps 2>&1 | tee ~/Documents/Repositories/spinybacked-orbweaver-eval/evaluation/commit-story-v2/run-26/spiny-orb-output.log
+  caffeinate -s env -u ANTHROPIC_CUSTOM_HEADERS -u ANTHROPIC_BASE_URL vals exec -i -f .vals.yaml -- node ~/Documents/Repositories/spinybacked-orbweaver/bin/spiny-orb.js instrument src --verbose --thinking --debug-dump-dir ~/Documents/Repositories/spinybacked-orbweaver-eval/evaluation/javascript/commit-story-v2/run-26/debug-dumps 2>&1 | tee ~/Documents/Repositories/spinybacked-orbweaver-eval/evaluation/javascript/commit-story-v2/run-26/spiny-orb-output.log
   ```
 
   **After saving artifacts and committing, push the eval branch to origin immediately** (`git push -u origin <eval-branch>`). The branch holds the only copy of run-26 artifacts until the "Copy artifacts to main" milestone runs.
@@ -154,22 +154,22 @@ The **evaluation execution branch** created by `/prd-start` from main **never me
   4. **Log-trace correlation check** *(commit-story-v2 only — pino bridge)*: Use `search_datadog_logs` with `service:commit-story` filtered to logs newer than the eval run's start. Confirm that ≥1 log record has non-empty `trace_id` and `span_id`. Note the correlated vs. uncorrelated count. Run-25 baseline: ~80% of log entries correlated. If zero correlated logs: flag as regression — pino bridge may have been disrupted.
 
 - [ ] **Failure deep-dives** — For each failed file AND run-level failure. Includes any partial files and committed files with ≥3 attempts AND quality failures.
-  Produces: `evaluation/commit-story-v2/run-26/failure-deep-dives.md`
+  Produces: `evaluation/javascript/commit-story-v2/run-26/failure-deep-dives.md`
   Style reference: `Read docs/templates/eval-run-style-reference/failure-deep-dives.md`
 
 - [ ] **Per-file evaluation** — Full rubric on ALL files (no spot-checking). Evaluate all rules across all committed and partial files.
-  Produces: `evaluation/commit-story-v2/run-26/per-file-evaluation.md`
+  Produces: `evaluation/javascript/commit-story-v2/run-26/per-file-evaluation.md`
   Style reference: `Read docs/templates/eval-run-style-reference/per-file-evaluation.md`
 
   **Rule rename note**: NDS-005 (Control Flow Preserved) is called **NDS-007** in spiny-orb's validator output. Use NDS-007 in all per-file evaluation tables.
 
-  **(D-2) Spawn per-file evaluation agents in batches of 5**: Before spawning agents, create: `mkdir -p evaluation/commit-story-v2/run-26/per-file-sections/`. Spawn individual background Agent() calls with `run_in_background: true` in batches of 5. After each batch returns, write section files to disk immediately. After writing, the user clears context before spawning the next batch. At the start of each new batch, run `ls per-file-sections/` to see what's done and pick the next 5. **Background agents cannot write NEW files** (Write tool blocked for new paths in subagent context) — ask agents to return section content in the result text, then write each file directly. Full protocol: `docs/language-extension-plan.md` step 6 (D-2).
+  **(D-2) Spawn per-file evaluation agents in batches of 5**: Before spawning agents, create: `mkdir -p evaluation/javascript/commit-story-v2/run-26/per-file-sections/`. Spawn individual background Agent() calls with `run_in_background: true` in batches of 5. After each batch returns, write section files to disk immediately. After writing, the user clears context before spawning the next batch. At the start of each new batch, run `ls per-file-sections/` to see what's done and pick the next 5. **Background agents cannot write NEW files** (Write tool blocked for new paths in subagent context) — ask agents to return section content in the result text, then write each file directly. Full protocol: `docs/language-extension-plan.md` step 6 (D-2).
 
   **COV-005 methodology (attribute presence, not attribute identity)**: COV-005 passes if a span carries ≥1 meaningful domain attribute. Attribute variation between runs is normal. When a committed file's attribute set changes substantially from run-25, note it as a **coverage delta observation** in the per-file narrative — do not fail COV-005 for it.
 
   **Important**: Per-file evaluation agents must read the instrumented source directly (`git show <instrument-branch>:src/file`); do not rely on agent notes alone. Additionally, each agent must read the `Agent thinking` and `Agent notes` blocks for that file from `spiny-orb-output.log` — this is the primary evidence source for understanding why the agent made specific instrumentation decisions. Note: `--debug-dump-dir` only fires for failed, partial, and zero-span files; if all files succeed, debug-dumps/ is empty and the log is the sole source of agent reasoning. Companion `.instrumentation.md` files on the instrument branch also contain structured rationale per file. (Updated per PRD #146 Decision 5, 2026-06-21.)
 
-  **(D-2 trace supplement)** Each per-file evaluation agent receives the `service.instance.id` from `evaluation/commit-story-v2/run-26/trace-artifact.md`. Before writing any section, use `search_datadog_spans` with the artifact query + `resource_name:<prefix>.*`. Note: run-26 may not have been organically invoked yet — run-25 traces (`service.instance.id: bcb5e6b0-0bfd-4dcd-afc8-22dd60a389f3`) are from the run-24 instrument branch. Note in each section which run's trace data is being used.
+  **(D-2 trace supplement)** Each per-file evaluation agent receives the `service.instance.id` from `evaluation/javascript/commit-story-v2/run-26/trace-artifact.md`. Before writing any section, use `search_datadog_spans` with the artifact query + `resource_name:<prefix>.*`. Note: run-26 may not have been organically invoked yet — run-25 traces (`service.instance.id: bcb5e6b0-0bfd-4dcd-afc8-22dd60a389f3`) are from the run-24 instrument branch. Note in each section which run's trace data is being used.
 
   **(D-1) Track attempt counts**: For each file, note attempts. If a file required ≥3 attempts AND has a quality failure, include the verbose log section as input to the per-file evaluation agent.
 
@@ -180,14 +180,14 @@ The **evaluation execution branch** created by `/prd-start` from main **never me
   - `git-collector.js` — Is `diff_lines` included this run, and if so, is it type-correct?
 
 - [ ] **PR artifact evaluation** — Evaluate PR quality.
-  Produces: `evaluation/commit-story-v2/run-26/pr-evaluation.md`
+  Produces: `evaluation/javascript/commit-story-v2/run-26/pr-evaluation.md`
   Style reference: `Read docs/templates/eval-run-style-reference/pr-evaluation.md`
-  PR: Find the URL in `evaluation/commit-story-v2/run-26/run-summary.md`.
+  PR: Find the URL in `evaluation/javascript/commit-story-v2/run-26/run-summary.md`.
 
 - [ ] **Rubric scoring** — Synthesize dimension-level scores.
-  Produces: `evaluation/commit-story-v2/run-26/rubric-scores.md`
+  Produces: `evaluation/javascript/commit-story-v2/run-26/rubric-scores.md`
   Style reference: `Read docs/templates/eval-run-style-reference/rubric-scores.md`
-  **Use run-25 rubric as the primary precedent reference** (`evaluation/commit-story-v2/run-25/rubric-scores.md`). Critical precedents:
+  **Use run-25 rubric as the primary precedent reference** (`evaluation/javascript/commit-story-v2/run-25/rubric-scores.md`). Critical precedents:
   1. **CDQ-006 precedent**: Advisory findings are not canonical failures — do NOT fail CDQ-006 for advisory findings.
   2. **COV-001 failed-file precedent**: Files that failed to commit but whose output would have passed COV-001 are scored as COV-001 PASS.
   3. **COV-005 delta observation precedent**: Coverage delta observations are narrative only.
@@ -213,12 +213,12 @@ The **evaluation execution branch** created by `/prd-start` from main **never me
      ```
      Note: omit `COMMIT_STORY_TRACELOOP=true`.
   3. **Claude stops** the Collector: `kill "$COLLECTOR_PID"`
-  4. **Claude runs** the scorer: `node evaluation/is/score-is.js evaluation/is/eval-traces.json --target commit-story-v2 > evaluation/commit-story-v2/run-26/is-score.md`
+  4. **Claude runs** the scorer: `node evaluation/is/score-is.js evaluation/is/eval-traces.json --target commit-story-v2 > evaluation/javascript/commit-story-v2/run-26/is-score.md`
   5. **Confirm IS scoring traces in Datadog**: Record IS scoring run start time, then query `service:commit-story from:<run-start-time>`. Record `service.instance.id`.
-  Produces: `evaluation/commit-story-v2/run-26/is-score.md`
+  Produces: `evaluation/javascript/commit-story-v2/run-26/is-score.md`
 
 - [ ] **Baseline comparison** — Compare run-26 vs runs 2–25 (run-22 was never executed).
-  Produces: `evaluation/commit-story-v2/run-26/baseline-comparison.md`
+  Produces: `evaluation/javascript/commit-story-v2/run-26/baseline-comparison.md`
   Style reference: `Read docs/templates/eval-run-style-reference/baseline-comparison.md`
 
 - [ ] **Update root README** — Add a row for run-26 to the run history table (quality, gates, files, spans, cost, push/PR, IS score). Update the "next run" sentence to reference run-27 and its primary goals.
@@ -226,7 +226,7 @@ The **evaluation execution branch** created by `/prd-start` from main **never me
 - [ ] **Actionable fix output** — Primary handoff deliverable. At milestone completion:
   1. Run the cross-document audit agent to verify consistency across all run-26 evaluation artifacts.
   2. **Spoken summary (root cause + generalization)** *(user-facing checkpoint 2)*: Before printing the file path, provide a spoken summary with three elements: (a) **Main points** — key failures, category, priority; (b) **Root cause vs. symptom** — for each fix, state whether it addresses root cause or symptom; (c) **Every-user generalization check** — how each fix helps any spiny-orb user, not just commit-story-v2.
-  3. Print the absolute file path of `evaluation/commit-story-v2/run-26/actionable-fix-output.md`.
+  3. Print the absolute file path of `evaluation/javascript/commit-story-v2/run-26/actionable-fix-output.md`.
   4. **Pause.** Do not proceed to Draft PRD #27 until Whitney confirms handoff to spiny-orb team.
 
   **Handoff framing guidance** (from taze run-16):
@@ -236,7 +236,7 @@ The **evaluation execution branch** created by `/prd-start` from main **never me
 
 - [ ] **Draft PRD #27** — Follow `docs/language-extension-plan.md` step 12. Complete the template-update checkpoint first. Cascade approved process improvements to three places: (1) the template, (2) all other currently active open eval PRDs, and (3) the affected milestones of PRD #27 itself before committing — a cold AI reading only PRD #27 will not re-read the template during the run. Draft PRD #27 using this PRD as the style reference. Create on a separate branch from main. Merge the PRD PR to main so `/prd-start` can pick it up. Carry forward both user-facing checkpoints.
 
-- [ ] **Copy artifacts to main** — From main, run `git checkout <eval-branch> -- evaluation/commit-story-v2/run-26/` to copy all artifacts. Commit to main with message `eval: save run-26 artifacts to main [skip ci]`. Add one row to `evaluation/commit-story-v2/run-log.md` for run-26. Push main. This step runs before `/prd-done`.
+- [ ] **Copy artifacts to main** — From main, run `git checkout <eval-branch> -- evaluation/javascript/commit-story-v2/run-26/` to copy all artifacts. Commit to main with message `eval: save run-26 artifacts to main [skip ci]`. Add one row to `evaluation/javascript/commit-story-v2/run-log.md` for run-26. Push main. This step runs before `/prd-done`.
 
 ---
 

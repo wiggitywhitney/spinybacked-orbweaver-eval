@@ -80,8 +80,8 @@ The eval execution branch (`feature/prd-83-taze-evaluation-run-15`) **never merg
 
 ### Key Inputs
 
-- **Run-14 actionable fix output**: `evaluation/taze/run-14/actionable-fix-output.md`
-- **Run-14 lessons**: `evaluation/taze/run-14/lessons-for-run15.md`
+- **Run-14 actionable fix output**: `evaluation/typescript/taze/run-14/actionable-fix-output.md`
+- **Run-14 lessons**: `evaluation/typescript/taze/run-14/lessons-for-run15.md`
 - **Evaluation rubric** (spiny-orb repo): `~/Documents/Repositories/spinybacked-orbweaver/research/evaluation-rubric.md`
 - **Schema design reference**: `~/Documents/Repositories/taze/semconv/SCHEMA_DESIGN.md`
 
@@ -105,12 +105,12 @@ The eval execution branch (`feature/prd-83-taze-evaluation-run-15`) **never merg
 - [ ] **Step 0 — Bootstrap reading.** Before proceeding with any other milestone, read these documents in order:
   1. `docs/language-extension-plan.md` — completely. Pay particular attention to: (a) Type D structure and step sequence; (b) "Two User-Facing Checkpoints" section — exact wording for Findings Discussion and handoff pause; (c) eval branch convention (never merges to main); (d) step 13 (copy artifacts to main before closing); (e) step 9.5 (SPA-001 calibration note for CLI apps — taze had 164 INTERNAL spans in run-13; treat this as structural, not a regression).
   2. `prds/82-taze-evaluation-run-14.md` — the immediately prior taze run PRD. **Taze is non-organic** (unlike commit-story-v2): the trace artifact is created during IS scoring (step 9.5), NOT during pre-run verification. The IS scoring milestone and per-file trace supplement timing differ accordingly.
-  3. `evaluation/taze/run-14/actionable-fix-output.md` — prior run findings. The carry-forward items (CDQ-006 after #933, SCH-003, IS RES-001) are the primary goals for this run.
+  3. `evaluation/typescript/taze/run-14/actionable-fix-output.md` — prior run findings. The carry-forward items (CDQ-006 after #933, SCH-003, IS RES-001) are the primary goals for this run.
   **Do not mark this complete until you have read all three documents.**
 
-- [ ] **Step 0.5 — Cross-run process review** *(user-facing checkpoint — template changes require user approval)*. Follow the full procedure in `docs/language-extension-plan.md` Step 0.5. In brief: (1) find the most recently completed taze run (completion signal: `actionable-fix-output.md` present in `evaluation/taze/run-N/` — note run-14 was aborted so run-13 is the most recent completed taze run); (2) check all other `evaluation/` subdirectories for a more recently completed cross-target run — compare using the `captured:` field in `trace-artifact.md` if it exists, or the file modification time of `actionable-fix-output.md` as a proxy; (3) if a more recent cross-target run exists, read its `actionable-fix-output.md` and any `lessons-for-prd*.md` files; (4) compare findings against the template's milestone structure as instantiated in this PRD; (5) present the structured three-section checkpoint report to the user; (6) after user approves, make approved template edits. Do NOT make any edits without explicit user approval. If no cross-target run is more recent, note this and proceed.
+- [ ] **Step 0.5 — Cross-run process review** *(user-facing checkpoint — template changes require user approval)*. Follow the full procedure in `docs/language-extension-plan.md` Step 0.5. In brief: (1) find the most recently completed taze run (completion signal: `actionable-fix-output.md` present in `evaluation/typescript/taze/run-N/` — note run-14 was aborted so run-13 is the most recent completed taze run); (2) check all other `evaluation/` subdirectories for a more recently completed cross-target run — compare using the `captured:` field in `trace-artifact.md` if it exists, or the file modification time of `actionable-fix-output.md` as a proxy; (3) if a more recent cross-target run exists, read its `actionable-fix-output.md` and any `lessons-for-prd*.md` files; (4) compare findings against the template's milestone structure as instantiated in this PRD; (5) present the structured three-section checkpoint report to the user; (6) after user approves, make approved template edits. Do NOT make any edits without explicit user approval. If no cross-target run is more recent, note this and proceed.
 
-- [ ] **Collect skeleton documents** — Create `evaluation/taze/run-15/` directory with `lessons-for-run16.md` and `spiny-orb-findings.md` skeleton files. Must run before pre-run verification.
+- [ ] **Collect skeleton documents** — Create `evaluation/typescript/taze/run-15/` directory with `lessons-for-run16.md` and `spiny-orb-findings.md` skeleton files. Must run before pre-run verification.
 
 - [ ] **Pre-run verification** — Confirm all four run-14 blockers are resolved and validate prerequisites:
 
@@ -129,12 +129,12 @@ The eval execution branch (`feature/prd-83-taze-evaluation-run-15`) **never merg
       ```
   11. **File inventory**: Count `.ts` files in `~/Documents/Repositories/taze/src/` — should be 33.
   12. **Rebuild spiny-orb**: `cd ~/Documents/Repositories/spinybacked-orbweaver && npm run build`
-  13. **Record environment**: Append spiny-orb SHA, Node version, and pnpm version to `evaluation/taze/run-15/lessons-for-run16.md`. **This SHA is critical for bug verification** — the four #933–#936 fixes must all be in this SHA.
+  13. **Record environment**: Append spiny-orb SHA, Node version, and pnpm version to `evaluation/typescript/taze/run-15/lessons-for-run16.md`. **This SHA is critical for bug verification** — the four #933–#936 fixes must all be in this SHA.
 
-- [ ] **Evaluation run-15** — Whitney runs `spiny-orb instrument` in her terminal. Create `evaluation/taze/run-15/debug-dumps/` before providing the command.
+- [ ] **Evaluation run-15** — Whitney runs `spiny-orb instrument` in her terminal. Create `evaluation/typescript/taze/run-15/debug-dumps/` before providing the command.
 
   ```bash
-  caffeinate -s env -u ANTHROPIC_CUSTOM_HEADERS -u ANTHROPIC_BASE_URL vals exec -i -f .vals.yaml -- bash -c 'GITHUB_TOKEN=$GITHUB_TOKEN_TAZE node ~/Documents/Repositories/spinybacked-orbweaver/bin/spiny-orb.js instrument src --verbose --thinking --debug-dump-dir ~/Documents/Repositories/spinybacked-orbweaver-eval/evaluation/taze/run-15/debug-dumps 2>&1 | tee ~/Documents/Repositories/spinybacked-orbweaver-eval/evaluation/taze/run-15/spiny-orb-output.log'
+  caffeinate -s env -u ANTHROPIC_CUSTOM_HEADERS -u ANTHROPIC_BASE_URL vals exec -i -f .vals.yaml -- bash -c 'GITHUB_TOKEN=$GITHUB_TOKEN_TAZE node ~/Documents/Repositories/spinybacked-orbweaver/bin/spiny-orb.js instrument src --verbose --thinking --debug-dump-dir ~/Documents/Repositories/spinybacked-orbweaver-eval/evaluation/typescript/taze/run-15/debug-dumps 2>&1 | tee ~/Documents/Repositories/spinybacked-orbweaver-eval/evaluation/typescript/taze/run-15/spiny-orb-output.log'
   ```
 
   After the run: save artifacts, commit with `git add -f` for the `.log` file, push the eval branch to origin immediately. Create PR to taze fork (`gh pr create --repo wiggitywhitney/taze`). Update PR title after rubric and IS scoring complete: `eval(prd-130): taze run-15 — <quality>/29 quality, Q×F <score>, IS <score>/100`.
@@ -143,7 +143,7 @@ The eval execution branch (`feature/prd-83-taze-evaluation-run-15`) **never merg
 
 - [ ] **Findings Discussion** *(user-facing checkpoint 1 — raw signal before analysis)* — Present raw findings from the log: committed files, failed files, pre-scan skips, cost, CDQ-006 guard status, any crashes. Do not interpret yet. Wait for Whitney's response before proceeding to failure deep-dives.
 
-- [ ] **Failure deep-dives** — For each failed file (0 committed spans), partially committed file, and committed file requiring ≥ 3 attempts with a quality failure: analyze debug dumps, verbose log, thinking blocks. Follow the diagnostic protocol from `docs/language-extension-plan.md` (all 5 dimensions). Document in `evaluation/taze/run-15/spiny-orb-findings.md`.
+- [ ] **Failure deep-dives** — For each failed file (0 committed spans), partially committed file, and committed file requiring ≥ 3 attempts with a quality failure: analyze debug dumps, verbose log, thinking blocks. Follow the diagnostic protocol from `docs/language-extension-plan.md` (all 5 dimensions). Document in `evaluation/typescript/taze/run-15/spiny-orb-findings.md`.
 
 - [ ] **Per-file evaluation** *(complete IS scoring and step 9.5 trace capture first — taze is non-organic; trace artifact does not exist until after IS scoring)* — Evaluate each committed file against the rubric. **Step 0 — Trace supplement**: the trace artifact is created in step 9.5 after IS scoring. Complete IS scoring (step 9) and trace capture (step 9.5) before returning here for trace supplement on each file. After trace data is available, use `search_datadog_spans` with the artifact query to supplement static code review. Follow the per-file format from the most recent completed taze run PRD.
 
@@ -153,24 +153,24 @@ The eval execution branch (`feature/prd-83-taze-evaluation-run-15`) **never merg
 
 - [ ] **IS scoring run** — See `evaluation/is/README.md` for collector setup. Run IS scoring:
   ```bash
-  node evaluation/is/score-is.js evaluation/is/eval-traces.json > evaluation/taze/run-15/is-score.md
+  node evaluation/is/score-is.js evaluation/is/eval-traces.json > evaluation/typescript/taze/run-15/is-score.md
   ```
   **SPA-001 note**: taze is a CLI app. If SPA-001 fires (span count > 10 INTERNAL spans), this is structural — taze had 164 INTERNAL spans in run-13. Document but do not treat as a regression.
   **RES-001 note**: If the `service.instance.id` fix (applied in pre-run-14) is working, RES-001 should pass for the first time. This is one of the primary verification goals.
 
-- [ ] **Capture trace artifact (step 9.5)** — Immediately after IS scoring completes, use the `search_datadog_spans` Datadog MCP tool with query `service:taze from:now-30m`. Retrieve `service.instance.id` from any span. Write `evaluation/taze/run-15/trace-artifact.md` (five fields: service.instance.id, captured, target, instrument_branch, query) using the format in `evaluation/trace-capture-protocol.md`. If no spans appear, wait up to 5 minutes and retry once.
+- [ ] **Capture trace artifact (step 9.5)** — Immediately after IS scoring completes, use the `search_datadog_spans` Datadog MCP tool with query `service:taze from:now-30m`. Retrieve `service.instance.id` from any span. Write `evaluation/typescript/taze/run-15/trace-artifact.md` (five fields: service.instance.id, captured, target, instrument_branch, query) using the format in `evaluation/trace-capture-protocol.md`. If no spans appear, wait up to 5 minutes and retry once.
 
 - [ ] **Baseline comparison** — Compare run-15 results to run-13 across all dimensions. Note: run-14 was aborted and has no valid scores. Calculate Q×F. Update root README: add a run-15 row to the taze run history table; update the "Run-16 is next" note with primary goals.
 
-- [ ] **Actionable fix output** *(user-facing checkpoint 2 — interpreted summary + handoff pause)* — Write `evaluation/taze/run-15/actionable-fix-output.md` with the full structured format: what happened, CDQ-006 status (pass/fail/partial), SCH-003 status, IS score status, new findings, updated carry-forward table. Pause for Whitney to review before handing off to the spiny-orb team. Print the absolute path when done.
+- [ ] **Actionable fix output** *(user-facing checkpoint 2 — interpreted summary + handoff pause)* — Write `evaluation/typescript/taze/run-15/actionable-fix-output.md` with the full structured format: what happened, CDQ-006 status (pass/fail/partial), SCH-003 status, IS score status, new findings, updated carry-forward table. Pause for Whitney to review before handing off to the spiny-orb team. Print the absolute path when done.
 
 - [ ] **Draft next PRD** *(includes template-update checkpoint before drafting)* — Follow `docs/language-extension-plan.md` step 12: (1) review `lessons-for-run16.md` and `actionable-fix-output.md` for process observations; (2) present two-section checkpoint to user (target-specific vs. generalizable); (3) after approval, commit any template changes as a separate commit; (4) draft the next taze run PRD using this PRD as the style reference; (5) run `/write-prompt` before committing.
 
 - [ ] **Copy artifacts to main** — Switch to main, pull, then run:
   ```bash
-  git checkout feature/prd-83-taze-evaluation-run-15 -- evaluation/taze/run-15/
+  git checkout feature/prd-83-taze-evaluation-run-15 -- evaluation/typescript/taze/run-15/
   ```
-  Commit to main with message `eval: save taze run-15 artifacts to main [skip ci]`. Update `evaluation/taze/run-log.md` with a run-15 row. Push to origin/main. Then return to the eval branch and run `/prd-done`.
+  Commit to main with message `eval: save taze run-15 artifacts to main [skip ci]`. Update `evaluation/typescript/taze/run-log.md` with a run-15 row. Push to origin/main. Then return to the eval branch and run `/prd-done`.
 
 ---
 
