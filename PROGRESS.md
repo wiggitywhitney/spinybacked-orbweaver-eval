@@ -6,6 +6,9 @@ Entry format: `- (YYYY-MM-DD) Description of feature-level change (PRD #X, miles
 
 ## [Unreleased]
 
+### Fixed
+- (2026-07-01) Fixed a recurring milestone-ordering bug across seven run PRDs (`prds/19-evaluation-run-7.md`, `prds/21-evaluation-run-8.md`, `prds/24-evaluation-run-9.md`, `prds/28-evaluation-run-10.md`, `prds/done/28-evaluation-run-10.md`, `prds/32-evaluation-run-11.md`, `prds/33-evaluation-run-12.md`): the "Pre-run verification" milestone appended to a `lessons-for-prdN.md` file before the later "Collect lessons for PRD #N" milestone created that file. Reordered so the file-creation milestone runs first. Fixed a span name typo in the open run-26 PRD (`save_entry` → `save_journal_entry`, matching the actual instrumented span name). Decided to also correct five findings in archived (`prds/done/`) PRDs for historical accuracy rather than leave them as-is, since archived run PRDs are actively used as style and milestone reference material when authoring future eval PRDs — an incorrect archived example would propagate the same mistake forward. Corrected a `vcs.ref.head.revision` vs. `git.commit.sha` attribute mix-up in the run-24 PRD, a run-log row column-count inconsistency and an overly broad validation command in the artifacts-to-main PRD, a dependency description that implied the wrong target path in the IS-integration PRD, and a run tally missing a "partial (not committed)" file state in the run-4 PRD.
+
 ### Added
 - (2026-06-30) Added the SPA-001 calibration spike and SPA-002 forceFlush/bootstrap-fix as required pre-run-1 onboarding steps to all four language eval setup PRDs (TypeScript, Python, Go, JavaScript). Corrected a factually wrong `process.exit()` guidance line in the TypeScript and JavaScript setup PRDs. Closes issue #133.
 

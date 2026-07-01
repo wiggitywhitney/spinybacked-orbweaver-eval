@@ -146,6 +146,11 @@ Four-phase approach (same structure as runs 5-6, with registry expansion as the 
 
 ## Milestones
 
+- [ ] **Collect lessons for PRD #8** — Create BOTH output documents at the START and append throughout all subsequent milestones:
+  1. Create `evaluation/javascript/commit-story-v2/run-7/spiny-orb-findings.md`. Use findings vocabulary from the start.
+  2. Create `evaluation/javascript/commit-story-v2/run-7/lessons-for-prd8.md`. Sections: Rubric Gaps, Process Improvements, Evaluation Methodology, Rubric-Codebase Mapping Corrections, Schema Decisions, Carry-Forward Items.
+  3. Both documents are updated throughout all subsequent milestones. Every milestone has explicit "append to findings/lessons" steps.
+
 - [ ] **Pre-run verification** — Verify spiny-orb fixes and validate run prerequisites:
   1. **Handoff triage review**: Read the spiny-orb team's triage of `evaluation/javascript/commit-story-v2/run-6/actionable-fix-output.md`. Compare what they filed vs what the eval recommended. Note any findings the spiny-orb team rejected and why.
   2. **SCH-001 verification (critical)**: Verify Weaver registry has ≥8 span definitions covering commit-story domain operations (CLI, git, context, journal, summary, auto-summarize, MCP server, summary-detector). If <5 definitions, STOP — registry expansion is the blocking prerequisite.
@@ -163,11 +168,6 @@ Four-phase approach (same structure as runs 5-6, with registry expansion as the 
   14. Verify codebase is clean: `git status` on main, no leftover spiny-orb branches.
   15. Record which run-6 findings are verified fixed vs still open — this determines the expected score ceiling.
   16. Append any pre-run observations to `evaluation/javascript/commit-story-v2/run-7/lessons-for-prd8.md`.
-
-- [ ] **Collect lessons for PRD #8** — Create BOTH output documents at the START and append throughout all subsequent milestones:
-  1. Create `evaluation/javascript/commit-story-v2/run-7/spiny-orb-findings.md`. Use findings vocabulary from the start.
-  2. Create `evaluation/javascript/commit-story-v2/run-7/lessons-for-prd8.md`. Sections: Rubric Gaps, Process Improvements, Evaluation Methodology, Rubric-Codebase Mapping Corrections, Schema Decisions, Carry-Forward Items.
-  3. Both documents are updated throughout all subsequent milestones. Every milestone has explicit "append to findings/lessons" steps.
 
 - [ ] **Evaluation run-7** — Execute `spiny-orb instrument` in the user's terminal (not through Claude Code):
   1. Clean codebase state: start from main branch with evaluation config (spiny-orb.yaml, instrumentation.js, semconv/).

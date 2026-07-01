@@ -146,7 +146,7 @@ Three-phase approach:
   6. If any files failed due to token budget, run supplemental passes with `maxTokensPerFile: 150000`
   7. Verify PR was created successfully — if push fails, the local PR summary file (orb issue #13) should be available
   8. Capture all output to `evaluation/javascript/commit-story-v2/run-4/orb-output.log`
-  9. Record final tally: files instrumented / correctly skipped / failed
+  9. Record final tally: files instrumented / correctly skipped / partial (not committed) / failed
 
 - [ ] **Collect lessons for PRD #5** — Create `evaluation/javascript/commit-story-v2/run-4/lessons-for-prd5.md` at the START of evaluation work and append to it throughout all subsequent milestones. Capture:
   1. Rubric gaps discovered during evaluation (new rules needed, scoring ambiguities)

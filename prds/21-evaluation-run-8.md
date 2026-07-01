@@ -132,6 +132,11 @@ Same four-phase structure as runs 5-7, with polish as the primary focus:
 
 ## Milestones
 
+- [ ] **Collect lessons for PRD #9** — Create BOTH output documents at the START:
+  1. Create `evaluation/javascript/commit-story-v2/run-8/spiny-orb-findings.md`.
+  2. Create `evaluation/javascript/commit-story-v2/run-8/lessons-for-prd9.md`.
+  3. Both updated throughout all subsequent milestones.
+
 - [ ] **Pre-run verification** — Verify spiny-orb fixes and validate run prerequisites:
   1. **Handoff triage review**: Read the spiny-orb team's triage of `evaluation/javascript/commit-story-v2/run-7/actionable-fix-output.md`. Compare what they filed vs what the eval recommended. Note any findings rejected.
   2. **Push auth verification (critical)**: Verify fail-fast before file processing when GITHUB_TOKEN is missing or write access unavailable. Test with `git push --dry-run`. Log must show GITHUB_TOKEN detection at startup. HTTPS-only is still broken — verify token-embedded URL or SSH.
@@ -144,11 +149,6 @@ Same four-phase structure as runs 5-7, with polish as the primary focus:
   9. **File recovery expectations**: Predict run-8 outcomes. With run-7 at 100% success, expect no regression. Apply 50% discount for unmasked bug risk.
   10. Record which run-7 findings are verified fixed vs still open.
   11. Append observations to `evaluation/javascript/commit-story-v2/run-8/lessons-for-prd9.md`.
-
-- [ ] **Collect lessons for PRD #9** — Create BOTH output documents at the START:
-  1. Create `evaluation/javascript/commit-story-v2/run-8/spiny-orb-findings.md`.
-  2. Create `evaluation/javascript/commit-story-v2/run-8/lessons-for-prd9.md`.
-  3. Both updated throughout all subsequent milestones.
 
 - [ ] **Evaluation run-8** — Execute `spiny-orb instrument` in the user's terminal:
   1. Clean codebase state from main.
