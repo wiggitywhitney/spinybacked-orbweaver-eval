@@ -111,6 +111,8 @@ Same as runs 9-11.
 
 ## Milestones
 
+- [ ] **Collect lessons for PRD #13** — Create skeleton documents at START.
+
 - [ ] **Pre-run verification** — Verify spiny-orb fixes and validate run prerequisites:
   1. **Handoff triage review**: Read the spiny-orb team's triage of `evaluation/javascript/commit-story-v2/run-11/actionable-fix-output.md`.
   2. **Target repo readiness** (commit-story-v2): Verify on `main`, clean working tree, spiny-orb.yaml and semconv/ exist.
@@ -120,9 +122,7 @@ Same as runs 9-11.
   6. **File inventory**: Count .js files in commit-story-v2's `src/` directory.
   7. Rebuild spiny-orb from **main branch**.
   8. Record version and findings status.
-  9. Append observations to `evaluation/javascript/commit-story-v2/run-12/lessons-for-prd13.md` (created in milestone 2; if running milestones in order, create the file first).
-
-- [ ] **Collect lessons for PRD #13** — Create skeleton documents at START. Must run before pre-run verification step 9 (which appends to the lessons file).
+  9. Append observations to `evaluation/javascript/commit-story-v2/run-12/lessons-for-prd13.md` (created in the preceding milestone).
 
 - [ ] **Evaluation run-12** — Execute `spiny-orb instrument` on commit-story-v2.
 

@@ -136,6 +136,11 @@ Run-9 operates across two repos. Be explicit about which repo at every step.
 
 ## Milestones
 
+- [ ] **Collect lessons for PRD #10** — Create BOTH output documents at the START:
+  1. Create `evaluation/javascript/commit-story-v2/run-9/spiny-orb-findings.md`.
+  2. Create `evaluation/javascript/commit-story-v2/run-9/lessons-for-prd10.md`.
+  3. Both updated throughout all subsequent milestones.
+
 - [ ] **Pre-run verification** — Verify spiny-orb fixes and validate run prerequisites:
   1. **Handoff triage review**: Read the spiny-orb team's triage of `evaluation/javascript/commit-story-v2/run-8/actionable-fix-output.md` (eval repo). Compare what they filed vs what the eval recommended. Note any findings rejected.
   2. **Target repo readiness** (commit-story-v2): Verify PRD #51 is complete — `@opentelemetry/sdk-node` in devDependencies (not peerDependencies), `instrumentation.js` exists, Datadog exporter configured. Verify `spiny-orb.yaml` and `semconv/` exist (copy from eval repo if needed). Verify commit-story-v2 is on `main` branch.
@@ -149,11 +154,6 @@ Run-9 operates across two repos. Be explicit about which repo at every step.
   10. **File recovery expectations**: Predict run-9 outcomes with 50% discount. Note that file names and counts may differ from run-8 (different repo). journal-graph.js non-deterministic — uncertain.
   11. Record which run-8 findings are verified fixed vs still open.
   12. Append observations to `evaluation/javascript/commit-story-v2/run-9/lessons-for-prd10.md` (eval repo).
-
-- [ ] **Collect lessons for PRD #10** — Create BOTH output documents at the START:
-  1. Create `evaluation/javascript/commit-story-v2/run-9/spiny-orb-findings.md`.
-  2. Create `evaluation/javascript/commit-story-v2/run-9/lessons-for-prd10.md`.
-  3. Both updated throughout all subsequent milestones.
 
 - [ ] **Evaluation run-9** — Execute `spiny-orb instrument` on **commit-story-v2** (not the eval repo):
   1. Ensure commit-story-v2 is on **main** with clean working tree: `cd ~/Documents/Repositories/commit-story-v2 && git checkout main && git status`.

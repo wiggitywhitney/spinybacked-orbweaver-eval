@@ -22,7 +22,7 @@ This PRD adds a repeatable end-of-run step: copy all generated artifacts to main
 
 - **Primary**: `evaluation/javascript/commit-story-v2/run-14/per-file-evaluation.md` exists on main
 - **Secondary**: `evaluation/javascript/commit-story-v2/run-log.md` exists on main with one row per run (2 through 14)
-- **Validation**: A `git log --oneline main -- evaluation/javascript/commit-story-v2/` shows one commit per run
+- **Validation**: A `git log --oneline main -- evaluation/javascript/commit-story-v2/run-*/` shows one commit per run (the run-log update itself is a separate, additional commit outside this path)
 
 ## Requirements
 
@@ -65,7 +65,7 @@ This PRD adds a repeatable end-of-run step: copy all generated artifacts to main
 
   To find eval branches: `git branch -r | grep 'prd.*evaluation-run'`; also check `git branch -a` for local-only branches. Run-1 had a flat structure before generalization (pre-PRD #43) — skip run-1 if `evaluation/javascript/commit-story-v2/run-1/` does not exist on the branch.
 
-  If a branch was deleted or unavailable, add the row with available data from PROGRESS.md and PRD files, mark the artifact path as unavailable: `| N | YYYY-MM-DD | score/total | files | Q×F | push | Top findings | — (branch unavailable) |`
+  If a branch was deleted or unavailable, add the row with available data from PROGRESS.md and PRD files, appending "— (branch unavailable)" inside the Top findings cell rather than as a separate column: `| N | YYYY-MM-DD | score/total | files | Q×F | push | Top finding 1; Top finding 2 — (branch unavailable) |`
 
   Success criteria: `evaluation/javascript/commit-story-v2/run-log.md` has one row per available run (runs where a branch existed); `evaluation/javascript/commit-story-v2/run-N/` directories exist on main for all those runs.
 

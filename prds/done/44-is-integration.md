@@ -133,7 +133,7 @@ Full research findings live in `docs/research/instrumentation-score-integration.
 
 ## Dependencies and Constraints
 
-- **Depends on**: PRD #43 (repo generalization) — IS infrastructure must land in `evaluation/javascript/commit-story-v2/` not the old flat structure. Do NOT start this PRD until #43 is merged.
+- **Depends on**: PRD #43 (repo generalization) — the trace-capture and run-artifact paths (e.g. `evaluation/javascript/commit-story-v2/run-N/`) must exist under the generalized structure, not the old flat structure, before this PRD's IS scorer (`evaluation/is/`) can write its output there. Do NOT start this PRD until #43 is merged.
 - **Depends on**: `docs/research/instrumentation-score-integration.md` — all implementation decisions come from this document
 - **Blocks**: Every future Type D run PRD — IS scoring becomes step 9 in all subsequent runs
 

@@ -134,6 +134,11 @@ Run-10 operates across two repos (same as run-9).
 
 ## Milestones
 
+- [x] **Collect lessons for PRD #11** — Create BOTH output documents at the START:
+  1. Create `evaluation/javascript/commit-story-v2/run-10/spiny-orb-findings.md`.
+  2. Create `evaluation/javascript/commit-story-v2/run-10/lessons-for-prd11.md`.
+  3. Both updated throughout all subsequent milestones.
+
 - [x] **Pre-run verification** — Verify spiny-orb fixes and validate run prerequisites:
   1. **Handoff triage review**: Read the spiny-orb team's triage of `evaluation/javascript/commit-story-v2/run-9/actionable-fix-output.md` (eval repo). Compare what they filed vs what the eval recommended. Note any findings rejected.
   2. **Target repo readiness** (commit-story-v2): Verify commit-story-v2 is on `main` with clean working tree. Verify `spiny-orb.yaml` and `semconv/` exist. Verify `@opentelemetry/sdk-node` still in devDependencies (not peerDependencies).
@@ -147,11 +152,6 @@ Run-10 operates across two repos (same as run-9).
   10. **File recovery expectations**: Predict run-10 outcomes with 50% discount. journal-graph.js recovery should be deterministic (validator fix, not LLM-dependent).
   11. Record which run-9 findings are verified fixed vs still open.
   12. Append observations to `evaluation/javascript/commit-story-v2/run-10/lessons-for-prd11.md` (eval repo).
-
-- [x] **Collect lessons for PRD #11** — Create BOTH output documents at the START:
-  1. Create `evaluation/javascript/commit-story-v2/run-10/spiny-orb-findings.md`.
-  2. Create `evaluation/javascript/commit-story-v2/run-10/lessons-for-prd11.md`.
-  3. Both updated throughout all subsequent milestones.
 
 - [x] **Evaluation run-10** — Execute `spiny-orb instrument` on **commit-story-v2** (not the eval repo):
   1. Ensure commit-story-v2 is on **main** with clean working tree: `cd ~/Documents/Repositories/commit-story-v2 && git checkout main && git status`.
