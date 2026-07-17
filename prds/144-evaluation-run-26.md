@@ -114,7 +114,7 @@ The **evaluation execution branch** created by `/prd-start` from main **never me
 
 - [x] **Collect skeleton documents** — Create `evaluation/javascript/commit-story-v2/run-26/` directory with `lessons-for-prd27.md` skeleton. Must run before pre-run verification begins. **Done**: skeleton created with the "0 attributes" clarification pre-populated as a carried-forward item from the Step 0.5 review.
 
-- [ ] **Pre-run verification** — Verify spiny-orb fixes and validate run prerequisites:
+- [x] **Pre-run verification** — Verify spiny-orb fixes and validate run prerequisites:
   1. **Datadog MCP health check** *(first, before any other pre-run step)*: Run `search_datadog_spans` with `service:commit-story` for the last 1 hour. If it fails or returns an unexpected error (not just "no results"), re-run `/ddsetup`, then `/reload-plugins`. Do not proceed until Datadog MCP queries succeed.
   2. **Handoff triage review**: Read the spiny-orb team's triage of `evaluation/javascript/commit-story-v2/run-25/actionable-fix-output.md`. Check which findings were filed and their current status.
   3. **RUN25-1 fix** (P2): Verify whether the COV-004 validator fix has landed. Look for a change in `isExpectedConditionCatch` (in `cov003.ts`) that recognizes the negated ENOENT pattern (`if (err.code !== 'ENOENT') throw err`) as graceful degradation (returns `true`) rather than flagging it. If not fixed, still proceed — run-26 will confirm the gap persists. Note whether Option A (validator fix) or Option B (prompt guidance workaround) was implemented.
