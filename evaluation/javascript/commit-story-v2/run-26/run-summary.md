@@ -83,7 +83,7 @@
 |----------|-------|
 | ×1 | 26 |
 | ×2 | 4 (summary-manager, summarize, summary-graph, reflection-tool [skip]) |
-| ×3 | 2 (git-collector, journal-graph, summary-detector) |
+| ×3 | 3 (git-collector, journal-graph, summary-detector) |
 
 ---
 
