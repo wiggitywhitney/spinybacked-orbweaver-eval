@@ -124,14 +124,14 @@ The **evaluation execution branch** created by `/prd-start` from main **never me
   5. **Attribute-count undercounting fix** (P2): Check whether spiny-orb's run-summary language changed to distinguish "new schema-extension attributes" from total attributes set, or whether a total-count metric was added.
   6. **RUN21-6 watch** (Watch, sixth run): Check whether any further changes landed for issue #927. Note any new instances in run-27.
   7. **Other spiny-orb fixes since run-26**: Check spiny-orb main for any merged PRs relevant to commit-story-v2 evaluation.
-  8. **Target repo readiness** (commit-story-v2): Verify on `main`, clean working tree, `spiny-orb.yaml` and `semconv/` exist. Check that target is NOT on the run-26 instrument branch at session start.
+  8. **Target repo readiness** (commit-story-v2): Verify the target checkout is on `main`, clean working tree, `spiny-orb.yaml` and `semconv/` exist. Branch-tip provenance (whether recent traffic came from the run-26 instrument branch) is validated separately via `git.commit.sha` in step 15 — it is not a precondition for this step.
   9. **Push auth stability check**: Verify token still works (dry-run push to non-existent branch).
   10. **File inventory**: Count `.js` files in commit-story-v2's `src/` directory (expect 31; verify count and check for any new files added since run-26).
   11. Rebuild spiny-orb from **main**: `cd ~/Documents/Repositories/spinybacked-orbweaver && npm install && npm run build`
   12. Record version and findings status.
   13. **README check**: Verify `README.md` on main has a row for run-26.
   14. **Datadog pre-run health check**: Use `search_datadog_spans` with `service:commit-story` (last 7 days). If no results, check Datadog Agent status. Do not start the eval run until spans appear.
-  15. **Instrument branch confirmation**: Check `git.commit.sha` on recent `commit_story.journal.save_journal_entry` spans (note: NOT `vcs.ref.head.revision` — see D-6). The run-26 instrument branch was `spiny-orb/instrument-1784302707982` — to get its HEAD SHA: `git -C ~/Documents/Repositories/commit-story-v2 rev-parse spiny-orb/instrument-1784302707982`. If target is still on the run-26 branch organically, that is expected and fine — confirm the target repo itself is on `main`.
+  15. **Instrument branch confirmation**: Check `git.commit.sha` on recent `commit_story.journal.save_journal_entry` spans (note: NOT `vcs.ref.head.revision` — see D-6). The run-26 instrument branch was `spiny-orb/instrument-1784302707982` — to get its HEAD SHA: `git -C ~/Documents/Repositories/commit-story-v2 rev-parse spiny-orb/instrument-1784302707982`. Recent spans matching that SHA are expected and fine — branch-tip provenance is a `git.commit.sha` fact, not a checkout-state precondition (see step 8).
   16. **Capture trace artifact** (organic target): Read `evaluation/trace-capture-protocol.md`. Use `search_datadog_spans` with `service:commit-story` (last 7 days). From the most recent complete journal generation run, record `service.instance.id`. Write `evaluation/javascript/commit-story-v2/run-27/trace-artifact.md`.
   17. Append observations to `evaluation/javascript/commit-story-v2/run-27/lessons-for-prd28.md`.
 
@@ -221,7 +221,7 @@ The **evaluation execution branch** created by `/prd-start` from main **never me
      ```
      Note: omit `COMMIT_STORY_TRACELOOP=true`.
   3. **Claude stops** the Collector: `kill "$COLLECTOR_PID"`
-  4. **Claude runs** the scorer: `node evaluation/is/score-is.js evaluation/is/eval-traces.json --target commit-story-v2 > evaluation/javascript/commit-story-v2/run-27/is-score.md`
+  4. **Claude runs** the scorer, from `~/Documents/Repositories/spinybacked-orbweaver-eval` (the preceding steps left the working directory in commit-story-v2): `cd ~/Documents/Repositories/spinybacked-orbweaver-eval && node evaluation/is/score-is.js evaluation/is/eval-traces.json --target commit-story-v2 > evaluation/javascript/commit-story-v2/run-27/is-score.md`
   5. **Confirm IS scoring traces in Datadog**: Record IS scoring run start time, then query `service:commit-story from:<run-start-time>`. Record `service.instance.id`.
   Produces: `evaluation/javascript/commit-story-v2/run-27/is-score.md`
 
@@ -249,7 +249,7 @@ The **evaluation execution branch** created by `/prd-start` from main **never me
 
 - [ ] **Draft PRD #28** — Follow `docs/language-extension-plan.md` step 12. Complete the template-update checkpoint first. Cascade approved process improvements to three places: (1) the template, (2) all other currently active open eval PRDs, and (3) the affected milestones of PRD #28 itself before committing — a cold AI reading only PRD #28 will not re-read the template during the run. Draft PRD #28 using this PRD as the style reference. Create on a separate branch from main. Merge the PRD PR to main so `/prd-start` can pick it up. Carry forward both user-facing checkpoints.
 
-- [ ] **Copy artifacts to main** — From main, run `git checkout <eval-branch> -- evaluation/javascript/commit-story-v2/run-27/` to copy all artifacts. Commit to main with message `eval: save run-27 artifacts to main [skip ci]`. Add one row to `evaluation/javascript/commit-story-v2/run-log.md` for run-27. Push main. This step runs before `/prd-done`.
+- [ ] **Copy artifacts to main** — From main, run `git checkout <eval-branch> -- evaluation/javascript/commit-story-v2/run-27/` to copy all artifacts. Commit to main with message `eval: save run-27 artifacts to main [skip ci]`. Add one row to `evaluation/javascript/commit-story-v2/run-log.md` for run-27. Update `PROGRESS.md` with an entry for run-27 (per global CLAUDE.md's PROGRESS.md style rules) before `/prd-done` runs. Push main. This step runs before `/prd-done`.
 
 ---
 
