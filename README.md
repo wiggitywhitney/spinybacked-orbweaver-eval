@@ -97,10 +97,17 @@ spinybacked-orbweaver-eval/
 | 16 | 22/25 (88%) | 5/5 | 10+3p | ~24 | $12.29 | YES | 80/100 |
 | 17 | 22/25 (88%) | 4/5 | 10+1p | ~28 | $10.43 | YES | 90/100 |
 | 18 | 24/25 (96%) | 5/5 | 11 | 36 | $9.16 | YES | 90/100 |
+| 19 | 21/25 (84%) | 5/5 | 10+3p | 30 | $8.83 | YES | 80/100 |
+| 20 | 24/25 (96%) | 5/5 | 12+1f | 42 | $9.08 | YES | 80/100 |
+| 21 | 23/25 (92%) | 5/5 | 12 | 42 | $8.10 | YES | 90/100 |
+| 23 | 24/25 (96%) | 5/5 | 13+1p | 45 | $7.84 | YES | 80/100 |
+| 24 | 23/25 (92%) | 5/5 | 14 | 48 | $3.70 | YES | 80/100 |
+| 25 | 24/25 (96%) | 5/5 | 13+1p | 47 | $7.38 | YES | **100/100** |
+| 26 | 23/25 (92%) | 5/5 | 14 | 41 | $11.15 | YES | 100/100 |
 
-Files column notation: plain count = committed files; `+Np` = N partial files (instrumentation started, not fully committed); `+Nf` = N files rolled back after a checkpoint test failure. Cost column: `~` prefix indicates an estimated/derived cost (early runs predating direct cost reporting in the tool); unprefixed values are directly reported by spiny-orb.
+Files column notation: plain count = committed files; `+Np` = N partial files (instrumentation started, not fully committed); `+Nf` = N files rolled back after a checkpoint test failure. Cost column: `~` prefix indicates an estimated/derived cost (early runs predating direct cost reporting in the tool); unprefixed values are directly reported by spiny-orb. Run-22 was never executed (skipped in the run sequence).
 
-**Run-19 is next** — verifying NDS-003 reconciler gap fix (PRD #845, content-aware diff) for context-capture-tool.js, reflection-tool.js, index.js, and summary-graph.js; monitoring SCH-002 recurrence on journal-manager.js `quotes_count` attribute.
+**Run-27 is next** — verifying whether RUN26-1 (journal-manager.js SCH-003 `reflections_count` typed as a true int) and RUN26-2 (journal-paths.js CDQ-007 raw path with unused `basename`) are resolved.
 
 Full run-by-run analysis: [`evaluation/javascript/commit-story-v2/`](evaluation/javascript/commit-story-v2/)
 
