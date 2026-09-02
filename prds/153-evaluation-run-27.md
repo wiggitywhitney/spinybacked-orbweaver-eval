@@ -116,7 +116,7 @@ The **evaluation execution branch** created by `/prd-start` from main **never me
 
   **Result**: No cross-target run is more recent. Completion dates (from the "eval: save ... artifacts to main" commit, not file mtime — mtimes for release-it/run-4 and taze/run-16 were overwritten by a later unrelated reorg commit): commit-story-v2 run-26 = 2026-07-20, taze run-16 = 2026-06-22, release-it run-4 = 2026-05-07. No `content-manager` directory exists yet. No template changes proposed.
 
-- [ ] **Collect skeleton documents** — Create `evaluation/javascript/commit-story-v2/run-27/` directory (already created with `debug-dumps/`) with a `lessons-for-prd28.md` skeleton. Must run before pre-run verification begins.
+- [x] **Collect skeleton documents** — Create `evaluation/javascript/commit-story-v2/run-27/` directory (already created with `debug-dumps/`) with a `lessons-for-prd28.md` skeleton. Must run before pre-run verification begins.
 
 - [ ] **Pre-run verification** — Verify spiny-orb fixes and validate run prerequisites:
   1. **Datadog MCP health check** *(first, before any other pre-run step)*: Run `search_datadog_spans` with `service:commit-story` for the last 1 hour. If it fails or returns an unexpected error (not just "no results"), re-run `/ddsetup`, then `/reload-plugins`. Do not proceed until Datadog MCP queries succeed.
