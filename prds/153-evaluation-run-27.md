@@ -106,7 +106,7 @@ The **evaluation execution branch** created by `/prd-start` from main **never me
 
 ## Milestones
 
-- [ ] **Step 0 — Bootstrap reading.** Before proceeding with any other milestone, read these documents in order:
+- [x] **Step 0 — Bootstrap reading.** Before proceeding with any other milestone, read these documents in order:
   1. `docs/language-extension-plan.md` — completely. Pay particular attention to: (a) step 9.5 (SPA-001 calibration note — commit-story-v2 threshold is 55, set by PR #142); (b) step 9 (IS scoring protocol); (c) step 6 (per-file trace supplement procedure and D-2 batch-of-5 approach); (d) step 3 (branch-name extraction fallback and approval-prompt check — added from run-26's RUN26-3 finding: before treating an apparently stalled run as failed, check whether it's paused at its own `Proceed? [y/N]` approval prompt rather than genuinely stuck); (e) step 10 (attribute-count trend caution — added from run-26's undercounting finding: before flagging any cross-run "declining richness" trend, verify reported attribute counts against direct source inspection rather than trusting logged figures alone).
   2. `prds/144-evaluation-run-26.md` — the immediately prior commit-story-v2 run PRD; use it as a style reference for the IS scoring milestone format and per-file evaluation structure.
   3. `evaluation/javascript/commit-story-v2/run-26/actionable-fix-output.md` — drives the current run's goals. RUN26-1 (SCH-003 journal-manager.js) and RUN26-2 (CDQ-007 journal-paths.js) are the primary goals for this run; §4 (attribute undercounting) and §7/§8 (carry-forward tracker and score projection) inform pre-run verification and success criteria.
