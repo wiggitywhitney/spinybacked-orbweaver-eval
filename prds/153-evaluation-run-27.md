@@ -158,11 +158,13 @@ The **evaluation execution branch** created by `/prd-start` from main **never me
 
   **Result**: Delivered and acknowledged by Whitney 2026-09-03.
 
-- [ ] **Post-run Datadog verification** — Follow `docs/language-extension-plan.md` step 3b. After the Findings Discussion checkpoint:
+- [ ] **Post-run Datadog verification** *(steps below are self-contained — do not go looking for a "step 3b" in `docs/language-extension-plan.md`; that step reference is stale, see note)*. After the Findings Discussion checkpoint:
   1. Use `search_datadog_spans` with `service:commit-story` filtered to spans newer than the eval run's start timestamp. Check `git.commit.sha` on spans to confirm the new instrument branch is present.
   2. If no spans from the instrument branch appear yet: note in `run-summary.md` and defer.
   3. When confirmed, record the `service.instance.id` in `trace-artifact.md`.
-  4. **Log-trace correlation check** *(commit-story-v2 only — pino bridge)*: Use `search_datadog_logs` with `service:commit-story` filtered to logs newer than the eval run's start. Confirm that ≥1 log record has non-empty `trace_id` and `span_id`. Note the correlated vs. uncorrelated count. Run-26 baseline: check run-26's post-run verification note for the actual figure. If zero correlated logs: flag as regression — pino bridge may have been disrupted.
+  4. **Log-trace correlation check** *(commit-story-v2 only — pino bridge)*: Use `search_datadog_logs` with `service:commit-story` filtered to logs newer than the eval run's start. Confirm that ≥1 log record has non-empty `trace_id` and `span_id`. Note the correlated vs. uncorrelated count. Run-26 baseline: check run-26's post-run verification note for the actual figure (`evaluation/javascript/commit-story-v2/run-26/run-summary.md` — ~83% correlated, 87-log sample). If zero correlated logs: flag as regression — pino bridge may have been disrupted.
+
+  **Note on the stale "step 3b" reference**: this check's steps 1-4 above are fully inline and self-contained — they do not depend on `docs/language-extension-plan.md`. A "step 3b" for this exact check was added to the template on PRD #140's (run-25) eval execution branch, which per this project's own convention never merges to main — so the template edit never reached main and no "step 3b" exists in the current `docs/language-extension-plan.md` (confirmed 2026-09-03; discovered when both run-26's and run-27's copies of this milestone pointed to it). The mainline template's step 9.6 ("Correlated signals check") is a *different* check at a different point in the process (after IS scoring, not right after Findings Discussion) and is not a substitute. Flagged in `lessons-for-prd28.md` for the template-update checkpoint — the template should either get this step back with correct numbering, or PRD #28's drafting should stop citing it.
 
 - [ ] **Failure deep-dives** — For each failed file AND run-level failure. Includes any partial files and committed files with ≥3 attempts AND quality failures.
   Produces: `evaluation/javascript/commit-story-v2/run-27/failure-deep-dives.md`

@@ -7,6 +7,16 @@ Process observations captured during run-27. Populated incrementally as the run 
 
 *(Findings specific to commit-story-v2 that do not belong in the template)*
 
+## Stranded Template Edit — "step 3b" Reference is Broken
+
+Both run-26's (PRD #144) and run-27's (PRD #153) "Post-run Datadog verification" milestones say "Follow `docs/language-extension-plan.md` step 3b" — but no "step 3b" exists in the current mainline template (confirmed 2026-09-03 via `grep` and `git log`). Root cause: the step-3b addition (`git log --all --oneline --grep="step 3b"` → commit `31f9dc4`) was committed on PRD #140's (run-25) **eval execution branch**, which by this project's own convention (`docs/language-extension-plan.md` Eval Branch Convention) never merges to main. The edit updated that branch's local copy of the template and was never carried to main. A separate, unrelated mainline commit (`f00f8c5`) added step 9.6 ("Correlated signals check") the same day — a different check, at a different point in the process (after IS scoring, not right after Findings Discussion) — which is not a substitute.
+
+This went undetected for two runs because the milestone's own inline steps (1-4) are fully self-contained, so the broken pointer never blocked execution — it just silently pointed nowhere.
+
+**Recommend at the template-update checkpoint**: either (a) re-add the step-3b content to `docs/language-extension-plan.md` proper (on a branch that actually merges to main — the PRD-drafting branch, not an eval execution branch), with correct sequential numbering, or (b) stop citing "step 3b" in future run PRDs and treat the milestone's own inline steps as the sole source of truth for this check.
+
+**Broader risk worth flagging generally**: any `docs/language-extension-plan.md` edit made on an eval execution branch will silently never reach main. Worth a one-line caution in the template's own "Eval Branch Convention" section: template changes belong on the PRD-drafting branch or a dedicated docs branch, never on an eval execution branch.
+
 ## Generalizable Process Improvements
 
 *(Observations about the eval process itself that may warrant template updates)*
