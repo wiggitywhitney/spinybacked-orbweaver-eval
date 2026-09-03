@@ -7,6 +7,7 @@ Entry format: `- (YYYY-MM-DD) Description of feature-level change (PRD #X, miles
 ## [Unreleased]
 
 ### Added
+- (2026-09-03) Completed commit-story-v2 run-27's post-run Datadog verification (PRD #153): the new instrument branch's telemetry hadn't reached Datadog yet, so this deferred as the process allows, while a separate check confirmed the log-to-trace correlation rate held steady at ~85%, matching run-26 with no regression.
 - (2026-09-02) Started commit-story-v2 evaluation run-27 (PRD #153, Step 0 — Bootstrap reading), verifying the SCH-003 and CDQ-007 fixes identified in run-26.
 - (2026-09-02) Created the run-27 skeleton documents (PRD #153) — `debug-dumps/` directory and `lessons-for-prd28.md` — needed before pre-run verification can begin.
 - (2026-09-02) Completed commit-story-v2 run-27 pre-run verification (PRD #153): confirmed none of the three tracked spiny-orb fixes from run-26 have landed yet — the int-typed attribute shipped as a string (issue #1037), the raw-path attribute quality finding (issue #1035), and the PR summary undercounting total attributes set (issue #1036) all remain open. spiny-orb rebuilt cleanly at v2.0.0. Captured a fresh trace artifact and confirmed Datadog telemetry is flowing normally after re-authenticating the Datadog MCP connection.

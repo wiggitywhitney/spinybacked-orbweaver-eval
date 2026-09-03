@@ -121,3 +121,11 @@ $9.40 vs run-26's $11.15, despite one new partial-file retry cycle (summary-mana
 | RUN26-2 (CDQ-007) | ❌ Still present | ❌ Present |
 
 Quality score, gates, and IS score pending rubric scoring and IS scoring milestones.
+
+---
+
+## Post-run Datadog verification (PRD #153 milestone)
+
+Instrument-branch traffic (`spiny-orb/instrument-1788361335787`, HEAD `38dd8702...`) has not yet appeared in Datadog as of 2026-09-03 — all spans on `service:commit-story` since 2026-09-02 carry `git.commit.sha` matching main's current HEAD (`8bea3922...`), confirming ordinary main-branch dogfooding traffic rather than instrument-branch evidence. Deferred per milestone step 2; full detail in `trace-artifact.md`.
+
+Log-trace correlation check: ~85% of a 88-log sample (227 total logs since run start) carry non-empty `trace_id`/`span_id` — consistent with run-26's ~83% baseline, no pino-bridge regression.
