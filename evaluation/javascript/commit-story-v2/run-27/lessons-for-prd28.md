@@ -11,6 +11,9 @@ Process observations captured during run-27. Populated incrementally as the run 
 
 *(Observations about the eval process itself that may warrant template updates)*
 
+- **A new unattended-prompt pause pattern, distinct from D-7's `Proceed? [y/N]`**: run-27's actual instrumentation work finished in well under an hour, but the process then sat overnight (21h 21m total duration) at an interactive `PROGRESS.md` update confirmation (`[a]ccept/[e]dit/[s]kip`) waiting for terminal input. Same failure *shape* as D-7 (unattended run looks stalled at a live prompt), but a different prompt than the push `Proceed?` confirmation D-7 documents.
+- **This prompt's text is invisible in the piped log.** `spiny-orb-output.log` (captured via `tee`) jumps directly from `pushBranch: urlChanged=true...` to `Completed in 21h 21m 7.7s` — the interactive block itself never appears in the log, only the raw terminal saw it. Checking `spiny-orb-output.log` alone during a live run gives no signal that this kind of prompt is blocking; only `ps` showing a low-but-nonzero CPU process hints at "alive but blocked" rather than crashed or hung. Recommend adding this as an explicit case to `docs/language-extension-plan.md` step 3 alongside D-7 — before declaring a run stalled, check for *any* live interactive prompt (not just push confirmation), and note that piped-log inspection cannot rule this out.
+
 ## Pre-Run Verification Summary (Step 13)
 
 - **RUN26-1 (SCH-003) not fixed**: tracked in spiny-orb issue #1037 (open, no acceptance criteria checked, no related merged PR since run-26). Related backstop issue #948 (closed 2026-06-19) may cover this pattern in its coverage table but wasn't wired in — #1037 explicitly calls this out as unresolved investigation. Expect the gap to persist in run-27.
