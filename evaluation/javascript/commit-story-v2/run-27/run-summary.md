@@ -115,7 +115,7 @@ $9.40 vs run-26's $11.15, despite one new partial-file retry cycle (summary-mana
 | Files partial | **1** | 0 |
 | Total spans (committed+partial) | 49 | 41 |
 | New schema attrs | 14 | 19 |
-| Multi-attempt files (≥2) | 7 (git-collector, journal-graph, summary-graph, reflection-tool [skip], summary-manager [partial], summarize, — 7 total) | 7 |
+| Multi-attempt files (≥2) | 6 (git-collector, journal-graph, summary-graph, reflection-tool [skip], summary-manager [partial], summarize) | 7 |
 | Cost | **$9.40** | $11.15 |
 | RUN26-1 (SCH-003) | ✅ Fixed | ❌ Present |
 | RUN26-2 (CDQ-007) | ❌ Still present | ❌ Present |
