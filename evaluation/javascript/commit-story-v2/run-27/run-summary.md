@@ -126,6 +126,8 @@ Quality score, gates, and IS score pending rubric scoring and IS scoring milesto
 
 ## Post-run Datadog verification (PRD #153 milestone)
 
-Instrument-branch traffic (`spiny-orb/instrument-1788361335787`, HEAD `38dd8702...`) has not yet appeared in Datadog as of 2026-09-03 — all spans on `service:commit-story` since 2026-09-02 carry `git.commit.sha` matching main's current HEAD (`8bea3922...`), confirming ordinary main-branch dogfooding traffic rather than instrument-branch evidence. Deferred per milestone step 2; full detail in `trace-artifact.md`.
+**Corrected finding** (see `trace-artifact.md` for full detail): an initial check against `git.commit.sha` reported instrument-branch traffic as "not yet observed" — that was wrong. `git.commit.sha` on these spans is the *journaled* commit (domain data), not the running code's own branch identity, exactly as run-26's post-run note already established. Re-checked against `vcs.ref.head.revision` (the correct attribute): confirmed. Every incremental instrument commit from this run (`38dd870` HEAD, plus `8317536`, `b219e77`, `e0ca3ee`, `c5839a3`, `9b22db6`, `a2fdaf4`, `ce19b5c`, `5178302`, `39abd79`, and others) has matching spans in Datadog — direct evidence the local commit-story-v2 checkout, on the instrument branch, self-journaled its own commits during and after the eval run. `service.instance.id: 0cac1bed-f201-466a-b976-41f47c65d3bd`.
+
+This PRD's milestone text and Decision D-6 both point at `git.commit.sha` for this check, which is what caused the initial false negative — flagged for correction in `lessons-for-prd28.md`.
 
 Log-trace correlation check: ~85% of a 88-log sample (227 total logs since run start) carry non-empty `trace_id`/`span_id` — consistent with run-26's ~83% baseline, no pino-bridge regression.
