@@ -70,7 +70,7 @@
 | src/utils/failure-placeholder.js | ✅ skip | 0 | 0 | 1 | RST-001 correct |
 | src/utils/journal-paths.js | ✅ committed | 1 | 0 | 1 | **RUN26-2 CONFIRMED STILL UNRESOLVED** — raw `filePath` used as-is; `basename` not imported |
 | src/managers/journal-manager.js | ✅ committed | 2 | 0 | 1 | **RUN26-1 type mismatch CONFIRMED FIXED** — `quotes_count` set as raw int, not `String()`-wrapped. **New semantic failure found**: that int is a reflection count written into `quotes_count`, a key registered to mean developer-quote count — a correct type on the wrong attribute (see per-file evaluation) |
-| src/managers/summary-manager.js | ⚠️ partial | 7 | 0 | 2 | **REGRESSION** — 2 functions rejected on COV-003 (Error Recording): "catch block does not record error on span." Rejected functions differ from run-25's pair (`readDayEntries`, `readMonthWeeklySummaries` here vs. run-25's `readWeekDailySummaries`, `readMonthWeeklySummaries`) — same failure shape (7/9), different functions. Run-26 had committed all 9 functions cleanly (RUN25-1 fix had held for one run). See `failure-deep-dives.md` for root cause. |
+| src/managers/summary-manager.js | ⚠️ partial | 7 | 0 | 2 | **REGRESSION (COV-003)** — 2 functions rejected on COV-003 (Error Recording): "catch block does not record error on span." Rejected functions differ from run-25's pair (`readDayEntries`, `readMonthWeeklySummaries` here vs. run-25's `readWeekDailySummaries`, `readMonthWeeklySummaries`) — same failure shape (7/9), different functions. Run-26 had committed all 9 functions cleanly (RUN25-1 fix had held for one run). See `failure-deep-dives.md` for root cause. **Also CDQ-007**: raw `repo_path`/`file_path` values, the same self-identified-and-declined `basename()` pattern as six other files this run (see per-file evaluation). |
 | src/commands/summarize.js | ✅ committed | 3 | 3 | 3 | Attempts up vs run-26 (2→3); new-attribute count down sharply (9→3) — reverses the run-24→25→26 climbing trend |
 | src/utils/summary-detector.js | ✅ committed | 9 | 1 | 1 | Attempts improved vs run-26 (3→1); attribute count down (3→1) is known attribute-selection variance, not a failure — but per-file evaluation found two real rule failures in the committed code: SCH-003 (`weeks_count` declared `int`, emitted via `String(...)`) and CDQ-007 (raw `repo_path`, self-identified-and-declined `basename()` fix) |
 | src/managers/auto-summarize.js | ✅ committed | 3 | 0 | 1 | Matches run-26 |
@@ -113,11 +113,11 @@ $9.40 vs run-26's $11.15, despite one new partial-file retry cycle (summary-mana
 | Files committed | 13 | **14** |
 | Files failed | 0 | 0 |
 | Files partial | **1** | 0 |
-| Total spans (committed+partial) | 49 | 41 |
+| Total spans (committed+partial) | 48 | 41 |
 | New schema attrs | 14 | 19 |
 | Multi-attempt files (≥2) | 6 (git-collector, journal-graph, summary-graph, reflection-tool [skip], summary-manager [partial], summarize) | 7 |
 | Cost | **$9.40** | $11.15 |
-| RUN26-1 (SCH-003) | ✅ Fixed | ❌ Present |
+| RUN26-1 (SCH-003) | ✅ Type fixed, ⚠️ new semantic mismatch found | ❌ Present |
 | RUN26-2 (CDQ-007) | ❌ Still present | ❌ Present |
 
 Quality score, gates, and IS score pending rubric scoring and IS scoring milestones.
