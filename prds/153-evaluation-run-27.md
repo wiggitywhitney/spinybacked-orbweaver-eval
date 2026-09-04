@@ -195,7 +195,7 @@ The **evaluation execution branch** created by `/prd-start` from main **never me
   **(D-1) Track attempt counts**: For each file, note attempts. If a file required ≥3 attempts AND has a quality failure, include the verbose log section as input to the per-file evaluation agent.
 
   **Key watch items for per-file evaluation**:
-  - `journal-manager.js` — Does `reflections_count` emit as a true int? RUN26-1 fix result.
+  - `journal-manager.js` — Does `reflections_count` emit as a true int? RUN26-1 fix result. **Also assess as a CDQ finding**: the value is mapped onto the pre-existing `commit_story.journal.quotes_count` key, which is registered to mean developer-quote count, not reflection count — correct type, semantically mismatched key (see `run-summary.md` Fix Verification table).
   - `journal-paths.js` — Is the raw-path CDQ-007 finding resolved, and if so, via which representation? RUN26-2 fix result.
   - `context-capture-tool.js` — Cross-check its attribute count against source directly; do not trust the run-summary figure alone (attribute-count trend caution above).
   - `journal-graph.js` — Tenth consecutive success expected.
