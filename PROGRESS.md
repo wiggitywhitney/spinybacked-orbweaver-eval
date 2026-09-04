@@ -7,6 +7,7 @@ Entry format: `- (YYYY-MM-DD) Description of feature-level change (PRD #X, miles
 ## [Unreleased]
 
 ### Added
+- (2026-09-04) Diagnosed commit-story-v2 run-27's new partial-file regression (PRD #153): a file that had committed cleanly in the prior run reverted to rejecting two of its nine functions. Traced the exact cause by comparing the accepted and rejected functions side by side — the validator accepts one style of "skip missing files, but raise real errors" error handling and rejects another, functionally equivalent style. The prior run's clean pass wasn't a fix; it was luck, because none of that file's functions happened to use the rejected style that run. This confirms and sharpens a root-cause theory from two runs ago.
 - (2026-09-03) Corrected commit-story-v2 run-27's post-run Datadog verification (PRD #153): an initial check said the new instrument branch's telemetry hadn't reached Datadog, but that check used the wrong span attribute. Re-checking the right one found clear evidence the instrumented code did run and was traced. Fixed the guidance in the PRD so future runs check the correct attribute from the start, and confirmed the log-to-trace correlation rate held steady at ~85%, matching run-26 with no regression.
 - (2026-09-02) Started commit-story-v2 evaluation run-27 (PRD #153, Step 0 — Bootstrap reading), verifying the SCH-003 and CDQ-007 fixes identified in run-26.
 - (2026-09-02) Created the run-27 skeleton documents (PRD #153) — `debug-dumps/` directory and `lessons-for-prd28.md` — needed before pre-run verification can begin.
