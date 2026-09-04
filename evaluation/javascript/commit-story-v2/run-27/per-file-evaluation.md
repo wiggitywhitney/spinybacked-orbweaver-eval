@@ -22,7 +22,7 @@
 |------|--------|----------|
 | API-002 | **PASS** | `package.json` `peerDependencies` contains `"@opentelemetry/api": "^1.9.0"` |
 | API-003 | **PASS** | `dependencies` block contains only `@langchain/anthropic`, `@langchain/core`, `@langchain/langgraph`, `@modelcontextprotocol/sdk`, `@opentelemetry/instrumentation-pino`, `dotenv`, `pino`, `zod` — no vendor-specific observability SDKs (grep for `datadog\|dd-trace\|newrelic\|honeycomb` returns nothing) |
-| API-004 | **PASS** | Grep for `@opentelemetry/sdk\|@opentelemetry/exporter\|@opentelemetry/resources\|@opentelemetry/instrumentation-` in `src/` returns nothing; these packages only appear in `devDependencies` |
+| API-004 | **PASS** | Grep for `@opentelemetry/sdk\|@opentelemetry/exporter\|@opentelemetry/resources\|@opentelemetry/instrumentation-` in `src/` returns nothing — no file in `src/` imports these directly. `@opentelemetry/instrumentation-pino` is a legitimate production dependency (auto-instrumentation registered by the bootstrap, not manually imported in `src/`); `@opentelemetry/sdk-*`/`exporter-*`/`resources` packages are absent from `dependencies` entirely and appear only in `devDependencies` (corrected: this row previously and inaccurately implied all `instrumentation-`-prefixed packages are dev-only, contradicting API-003's own listing of `@opentelemetry/instrumentation-pino` as a production dependency — caught in CodeRabbit review of this document) |
 | CDQ-008 | **PASS** | `grep -rn "getTracer" src/` confirms all 14 committed/partial files use `trace.getTracer('commit-story')` with the identical string, no variants |
 
 ---
@@ -489,7 +489,7 @@ This SCH-003 failure is self-consistent across all three call sites (always `Str
 
 **Total canonical failures**: 12 findings across 9 files (CDQ-007 ×7, SCH-003 ×2, SCH-002/semantic mismatch ×1, unrubriced semantic mismatch ×1, COV-003 ×1)
 
-**Correction history**: This document went through six CodeRabbit CLI review passes before push, each catching real internal scoring inconsistencies across the independently-authored per-file sections (14 background agents scored files without cross-checking each other's verdicts, so the same underlying pattern sometimes landed on different sides of PASS/FAIL in different files) or plain arithmetic mistakes.
+**Correction history**: This document went through seven CodeRabbit CLI review passes before push, each catching real internal scoring inconsistencies across the independently-authored per-file sections (14 background agents scored files without cross-checking each other's verdicts, so the same underlying pattern sometimes landed on different sides of PASS/FAIL in different files) or plain arithmetic mistakes.
 
 *Pass 1* caught: `context-integrator.js`'s CDQ-007 scored PASS for the identical raw-absolute-path pattern that `claude-collector.js` scored FAIL for the same `repo_path` attribute; `summary-detector.js`'s SCH-003 table cell said PASS while its own narrative text already documented `weeks_count` being emitted via `String(...)` against a declared `int` key; and `summarize.js`'s `dates_count`-holds-a-week-count finding was left ADVISORY despite matching `journal-manager.js`'s canonical-failure precedent for a wrong chosen registry key.
 
