@@ -18,7 +18,7 @@
 | Files partial | 1 (summary-manager.js) |
 | Correct skips | 18 |
 | Files seen | 32 |
-| Total spans (committed + partial) | 49 |
+| Total spans (committed + partial) | 48 (corrected from an initially-reported 49 — see `context-capture-tool.js`'s row below) |
 | New schema extension attributes | 14 |
 | Model | claude-sonnet-4-6 |
 | Tokens | 272.3K input / 356.1K output (515.2K cached) |
@@ -60,8 +60,8 @@
 | src/integrators/context-integrator.js | ✅ committed | 1 | 0 | 1 | Reuses `repo_path` as a registered key (0 new extensions) once claude-collector.js declares it |
 | src/logger.js | ✅ skip | 0 | 0 | 1 | RST-001 correct |
 | src/generators/journal-graph.js | ✅ committed | 4 | 3 | 3 | Tenth consecutive success; matches run-26's attempt count |
-| src/generators/summary-graph.js | ✅ committed | 6 | 3 | 2 | Matches run-26 exactly |
-| src/mcp/tools/context-capture-tool.js | ✅ committed | 3 | 0 | 1 | Spans up vs run-26 (1→3); attribute-count trend caution applies — verify against source in per-file eval |
+| src/generators/summary-graph.js | ✅ committed | 6 | 3 | 2 | Span and attempt counts match run-26; per-file evaluation found the attribute set itself changed (renamed/consolidated keys, dropped `section_type`/`gen_ai.request.temperature`) — not an exact instrumentation match |
+| src/mcp/tools/context-capture-tool.js | ✅ committed | 2 (corrected from an initially-reported 3 — per-file evaluation confirmed only 2 `startActiveSpan` calls via direct source inspection) | 0 | 1 | Spans up vs run-26 (1→2, corrected from an initially-reported 1→3) |
 | src/mcp/tools/reflection-tool.js | ✅ skip | 0 | 0 | 2 | RST-001 correct; matches run-26 |
 | src/mcp/server.js | ✅ committed | 1 | 1 | 1 | Matches run-26 |
 | src/traceloop-init.js | ✅ skip | 0 | 0 | 1 | RST-001 correct |
@@ -69,10 +69,10 @@
 | src/utils/config.js | ✅ skip | 0 | 0 | 1 | RST-001 correct |
 | src/utils/failure-placeholder.js | ✅ skip | 0 | 0 | 1 | RST-001 correct |
 | src/utils/journal-paths.js | ✅ committed | 1 | 0 | 1 | **RUN26-2 CONFIRMED STILL UNRESOLVED** — raw `filePath` used as-is; `basename` not imported |
-| src/managers/journal-manager.js | ✅ committed | 2 | 0 | 1 | **RUN26-1 CONFIRMED FIXED** — `quotes_count` set as raw int on the pre-existing registered key, not `String()`-wrapped |
+| src/managers/journal-manager.js | ✅ committed | 2 | 0 | 1 | **RUN26-1 type mismatch CONFIRMED FIXED** — `quotes_count` set as raw int, not `String()`-wrapped. **New semantic failure found**: that int is a reflection count written into `quotes_count`, a key registered to mean developer-quote count — a correct type on the wrong attribute (see per-file evaluation) |
 | src/managers/summary-manager.js | ⚠️ partial | 7 | 0 | 2 | **REGRESSION** — 2 functions rejected on COV-003 (Error Recording): "catch block does not record error on span." Rejected functions differ from run-25's pair (`readDayEntries`, `readMonthWeeklySummaries` here vs. run-25's `readWeekDailySummaries`, `readMonthWeeklySummaries`) — same failure shape (7/9), different functions. Run-26 had committed all 9 functions cleanly (RUN25-1 fix had held for one run). See `failure-deep-dives.md` for root cause. |
 | src/commands/summarize.js | ✅ committed | 3 | 3 | 3 | Attempts up vs run-26 (2→3); new-attribute count down sharply (9→3) — reverses the run-24→25→26 climbing trend |
-| src/utils/summary-detector.js | ✅ committed | 9 | 1 | 1 | Attempts improved vs run-26 (3→1); attribute count down (3→1) — known attribute-selection variance, not a rule failure |
+| src/utils/summary-detector.js | ✅ committed | 9 | 1 | 1 | Attempts improved vs run-26 (3→1); attribute count down (3→1) is known attribute-selection variance, not a failure — but per-file evaluation found two real rule failures in the committed code: SCH-003 (`weeks_count` declared `int`, emitted via `String(...)`) and CDQ-007 (raw `repo_path`, self-identified-and-declined `basename()` fix) |
 | src/managers/auto-summarize.js | ✅ committed | 3 | 0 | 1 | Matches run-26 |
 | src/index.js | ✅ committed | 2 | 0 | 1 | Matches run-26 |
 
@@ -80,9 +80,9 @@
 
 ## Key Findings
 
-### RUN26-1 (SCH-003) resolved — via better registry-matching, not a validator fix
+### RUN26-1 (SCH-003) type mismatch resolved, but a new semantic failure replaced it
 
-Run-26 invented a brand-new schema extension key (`commit_story.journal.reflections_count`, self-declared `int`) and then violated its own contract by wrapping the value in `String()`. Run-27's agent instead recognized that the pre-existing registered `commit_story.journal.quotes_count` (already `type: int`) covers the same semantic value, and used it directly with a raw int. Net effect: the SCH-003 mismatch is gone for this file. This looks like a genuine improvement in registry-matching behavior rather than a fix to the underlying `String()`-wrapping defect — that specific anti-pattern was sidestepped, not tested against. Worth flagging in the handoff: if a future file still needs to invent a new int-typed extension, RUN26-1's root cause (no static check catching `setAttribute(key, String(...))` against numeric-typed keys) may still be present.
+Run-26 invented a brand-new schema extension key (`commit_story.journal.reflections_count`, self-declared `int`) and then violated its own contract by wrapping the value in `String()`. Run-27's agent instead reused the pre-existing registered `commit_story.journal.quotes_count` (already `type: int`) and set it directly with a raw int — the SCH-003 type mismatch is gone for this file. **This is not a clean fix**: per-file evaluation found `quotes_count` does not cover the same semantic value — it is registered to mean the number of developer quotes extracted from AI dialogue, while the code now stores an unrelated `discoverReflections()` count under that key. The type mismatch was avoided by picking a different, wrong key rather than resolved; the underlying gap (no check catching `setAttribute(key, String(...))` against numeric-typed keys) is unverified and, per per-file evaluation, recurs independently this run in `summary-detector.js`'s `weeks_count`. This semantic-mismatch finding is the primary RUN26-1-related handoff item, not a confirmation that RUN26-1 is closed.
 
 ### RUN26-2 (CDQ-007) still unresolved — same self-identified, unapplied fix
 
@@ -98,7 +98,7 @@ The run's actual instrumentation work (all 32 files) completed in well under an 
 
 ### Attempt/attribute variance continues
 
-`git-collector.js` and `summary-detector.js` both improved on attempts vs run-26 (3→2 and 3→1 respectively) while `summarize.js` got worse (2→3) with a sharp attribute drop (9→3). `context-capture-tool.js` gained spans (1→3) worth checking against source per the attribute-count trend caution. No single clean trend line — consistent with runs 24-26's established attribute-selection variance pattern.
+`git-collector.js` and `summary-detector.js` both improved on attempts vs run-26 (3→2 and 3→1 respectively) while `summarize.js` got worse (2→3) with a sharp attribute drop (9→3). `context-capture-tool.js` gained spans (1→2, corrected from an initially-reported 1→3 by per-file evaluation's direct source inspection). No single clean trend line — consistent with runs 24-26's established attribute-selection variance pattern.
 
 ### Cost down vs run-26
 
