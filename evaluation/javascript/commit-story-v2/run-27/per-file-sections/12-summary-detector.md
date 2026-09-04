@@ -15,21 +15,21 @@
 | RST-004 | PASS |
 | SCH-001 | PASS |
 | SCH-002 | PASS |
-| SCH-003 | PASS |
+| SCH-003 | **FAIL** (corrected — see below) |
 | CDQ-001 | PASS |
 | CDQ-002 | PASS |
 | CDQ-003 | PASS |
 | CDQ-005 | PASS |
 | CDQ-007 | ADVISORY |
 
-**Failures**: None. One advisory finding, non-blocking:
+**Failures**: SCH-003 — `commit_story.journal.weeks_count` is declared `type: int` in `semconv/agent-extensions.yaml` (confirmed: `spiny-orb-output.log` line 1054, "I need `commit_story.journal.weeks_count` as a new int attribute"), but the code sets it via `String(...)` at all three call sites (`getWeeksWithWeeklySummaries`, `findUnsummarizedWeeks`, and a third site — confirmed by direct source inspection: `span.setAttribute('commit_story.journal.weeks_count', String(weeks.size))` etc.). The live trace below confirms the mismatch reaches Datadog as a quoted string (`weeks_count: "11"`). This section originally scored SCH-003 PASS despite the type-inconsistency evidence already present in the paragraphs below — a self-contradiction within this section, caught in CodeRabbit review of this document; corrected here. One advisory finding, non-blocking, in addition to the SCH-003 failure above:
 - CDQ-007 (×14, all on `commit_story.context.repo_path`): every span sets this from the raw `basePath` parameter without a basename transformation. The `.instrumentation.md` report flags this itself and classifies it as lower severity, noting `path.basename` isn't imported in the file. Real-world risk is low since `basePath` defaults to `.` and is caller-supplied, but per the rule's letter it's a raw filesystem path.
 
 Notable improvement over run-26: all four unexported async helpers (`getSummarizedDays`, `getSummarizedWeeks`, `getSummarizedMonths`, `getWeeksWithWeeklySummaries`) got their own spans this run rather than being left as a COV-004 advisory gap — full coverage, no unresolved internal-helper question this time.
 
 **Attribute-count verification**: The framing in `run-summary.md` ("attribute count down (3→1)") holds up, but only as a count of *new schema-extension attributes* — it is not the total attribute-setting activity in the file. Verified directly from source: all 9 spans call `setAttribute` exactly twice each (one `commit_story.context.repo_path` input, one output count), for 18 total `setAttribute` calls using 4 distinct attribute keys — `commit_story.context.repo_path`, `commit_story.journal.dates_count`, `commit_story.journal.weeks_count`, and `commit_story.summary.months_count`. Of those four, only `commit_story.journal.weeks_count` is a genuinely new schema extension (confirmed against both the log's "Schema extensions" block and the `.instrumentation.md` report, which explicitly states `attributesCreated = 1`); the other three keys were already registered and are reused. So "1" is correct for new schema extensions, matching the note's intent, but a reader could misread "attribute count" as total attributes emitted, which is 4 (or 18 call sites) — worth keeping that distinction explicit going forward.
 
-One type inconsistency worth flagging for future runs: `weeks_count` is consistently wrapped in `String(...)` at all three call sites, while `dates_count` and `months_count` are set as raw numbers — a self-consistent choice for the new attribute, but it diverges from the numeric-count pattern used elsewhere in this same file.
+This SCH-003 failure is self-consistent across all three call sites (always `String(...)`, never a bare number for `weeks_count`), unlike a one-off slip — the agent applied a systematic (but wrong) `String()`-wrapping rule to this one attribute while leaving `dates_count` and `months_count` as raw numbers throughout the same file. This is the same class of RUN26-1-style int/`String()` mismatch already confirmed fixed in `journal-manager.js` this run — its recurrence here (a different file, same run) shows the underlying validator/generation-time gap (no check catches `setAttribute(key, String(...))` against a numeric-typed key) is not resolved project-wide, only avoided in the specific case run-26 originally flagged.
 
 **Datadog trace supplement**: Found matching spans for all 9 function names.
 - **Instrument-branch evidence** (`service:commit-story`, `service.instance.id:0cac1bed-f201-466a-b976-41f47c65d3bd`, trace `3b42cf07b106223acd3e9a8e2ac52ead`, timestamp 2026-09-03T12:23:31): `commit_story.journal.get_weeks_with_weekly_summaries` (`repo_path: "."`, `weeks_count: "11"`), `commit_story.journal.get_summarized_months` (`months_count: 5`), `commit_story.journal.find_unsummarized_months` (`months_count: 0`). Attribute keys, values, and types (string for `weeks_count`, integer for `months_count`) match the committed source exactly.
