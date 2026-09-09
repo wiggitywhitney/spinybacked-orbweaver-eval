@@ -6,6 +6,9 @@ Entry format: `- (YYYY-MM-DD) Description of feature-level change (PRD #X, miles
 
 ## [Unreleased]
 
+### Added
+- (2026-09-09) Evaluated the generated pull request for commit-story-v2 run-27 (PRD #153): checked every claim the auto-generated PR summary makes against the independently-derived full instrumentation review. The summary's habit of inventing findings that don't hold up dropped sharply from the prior run (roughly 1 in 8 claims now, down from nearly half). But it still leaves out a third of the real problems entirely — including two cases where a number was declared as a whole number but recorded as text — and treats a handful of confirmed, unresolved defects (the same raw-file-path issue recurring in seven files) with the same "low priority, fix eventually" language it uses for genuinely minor notes, giving a reviewer no way to tell which flagged items actually need attention.
+
 ### Fixed
 - (2026-09-04) Corrected six documentation errors in commit-story-v2 run-27's artifacts and PRD #153, found by a CodeRabbit review: pre-run verification steps still told operators to use the wrong span attribute for identifying which code version is running (already corrected elsewhere in the same document); the "run appears stuck" guidance only covered one of the two prompts that can actually stall a run overnight; a trace record mixed together evidence from before and after the run without labeling which was which; a stale expected-file-count number; a note that hadn't been updated after its own referenced fix landed; and a result that had been superseded by a later, more thorough investigation but still read as unresolved. Also caught that an attribute fix landed on the right data type but the wrong meaning — the code reports a reflection count using a schema field defined for a different kind of count entirely.
 

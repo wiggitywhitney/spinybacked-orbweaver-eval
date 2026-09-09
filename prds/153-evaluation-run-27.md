@@ -204,10 +204,12 @@ The **evaluation execution branch** created by `/prd-start` from main **never me
   - `context-capture-tool.js` — Cross-check its attribute count against source directly; do not trust the run-summary figure alone (attribute-count trend caution above).
   - `journal-graph.js` — Tenth consecutive success expected.
 
-- [ ] **PR artifact evaluation** — Evaluate PR quality.
+- [x] **PR artifact evaluation** — Evaluate PR quality.
   Produces: `evaluation/javascript/commit-story-v2/run-27/pr-evaluation.md`
   Style reference: `Read docs/templates/eval-run-style-reference/pr-evaluation.md`
   PR: Find the URL in `evaluation/javascript/commit-story-v2/run-27/run-summary.md`.
+
+  **Result**: PR #94 evaluated against `per-file-evaluation.md`'s 12 canonical findings. Push auth: nineteenth consecutive automated success, no manual recovery needed. Advisory-finding accuracy improved sharply over run-26 (1 hallucination out of 13 line-items, ~8%, vs. run-26's 44%) — the one false positive is a CDQ-007 flag on `journal-graph.js` at lines that contain no PII or path data. The dominant failure mode remains omission and severity-calibration, not hallucination: 4 of 12 canonical failures (both SCH-003 type mismatches, `summarize.js`'s SCH-002 key mismatch, `journal-manager.js`'s unrubriced semantic mismatch) are entirely absent from Advisory Findings, and all 7 CDQ-007 self-identified-fix instances that per-file evaluation scored FAIL are flattened into the same uniform low-severity boilerplate as routine advisory noise. Registry version still reports unchanged (0.1.0→0.1.0) despite 14 new attributes and ~48 new span IDs — second consecutive run with this discrepancy. Cost $9.40, down $1.75 (−15.7%) from run-26, reversing that run's spike — fewer 3-attempt files this run (2 vs. 3). Reviewer Utility Score 3.5/5, matching run-26.
 
 - [ ] **Rubric scoring** — Synthesize dimension-level scores.
   Produces: `evaluation/javascript/commit-story-v2/run-27/rubric-scores.md`
