@@ -232,7 +232,9 @@ The **evaluation execution branch** created by `/prd-start` from main **never me
 
   **Note on Datadog Agent**: Do NOT run `datadog-agent stop/start`. The Agent's embedded OTLP HTTP receiver is permanently disabled (port 4318 owned by `otelcol-contrib`).
 
-  1. **Claude starts** the OTel Collector in the background:
+  **Read `~/.claude/rules/is-scoring-gotchas.md` before step 1.** `otelcol-contrib` now runs as a persistent macOS LaunchAgent (`com.whitney.otelcol-contrib`) that is almost always already listening on port 4318 — check with `lsof -i :4318 -sTCP:LISTEN` first. If it shows `otelcol-c` as the listener, skip starting a new instance entirely (do not set `COLLECTOR_PID`, and skip step 3's `kill` below). Only fall back to manually starting a new instance if the port shows no listener.
+
+  1. **If no listener was found above, Claude starts** the OTel Collector in the background:
      ```bash
      vals exec -f ~/Documents/Repositories/spinybacked-orbweaver-eval/.vals.yaml -- ~/.local/bin/otelcol-contrib --config ~/Documents/Repositories/spinybacked-orbweaver-eval/evaluation/is/otelcol-config.yaml > /tmp/otelcol.log 2>&1 &
      COLLECTOR_PID=$!
@@ -245,7 +247,7 @@ The **evaluation execution branch** created by `/prd-start` from main **never me
      git checkout main -- src/ examples/
      ```
      Note: omit `COMMIT_STORY_TRACELOOP=true`.
-  3. **Claude stops** the Collector: `kill "$COLLECTOR_PID"`
+  3. **Claude stops** the Collector: `kill "$COLLECTOR_PID"` — **skip this step entirely** if the persistent LaunchAgent instance was already running and no `COLLECTOR_PID` was set; leave it running.
   4. **Claude runs** the scorer, from `~/Documents/Repositories/spinybacked-orbweaver-eval` (the preceding steps left the working directory in commit-story-v2): `cd ~/Documents/Repositories/spinybacked-orbweaver-eval && node evaluation/is/score-is.js evaluation/is/eval-traces.json --target commit-story-v2 > evaluation/javascript/commit-story-v2/run-27/is-score.md`
   5. **Confirm IS scoring traces in Datadog**: Record IS scoring run start time, then query `service:commit-story from:<run-start-time>`. Record `service.instance.id`.
   Produces: `evaluation/javascript/commit-story-v2/run-27/is-score.md`
