@@ -214,6 +214,9 @@ The **evaluation execution branch** created by `/prd-start` from main **never me
 - [ ] **Rubric scoring** — Synthesize dimension-level scores.
   Produces: `evaluation/javascript/commit-story-v2/run-27/rubric-scores.md`
   Style reference: `Read docs/templates/eval-run-style-reference/rubric-scores.md`
+
+  **Before scoring, resolve four outstanding CodeRabbit findings in `per-file-evaluation.md`** (surfaced by the PR-artifact-evaluation milestone's review, out of that milestone's scope since they're in content from an earlier session): (1) the "Total canonical failures" line (490) should distinguish 11 rubric-scored failures across 8 files from `journal-manager.js`'s 1 unrubriced finding, rather than a flat "12 findings across 9 files"; (2) the file-count summary (line 6) should not count `reflection-tool.js` among "confirmed correct skips" given its own questionable-skip flag — report 17 confirmed + 1 questionable, or recategorize; (3) `journal-manager.js`'s CDQ-001 through CDQ-005 rows (277-280) use inconsistent rule-ID mappings vs. other files' sections — align to the canonical per-rule meaning used elsewhere in the document; (4) `summarize.js`'s trace-evidence conclusion (per-file-sections/11-summarize.md line 29) overclaims — narrow it to "no spans found in the queried instance/30-day window" rather than implying no evidence exists anywhere. Fix (1) also requires a matching correction to PROGRESS.md's per-file-evaluation entry.
+
   **Use run-26 rubric as the primary precedent reference** (`evaluation/javascript/commit-story-v2/run-26/rubric-scores.md`). Critical precedents:
   1. **CDQ-006 precedent**: Advisory findings are not canonical failures — do NOT fail CDQ-006 for advisory findings.
   2. **COV-001 failed-file precedent**: Files that failed to commit but whose output would have passed COV-001 are scored as COV-001 PASS.
