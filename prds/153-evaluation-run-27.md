@@ -226,7 +226,7 @@ The **evaluation execution branch** created by `/prd-start` from main **never me
   4. **CDQ-007 self-identified-fix precedent** (new from run-26): a raw-path/similar advisory finding becomes a canonical FAIL when the agent's own generation-time notes name a specific, cost-free remediation and decline to apply it — do not apply this escalation to any other CDQ-007 finding this run unless the same self-identification condition holds.
   **Rule set**: CDQ dimension is 7/7 max (CDQ-001, CDQ-002, CDQ-003, CDQ-005, CDQ-006, CDQ-007, CDQ-008). NDS-007 is Control Flow Preserved.
 
-- [ ] **IS scoring run** — Follow `docs/language-extension-plan.md` step 9. Full protocol in `evaluation/is/README.md`.
+- [x] **IS scoring run** — Follow `docs/language-extension-plan.md` step 9. Full protocol in `evaluation/is/README.md`.
 
   **Note**: SPA-001 threshold for commit-story-v2 is 55 (set by PR #142). SPA-002 is de-facto resolved for commit-story-v2 (`SimpleSpanProcessor` + `shutdownAndExit` override — structurally impossible). IS 100/100 in run-25 and run-26 is the baseline. If IS returns <100/100 in run-27, check for a **different** rule failure — do NOT re-investigate SPA-002.
 
