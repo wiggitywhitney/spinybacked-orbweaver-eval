@@ -99,7 +99,7 @@
 | **Total** | **21/25 (84%)** | **23/25 (92%)** | **24/25 (96%)** | **23/25 (92%)** | **-8pp** |
 | **Gates** | **5/5 (100%)** | **5/5 (100%)** | **5/5 (100%)** | **5/5 (100%)** | — |
 
-**This run regresses against Success Criteria #3** (≥23/25, no regression from run-26). Both primary run-27 goals were partially met — RUN26-1 fixed on the type dimension but introduced a new semantic-mismatch finding, and RUN26-2 remains unresolved and widened to six more files — but the regression is driven by two independent new failures neither goal targeted: COV-003's `summary-manager.js` partial-commit recurrence (the same run-25 validator gap, not a new bug) and SCH-002's `summarize.js` same-file key-meaning contradiction. Four of the five dimension movements are regressions (COV, SCH) or flat (RST, API, and CDQ nominally flat despite a much wider CDQ-007 footprint); none improved.
+**This run regresses against Success Criteria #3** (≥23/25, no regression from run-26). Both primary run-27 goals were partially met — RUN26-1 fixed on the type dimension but introduced a new semantic-mismatch finding, and RUN26-2 remains unresolved and widened to six more files — but the regression is driven by two independent new failures neither goal targeted: COV-003's `summary-manager.js` partial-commit recurrence (the same run-25 validator gap, not a new bug) and SCH-002's `summarize.js` same-file key-meaning contradiction. Of the six dimensions, two regressed (COV, SCH) and four held flat (NDS, RST, API, and CDQ — CDQ only nominally flat, since its CDQ-007 footprint widened sharply); none improved.
 
 ---
 
