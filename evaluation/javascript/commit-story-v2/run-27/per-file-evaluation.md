@@ -1,8 +1,8 @@
 # Per-File Evaluation — Run-27
 
-**Date**: 2026-09-03
+**Evaluation date**: 2026-09-03 (run executed 2026-09-02 — see `run-summary.md`)
 **Branch**: spiny-orb/instrument-1788361335787
-**Rubric**: 32 rules (5 gates + 27 quality)
+**Rubric**: 30 rules (5 gates + 25 quality — see `rubric-scores.md` for the dimension breakdown: NDS 2, COV 5, RST 4, API 3, SCH 4, CDQ 7)
 **Files evaluated**: 32 (13 committed + 1 partial + 17 confirmed correct skips + 1 questionable skip — see `reflection-tool.js` entry in Correct Skips)
 
 ---

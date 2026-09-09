@@ -1,7 +1,7 @@
 // ABOUTME: Rubric scores for run-27 — dimension-level synthesis from per-file, failure-deep-dive, and PR evaluations.
 # Rubric Scores — Run-27
 
-**Date**: 2026-09-09
+**Synthesis date**: 2026-09-09 (dimension scoring completed; run executed 2026-09-02, per-file evaluation completed 2026-09-03 — see `run-summary.md` and `per-file-evaluation.md` respectively)
 **Branch**: `spiny-orb/instrument-1788361335787`
 **PR**: https://github.com/wiggitywhitney/commit-story-v2/pull/94
 
@@ -46,7 +46,7 @@
 
 | Rule | Result | Files |
 |------|--------|-------|
-| RST-001 (No utility spans) | **PASS** | All sync helpers excluded across all 14 files, including `reflection-tool.js` (0 spans, though flagged as a questionable skip on COV-004 grounds — see Watch Items) |
+| RST-001 (No utility spans) | **PASS** | All sync helpers excluded across the 13 committed + 1 partial files. `reflection-tool.js` is a separate skip file (not among the 14), flagged as a questionable skip on COV-004 grounds — see Watch Items |
 | RST-003 (No duplicate wrapper spans) | **PASS** | N/A |
 | RST-004 (No internal detail spans) | **PASS** | 14/14 — unexported sync helpers excluded per RST-001; unexported async I/O helpers correctly instrumented where COV-004 requires it (`git-collector.js`, `summary-detector.js`, `context-capture-tool.js`'s `saveContext`) |
 | RST-005 (No re-instrumentation) | **PASS** | N/A |
@@ -68,7 +68,7 @@
 | SCH-003 (Attribute types correct) | **FAIL** | Two independent instances this run: `git-collector.js`'s `commit_story.git.diff_size` (declared `int`, emitted via `String(diff.length)`) and `summary-detector.js`'s `commit_story.journal.weeks_count` (declared `int`, emitted via `String(weeks.size)` at all three call sites). RUN26-1's original occurrence (`journal-manager.js`) is confirmed fixed on the type dimension, but the same failure class recurred in two other files — the underlying validator gap (no check catches `setAttribute(key, String(...))` against a numeric-typed key) is not resolved project-wide |
 | SCH-004 (No redundant entries) | **PASS** | No invented duplicate keys found; `summary-graph.js`'s `entry_count` reuse across three counts (journal/daily/weekly) passes the "generic term legitimately covering three like concepts" test applied consistently across the run — distinguished from the SCH-002/unrubriced findings, where the reused noun names a *specific, different* concept |
 
-**SCH regression note**: SCH dropped from run-26's 3/4 (75%) to 2/4 (50%) — RUN26-1's original SCH-003 instance is fixed, but SCH-003 recurred in two new files and SCH-002 failed for the first time this run. Net: one rule recovered, two rules newly or still failing.
+**SCH regression note**: SCH dropped from run-26's 3/4 (75%) to 2/4 (50%). RUN26-1's original SCH-003 instance (`journal-manager.js`) is recovered on the type dimension, but SCH-003 as a rule remains FAIL this run because the same `String()`-vs-`int` pattern now recurs independently in `git-collector.js` and `summary-detector.js`. SCH-002 fails for the first time this run (`summarize.js`). Net: one instance recovered, but the rule it belonged to stays failed via new instances, plus one newly-failing rule.
 
 ### Code Quality (CDQ): 6/7 (86%)
 
@@ -160,7 +160,7 @@ The shared `commit_story.context.repo_path` attribute (and `journal-paths.js`'s 
 
 **Root cause**: Same as RUN26-2's original diagnosis (self-acknowledged agent limitation, not a validator gap) — but the pattern's recurrence across seven independent files this run indicates the underlying prompt guidance treats this as a low-priority, file-scoped decision rather than flagging that the same shared attribute is affected project-wide.
 
-**Fix needed in spiny-orb**: A single `basename()` import added once (or a shared helper) would resolve all seven instances at once, since they all write the same attribute from the same unconstrained-path pattern — this is not seven independent decisions, it's one decision repeated seven times.
+**Fix needed in spiny-orb**: These are seven separate call sites, each needing its own fix — there is no single shared function to patch. Either (a) each of the seven affected modules (`claude-collector.js`, `context-integrator.js`, `journal-paths.js`, `summarize.js`, `summary-detector.js`, `auto-summarize.js`, `summary-manager.js`) imports `basename` from `node:path` and applies it to its own unconstrained path parameter, or (b) all seven are migrated to call a new shared helper that performs the transformation once, so future files reuse it instead of repeating the same import decision.
 
 ---
 
