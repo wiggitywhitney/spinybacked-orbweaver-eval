@@ -262,7 +262,9 @@ The **evaluation execution branch** created by `/prd-start` from main **never me
 
   **Result**: Run-27 scores 21/25 (84%) — a new series low since run-6, breaking the runs-23–26 oscillation between 23/25 and 24/25. Q×F drops to 10.92 (lowest since run-21), driven by two new failures neither of run-27's primary goals targeted (COV-003's `summary-manager.js` recurrence, SCH-002's `summarize.js` key-meaning contradiction) plus RUN26-1's partial (type-only) fix and RUN26-2's continued, now 7-file-wide, non-resolution. Total spans (48) tie run-24's record despite one fewer committed file. IS holds at 100/100 for a third consecutive run. Cost drops to $9.40 (-15.7% vs run-26), and push/PR returns to AUTO (#94) after run-26's one manual-recovery interruption. Full detail, records table, and active-issue tracker in `baseline-comparison.md`.
 
-- [ ] **Update root README** — Add a row for run-27 to the run history table (quality, gates, files, spans, cost, push/PR, IS score). Update the "next run" sentence to reference run-28 and its primary goals.
+- [x] **Update root README** — Add a row for run-27 to the run history table (quality, gates, files, spans, cost, push/PR, IS score). Update the "next run" sentence to reference run-28 and its primary goals.
+
+  **Result**: Added run-27 row (21/25 (84%), gates 5/5, 13+1p files, 48 spans, $9.40, YES, IS 100/100). Updated "next run" sentence to point at run-28's likely goals — the CDQ-007 raw-path finding now spanning 7 files (missing `basename()` import), `summary-manager.js`'s COV-003 partial-commit recurrence, and the SCH-003 `String()`-vs-`int` pattern's spread to `git-collector.js` and `summary-detector.js`.
 
 - [ ] **Actionable fix output** — Primary handoff deliverable.
 
