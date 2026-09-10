@@ -254,11 +254,13 @@ The **evaluation execution branch** created by `/prd-start` from main **never me
   5. **Confirm IS scoring traces in Datadog**: Record IS scoring run start time, then query `service:commit-story from:<run-start-time>`. Record `service.instance.id`.
   Produces: `evaluation/javascript/commit-story-v2/run-27/is-score.md`
 
-- [ ] **Baseline comparison** — Compare run-27 vs runs 2–26 (run-22 was never executed).
+- [x] **Baseline comparison** — Compare run-27 vs runs 2–26 (run-22 was never executed).
   Produces: `evaluation/javascript/commit-story-v2/run-27/baseline-comparison.md`
   Style reference: `Read docs/templates/eval-run-style-reference/baseline-comparison.md`
 
   **Attribute-count trend caution**: before flagging any cross-run "declining richness" trend, verify reported attribute counts against direct source inspection rather than trusting logged figures alone — see `docs/language-extension-plan.md` step 10 (added from run-26's undercounting finding on commit-story-v2, which produced a false regression narrative for `context-capture-tool.js` that was disproved on source inspection).
+
+  **Result**: Run-27 scores 21/25 (84%) — a new series low since run-6, breaking the runs-23–26 oscillation between 23/25 and 24/25. Q×F drops to 10.92 (lowest since run-21), driven by two new failures neither of run-27's primary goals targeted (COV-003's `summary-manager.js` recurrence, SCH-002's `summarize.js` key-meaning contradiction) plus RUN26-1's partial (type-only) fix and RUN26-2's continued, now 7-file-wide, non-resolution. Total spans (48) tie run-24's record despite one fewer committed file. IS holds at 100/100 for a third consecutive run. Cost drops to $9.40 (-15.7% vs run-26), and push/PR returns to AUTO (#94) after run-26's one manual-recovery interruption. Full detail, records table, and active-issue tracker in `baseline-comparison.md`.
 
 - [ ] **Update root README** — Add a row for run-27 to the run history table (quality, gates, files, spans, cost, push/PR, IS score). Update the "next run" sentence to reference run-28 and its primary goals.
 
