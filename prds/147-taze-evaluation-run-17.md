@@ -182,9 +182,9 @@ The eval execution branch (`feature/prd-147-taze-evaluation-run-17`) **never mer
   ```
   Run from `~/Documents/Repositories/taze` on the instrument branch. OTel SDK packages are already in node_modules on the instrument branch — no `npm install` needed. OTel Collector must be running on port 4318 (Docker or binary). See `~/.claude/rules/is-scoring-gotchas.md` for full sequence.
 
-  **Do NOT score `evaluation/is/eval-traces.json` directly** — it is shared and never truncated across sessions and targets (commit-story-v2 run-27 got a false 70/100 this way, from another target's spans mixed in). Filter it first to `service.name` matching taze's OTel service name and a time window around this run's app invocation; write the filtered subset to `evaluation/typescript/taze/run-17/eval-traces-run17.json`, sanitize local-machine identity fields (`process.owner`, `host.id`, `process.command_args`, `process.executable.path`, `process.command`) before committing it, and score that file:
+  **Do NOT score `evaluation/is/eval-traces.json` directly** — it is shared and never truncated across sessions and targets (commit-story-v2 run-27 got a false 70/100 this way, from another target's spans mixed in). Filter it first to `service.name` matching taze's OTel service name and a time window around this run's app invocation; write the filtered subset to `evaluation/typescript/taze/run-17/eval-traces-run17.json`, sanitize local-machine identity fields (`process.owner`, `host.id`, `process.command_args`, `process.executable.path`, `process.command`, and any target-specific span attribute holding an absolute local path (e.g. commit-story-v2 span attribute `commit_story.context.repo_path`)) before committing it, and score that file. All paths below are relative to `~/Documents/Repositories/spinybacked-orbweaver-eval` — run from there, not from the taze checkout used for the app-invocation step above:
   ```bash
-  node evaluation/is/score-is.js evaluation/typescript/taze/run-17/eval-traces-run17.json --target taze > evaluation/typescript/taze/run-17/is-score.md
+  cd ~/Documents/Repositories/spinybacked-orbweaver-eval && node evaluation/is/score-is.js evaluation/typescript/taze/run-17/eval-traces-run17.json --target taze > evaluation/typescript/taze/run-17/is-score.md
   ```
   Full filtering procedure: `~/.claude/rules/is-scoring-gotchas.md`.
 

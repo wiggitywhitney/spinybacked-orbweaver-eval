@@ -248,7 +248,9 @@ The **evaluation execution branch** created by `/prd-start` from main **never me
      ```
      Note: omit `COMMIT_STORY_TRACELOOP=true`.
   3. **Claude stops** the Collector: `kill "$COLLECTOR_PID"` — **skip this step entirely** if the persistent LaunchAgent instance was already running and no `COLLECTOR_PID` was set; leave it running.
-  4. **Claude runs** the scorer, from `~/Documents/Repositories/spinybacked-orbweaver-eval` (the preceding steps left the working directory in commit-story-v2): `cd ~/Documents/Repositories/spinybacked-orbweaver-eval && node evaluation/is/score-is.js evaluation/is/eval-traces.json --target commit-story-v2 > evaluation/javascript/commit-story-v2/run-27/is-score.md`
+  4. **Claude filters, then runs the scorer**, from `~/Documents/Repositories/spinybacked-orbweaver-eval` (the preceding steps left the working directory in commit-story-v2). Do NOT score `evaluation/is/eval-traces.json` directly — it is shared and never truncated across sessions and targets (see `~/.claude/rules/is-scoring-gotchas.md`). Filter to `service.name == "commit-story"` and a time window around the app invocation, write the filtered subset to `evaluation/javascript/commit-story-v2/run-27/eval-traces-run27.json` (sanitizing local-machine identity fields before committing it), then: `cd ~/Documents/Repositories/spinybacked-orbweaver-eval && node evaluation/is/score-is.js evaluation/javascript/commit-story-v2/run-27/eval-traces-run27.json --target commit-story-v2 > evaluation/javascript/commit-story-v2/run-27/is-score.md`
+
+     *(Historical note, added post-completion: run-27 initially scored `evaluation/is/eval-traces.json` directly and got a false 70/100 from another target's spans mixed into the shared file. This step was corrected after the fact — see PRD Decision Log D-11 — and the text above reflects the corrected procedure, not what was literally run first.)*
   5. **Confirm IS scoring traces in Datadog**: Record IS scoring run start time, then query `service:commit-story from:<run-start-time>`. Record `service.instance.id`.
   Produces: `evaluation/javascript/commit-story-v2/run-27/is-score.md`
 
