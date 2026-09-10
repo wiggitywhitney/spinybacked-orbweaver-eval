@@ -19,7 +19,7 @@ The persistent `otelcol-contrib` LaunchAgent has been running since 2026-07-08 a
 
 To score only this run's telemetry, spans were filtered to `service.name == "commit-story"` and `startTimeUnixNano` within a 5-second-padded window around the app invocation (1788977114361–1788977138721 ms), producing a 47-span subset scored above. The filtered subset is saved at `evaluation/javascript/commit-story-v2/run-27/eval-traces-run27.json` for reproducibility, with `process.owner`, `host.id`, `process.command_args`, `process.executable.path`, and `process.command` redacted (local machine identity, not needed to reproduce the score). The file stays line-delimited JSON (one `ExportTraceServiceRequest` per line) rather than a single top-level array — that's the format `score-is.js` and the collector's file exporter already use, and changing it would break re-scoring.
 
-This is a process gap worth flagging for `actionable-fix-output.md`: any run using the persistent collector needs this same time/service filtering step, or the shared file needs periodic rotation, or `score-is.js` needs a `--service-name` / time-window filter built in.
+This is a Claude Code eval-infrastructure gap, not a spiny-orb instrumentation defect — do NOT carry it into `actionable-fix-output.md` (that deliverable is scoped to spiny-orb component gaps). It's already handled: documented as PRD #153 Decision Log D-11, added as a permanent step in `docs/language-extension-plan.md` step 9 and `~/.claude/rules/is-scoring-gotchas.md`, and cascaded to taze's active run-17 PRD (#147).
 
 ## Datadog trace verification
 
