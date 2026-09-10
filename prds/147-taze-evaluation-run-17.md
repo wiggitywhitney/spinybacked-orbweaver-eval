@@ -182,10 +182,11 @@ The eval execution branch (`feature/prd-147-taze-evaluation-run-17`) **never mer
   ```
   Run from `~/Documents/Repositories/taze` on the instrument branch. OTel SDK packages are already in node_modules on the instrument branch — no `npm install` needed. OTel Collector must be running on port 4318 (Docker or binary). See `~/.claude/rules/is-scoring-gotchas.md` for full sequence.
 
-  Then score:
+  **Do NOT score `evaluation/is/eval-traces.json` directly** — it is shared and never truncated across sessions and targets (commit-story-v2 run-27 got a false 70/100 this way, from another target's spans mixed in). Filter it first to `service.name` matching taze's OTel service name and a time window around this run's app invocation; write the filtered subset to `evaluation/typescript/taze/run-17/eval-traces-run17.json`, sanitize local-machine identity fields (`process.owner`, `host.id`, `process.command_args`, `process.executable.path`, `process.command`) before committing it, and score that file:
   ```bash
-  node evaluation/is/score-is.js evaluation/is/eval-traces.json --target taze > evaluation/typescript/taze/run-17/is-score.md
+  node evaluation/is/score-is.js evaluation/typescript/taze/run-17/eval-traces-run17.json --target taze > evaluation/typescript/taze/run-17/is-score.md
   ```
+  Full filtering procedure: `~/.claude/rules/is-scoring-gotchas.md`.
 
   **SPA-001 note**: taze is a CLI app. If SPA-001 fires, this is structural — document but do not treat as a regression.
   **SPA-002 watch**: Compare SPA-002 orphan span result to run-16. If the orphan persists, the fix belongs in spiny-orb's context propagation across async boundaries for resolves.ts.
