@@ -35,7 +35,7 @@
 
 Run-22 was never executed (PRD #115 closed 2026-06-05 without a run). Run-23 follows directly from run-21; run-25 follows directly from run-24; run-26 follows directly from run-25; run-27 follows directly from run-26.
 
-Run-27 spans: 48 total (13 committed + 7 from the 2-function-short partial `summary-manager.js`) — ties run-24's all-time record of 48, but run-24's was 14 files fully committed with 0 partial, while run-27 reaches the same total across one fewer committed file plus a partial. Push/PR: first AUTO success after run-26's one manual recovery (which itself was an eval-side premature recovery during a paused approval prompt, not a spiny-orb defect — see run-26 D-7).
+Run-27 spans: 48 total (41 spans from 13 committed files + 7 spans from the 2-function-short partial `summary-manager.js`) — ties run-24's all-time record of 48, but run-24's was 14 files fully committed with 0 partial, while run-27 reaches the same total across one fewer committed file plus a partial. Push/PR: first AUTO success after run-26's one manual recovery (which itself was an eval-side premature recovery during a paused approval prompt, not a spiny-orb defect — see run-26 D-7).
 
 ---
 
