@@ -146,6 +146,8 @@ The eval execution branch (`feature/prd-147-taze-evaluation-run-17`) **never mer
 
   **debug-dumps note**: `--debug-dump-dir` fires only for failed, partial, and zero-span files. If all 33 files succeed, the debug-dumps directory will be empty — the `spiny-orb-output.log` is the sole source of agent reasoning (via `Agent thinking` and `Agent notes` blocks).
 
+  **Before treating an apparently stalled run as failed**: check whether the process is paused at a live interactive prompt rather than genuinely stuck or errored — piped log output (`tee`) does not always show prompt text. Known prompt shapes: a `Proceed? [y/N]` push-confirmation prompt, or a `PROGRESS.md` `[a]ccept/[e]dit/[s]kip` update-confirmation prompt (can pause for many hours if unattended overnight). Neither prompt's text reliably reaches the piped log. Check `ps` for a live, low-but-nonzero-CPU process before concluding the run needs manual recovery. (Cascaded from `docs/language-extension-plan.md` step 3, restored there from commit-story-v2 run-27.)
+
 - [ ] **Findings Discussion** *(user-facing checkpoint 1 — raw signal before analysis)* — Present raw findings from the log: committed files, failed files, pre-scan skips, cost, resolves.ts outcome, COV-005/SCH-003/CDQ-006 guard status. Do not interpret yet. Wait for Whitney's response before proceeding to failure deep-dives.
 
 - [ ] **Failure deep-dives** — For each failed file (0 committed spans), partially committed file, and committed file requiring ≥ 3 attempts with a quality failure: analyze debug dumps, verbose log, thinking blocks, companion `.instrumentation.md` files. Follow the diagnostic protocol from `docs/language-extension-plan.md` (all 5 dimensions). Document in `evaluation/typescript/taze/run-17/spiny-orb-findings.md`.
@@ -170,9 +172,15 @@ The eval execution branch (`feature/prd-147-taze-evaluation-run-17`) **never mer
 
   **Step 0 — Trace supplement**: complete IS scoring (step 9) and trace capture (step 9.5) before returning here for trace supplement on each file. Use `search_datadog_spans` with the artifact query to supplement static code review. For each committed file, record attribute count vs. run-16 baseline. If the baseline is 0 (file was not committed or failed in run-16), flag any non-zero count explicitly; otherwise, flag any file where count changed by ≥50% in either direction.
 
+  **Reconciliation pass (after all batches return, before the first CodeRabbit review):** Independent per-file agents scoring the same underlying pattern (e.g., a shared attribute or helper used across files) can disagree. Before writing the final document, do one targeted pass: for each rule that appears in more than one file's findings, diff the verdicts across those files and flag disagreements for resolution. Two reusable tests from commit-story-v2 run-27: **CDQ-007 "structural guarantee" test** (a raw-path-shaped attribute FAILs unless the source code structurally guarantees the value can never be absolute — an observed relative value in one trace sample is not sufficient); **SCH-002 "specific wrong noun vs. generic reasonable term" test** (a reused attribute key FAILs if its own name is a specific, different noun from what it holds, PASSes if the name is generic enough to cover all reused values). Full detail: `docs/language-extension-plan.md` step 6.
+
+  **Correct-skip verification:** For each file the run summary labels a "correct skip," grep that file's own pre-instrumentation-analysis block in `spiny-orb-output.log` for a COV-001/COV-004 flag the final output didn't act on. A file that flags its own need for a span and then skips anyway with unrelated boilerplate justification is a "questionable skip," not a confirmed correct one.
+
 - [ ] **PR artifact evaluation** — Evaluate the instrument branch PR: diff completeness, span registration accuracy, schema accuracy in `agent-extensions.yaml`, `traceloop-init.ts` registration block.
 
 - [ ] **Rubric scoring** — Score all dimensions against the rubric. Compare to run-16 baseline. COV-005/SCH-003/CDQ-006 resolution status are the primary data points.
+
+  **Unrubriced findings category**: some real failures have no matching rule ID — e.g. an attribute with the correct declared type written to the wrong pre-existing registry key. Score these as canonical failures in the narrative for consistency, but list them separately under a standing "Unrubriced Findings" section rather than folding them into any dimension's score or inventing an ad hoc rule ID. Full detail: `docs/language-extension-plan.md` step 8.
 
 - [ ] **IS scoring run** — See `evaluation/is/README.md` for collector setup.
 
@@ -206,6 +214,8 @@ The eval execution branch (`feature/prd-147-taze-evaluation-run-17`) **never mer
   - **Fix language targets spiny-orb components, not target files.** "Fix:" entries should describe the spiny-orb component gap — auto-fix, validator, prompt, or fix-loop. Do not write "remove X at line Y of file.ts." Target repo files are overwritten every run; patching them is not durable and misleads the team about where the root cause is.
   - **Attribute disappearance is not automatically a finding.** If an attribute appeared in a prior run and is absent now, investigate before calling it wrong — consider whether there is a semconv basis for the attribute and whether the absence is a defensible agent decision. Give the spiny-orb team evidence and honest characterization, not a decision-free action list.
   - **Carry-forward table: consider distinguishing findings from observations.** Entries with a plausible spiny-orb root cause ("finding") vs. entries worth watching but without a clear industry basis for calling them wrong ("observation") serve different purposes for the team.
+
+  **Handoff-confirmation depth**: When Whitney confirms handoff to the spiny-orb team, verify each finding's actual roadmap tier/sequencing (not just that an issue exists with acceptance criteria) against spiny-orb's `docs/ROADMAP.md`. A finding can be correctly filed and triaged while still not being scheduled to land before the next run — state this explicitly rather than treating an expected recurrence as a surprise.
 
 - [ ] **Draft next PRD** *(includes template-update checkpoint before drafting)* — Follow `docs/language-extension-plan.md` step 12: (1) review `lessons-for-run18.md` and `actionable-fix-output.md` for process observations; (2) present two-section checkpoint to user (target-specific vs. generalizable); (3) after approval, commit any template changes as a separate commit; (4) draft the next taze run PRD using this PRD as the style reference; (5) run `/write-prompt` before committing.
 
