@@ -117,7 +117,7 @@
 | Cost | **$9.40** | $11.15 | $7.38 | ~$3.70 |
 | Q×F | **10.92** | 12.88 | 12.48 | 12.88 |
 | Push/PR | **AUTO (#94)** | MANUAL (#91, see run-26 D-7) | AUTO (#86) | AUTO (#81) |
-| IS | Pending IS scoring milestone | 100/100 | 100/100 | 80/100 |
+| IS | **100/100** | 100/100 | 100/100 | 80/100 |
 
 **Q×F = 10.92** (21/25 × 13 committed files). Down from run-26's 12.88 and run-25's 12.48 — both the quality percentage (84% vs 92%/96%) and the committed-file count (13 vs 14/13) moved against this run relative to run-26, though the file count matches run-25's. This is the lowest Q×F since run-21 (11.0).
 
