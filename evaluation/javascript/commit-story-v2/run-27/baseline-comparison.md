@@ -51,13 +51,13 @@ Run-27 spans: 48 total (41 spans from 13 committed files + 7 spans from the 2-fu
 | CDQ | 7/7 | 6/7 | 7/7 | 6/7 | **6/7** |
 | **Total** | **24/25** | **23/25** | **24/25** | **23/25** | **21/25** |
 
-Run-27 breaks the runs-23–26 oscillation between 23/25 and 24/25 with a new series low of 21/25 (84%) — the worst score since run-6 (2026-03-20, 21/25) and the first time SCH has dropped below 3/4 since the rubric stabilized at 25 rules. NDS, RST, and API remain at 100% across every measured run since run-5.
+Run-27 breaks the runs-23–26 oscillation between 23/25 and 24/25, tying the series low of 21/25 (84%) — matching run-6 (2026-03-20) and run-19, and the first time SCH has dropped below 3/4 since the rubric stabilized at 25 rules. NDS, RST, and API remain at 100% across every measured run since run-5.
 
 ---
 
 ## Key Changes in Run-27
 
-### 1. Quality: 23/25 → 21/25 (-2 points, series low since run-6)
+### 1. Quality: 23/25 → 21/25 (-2 points, ties series low with run-6 and run-19)
 
 Run-26 scored 23/25 with two isolated new failures (SCH-003, CDQ-007). Run-27 drops further, driven by two independent new failures neither of run-27's primary goals (RUN26-1, RUN26-2) targeted:
 
