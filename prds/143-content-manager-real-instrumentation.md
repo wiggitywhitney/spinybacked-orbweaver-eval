@@ -126,12 +126,14 @@ Evaluation artifacts live at `evaluation/content-manager/run-1/` in this repo (s
 
   After saving artifacts, push the eval branch to origin immediately: `git push -u origin <eval-branch>`. Do not leave it local-only.
 
+  **Before treating an apparently stalled run as failed**: check whether the process is paused at a live interactive prompt rather than genuinely stuck or errored — piped log output (`tee`) does not always show prompt text. Known prompt shapes: a `Proceed? [y/N]` push-confirmation prompt, or a `PROGRESS.md` `[a]ccept/[e]dit/[s]kip` update-confirmation prompt (can pause for many hours if unattended overnight). Neither prompt's text reliably reaches the piped log. Check `ps` for a live process before concluding the run needs manual recovery — do not require nonzero CPU usage as the detection criterion, since a process blocked on terminal input can report 0% CPU; treat CPU usage as supporting evidence only, alongside confirming the process is alive (not exited or crashed). Process existence alone is not sufficient either — a process blocked on network I/O, a deadlock, or a retry loop is also live with 0% CPU. Use elapsed time as the deciding factor: if the run has been alive far longer than either known prompt shape would explain, with no further log activity and no crash, treat it as genuinely stalled rather than assuming an indefinite prompt-pause. (Cascaded from `docs/language-extension-plan.md` step 3, restored there from commit-story-v2 run-27.)
+
 - [ ] **Findings Discussion** *(user-facing checkpoint 1)* — After `run-summary.md` is written, before any evaluation documents are started: report to Whitney: (1) files committed / failed / partial, (2) whether any checkpoint failures occurred, (3) first impressions on domain attribute quality — did spiny-orb invent reasonable content-publishing spans?, (4) cost, (5) push/PR status (auto or manual?), (6) overall attempt-count distribution. Keep it under 12 lines. Wait for acknowledgment before proceeding.
 
 - [ ] **Post-run Datadog verification** — After the Findings Discussion checkpoint:
   1. Use `search_datadog_spans` with query `service:content-manager` filtered to spans newer than the eval run start timestamp. Confirm new spans from the instrument branch appear. Check `vcs.ref.head.revision` on spans to confirm the correct branch.
   2. If no spans appear yet: note in `run-summary.md` and defer. The post-merge production verification in a later milestone is the primary trace confirmation.
-  3. When confirmed, record `service.instance.id` in `evaluation/content-manager/run-1/trace-artifact.md`.
+  3. When confirmed, write the full trace artifact to `evaluation/content-manager/run-1/trace-artifact.md`: `service.instance.id`, `captured` (timestamp), `target`, `instrument_branch`, and `query` (e.g. `service:content-manager @service.instance.id:<uuid>`) — the format in `evaluation/trace-capture-protocol.md`. The per-file evaluation trace supplement below depends on the `query` field, not just the UUID.
   4. **Log-trace correlation check**: Use `search_datadog_logs` with query `service:content-manager` filtered to logs newer than the eval run start. Confirm whether log records have `trace_id` and `span_id` fields. Note the count. Content Manager uses CommonJS — if spiny-orb generated an `instrumentation.js` that loads pino instrumentation, this should work; if it used `console.log` only, correlation will be absent. Record the finding.
 
 - [ ] **Failure deep-dives** — For each failed file AND run-level failure. Includes partial files. Also includes committed files with ≥ 3 attempts AND quality failures.
@@ -148,7 +150,11 @@ Evaluation artifacts live at `evaluation/content-manager/run-1/` in this repo (s
 
   **COV-005 note for a blank-slate schema**: This is the first run with zero pre-existing schema. Spiny-orb will create domain attributes from scratch. COV-005 assessment should focus on whether attributes capture meaningful domain context, not whether they match any prior run — there is no prior run. Attribute variation is expected and not a COV-005 concern.
 
-  **(Trace supplement)** Each agent receives the `service.instance.id` from `trace-artifact.md` and uses `search_datadog_spans` with `resource_name:<prefix>.*` to supplement static code review.
+  **(Trace supplement)** Before writing any section, check `trace-artifact.md` for the `query` field. If present, each agent uses it as the base for `search_datadog_spans` with `resource_name:<prefix>.*` appended, to supplement static code review. **If post-run verification was deferred** (no spans found yet, per that milestone's step 2, so `trace-artifact.md` has no `query` field): do not block — proceed with per-file evaluation and mark trace supplementation "unavailable (post-run verification deferred)" in each affected section.
+
+  **Reconciliation pass (after all batches return, before the first CodeRabbit review):** Independent per-file agents scoring the same underlying pattern (e.g., a shared attribute or helper used across files) can disagree. Before writing the final document, do one targeted pass: for each rule that appears in more than one file's findings, diff the verdicts across those files and flag disagreements for resolution. Two reusable tests from commit-story-v2 run-27: **CDQ-007 "structural guarantee" test** (a raw-path-shaped attribute FAILs unless the source code structurally guarantees the value can never be absolute — an observed relative value in one trace sample is not sufficient); **SCH-002 "specific wrong noun vs. generic reasonable term" test** (a reused attribute key FAILs if its own name is a specific, different noun from what it holds, PASSes if the name is generic enough to cover all reused values). Full detail: `docs/language-extension-plan.md` step 6.
+
+  **Correct-skip verification:** For each file the run summary labels a "correct skip," grep that file's own pre-instrumentation-analysis block in `spiny-orb-output.log` for a COV-001/COV-004 flag the final output didn't act on. A file that flags its own need for a span and then skips anyway with unrelated boilerplate justification is a "questionable skip," not a confirmed correct one.
 
 - [ ] **PR artifact evaluation** — Evaluate PR quality.
   Produces: `evaluation/content-manager/run-1/pr-evaluation.md`
@@ -159,6 +165,8 @@ Evaluation artifacts live at `evaluation/content-manager/run-1/` in this repo (s
   Produces: `evaluation/content-manager/run-1/rubric-scores.md`
   Style reference: `Read docs/templates/eval-run-style-reference/rubric-scores.md`
   Use `evaluation/javascript/commit-story-v2/run-24/rubric-scores.md` as the precedent reference for CDQ-006 advisory treatment, COV-001 failed-file treatment, and the 7/7 CDQ rule set. This is run-1 for content-manager — there are no prior run precedents for this target.
+
+  **Unrubriced findings category**: some real failures have no matching rule ID — e.g. an attribute with the correct declared type written to the wrong pre-existing registry key. Score these as canonical failures in the narrative for consistency, but list them separately under a standing "Unrubriced Findings" section rather than folding them into any dimension's score or inventing an ad hoc rule ID. Full detail: `docs/language-extension-plan.md` step 8.
 
 - [ ] **IS scoring run** — Follow `docs/language-extension-plan.md` step 9.
 
@@ -203,6 +211,8 @@ Evaluation artifacts live at `evaluation/content-manager/run-1/` in this repo (s
 
 - [ ] **Actionable fix output** *(user-facing checkpoint 2)* — Primary handoff deliverable to the spiny-orb team.
   1. Run the cross-document audit agent to verify consistency across all run-1 evaluation artifacts.
+
+  **Handoff-confirmation depth**: When Whitney confirms handoff to the spiny-orb team, verify each finding's actual roadmap tier/sequencing (not just that an issue exists with acceptance criteria) against spiny-orb's `docs/ROADMAP.md`. A finding can be correctly filed and triaged while still not being scheduled to land before the next run — state this explicitly rather than treating an expected recurrence as a surprise.
   2. **Spoken summary**: Provide a spoken summary with: (a) main failures and their categories; (b) root cause vs. symptom for each recommended fix; (c) every-user generalization — how each fix helps any spiny-orb user, not just content-manager.
   3. Print the absolute path: `evaluation/content-manager/run-1/actionable-fix-output.md`.
   4. **Pause.** Do not proceed to the learnings milestone until Whitney confirms she has handed the document to the spiny-orb team.
