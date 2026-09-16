@@ -3,7 +3,7 @@
 
 Self-contained handoff from evaluation run-27 to the spiny-orb team.
 
-**Run-27 result**: 21/25 (84%) canonical quality — ties the series low with run-6 and run-19, breaking the runs-23–26 oscillation between 23/25 and 24/25. 13 committed, 1 partial (`summary-manager.js`), 0 failed, 18 correct skips, 48 spans (ties run-24's all-time record), $9.40 cost. Gates 5/5. IS **100/100** (third consecutive perfect score). Q×F 10.92 (lowest since run-21). Push/PR **AUTO** (PR #94) — first AUTO success since run-25, no manual recovery needed.
+**Run-27 result**: 21/25 (84%) canonical quality — ties the series low with run-6 and run-19, breaking the runs-23–26 oscillation between 23/25 and 24/25. 13 committed, 1 partial (`summary-manager.js`), 0 failed, 18 harness-labeled skips (17 confirmed correct, 1 questionable: `reflection-tool.js`), 48 spans (ties run-24's all-time record), $9.40 cost. Gates 5/5. IS **100/100** (third consecutive perfect score). Q×F 10.92 (lowest since run-21). Push/PR **AUTO** (PR #94) — first AUTO success since run-25, no manual recovery needed.
 
 **Run-26 → Run-27 delta**: Quality -8pp (92% → 84%), COV -20pp (5/5 → 4/5 — new COV-003 failure), SCH -25pp (3/4 → 2/4 — one recovered, two new), CDQ flat nominally (6/7 → 6/7, but CDQ-007's footprint widened from 1 file to 7), files -1 committed +1 partial (14 clean → 13+1p), spans +7 (41 → 48), cost -$1.75/-15.7% ($11.15 → $9.40), IS unchanged (100/100 → 100/100, third consecutive), Q×F -1.96 (12.88 → 10.92), Push/PR back to AUTO (was MANUAL recovery in run-26, see run-26 D-7 — that was never a spiny-orb defect).
 

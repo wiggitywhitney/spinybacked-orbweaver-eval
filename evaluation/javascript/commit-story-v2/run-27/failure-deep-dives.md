@@ -1,7 +1,7 @@
 // ABOUTME: Failure deep-dives for run-27 — one partial file (summary-manager.js regression), run-level observations.
 # Failure Deep-Dives — Run-27
 
-**Run-27 result**: 13 committed, 0 failed, 1 partial (summary-manager.js), 18 correct skips.
+**Run-27 result**: 13 committed, 0 failed, 1 partial (summary-manager.js), 18 harness-labeled skips (17 confirmed correct, 1 questionable: `reflection-tool.js`).
 
 ---
 
