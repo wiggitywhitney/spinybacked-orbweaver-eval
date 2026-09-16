@@ -480,7 +480,7 @@ This SCH-003 failure is self-consistent across all three call sites (always `Str
 | collectors/claude-collector.js | CDQ-007 | Code Quality |
 | integrators/context-integrator.js | CDQ-007 | Code Quality |
 | utils/journal-paths.js | CDQ-007 | Code Quality |
-| commands/summarize.js | CDQ-007, SCH-002 (chosen-wrong-existing-key semantic mismatch — see file section) | Code Quality, Schema Compliance |
+| commands/summarize.js | CDQ-007, SCH-002 (same-file declaration-vs-usage mismatch on a newly-declared key — see file section) | Code Quality, Schema Compliance |
 | utils/summary-detector.js | CDQ-007, SCH-003 | Code Quality, Schema Compliance |
 | managers/auto-summarize.js | CDQ-007 | Code Quality |
 | collectors/git-collector.js | SCH-003 | Schema Compliance |
