@@ -18,7 +18,7 @@
 | SCH-003 | PASS — no new attribute keys were minted; both `commit_story.journal.file_path` and `commit_story.context.source` reuse pre-existing registry keys, consistent with zero `attributesCreated`. |
 | CDQ-001 | PASS |
 | CDQ-002 | PASS |
-| CDQ-003 | PASS — attributes follow the `commit_story.journal.*` / `commit_story.context.*` dotted namespace convention. |
+| CDQ-003 (Standard Error Recording Pattern) | PASS — outer catch calls `span.recordException(error)` + `span.setStatus({code: SpanStatusCode.ERROR})` before rethrow, the standard pattern (corrected — this row previously cited attribute namespacing, which is SCH-001's check, not CDQ-003's). |
 | CDQ-005 | PASS — attribute values are plain strings (file path, `'mcp'` source tag), no complex/unbounded types. |
 | CDQ-007 | ADVISORY — `commit_story.journal.file_path` stores the full relative path (`journal/context/YYYY-MM/YYYY-MM-DD.md`), the same lower-severity pattern flagged in run-26 (raw path vs. basename). The user-supplied `text` parameter was correctly excluded from span attributes as unbounded/potentially sensitive content, per the agent's own notes — so this isn't a clean fail, only the path-form advisory carries over. |
 

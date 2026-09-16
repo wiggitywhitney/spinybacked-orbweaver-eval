@@ -8,7 +8,7 @@
 | NDS-004 | PASS |
 | NDS-007 | PASS — try/catch/finally preserved around `collectChatMessages`; `span.recordException(error)` + `span.setStatus({code: SpanStatusCode.ERROR})` + rethrow, `span.end()` in `finally`; the pre-existing empty `catch` inside `parseJSONLFile` (expected control flow for malformed JSON lines, no rethrow) was correctly left unmodified |
 | COV-001 | PASS — `collectChatMessages` is the sole exported async function and COV-001 entry point, wrapped in `tracer.startActiveSpan('commit_story.context.collect', ...)` |
-| COV-003 | PASS — span always ended via `finally`, including the error/rethrow path |
+| COV-003 (Error Recording) | PASS — catch block calls `span.recordException(error)` + `span.setStatus({code: SpanStatusCode.ERROR})` before rethrow, giving the failable operation error visibility (corrected — this row previously cited span-closure evidence, which is CDQ-001's check, not COV-003's) |
 | COV-004 | PASS — `getClaudeProjectsDir`, `encodeProjectPath`, `getClaudeProjectPath`, `findJSONLFiles`, `parseJSONLFile`, `filterMessages`, `groupBySession` are all exported but synchronous; none received spans |
 | COV-005 | PASS — 6 domain attributes: `commit_story.context.source`, `repo_path`, `time_window_start`, `time_window_end`, `sessions_count`, `messages_count`; all 6 confirmed present on the instrument-branch live trace (see below). **Coverage delta observation**: run-26 had 5 attributes on this span (no `repo_path`); run-27 adds `repo_path` as a new extension attribute |
 | RST-001 | PASS — the 7 synchronous exported utilities are correctly left unwrapped |
