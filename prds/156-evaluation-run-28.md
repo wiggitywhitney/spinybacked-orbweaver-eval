@@ -110,8 +110,8 @@ The **evaluation execution branch** created by `/prd-start` from main **never me
 ## Success Criteria
 
 1. `summary-manager.js` commits cleanly across all 9 functions — COV returns to 5/5 (per D-13, spiny-orb PR #1058 already fixed this; a recurrence here would itself be a new finding, not an expected outcome)
-2. `summarize.js` does not violate its own declared key semantics — SCH contributes 4/4 alongside a clean SCH-003 result (per D-13, spiny-orb PR #1058 already fixed this; a recurrence here would itself be a new finding, not an expected outcome)
-3. No file emits `String(x.length)` against an int-typed registry key anywhere in the run (RUN27-3 fix confirmed)
+2. `summarize.js` does not violate its own declared key semantics (per D-13, spiny-orb PR #1058 already fixed this; a recurrence here would itself be a new finding, not an expected outcome)
+3. No file emits `String(x.length)` against an int-typed registry key anywhere in the run — SCH contributes 4/4 only if this criterion and #2 both hold (RUN27-3/SCH-003, #1037, remains genuinely open per D-13 — this is a verification target, not a confirmed fix)
 4. The 7-file CDQ-007 raw-path pattern is resolved at every site — CDQ returns to 7/7 if the issue is actually fixed at all 7 sites, whether via a shared helper or per-file edits (a per-file fix still counts as PASS at each site; it's a watch item for a future 8th instance, not a scoring penalty). CDQ stays below 7/7 only if any site's raw-path issue remains unresolved, or if the team documents an intentionally accepted advisory instead of a fix
 5. Quality score ≥ 21/25 (84%, no regression from run-27); 25/25 if all four fixes land (Q×F ~14.0, all-time record target)
 6. Push/PR succeeds automatically (per run-27's precedent; no spiny-orb-side risk identified)
