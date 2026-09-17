@@ -231,7 +231,7 @@ The **evaluation execution branch** created by `/prd-start` from main **never me
 
 - [x] **Rubric scoring** — Synthesize dimension-level scores.
 
-  **Completed** 2026-09-17: 21/25 (84%), gates 5/5 — ties run-27's series-low score, but via offsetting composition: COV recovered to 5/5 (RUN27-1's COV-003 bug confirmed fixed) while CDQ dropped to 5/7 (a new CDQ-006 failure, plus 3 new CDQ-007 instances distinct from the now-resolved RUN27-4 pattern). SCH held at 2/4 with SCH-003's footprint widening to 6 files/16 occurrences, the largest in the series. RUN27-5 (journal-manager.js `quotes_count`) does not persist this run — resolved, so no Unrubriced Findings entry needed.
+  **Completed** 2026-09-17: 21/25 (84%), gates 5/5 — ties run-27's series-low score, but via offsetting composition: COV recovered to 5/5 (RUN27-1's COV-003 bug confirmed fixed) while CDQ dropped to 5/7 (a new CDQ-006 failure, RUN27-4 still not fully closed at `summary-manager.js` — 4 of its 7 raw-path sites remain unfixed even though 6 of the original 7 affected files are clean — plus a new PII regression at `git-collector.js`/`context-integrator.js`). SCH held at 2/4 with SCH-003's footprint widening to 5 files, the largest in the series. RUN27-5 (journal-manager.js `quotes_count`) does not persist this run — resolved, so no Unrubriced Findings entry needed.
   Produces: `evaluation/javascript/commit-story-v2/run-28/rubric-scores.md`
   Style reference: `Read docs/templates/eval-run-style-reference/rubric-scores.md`
 
