@@ -126,7 +126,7 @@
 **Fix verification summary** (full detail in `run-summary.md` and `per-file-evaluation.md`):
 - **RUN27-1 (COV-003 / summary-manager.js partial-commit)**: ✅ FULLY RESOLVED — all 9 span-eligible functions committed cleanly, correct error recording throughout.
 - **RUN27-2 (SCH-002 / summarize.js key-reuse)**: ⚠️ PARTIALLY RESOLVED — the validator now catches this exact pattern and rejects reassembly, but the agent still generates the mistake; net effect is a new partial-commit outcome rather than a silent full commit with a latent bug.
-- **RUN27-3 (SCH-003 / String()-vs-int)**: ❌ CONFIRMED RECURRING, WIDER — 3 files, 14 occurrences of this specific shape (plus 2 more of the opposite-direction mismatch, and 2 entirely new instances in `git-collector.js`/`summary-manager.js`).
+- **RUN27-3 (SCH-003 / String()-vs-int)**: ❌ CONFIRMED RECURRING, WIDER — 12 occurrences of this specific shape across 3 files (`summarize.js`, `summary-detector.js`, `auto-summarize.js`), plus 2 occurrences of the opposite-direction mismatch (both in `summarize.js`, 14 total across those 3 files), plus 2 entirely separate SCH-003 instances in `git-collector.js` and `summary-manager.js` — 5 files affected in total.
 - **RUN27-4 (CDQ-007 / raw-path pattern)**: ⚠️ PARTIALLY RESOLVED via the shared-representation fix (inline sanitization fallback, no per-file `basename` import needed) — 6 of 7 originally-affected files are now fully clean, but `summary-manager.js` still ships raw paths at 4 of its 7 sites. A separate, new PII regression (`commit_story.commit.author`, previously fixed in run-27) also appeared this run.
 - **NEW: CDQ-006 (summary-manager.js isRecording guard inconsistency)**: ❌ NEW FAILURE — first CDQ-006 failure recorded in this run series.
 
