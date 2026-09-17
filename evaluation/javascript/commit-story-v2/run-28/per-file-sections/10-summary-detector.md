@@ -20,7 +20,7 @@
 | CDQ-002 | PASS — status codes set only on genuine error paths, not on expected/graceful ones. |
 | CDQ-003 | PASS — try/catch/finally structure correct on every span. |
 | CDQ-005 | PASS — no excessive/high-cardinality attributes; only scalar counts. |
-| CDQ-006 | PASS — no evidence of naming-convention or namespace violations beyond what SCH-001/SCH-002 already cover. |
+| CDQ-006 | PASS — no `isRecording()` guards are present anywhere in this file, and none are required: every `setAttribute` call sets a trivial, already-computed value (`dates.length`, `dates.size`, `weeks.size`, `entryDays.length`, or a literal `0`), never a method call, string transformation, or external-source read. All 5 spans are also COV-001 entry points, independently exempt. |
 | CDQ-007 | PASS (log/report advisories are false positives — see note) |
 
 **Failures**: SCH-003 only (see above; four `int`-declared keys, all `String()`-wrapped).

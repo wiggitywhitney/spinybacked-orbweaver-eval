@@ -53,7 +53,7 @@ span.setAttribute(
 ### What the Agent Could Have Done
 
 1. Declare three distinct, correctly-typed keys instead of reusing `dates_requested`: e.g. `commit_story.summary.weeks_requested` (`int`) and `commit_story.summary.months_requested` (`int`), leaving `dates_requested` (`string`) to `runSummarize` alone.
-2. For `months_generated_count`/`months_failed_count`, set the raw `.length` values directly (`result.generated.length`, no `String()` wrapper) — matches the registered `int` type and is exactly what `auto-summarize.js` in this same run does correctly for its own generated/failed-count pairs.
+2. For `months_generated_count`/`months_failed_count`, set the raw `.length` values directly (`result.generated.length`, no `String()` wrapper) — matches the registered `int` type and is exactly what `index.js` in this same run does correctly for the same two keys (reused from `summarize.js`'s own declaration). Note `auto-summarize.js` is not a clean counter-example here — its own per-file evaluation found 6 SCH-003 violations on its *own* newly-invented `days_*`/`weeks_*` count pairs, even though it does correctly reuse `months_generated_count`/`months_failed_count` as raw numbers.
 
 Neither was applied; the file landed as PARTIAL with three functions' worth of content, one of which (`runMonthlySummarize`) also carries an unrelated, uncaught type error.
 
