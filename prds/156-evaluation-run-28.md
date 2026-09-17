@@ -176,17 +176,19 @@ The **evaluation execution branch** created by `/prd-start` from main **never me
 
   **Completed** 2026-09-17: reported to Whitney — RUN27-1 confirmed fixed, RUN27-2 validator now catches the reuse mistake (agent still makes it, file goes PARTIAL), RUN27-3 initially reported inconclusive but **corrected to confirmed-still-open** after a CodeRabbit review of the PRD branch caught a live recurrence missed by the first log-only check (`months_generated_count`/`months_failed_count` set via `String()` against an int-typed key in `summarize.js`'s committed source — see `run-summary.md`), RUN27-4 confirmed fixed via inline fallback, journal-graph.js 11th consecutive success, cost $7.23, PR #95 auto-created. Whitney acknowledged and directed continuation.
 
-- [ ] **Post-run Datadog verification** — After the Findings Discussion checkpoint:
+- [x] **Post-run Datadog verification** — After the Findings Discussion checkpoint:
   1. Use `search_datadog_spans` with `service:commit-story` filtered to spans newer than the eval run's start timestamp. Check `vcs.ref.head.revision` on spans to confirm the new instrument branch is present — **not** `git.commit.sha` (see D-10).
   2. If no spans from the instrument branch appear yet: note in `run-summary.md` and defer.
   3. When confirmed, append `post_run_service.instance.id` (this UUID, distinct from the pre-run one) plus a `query (post-run instance, instrument-branch evidence)` field to the same `trace-artifact.md` under a "## Post-run verification" section — do not overwrite the pre-run fields, per run-27's `trace-artifact.md` format.
   4. **Log-trace correlation check** *(commit-story-v2 only — pino bridge)*: Use `search_datadog_logs` with `service:commit-story` filtered to logs newer than the eval run's start. Confirm that ≥1 log record has non-empty `trace_id` and `span_id`. Note the correlated vs. uncorrelated count. Run-27 baseline: ~85% correlated (75/88 sampled). If zero correlated logs: flag as regression — pino bridge may have been disrupted.
 
-- [ ] **Failure deep-dives** — For each failed file AND run-level failure. Includes any partial files and committed files with ≥3 attempts AND quality failures.
+  **Completed** 2026-09-17: confirmed via `search_datadog_spans` — `vcs.ref.head.revision: c87b774` matches instrument branch `spiny-orb/instrument-1789648132789`'s HEAD SHA exactly. `service.instance.id: ab1620ee-ef3e-4d7f-813b-6ae7894744ff`. Log-trace correlation: 71/87 sampled (~82%), consistent with run-27's ~85% baseline, no regression. Written to `trace-artifact.md` (no pre-run section, per D-14).
+
+- [x] **Failure deep-dives** — For each failed file AND run-level failure. Includes any partial files and committed files with ≥3 attempts AND quality failures.
   Produces: `evaluation/javascript/commit-story-v2/run-28/failure-deep-dives.md`
   Style reference: `Read docs/templates/eval-run-style-reference/failure-deep-dives.md`
 
-  **Priority check**: If `summary-manager.js` is partial again (RUN27-1 unresolved), confirm the same three-function catch-shape pattern from run-25/run-27 directly against source, rather than assuming it recurs unchanged.
+  **Priority check**: If `summary-manager.js` is partial again (RUN27-1 unresolved), confirm the same three-function catch-shape pattern from run-25/run-27 directly against source, rather than assuming it recurs unchanged. **N/A this run** — `summary-manager.js` committed cleanly (RUN27-1 resolved); the only partial file is `summarize.js` (SCH-002 reuse + newly-confirmed SCH-003 recurrence on `months_generated_count`/`months_failed_count`), documented in `failure-deep-dives.md`.
 
 - [ ] **Per-file evaluation** — Full rubric on ALL files (no spot-checking). Evaluate all rules across all committed and partial files.
   Produces: `evaluation/javascript/commit-story-v2/run-28/per-file-evaluation.md`
