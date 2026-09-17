@@ -222,10 +222,12 @@ The **evaluation execution branch** created by `/prd-start` from main **never me
   - `journal-manager.js` — Does the `quotes_count`/reflection-count semantic mismatch (RUN27-5) persist or resolve? Score per the standing Unrubriced Findings category (see Rubric scoring milestone below) if it persists.
   - `journal-graph.js` — Eleventh consecutive success expected.
 
-- [ ] **PR artifact evaluation** — Evaluate PR quality.
+- [x] **PR artifact evaluation** — Evaluate PR quality.
   Produces: `evaluation/javascript/commit-story-v2/run-28/pr-evaluation.md`
   Style reference: `Read docs/templates/eval-run-style-reference/pr-evaluation.md`
   PR: Find the URL in `evaluation/javascript/commit-story-v2/run-28/run-summary.md`.
+
+  **Completed** 2026-09-17: Reviewer Utility Score 2.25/5 (down from run-27's 3.25/5). The Per-File Results table is accurate (an improvement over run-27's fabricated "12/14" function count). But the Advisory Findings section regressed sharply — 6 of 13 line-items (46%) are false positives, mostly CDQ-007 firing on plain integer-count attributes across 5 files, some pointing at entirely wrong line numbers. All 6 of this run's SCH-003/CDQ-006 canonical failures (14 occurrences) are completely absent from Advisory Findings — the PR's own generated content gives a reviewer no signal any of them exist.
 
 - [ ] **Rubric scoring** — Synthesize dimension-level scores.
   Produces: `evaluation/javascript/commit-story-v2/run-28/rubric-scores.md`
