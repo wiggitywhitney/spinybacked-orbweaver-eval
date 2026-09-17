@@ -117,7 +117,7 @@
 | Cost | **$7.23** | $9.40 | $11.15 | $7.38 |
 | Q×F | **10.08** | 10.92 | 12.88 | 12.48 |
 | Push/PR | **AUTO (#95)** | AUTO (#94) | MANUAL (#91) | AUTO (#86) |
-| IS | *pending — see `is-score.md`* | 100/100 | 100/100 | 100/100 |
+| IS | **100/100** | 100/100 | 100/100 | 100/100 |
 
 **Q×F = 10.08** (21/25 × 12 committed files). Down from run-27's 10.92 — the quality percentage held flat (84%) but the committed-file count dropped by one (12 vs 13), since run-28 has one fewer file overall (32 vs run-27's implied count) with the same 1 partial. This continues the pattern of Q×F tracking file-count changes more than quality-percentage changes when the percentage itself doesn't move.
 
