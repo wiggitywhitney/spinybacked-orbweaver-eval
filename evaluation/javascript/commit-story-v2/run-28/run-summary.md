@@ -16,7 +16,7 @@
 | Files with a full commit | 12 |
 | Files with a failed commit | 0 |
 | Files partial | 1 (`src/commands/summarize.js`) |
-| Harness-labeled skips | 19 (17 confirmed correct, 2 questionable — see `per-file-evaluation.md`'s Correct Skips section) |
+| Harness-labeled skips | 19 (17 confirmed correct, 2 questionable — see `per-file-evaluation.md`'s Skips Evaluated section) |
 | Files seen | 32 |
 | Model | claude-sonnet-4-6 |
 | Tokens | 181.8K input / 297.1K output (422.7K cached) |
