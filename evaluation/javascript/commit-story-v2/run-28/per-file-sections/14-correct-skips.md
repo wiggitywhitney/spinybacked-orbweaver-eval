@@ -1,4 +1,4 @@
-## Correct Skips (19)
+## Skips Evaluated (19 — 17 correct, 2 questionable)
 
 | File | Verdict | Reasoning |
 |------|---------|-----------|
