@@ -13,8 +13,8 @@
 
 | Metric | Value |
 |--------|-------|
-| Files committed | 12 |
-| Files failed | 0 |
+| Files with a full commit | 12 |
+| Files with a failed commit | 0 |
 | Files partial | 1 (`src/commands/summarize.js`) |
 | Correct skips | 19 |
 | Files seen | 32 |
@@ -22,6 +22,8 @@
 | Tokens | 181.8K input / 297.1K output (422.7K cached) |
 | Cost | $7.23 |
 | Live-check | OK (730 spans, 5597 advisory findings — see `spiny-orb-live-check-report.json`) |
+
+Note: "Attributes" in the File Outcomes table below means *new schema-extension attributes* declared, not the total number of `setAttribute` calls in a file — a file can show "0 attributes" while setting many pre-existing registered keys (see per-file entries for examples).
 
 ---
 
@@ -31,20 +33,20 @@
 |------|----------|--------|
 | RUN27-1 (COV-003): `summary-manager.js` partial-commit recurrence | FIXED — expect PASS | **✅ CONFIRMED FIXED (this specific bug)** — all 14 functions instrumented, 9 spans, full SUCCESS (2 attempts). No COV-003 rejection. **But per-file evaluation found the file has three unrelated, genuine failures**: SCH-003 (`summary_saved` declared `string`, always set as boolean), CDQ-006 (isRecording guard applied to only 3 of ~24 `setAttribute` calls), and CDQ-007 (raw unsanitized path at 4 of 7 `file_path` sites, correctly sanitized at the other 3 in the same file). COV-003 resolution does not mean this file is clean overall. |
 | RUN27-2 (SCH-002): `summarize.js` key-reuse contradiction (`dates_requested`/`dates_count`) | FIXED — expect PASS | **⚠️ VALIDATOR CAUGHT IT, BUT AGENT STILL MADE THE MISTAKE** — the agent reused `commit_story.summary.dates_requested` for a week value (line 435) and a month value (line 523) after first declaring it for "dates" (line 330), same pattern as run-27. This time the SCH-002 check **fired and rejected the reassembly**, forcing the file to PARTIAL (3 spans instead of the intended 7, 3 attempts) rather than silently committing the semantic violation. The validator-level fix is working — it is now catching this exact pattern — but agent generation behavior hasn't changed, so the practical outcome (a partial file) is new, not a full pass. |
-| RUN27-3 (SCH-003): `String(x.length)` vs int-typed key | Still open — expect recurrence | **❌ CONFIRMED RECURRING, UNCAUGHT — in TWO files, not one.** `src/commands/summarize.js` sets `commit_story.summary.months_generated_count`/`months_failed_count` (both `type: int`) via `String(result.generated.length)`/`String(result.failed.length)`. `src/utils/summary-detector.js` is **worse**: all four of its newly-invented `int`-typed keys (`unsummarized_days_count`, `unsummarized_weeks_count`, `summarized_months_count`, `unsummarized_months_count`) are wrapped in `String(...)` — 4 violations in one file, found during per-file evaluation via direct `git show` line-by-line checking against the registry, independently re-verified. No SCH-003 rejection fired for any of these 6 total occurrences across both files — the validator gap is confirmed still open and, per the summary-detector.js evidence, applies specifically to attributes the agent invents itself in a given file (every pre-existing/reused key in both files is correctly typed). (Two earlier passes of this table incorrectly reported "no recurrence observed" for these exact files — first corrected for `summarize.js` after a CodeRabbit review, then corrected again for `summary-detector.js` after per-file evaluation found what a log-only check missed a second time; see git history and the correction note below.) |
+| RUN27-3 (SCH-003): `String(x.length)` vs int-typed key | Still open — expect recurrence | **❌ CONFIRMED RECURRING, UNCAUGHT — in THREE files, 12 total occurrences.** `src/commands/summarize.js` (2 occurrences: `months_generated_count`/`months_failed_count`), `src/utils/summary-detector.js` (4: `unsummarized_days_count`, `unsummarized_weeks_count`, `summarized_months_count`, `unsummarized_months_count`), and `src/managers/auto-summarize.js` (6: `days_generated_count`/`days_failed_count` set twice each on two code paths, plus `weeks_generated_count`/`weeks_failed_count`) all wrap newly-invented `int`-typed registry keys in `String(...)`. Every occurrence was found during per-file evaluation via direct `git show` line-by-line checking against the registry, independently re-verified. No SCH-003 rejection fired for any of the 12 — the validator gap is confirmed still open, and applies specifically to attributes the agent invents itself in a given file (every pre-existing/reused key across all three files is correctly typed). (Three successive passes of this table incorrectly reported "no recurrence" or undercounted this finding for these exact files, each corrected only after per-file evaluation checked source line by line; see the correction note below.) |
 | RUN27-4 (CDQ-007): raw-path pattern (7 files, missing `basename` import) | Still open — expect recurrence | **⚠️ PARTIALLY RESOLVED — the fix mechanism works, but is not consistently applied, even within a single file.** `journal-paths.js`, `journal-manager.js`, and `index.js` all correctly sanitize every path-like attribute using the inline `.split(/[\/]/).filter(Boolean).pop()` fallback (confirmed on spiny-orb main: `5a0636c` "add import-free path fallback for CDQ-007", plus two CodeRabbit-finding follow-ups). But `summary-manager.js` uses the SAME fallback correctly at 3 of 7 `file_path` call sites and ships a raw, unsanitized path at the other 4 — in the same file, with the instrumentation report's own advisory findings flagging all 7 sites. `git-collector.js` separately regressed a *different* CDQ-007 case (raw PII author name) that run-27 had fixed. The mechanism generalizes; invoking it consistently does not yet. |
 | RUN27-5 (Watch, unrubriced): correct type, wrong registered key | Watch — third instance would strengthen the case | **✅ RESOLVED for `journal-manager.js`** — this run's version writes the reflection count to `commit_story.journal.entries_count` (a generic, unscoped agent-extension key), not to `commit_story.journal.quotes_count` (the semantically-specific key that caused run-27's mismatch). Does not extend to a third instance; the streak is broken. `summarize.js`'s `dates_count`-shaped SCH-002 variant is now caught by the validator (see RUN27-2 row), so it's scored there, not here. |
 | journal-graph.js | Eleventh consecutive success expected | **✅ CONFIRMED** — committed, 4 spans, 2 attempts. |
 
 ---
 
-## File Outcomes (committed + partial only — full per-file evaluation pending)
+## File Outcomes (committed + partial only — see `per-file-evaluation.md` for the full rubric on every file)
 
 | File | Result | Spans | Attributes | Attempts | Notes |
 |------|--------|-------|------------|----------|-------|
 | src/collectors/claude-collector.js | ✅ committed | 1 | 0 | 1 | CDQ-007 resolved by dropping `repo_path` entirely (not sanitizing it) |
 | src/collectors/git-collector.js | ✅ committed | 6 | 5 | 1 | **SCH-003 FAIL** (`is_merge` boolean set via `String()`); **CDQ-007 FAIL** (regression — raw PII `commit.author` name, was fixed in run-27) |
-| src/integrators/context-integrator.js | ✅ committed | 1 | 0 | 1 | CDQ-007 resolved by dropping `repo_path` entirely, same as claude-collector.js |
+| src/integrators/context-integrator.js | ✅ committed | 1 | 0 | 1 | `repo_path` correctly dropped, but **CDQ-007 FAIL** — raw PII `commit.author` name re-exposed on this span (same value as `git-collector.js`'s regression) |
 | src/generators/journal-graph.js | ✅ committed | 4 | 0 | 2 | 11th consecutive success, no failures |
 | src/generators/summary-graph.js | ✅ committed | 6 | — | 1 | No failures |
 | src/mcp/server.js | ✅ committed | 1 | 1 | — | No failures; historical NDS-003 blank-line issue (#917) confirmed absent |
@@ -53,8 +55,8 @@
 | src/managers/summary-manager.js | ✅ committed | 9 | 1 | 2 | **RUN27-1/COV-003 resolved** (all 14 functions instrumented) but **SCH-003 FAIL** (`summary_saved` boolean-vs-string), **CDQ-006 FAIL**, **CDQ-007 FAIL** (raw path at 4/7 sites, sanitized at the other 3 in the same file) |
 | src/commands/summarize.js | ⚠️ **partial** | 3 | 4 | 3 | **RUN27-2 validator catch** — SCH-002 rejected `dates_requested` reuse for weeks (line 435) and months (line 523). **RUN27-3 recurrence** — `months_generated_count`/`months_failed_count` (int-typed) set via `String(...)`, uncaught |
 | src/utils/summary-detector.js | ✅ committed | 9 | 4 | 1 | **RUN27-3 recurrence, worse** — all 4 newly-invented count keys (`unsummarized_days_count`, `unsummarized_weeks_count`, `summarized_months_count`, `unsummarized_months_count`), all `int`-typed, set via `String(...)`, uncaught. (Earlier pass of this table wrongly said "no issue found" — corrected after per-file evaluation checked source directly.) |
-| src/managers/auto-summarize.js | ✅ committed | 3 | 4 | 1 | Not yet independently re-verified in per-file evaluation |
-| src/index.js | ✅ committed | 2 | 1 | — | `savedPath` sanitized inline via CDQ-007 fallback (per failure-deep-dive) |
+| src/managers/auto-summarize.js | ✅ committed | 3 | 4 | 1 | **RUN27-3 recurrence** — `days_generated_count`/`days_failed_count`/`weeks_generated_count`/`weeks_failed_count` (all int-typed) set via `String(...)`, 6 occurrences, uncaught. CDQ-007 clean (no repo_path this run, unlike run-27) |
+| src/index.js | ✅ committed | 2 | 1 | — | Full PASS, all 19 rules — no SCH-003/CDQ-007 issues; sole `file_path` site sanitized inline |
 
 Full rule-by-rule detail for every file lives in `per-file-evaluation.md`.
 
@@ -85,7 +87,7 @@ Confirmed on spiny-orb main (`5a0636c`) and via three fully-clean files this run
 Per-file evaluation (full rubric, direct source inspection) surfaced several genuine findings that the run log's summary/narrative gave no indication of:
 
 - **`git-collector.js` SCH-003 FAIL**: `commit_story.git.is_merge` declared `boolean`, set via `String(parentCount > 1)`.
-- **`git-collector.js` CDQ-007 regression**: `commit_story.commit.author` (raw PII, a person's full name) ships in committed code — the identical attribute run-27 explicitly removed after being blocked by the same rule. This run's validator downgraded the finding to a non-blocking advisory instead of a blocking error, a validator-severity regression worth flagging to spiny-orb independent of the attribute itself.
+- **`git-collector.js` and `context-integrator.js` CDQ-007 regression (same attribute, two files)**: `commit_story.commit.author` (raw PII, a person's full name) ships unsanitized in both files' committed code — the identical attribute run-27 explicitly removed after being blocked by the same rule. `context-integrator.js` re-exposes the value it receives from `git-collector.js` on its own span, so the regression appears twice per commit journaled. This run's validator downgraded the finding to a non-blocking advisory instead of a blocking error in `git-collector.js`, a validator-severity regression worth flagging to spiny-orb independent of the attribute itself.
 - **`summary-manager.js` SCH-003 FAIL**: `commit_story.journal.summary_saved` declared `type: string`, set as a bare boolean at all 14 call sites.
 - **`summary-manager.js` CDQ-006 FAIL**: `isRecording()` guards present on only 3 of ~24 `setAttribute` calls, no stated exemption for the rest.
 - **`git-collector.js` SCH-002 enforcement inconsistency**: `is_merge`/`parent_count` were blocked as semantic duplicates in run-27; the identical pair ships together with 0 blocking errors in run-28.
