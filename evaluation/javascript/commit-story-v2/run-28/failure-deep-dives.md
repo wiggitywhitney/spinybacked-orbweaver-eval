@@ -1,7 +1,7 @@
 // ABOUTME: Failure deep-dives for run-28 — one partial file (summarize.js, SCH-002 + SCH-003), run-level observations.
 # Failure Deep-Dives — Run-28
 
-**Run-28 result**: 12 committed, 0 failed, 1 partial (`summarize.js`), 19 correct skips (pending correct-skip verification in per-file evaluation).
+**Run-28 result**: 12 committed, 0 failed, 1 partial (`summarize.js`), 19 harness-labeled skips (17 confirmed correct, 2 questionable — see `per-file-evaluation.md`'s Correct Skips section: `context-capture-tool.js` is a coverage regression from run-27's 2 committed spans to 0 this run, and `reflection-tool.js` repeats the same self-identified-and-declined `saveReflection`/COV-004 gap documented in runs 26 and 27).
 
 ---
 
@@ -27,7 +27,7 @@
 
 SCH-002 correctly rejected reassembly on both non-`runSummarize` call sites: "declared attribute extension `commit_story.summary.dates_requested` is used with an inconsistent value source... a different concept" (lines 435, 523 per the log). This is the RUN27-2 pattern recurring exactly — the validator-level fix from spiny-orb PR #1058 is confirmed working (it caught this on both call sites, at reassembly time), but it didn't stop the agent from generating the mistake three separate times across five attempts.
 
-**New observation not present in run-27's version of this pattern**: the two rejected call sites don't just reuse the wrong key — they also skip the `String()` wrapping `runSummarize` uses, setting a raw number directly against a `string`-typed key (`weeks.length`, `months.length`, no conversion). This is a second, compounding type inconsistency layered on top of the semantic reuse: even if the agent had picked distinct keys, the two new-concept values would still need to be declared `int` (not `string`) or explicitly stringified. Not independently flagged by any validator rule in this run — SCH-002 fired first and the fallback discarded these call sites' final form before a separate type check could run against them, if one exists at all.
+**New observation not present in run-27's version of this pattern**: the two rejected call sites don't just reuse the wrong key — they also skip the `String()` wrapping `runSummarize` uses, setting a raw number directly against a `string`-typed key (`weeks.length`, `months.length`, no conversion). This is a second, compounding type inconsistency layered on top of the semantic reuse. Fixing it correctly requires pairing each new key with a type that matches how its value is actually produced, not just picking distinct names: if `weeks_requested`/`months_requested` are declared `int` (the natural type for a `.length` value), the raw numbers used here are already correct and need no wrapper; if they're declared `string` instead (matching `dates_requested`'s own type, for consistency across all three), every one of the three call sites — including `runSummarize`'s own `String(dates.length)` — needs the same explicit `String(...)` wrapper, which today only `runSummarize` applies. Not independently flagged by any validator rule in this run — SCH-002 fired first and the fallback discarded these call sites' final form before a separate type check could run against them, if one exists at all.
 
 ### RUN27-3 (SCH-003) confirmed recurring, uncaught, same file
 
@@ -60,6 +60,10 @@ Neither was applied; the file landed as PARTIAL with three functions' worth of c
 ---
 
 ## Run-Level Observations
+
+### context-capture-tool.js — coverage regression (2 spans → 0), agent notes contradict its own reasoning
+
+`context-capture-tool.js` was committed with 2 spans in run-27 (`saveContext`'s own async filesystem I/O, plus the MCP handler entry point). In run-28 it lands as a "correct skip" (0 spans) — but the agent's own thinking trace for this run reconstructs the identical run-27 analysis nearly verbatim: it flags `saveContext` as needing a COV-004 span, works through the RST-004 unexported-orchestrator exception, and drafts a schema extension name for it. The final "Agent notes" then reverse course with "All exported functions are synchronous... no async I/O to trace" — a statement that is false on its face, since `saveContext` (the function the agent's own reasoning just flagged) is unexported, not exported, and is exactly the async I/O in question. Full detail and the parallel `reflection-tool.js` case (same shape, third consecutive run, but never previously committed so not a regression) are in `per-file-evaluation.md`'s Correct Skips section. This is a genuine coverage regression, not a legitimate skip, and should be a handoff item alongside RUN27-3/RUN27-4 — the notes-vs-reasoning divergence pattern (the final summary contradicting the agent's own preceding chain-of-thought) is worth flagging as its own class of defect, separate from the coverage gap itself.
 
 ### journal-graph.js — 2 attempts, 11th consecutive success
 

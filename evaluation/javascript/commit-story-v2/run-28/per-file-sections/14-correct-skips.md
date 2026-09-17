@@ -1,0 +1,33 @@
+## Correct Skips (19)
+
+| File | Verdict | Reasoning |
+|------|---------|-----------|
+| src/generators/prompts/guidelines/accessibility.js | Correct | Pre-scan: no instrumentable functions, pure sync utilities/unexported helpers, no LLM call. |
+| src/generators/prompts/guidelines/anti-hallucination.js | Correct | Same pre-scan pattern; pure sync template/utility file. |
+| src/generators/prompts/guidelines/index.js | Correct | Same pre-scan pattern; pure sync re-export/index file. |
+| src/generators/prompts/sections/daily-summary-prompt.js | Correct | Same pre-scan pattern; pure sync prompt template, no I/O. |
+| src/generators/prompts/sections/dialogue-prompt.js | Correct | Same pre-scan pattern; pure sync prompt template, no I/O. |
+| src/generators/prompts/sections/monthly-summary-prompt.js | Correct | Same pre-scan pattern; pure sync prompt template, no I/O. |
+| src/generators/prompts/sections/summary-prompt.js | Correct | Same pre-scan pattern; pure sync prompt template, no I/O. |
+| src/generators/prompts/sections/technical-decisions-prompt.js | Correct | Same pre-scan pattern; pure sync prompt template, no I/O. |
+| src/generators/prompts/sections/weekly-summary-prompt.js | Correct | Same pre-scan pattern; pure sync prompt template, no I/O. |
+| src/integrators/filters/message-filter.js | Correct | Same pre-scan pattern; pure sync filter utility, no I/O. |
+| src/integrators/filters/sensitive-filter.js | Correct | Same pre-scan pattern; pure sync filter utility, no I/O. |
+| src/integrators/filters/token-filter.js | Correct | Same pre-scan pattern; pure sync filter utility, no I/O. |
+| src/logger.js | Correct | Same pre-scan pattern; pure sync logger config, no I/O. |
+| src/mcp/tools/context-capture-tool.js | **Questionable — coverage regression** | Pre-analysis explicitly flagged `saveContext` (unexported async filesystem I/O) as needing a COV-004 span, and the agent's own reasoning trace worked through the RST-004 unexported-orchestrator exception and drafted a schema extension for it — then the final output shipped 0 spans, justified only by "All exported functions are synchronous," which never addresses the flagged unexported async function. Direct regression from run-27, which committed this file with 2 spans (`commit_story.context.save_context` on `saveContext`, `commit_story.mcp.capture_context` on the handler) under the identical RST-004 reasoning. See detail below. |
+| src/mcp/tools/reflection-tool.js | **Questionable — recurring gap** | Identical shape to run-27's questionable skip on this same file: pre-analysis flagged `saveReflection` as needing a COV-004 span, the agent's own reasoning trace independently re-derives the same conclusion (unexported-but-uncovered async I/O), invents a span name, and reasons through CDQ-007 sanitization for it — then the final notes claim "All exported functions are synchronous... no async I/O to trace" and ship 0 spans. The exact same self-identified-and-declined gap documented in run-26 and run-27, unresolved across three runs. See detail below. |
+| src/traceloop-init.js | Correct | Same pre-scan pattern; pure sync init/config file, no I/O. |
+| src/utils/commit-analyzer.js | Correct | Same pre-scan pattern; pure sync utility, no I/O. |
+| src/utils/config.js | Correct | Same pre-scan pattern; pure sync config, no I/O. |
+| src/utils/failure-placeholder.js | Correct | Same pre-scan pattern; pure sync placeholder, no I/O. |
+
+**`context-capture-tool.js` and `reflection-tool.js` in detail:**
+
+Both files were read directly from the instrument-branch source and confirmed structurally unchanged from run-27: each defines an unexported `async function saveContext(text)` / `async function saveReflection(text)` that performs real filesystem I/O (`mkdir(dirname(filePath), {recursive:true})` then `appendFile(...)`), called only from inside an anonymous async MCP tool handler passed to `server.tool(...)` inside the exported `registerContextCaptureTool` / `registerReflectionTool` functions (which are themselves synchronous). Nothing about either file changed in a way that would legitimately eliminate the async I/O — this rules out "file refactored to be synchronous" as an explanation for either skip.
+
+For `context-capture-tool.js`, run-27 evaluated and committed this file with 2 spans under exactly this reasoning: `saveContext` is unexported async I/O with no exported orchestrator span covering its execution path, so the RST-004 exception applies and it earns a direct span, alongside a second span on the MCP handler itself (COV-001 entry point). Run-28's own agent-thinking trace reconstructs this identical analysis nearly verbatim — it flags `saveContext` as COV-004, works through the RST-004 tension, and concludes "I'll settle on instrumenting just `saveContext` directly" and drafts a schema extension name — then the final "Agent notes" abruptly reverses course with "All exported functions are synchronous (registerContextCaptureTool) — no async I/O to trace," which is false on its face (`saveContext` is the very async I/O function the agent's own reasoning just identified) and ships 0 spans. **This is a genuine coverage regression, not a legitimate skip**: a file that earned 2 spans in run-27 lost both in run-28 with the harness's final notes contradicting its own mid-generation reasoning.
+
+For `reflection-tool.js`, the same failure mode recurs for a third consecutive run (run-26, run-27, run-28). Run-28's agent-thinking trace independently re-derives that `saveReflection` is unexported async I/O fitting COV-004, resolves the RST-004 question the same way, invents a span name, and reasons through CDQ-007 sanitization for the file path — a full instrumentation plan — before the final notes again claim "All exported functions are synchronous... no async I/O to trace" and ship 0 spans. Unlike `context-capture-tool.js`, this file has never been committed with a span in any run, so there is no regression here, but it is the same self-identified-and-declined coverage gap flagged as "questionable, not confirmed correct" in run-27's evaluation, now persisting unaddressed into run-28.
+
+**Recommendation for handoff**: File both as COV-004 handoff findings. The `context-capture-tool.js` case is the more severe of the two — it is a measurable regression (2 spans → 0 spans) with the final agent notes text directly contradicting the agent's own preceding reasoning chain, worth flagging as a distinct "notes vs. reasoning divergence" pattern in addition to the coverage gap itself.
