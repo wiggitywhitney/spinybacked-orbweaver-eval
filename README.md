@@ -104,10 +104,11 @@ spinybacked-orbweaver-eval/
 | 24 | 23/25 (92%) | 5/5 | 14 | 48 | $3.70 | YES | 80/100 |
 | 25 | 24/25 (96%) | 5/5 | 13+1p | 47 | $7.38 | YES | **100/100** |
 | 26 | 23/25 (92%) | 5/5 | 14 | 41 | $11.15 | YES | 100/100 |
+| 27 | 21/25 (84%) | 5/5 | 13+1p | 48 | $9.40 | YES | 100/100 |
 
 Files column notation: plain count = committed files; `+Np` = N partial files (instrumentation started, not fully committed); `+Nf` = N files rolled back after a checkpoint test failure. Cost column: `~` prefix indicates an estimated/derived cost (early runs predating direct cost reporting in the tool); unprefixed values are directly reported by spiny-orb. Run-22 was never executed (skipped in the run sequence).
 
-**Run-27 is next** — verifying whether RUN26-1 (journal-manager.js SCH-003 `reflections_count` typed as a true int) and RUN26-2 (journal-paths.js CDQ-007 raw path with unused `basename`) are resolved.
+**Run-28 is next** — the widened CDQ-007 raw-path finding (missing `basename()` import, now 7 modules and 30 call sites instead of run-26's 1) and the SCH-003 `String()`-vs-`int` pattern's spread to `git-collector.js` and `summary-detector.js`. The `summary-manager.js` COV-003 partial-commit recurrence and the `summarize.js` SCH-002 key-meaning mismatch are already fixed as of 2026-09-16 (spiny-orb PR #1058) and should not recur.
 
 Full run-by-run analysis: [`evaluation/javascript/commit-story-v2/`](evaluation/javascript/commit-story-v2/)
 
