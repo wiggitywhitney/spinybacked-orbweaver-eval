@@ -7,7 +7,7 @@
 
 **post_run_service.instance.id**: `ab1620ee-ef3e-4d7f-813b-6ae7894744ff`
 
-**query (post-run instance, instrument-branch evidence)**: `service:commit-story` from `2026-09-17T12:28:52Z` (eval run start) to now
+**query (post-run instance, instrument-branch evidence)**: `service:commit-story` from `2026-09-17T12:28:52Z` (eval run start) to `2026-09-17T13:45:27Z` (verification query time)
 
 **Confirmation**: `vcs.ref.head.revision: c87b774` on multiple spans (e.g. `commit_story.journal.save_entry`, `commit_story.journal.generate_sections`, `commit_story.journal.dialogue_node`, `commit_story.journal.summary_node`, `commit_story.journal.technical_node`) matches the instrument branch `spiny-orb/instrument-1789648132789`'s HEAD SHA (`c87b7749c5a17a0b5f8c88d26d51d2cb37e331e1`, short `c87b774`) — confirmed via `git -C ~/Documents/Repositories/commit-story-v2 rev-parse spiny-orb/instrument-1789648132789`. Direct evidence the local commit-story-v2 checkout, on the instrument branch, self-journaled its own commits during and after the eval run (per D-10 — `vcs.ref.head.revision`, not `git.commit.sha`, identifies the running code's own branch).
 
