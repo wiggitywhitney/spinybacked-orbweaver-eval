@@ -1,0 +1,317 @@
+// ABOUTME: PRD for JS Evaluation Run-27 — SCH-003 int-type String() cast check and CDQ-007 self-identified-fix guidance verification.
+# PRD #27: JS Evaluation Run-27: commit-story-v2 — SCH-003 AST Check + CDQ-007 Self-Identified-Fix Verification
+
+**Status:** Complete (2026-09-17)
+**Created:** 2026-07-20
+**GitHub Issue:** #153
+**Depends on:** PRD #26 (run-26 complete, actionable fix output delivered to spiny-orb team)
+
+---
+
+## Problem Statement
+
+Run-26 scored 23/25 (92%) with a clean sweep (14 committed, 0 partial, 0 failed). Gates 5/5. IS 100/100 (second consecutive perfect score). Q×F 12.88. RUN25-1 (COV-004 ENOENT validator false positive) confirmed resolved via a genuine validation journey, not a lucky pass.
+
+Two new rule findings emerged:
+
+1. **RUN26-1 (P1)** — `journal-manager.js` SCH-003: `commit_story.journal.reflections_count` is declared `type: int` in `semconv/agent-extensions.yaml`, but the agent emitted `String(reflections.length)`. The validator's SCH-003 check appears to only compare declared type against direct literal/variable assignments — it does not flag an explicit `String(...)` wrapper around a value passed to `setAttribute` for an int/float/bool-typed registry key. Confirmed live via a run-26-branch trace (`git.commit.sha` matches the instrument branch HEAD; trace `3722a802e3cf1bc1c0bc5428509d2ce7`).
+
+2. **RUN26-2 (P2)** — `journal-paths.js` CDQ-007: raw filesystem path set as `commit_story.journal.file_path`; the agent's own generation-time notes self-identified "missing `basename` import" as the fix and declined to apply it. This is the first run where a CDQ-007 finding crossed from advisory to canonical FAIL specifically because the agent named a concrete, cost-free remediation and didn't apply it — the other six CDQ-007 findings this run remained advisory. `ensureDirectory(filePath)` derives its directory via `dirname(filePath)` on the full path, so a straight swap to `basename(filePath)` would drop that directory context — the correct fix depends on which representation the spiny-orb team confirms satisfies CDQ-007 without losing diagnostic value.
+
+Additionally, run-26 surfaced a broader methodology issue (not a rule failure): `attributesCreated`/"N attributes" figures in `run-summary.md` and `spiny-orb-output.log` count only *new schema extensions*, not total attributes set in code. This produced a false "declining richness" narrative for `context-capture-tool.js` across runs 23–25 that source inspection disproved. Full detail: `evaluation/javascript/commit-story-v2/run-26/actionable-fix-output.md` §3, §4, §7, §8.
+
+### Primary Goals
+
+Verify whether RUN26-1 and RUN26-2 are resolved:
+- `journal-manager.js` emits `reflections_count` as a true int, not a quoted string (SCH-003 passes)
+- `journal-paths.js` resolves its CDQ-007 finding via whichever representation the spiny-orb team confirmed — either a directory-preserving fix, or documented as an accepted advisory if no fix landed. Do not treat "an attribute was added alongside the original raw path" as a resolution; the original raw-path attribute must actually be gone or corrected.
+
+### Secondary Goals
+
+- **Attribute-count undercounting**: Check whether spiny-orb's run-summary language changed (e.g., "N new schema-extension attributes" instead of bare "N attributes"), or whether a total-`setAttribute`-count metric was added. If not, per-file evaluation must independently verify attribute counts against source for any file the run summary reports as "0 attributes" before drawing any coverage conclusion.
+- **RUN21-6 watch** (sixth run): any new agent notes vs. committed code divergence. spiny-orb issue #927.
+- **IS score**: does 100/100 hold for a third consecutive run?
+- **Cost trend**: does retry volume normalize from run-26's $11.15 high (driven by three files needing 3 attempts each, not one outlier), or continue climbing?
+- **journal-graph.js**: tenth consecutive success expected (runs 18–21, 23–26).
+
+### Run-26 Scores (baseline for run-27 comparison)
+
+| Dimension | Run-26 | Run-25 | Run-24 | Run-23 |
+|-----------|--------|--------|--------|--------|
+| NDS | 2/2 (100%) | 2/2 (100%) | 2/2 (100%) | 2/2 (100%) |
+| COV | 5/5 (100%) | 4/5 (80%) | 5/5 (100%) | 5/5 (100%) |
+| RST | 4/4 (100%) | 4/4 (100%) | 4/4 (100%) | 4/4 (100%) |
+| API | 3/3 (100%) | 3/3 (100%) | 3/3 (100%) | 3/3 (100%) |
+| SCH | **3/4 (75%)** | 4/4 (100%) | 3/4 (75%) | 3/4 (75%) |
+| CDQ | **6/7 (86%)** | 7/7 (100%) | 6/7 (86%) | 7/7 (100%) |
+| **Total** | **23/25 (92%)** | **24/25 (96%)** | **23/25 (92%)** | **24/25 (96%)** |
+| **Gates** | **5/5** | **5/5** | **5/5** | **5/5** |
+| **Files** | **14 (clean sweep)** | **13+1p** | **14 (0p, 0f)** | **13+1p** |
+| **Cost** | **$11.15** | **$7.38** | **~$3.70** | **~$5.60** |
+| **Push/PR** | **MANUAL (#91, see D-7)** | **AUTO (#86)** | **AUTO (#81)** | **AUTO (#75)** |
+| **IS** | **100/100** | **100/100** | **80/100** | **80/100** |
+| **Q×F** | **12.88** | **12.48** | **12.88** | **12.48** |
+
+### Unresolved from Prior Runs
+
+| Item | Origin | Runs Open | Status |
+|------|--------|-----------|--------|
+| RUN26-1: journal-manager.js SCH-003 — `reflections_count` emitted as `String(x.length)` against an int-typed registry key | RUN26-1 | 1 run | P1 — needs a static AST check for `setAttribute(key, String(...))` against numeric-typed registry keys |
+| RUN26-2: journal-paths.js CDQ-007 — raw path, `basename` self-identified and not applied | RUN26-2 | 1 run | P2 — prompt guidance or validator escalation for self-identified-but-unapplied fixes |
+| Log attribute undercounting — `attributesCreated` counts only new schema extensions, not total attributes set | RUN25 (implicit) / RUN26 (confirmed) | 2+ runs | P2 — produced a false "declining richness" narrative for context-capture-tool.js; needs a spiny-orb run-summary language fix |
+| RUN21-6: Agent notes vs committed code divergence | RUN21-6 | 6 runs | Watch — spiny-orb issue #927; sixth watch run in run-27 |
+| IS SPA-001: INTERNAL span count structural | Structural | 12 runs | Structural — threshold raised to 55 by PR #142; research spike #929 still open |
+
+---
+
+## Solution Overview
+
+Same four-phase structure as runs 5–26:
+
+1. **Pre-run verification** — Verify RUN26-1/RUN26-2 fix status; check for attribute-count language changes since run-26
+2. **Evaluation run** — Execute `spiny-orb instrument` on commit-story-v2
+3. **Structured evaluation** — Per-file evaluation with per-agent methodology, including two user-facing checkpoints
+4. **Process refinements** — Encode methodology changes, draft PRD #28
+
+### Two-Repo Workflow
+
+Same as runs 9–26.
+
+| Repo | Path | Role |
+|------|------|------|
+| **commit-story-v2** (target) | `~/Documents/Repositories/commit-story-v2` | spiny-orb instruments this repo |
+| **spinybacked-orbweaver-eval** (evaluation) | `~/Documents/Repositories/spinybacked-orbweaver-eval` | Evaluation artifacts live here |
+| **spinybacked-orbweaver** (agent) | `~/Documents/Repositories/spinybacked-orbweaver` | The spiny-orb agent |
+
+### Eval Branch Convention
+
+This PRD document merges to `main` so `/prd-start` can pick it up.
+
+The **evaluation execution branch** created by `/prd-start` from main **never merges to main**. Before closing with `/prd-done`, run the "Copy artifacts to main" milestone. When `/prd-done` runs at completion, close the issue without merging or deleting the eval branch.
+
+---
+
+## Success Criteria
+
+1. `journal-manager.js` emits `reflections_count` as a true int (RUN26-1 fix confirmed) — SCH returns to 4/4
+2. `journal-paths.js` CDQ-007 finding resolved per the spiny-orb team's confirmed representation, or documented as an intentionally accepted advisory — CDQ returns to 7/7 only if an actual fix landed
+3. Quality score ≥ 23/25 (92%, no regression from run-26); 25/25 if both fixes land (Q×F 14.0, all-time record target)
+4. Push/PR succeeds automatically (nineteenth consecutive attempt; run-26 was a manual recovery during a paused run, not a spiny-orb defect — see D-7)
+5. Per-file span counts verified by post-hoc counting, cross-checked against source for any file the run summary reports as "0 attributes"
+6. All evaluation artifacts generated from canonical methodology (per-agent approach, batches of 5)
+7. Both user-facing checkpoints completed (Findings Discussion + handoff pause with spoken summary)
+8. IS ≥ 100/100 (run-25 and run-26 both hit 100/100; this is now the expected baseline, not a stretch target)
+
+---
+
+## Milestones
+
+- [x] **Step 0 — Bootstrap reading.** Before proceeding with any other milestone, read these documents in order:
+  1. `docs/language-extension-plan.md` — completely. Pay particular attention to: (a) step 9.5 (SPA-001 calibration note — commit-story-v2 threshold is 55, set by PR #142); (b) step 9 (IS scoring protocol); (c) step 6 (per-file trace supplement procedure and D-2 batch-of-5 approach); (d) step 3 (branch-name extraction fallback and approval-prompt check — added from run-26's RUN26-3 finding: before treating an apparently stalled run as failed, check whether it's paused at its own `Proceed? [y/N]` approval prompt rather than genuinely stuck); (e) step 10 (attribute-count trend caution — added from run-26's undercounting finding: before flagging any cross-run "declining richness" trend, verify reported attribute counts against direct source inspection rather than trusting logged figures alone).
+  2. `prds/144-evaluation-run-26.md` — the immediately prior commit-story-v2 run PRD; use it as a style reference for the IS scoring milestone format and per-file evaluation structure.
+  3. `evaluation/javascript/commit-story-v2/run-26/actionable-fix-output.md` — drives the current run's goals. RUN26-1 (SCH-003 journal-manager.js) and RUN26-2 (CDQ-007 journal-paths.js) are the primary goals for this run; §4 (attribute undercounting) and §7/§8 (carry-forward tracker and score projection) inform pre-run verification and success criteria.
+  **Do not mark this complete until you have read all three documents.**
+
+- [x] **Cross-run process review** *(Step 0.5 — before any other milestones except Step 0)* — Follow the full procedure in `docs/language-extension-plan.md` Step 0.5. Check whether any other eval target (taze, release-it, content-manager) has a completed run more recent than run-26 (`evaluation/javascript/commit-story-v2/run-26/actionable-fix-output.md`). If so, read its `actionable-fix-output.md` and any `lessons-for-prd*.md` files; present a structured checkpoint report; wait for user approval before making any template changes.
+
+  **Result**: No cross-target run is more recent. Completion dates (from the "eval: save ... artifacts to main" commit, not file mtime — mtimes for release-it/run-4 and taze/run-16 were overwritten by a later unrelated reorg commit): commit-story-v2 run-26 = 2026-07-20, taze run-16 = 2026-06-22, release-it run-4 = 2026-05-07. No `content-manager` directory exists yet. No template changes proposed.
+
+- [x] **Collect skeleton documents** — Create `evaluation/javascript/commit-story-v2/run-27/` directory (already created with `debug-dumps/`) with a `lessons-for-prd28.md` skeleton. Must run before pre-run verification begins.
+
+- [x] **Pre-run verification** — Verify spiny-orb fixes and validate run prerequisites:
+  1. **Datadog MCP health check** *(first, before any other pre-run step)*: Run `search_datadog_spans` with `service:commit-story` for the last 1 hour. If it fails or returns an unexpected error (not just "no results"), re-run `/ddsetup`, then `/reload-plugins`. Do not proceed until Datadog MCP queries succeed.
+  2. **Handoff triage review**: Read the spiny-orb team's triage of `evaluation/javascript/commit-story-v2/run-26/actionable-fix-output.md`. Check which findings were filed and their current status.
+  3. **RUN26-1 fix** (P1): Verify whether a validator or generation-time check now catches `setAttribute(key, String(...))` calls where `key` resolves to an int/float/bool-typed registry attribute. If not fixed, still proceed — run-27 will confirm the gap persists.
+  4. **RUN26-2 fix** (P2): Verify whether journal-paths.js's raw-path CDQ-007 finding has a confirmed resolution path from the spiny-orb team — either a specific representation fix or an explicit decision to leave it as an accepted advisory. Note which.
+  5. **Attribute-count undercounting fix** (P2): Check whether spiny-orb's run-summary language changed to distinguish "new schema-extension attributes" from total attributes set, or whether a total-count metric was added.
+  6. **RUN21-6 watch** (Watch, sixth run): Check whether any further changes landed for issue #927. Note any new instances in run-27.
+  7. **Other spiny-orb fixes since run-26**: Check spiny-orb main for any merged PRs relevant to commit-story-v2 evaluation.
+  8. **Target repo readiness** (commit-story-v2): Verify the target checkout is on `main`, clean working tree, `spiny-orb.yaml` and `semconv/` exist. Branch-tip provenance (whether recent traffic came from the run-26 instrument branch) is validated separately via `vcs.ref.head.revision` in step 15 — it is not a precondition for this step.
+  9. **Push auth stability check**: Verify token still works (dry-run push to non-existent branch).
+  10. **File inventory**: Count `.js` files in commit-story-v2's `src/` directory (expect 32, the run-26/run-27 baseline; verify count and check for any new files added since run-26).
+  11. Rebuild spiny-orb from **main**: `cd ~/Documents/Repositories/spinybacked-orbweaver && npm install && npm run build`
+  12. Record version and findings status.
+  13. **README check**: Verify `README.md` on main has a row for run-26.
+  14. **Datadog pre-run health check**: Use `search_datadog_spans` with `service:commit-story` (last 7 days). If no results, check Datadog Agent status. Do not start the eval run until spans appear.
+  15. **Instrument branch confirmation**: Check `vcs.ref.head.revision` on recent `commit_story.journal.save_journal_entry` spans (note: NOT `git.commit.sha`, which is the journaled commit — domain data, not the running code's own branch identity — see D-10, correcting D-6). The run-26 instrument branch was `spiny-orb/instrument-1784302707982` — to get its HEAD SHA: `git -C ~/Documents/Repositories/commit-story-v2 rev-parse spiny-orb/instrument-1784302707982`. Recent spans matching that SHA are expected and fine — branch-tip provenance is a `vcs.ref.head.revision` fact, not a checkout-state precondition (see step 8).
+  16. **Capture trace artifact** (organic target): Read `evaluation/trace-capture-protocol.md`. Use `search_datadog_spans` with `service:commit-story` (last 7 days). From the most recent complete journal generation run, record `service.instance.id`. Write `evaluation/javascript/commit-story-v2/run-27/trace-artifact.md`.
+  17. Append observations to `evaluation/javascript/commit-story-v2/run-27/lessons-for-prd28.md`.
+
+  **Result**: RUN26-1 (#1037), RUN26-2 (#1035), and the attribute-count undercounting fix (#1036) are all still open on spiny-orb main with no acceptance criteria checked — expect all three gaps to persist in run-27. spiny-orb rebuilt clean at v2.0.0 (unrelated CLI/publish fixes only since run-26). File inventory unchanged at 32 (the "expect 31" note was already stale as of run-26, which itself recorded 32). Target repo confirmed on `main`, clean, push auth working. Datadog MCP required re-authentication before health checks passed (31 spans/1h, 226 spans/7d, all `git.commit.sha:8bea3922...` = current main HEAD). Trace artifact captured (`service.instance.id: 648eef31-...`). Full detail in `lessons-for-prd28.md`.
+
+- [x] **Evaluation run-27** — Whitney runs `spiny-orb instrument` in her own terminal. **Do NOT run the command yourself.** AI role: (1) confirm readiness with Whitney, (2) once Whitney provides the log output, save it to `evaluation/javascript/commit-story-v2/run-27/spiny-orb-output.log` using `git add -f` and write `evaluation/javascript/commit-story-v2/run-27/run-summary.md`, (3) **if auto PR creation failed**, create the PR from the file spiny-orb already wrote: `gh pr create --body-file ~/Documents/Repositories/commit-story-v2/spiny-orb-pr-summary.md --repo wiggitywhitney/commit-story-v2 --head <instrument-branch> --title "..."`
+
+  **Result**: 13 committed, 0 failed, 1 partial (`summary-manager.js`), 18 harness-labeled skips (17 confirmed correct, 1 questionable: `reflection-tool.js`). Cost $9.40. PR #94 auto-created — no manual recovery needed. Reported "stuck at pre-push hook" during live monitoring turned out to be the process correctly paused at an interactive `PROGRESS.md` accept/edit/skip prompt overnight (21h 21m total elapsed, dominated by that wait, not processing time); the prompt text never appeared in the piped log, only the final "Completed in..." line did — captured as a new lesson (distinct from D-7's `Proceed? [y/N]` pattern) in `lessons-for-prd28.md`. RUN26-1 (SCH-003) type mismatch confirmed fixed via direct source diff, though per-file evaluation later found the fix replaced it with a semantic mismatch (see that milestone's Result). RUN26-2 (CDQ-007) confirmed still unresolved. New regression found: `summary-manager.js` reverted to the run-25 PARTIAL failure shape after run-26 had confirmed it fixed.
+
+  **Before treating an apparently stalled run as failed**: check whether it's paused at any live interactive prompt — not just the `Proceed? [y/N]` push-confirmation prompt (D-7/RUN26-3), but also the `PROGRESS.md` `[a]ccept/[e]dit/[s]kip` prompt this run got stuck at (see Result note above) — rather than genuinely stuck or errored. See `docs/language-extension-plan.md` step 3. Run-26's "push/PR failure" (RUN26-3) turned out to be a ~27.5-hour approval-prompt pause, not a spiny-orb defect; a premature manual recovery during that window produced a downstream duplicate-PR conflict that required correction after the fact. Neither prompt's text reaches the piped `spiny-orb-output.log` — only low, nonzero CPU usage (`ps`) distinguishes a live pause from a real hang. If the run appears stalled, check the terminal state before concluding it needs manual recovery.
+
+  AI must create `evaluation/javascript/commit-story-v2/run-27/debug-dumps/` before handing Whitney the command (already created). When writing `run-summary.md`, extract the instrument branch name directly from the log (`grep -m1 'Branch:' spiny-orb-output.log`) — do not write it from context (D-4).
+
+  **Exact command** (run from `~/Documents/Repositories/commit-story-v2`):
+  ```bash
+  caffeinate -s env -u ANTHROPIC_CUSTOM_HEADERS -u ANTHROPIC_BASE_URL vals exec -i -f .vals.yaml -- node ~/Documents/Repositories/spinybacked-orbweaver/bin/spiny-orb.js instrument src --verbose --thinking --debug-dump-dir ~/Documents/Repositories/spinybacked-orbweaver-eval/evaluation/javascript/commit-story-v2/run-27/debug-dumps 2>&1 | tee ~/Documents/Repositories/spinybacked-orbweaver-eval/evaluation/javascript/commit-story-v2/run-27/spiny-orb-output.log
+  ```
+
+  **After saving artifacts and committing, push the eval branch to origin immediately** (`git push -u origin <eval-branch>`). The branch holds the only copy of run-27 artifacts until the "Copy artifacts to main" milestone runs.
+
+- [x] **Findings Discussion** *(user-facing checkpoint 1)* — After `run-summary.md` is written, before any evaluation documents are started: report to Whitney: (1) files committed / failed / partial, (2) whether any checkpoint failures occurred, (3) RUN26-1 fix result — does journal-manager.js emit `reflections_count` as a true int?, (4) RUN26-2 fix result — is journal-paths.js's CDQ-007 finding resolved?, (5) journal-graph.js result — tenth consecutive?, (6) 3-attempt rate, (7) quality score if visible, (8) cost, (9) push/PR status, (10) overall attempt-count distribution. Keep it conversational, under 12 lines. Wait for acknowledgment before proceeding.
+
+  **Result**: Delivered and acknowledged by Whitney 2026-09-03. **Correction (added during per-file evaluation)**: item (3) as originally phrased assumed the fix would emit a new `reflections_count` key — it does not. Run-27 emits the reflection count under the pre-existing `commit_story.journal.quotes_count` key instead, as a native int (SCH-003 type check passes), but that key is registered to mean developer-quote count, not reflection count — a correct type on a semantically wrong key. See `journal-manager.js`'s per-file evaluation section for full analysis.
+
+- [x] **Post-run Datadog verification** *(steps below are self-contained — do not go looking for a "step 3b" in `docs/language-extension-plan.md`; that step reference is stale, see note)*. After the Findings Discussion checkpoint:
+  1. Use `search_datadog_spans` with `service:commit-story` filtered to spans newer than the eval run's start timestamp. Check `vcs.ref.head.revision` on spans to confirm the new instrument branch is present — **not** `git.commit.sha`, which is the journaled commit (domain data), not the running code's own branch identity (see run-27's Result note and D-6 correction below; D-6 as originally written pointed at the wrong attribute and produced a false negative in run-27).
+  2. If no spans from the instrument branch appear yet: note in `run-summary.md` and defer.
+  3. When confirmed, record the `service.instance.id` in `trace-artifact.md`.
+  4. **Log-trace correlation check** *(commit-story-v2 only — pino bridge)*: Use `search_datadog_logs` with `service:commit-story` filtered to logs newer than the eval run's start. Confirm that ≥1 log record has non-empty `trace_id` and `span_id`. Note the correlated vs. uncorrelated count. Run-26 baseline: check run-26's post-run verification note for the actual figure (`evaluation/javascript/commit-story-v2/run-26/run-summary.md` — ~83% correlated, 87-log sample). If zero correlated logs: flag as regression — pino bridge may have been disrupted.
+
+  **Result** (corrected — see D-10): An initial check against `git.commit.sha` reported instrument-branch traffic as "not yet observed," which was wrong — `git.commit.sha` on these spans is the journaled commit (domain data), not the running code's own branch identity. Re-checked against `vcs.ref.head.revision`: **CONFIRMED**. Every incremental instrument commit from this run (`38dd870` HEAD plus `8317536`, `b219e77`, `e0ca3ee`, `c5839a3`, `9b22db6`, `a2fdaf4`, `ce19b5c`, `5178302`, `39abd79`, and others) has matching spans — the local commit-story-v2 checkout, on the instrument branch, self-journaled its own commits during and after the eval run. `service.instance.id: 0cac1bed-f201-466a-b976-41f47c65d3bd`. Log-trace correlation check: 75/88 sampled logs (227 total since run start) carry non-empty `trace_id`/`span_id` (~85%), consistent with run-26's ~83% baseline — no pino-bridge regression. Full detail in `trace-artifact.md` and `run-summary.md`.
+
+  **Note on the stale "step 3b" reference**: this check's steps 1-4 above are fully inline and self-contained — they do not depend on `docs/language-extension-plan.md`. A "step 3b" for this exact check was added to the template on PRD #140's (run-25) eval execution branch, which per this project's own convention never merges to main — so the template edit never reached main and no "step 3b" exists in the current `docs/language-extension-plan.md` (confirmed 2026-09-03; discovered when both run-26's and run-27's copies of this milestone pointed to it). The mainline template's step 9.6 ("Correlated signals check") is a *different* check at a different point in the process (after IS scoring, not right after Findings Discussion) and is not a substitute. Flagged in `lessons-for-prd28.md` for the template-update checkpoint — the template should either get this step back with correct numbering, or PRD #28's drafting should stop citing it.
+
+- [x] **Failure deep-dives** — For each failed file AND run-level failure. Includes any partial files and committed files with ≥3 attempts AND quality failures.
+  Produces: `evaluation/javascript/commit-story-v2/run-27/failure-deep-dives.md`
+  Style reference: `Read docs/templates/eval-run-style-reference/failure-deep-dives.md`
+
+  **Result**: `summary-manager.js`'s partial-commit regression (7/9 functions) confirmed as the same `isExpectedConditionCatch` validator gap identified in run-25 — not a new bug. Direct source comparison across the file's three ENOENT-handling functions in the final committed dump gives unambiguous confirmation of run-25's theorized catch-shape split: `if (err.code === 'ENOENT') return; throw err;` is flagged for COV-003, `if (err.code !== 'ENOENT') throw err;` is accepted as graceful degradation, and `readMonthWeeklySummaries` — which contains both shapes in one function — has only the flagged shape cited by the validator. Run-26's single clean pass (all 9 functions) was not a fix landing; it was one run where none of this file's functions happened to use the flagged shape. `journal-graph.js` and `summarize.js` (both 3 attempts, both committed cleanly) got a brief run-level note per the run-26 precedent — no quality failure to warrant a dedicated entry.
+
+- [x] **Per-file evaluation** — Full rubric on ALL files (no spot-checking). Evaluate all rules across all committed and partial files.
+  Produces: `evaluation/javascript/commit-story-v2/run-27/per-file-evaluation.md`
+  Style reference: `Read docs/templates/eval-run-style-reference/per-file-evaluation.md`
+
+  **Result**: Complete — 14 background agents (D-2 batches of 5, 5, 4) evaluated all 13 committed + 1 partial file against the full 30-rule rubric (5 gates + 25 quality rules), using `git show` (read-only) against the instrument branch, `spiny-orb-output.log` thinking/notes blocks, and Datadog trace corroboration labeled per the trace-provenance rule. Gate checks confirmed directly: `node --check` clean on all 14 files; `npm test` on the instrument branch tip gives 630 passed / 1 skipped (631 total); API-002/003/004 and CDQ-008 all PASS. Seven CodeRabbit CLI review passes on the assembled document caught real scoring and arithmetic inconsistencies across the independently-authored per-file sections, all fixed in place — see `per-file-evaluation.md`'s Quality Failures Summary "Correction history" for the full account.
+
+  **12 canonical findings across 9 files** in the final, reviewed version: `claude-collector.js`, `context-integrator.js`, `journal-paths.js`, `summarize.js`, `summary-detector.js`, `managers/auto-summarize.js`, and `summary-manager.js` all score CDQ-007 (seven independent instances of the same self-identified-and-declined raw-`repo_path`/`file_path` fix — `journal-paths.js` is RUN26-2 confirmed still unresolved, the other six are new; `journal-manager.js`'s equivalent `file_path` attribute is the one deliberate exception, since its sole call site structurally guarantees a relative path); `git-collector.js` and `summary-detector.js` score SCH-003 (two independent int-declared-but-`String()`-emitted mismatches — the same RUN26-1 failure class recurring in files other than the one it was originally fixed in); `journal-manager.js` surfaces a "correct type, wrong chosen registry key" finding with no existing rule to catch it (`quotes_count`, an already-registered key meaning developer-quote count, holds a reflection count instead) — scored as a canonical failure for consistency and flagged as a rubric gap, not tied to any scored dimension; `summarize.js` surfaces a related but distinct issue, reconciled during rubric scoring as a scored **SCH-002** failure rather than a second unrubriced gap: `dates_count` is a *freshly-declared* extension key (not a pre-existing one) whose own declared meaning (date count) is violated by a second `setAttribute` call in the same file/pass that reuses it for a week count — SCH-002 already covers cross-checking a newly-declared key's usage against its own declared semantics, so this is a rule gap in enforcement, not an absence of a rule; and `summary-manager.js` also scores COV-003 (partial-file regression, confirmed by `failure-deep-dives.md` as the same run-25 validator gap recurring against a different function pair). Also found a reporting discrepancy (not a rubric failure): `context-capture-tool.js` logged as 3 spans but source shows only 2. Full detail, all trace citations, and the per-file `per-file-sections/*.md` working files are in `per-file-evaluation.md`.
+
+  **Rule rename note**: NDS-005 (Control Flow Preserved) is called **NDS-007** in spiny-orb's validator output. Use NDS-007 in all per-file evaluation tables.
+
+  **(D-2) Spawn per-file evaluation agents in batches of 5**: Before spawning agents, create: `mkdir -p evaluation/javascript/commit-story-v2/run-27/per-file-sections/`. Spawn individual background Agent() calls with `run_in_background: true` in batches of 5. After each batch returns, write section files to disk immediately. After writing, the user clears context before spawning the next batch. At the start of each new batch, run `ls per-file-sections/` to see what's done and pick the next 5. **Background agents cannot write NEW files** (Write tool blocked for new paths in subagent context) — ask agents to return section content in the result text, then write each file directly. Full protocol: `docs/language-extension-plan.md` step 6 (D-2).
+
+  **COV-005 methodology (attribute presence, not attribute identity)**: COV-005 passes if a span carries ≥1 meaningful domain attribute. Attribute variation between runs is normal. When a committed file's attribute set changes substantially from run-26, note it as a **coverage delta observation** in the per-file narrative — do not fail COV-005 for it.
+
+  **Attribute-count trend caution**: before flagging any cross-run "declining richness" trend for any file, verify reported attribute counts against direct source inspection rather than trusting `attributesCreated`/"N attributes" figures alone — those figures count only new schema extensions, not total attributes set. See `docs/language-extension-plan.md` step 10 (added from run-26's undercounting finding, which produced a false regression narrative for `context-capture-tool.js` across runs 23–25).
+
+  **Trace provenance labeling** (attribute corrected by D-10 — see below): commit-story-v2 is dogfooded in real operation, so live trace evidence may come from either the instrument branch tip or ordinary main-branch usage — these are not interchangeable. Before citing a trace as support for a per-file finding, check the span's `vcs.ref.head.revision` against the instrument branch's actual HEAD SHA (obtained in pre-run verification step 15) — **not** `git.commit.sha`, which is the journaled commit (domain data), not the running code's own branch identity. D-9 originally named `git.commit.sha` for this check; D-10 (added during this run's post-run Datadog verification) found that attribute backwards and corrected it. Label each cited trace explicitly as "instrument-branch evidence" or "main-branch evidence (corroborating, not direct)" — see `docs/language-extension-plan.md` step 6 (added from run-26's trace provenance split finding, where most cited traces turned out to be main-branch dogfooding traffic rather than run-26-branch evidence).
+
+  **Important**: Per-file evaluation agents must read the instrumented source directly (`git show <instrument-branch>:src/file`); do not rely on agent notes alone. Additionally, each agent must read the `Agent thinking` and `Agent notes` blocks for that file from `spiny-orb-output.log` — this is the primary evidence source for understanding why the agent made specific instrumentation decisions. Note: `--debug-dump-dir` only fires for failed, partial, and zero-span files; if all files succeed, debug-dumps/ is empty and the log is the sole source of agent reasoning. Companion `.instrumentation.md` files on the instrument branch also contain structured rationale per file.
+
+  **(D-2 trace supplement)** Each per-file evaluation agent receives the `post_run_service.instance.id` from `evaluation/javascript/commit-story-v2/run-27/trace-artifact.md` — the instrument-branch-evidence instance, not the `pre_run_service.instance.id` (main-branch, corroborating only). Before writing any section, use `search_datadog_spans` with the artifact's post-run query + `resource_name:<prefix>.*`. Note in each section which run's trace data is being used, and apply the trace provenance labeling rule above.
+
+  **(D-1) Track attempt counts**: For each file, note attempts. If a file required ≥3 attempts AND has a quality failure, include the verbose log section as input to the per-file evaluation agent.
+
+  **Key watch items for per-file evaluation**:
+  - `journal-manager.js` — Does `reflections_count` emit as a true int? RUN26-1 fix result. **Also assess the semantic mismatch**: the value is mapped onto the pre-existing `commit_story.journal.quotes_count` key, which is registered to mean developer-quote count, not reflection count — correct type, semantically mismatched key, an unrubriced rubric gap rather than a CDQ finding (no existing rule ID covers a wrong-chosen-existing-key case; see `run-summary.md` Fix Verification table).
+  - `journal-paths.js` — Is the raw-path CDQ-007 finding resolved, and if so, via which representation? RUN26-2 fix result.
+  - `context-capture-tool.js` — Cross-check its attribute count against source directly; do not trust the run-summary figure alone (attribute-count trend caution above).
+  - `journal-graph.js` — Tenth consecutive success expected.
+
+- [x] **PR artifact evaluation** — Evaluate PR quality.
+  Produces: `evaluation/javascript/commit-story-v2/run-27/pr-evaluation.md`
+  Style reference: `Read docs/templates/eval-run-style-reference/pr-evaluation.md`
+  PR: Find the URL in `evaluation/javascript/commit-story-v2/run-27/run-summary.md`.
+
+  **Result**: PR #94 evaluated against `per-file-evaluation.md`'s 12 canonical findings. Push auth: nineteenth consecutive automated success, no manual recovery needed. Advisory-finding accuracy improved sharply over run-26 (1 hallucination out of 13 line-items, ~8%, vs. run-26's 44%) — the one false positive is a CDQ-007 flag on `journal-graph.js` at lines that contain no PII or path data. The dominant failure mode remains omission and severity-calibration, not hallucination: 4 of 12 canonical failures (both SCH-003 type mismatches, `summarize.js`'s SCH-002 key mismatch, `journal-manager.js`'s unrubriced semantic mismatch) are entirely absent from Advisory Findings, and all 7 CDQ-007 self-identified-fix instances that per-file evaluation scored FAIL are flattened into the same uniform low-severity boilerplate as routine advisory noise. Registry version still reports unchanged (0.1.0→0.1.0) despite 14 new attributes and ~48 new span IDs — second consecutive run with this discrepancy. Cost $9.40, down $1.75 (−15.7%) from run-26, reversing that run's spike — fewer 3-attempt files this run (2 vs. 3). Reviewer Utility Score 3.5/5, matching run-26.
+
+- [x] **Rubric scoring** — Synthesize dimension-level scores.
+  Produces: `evaluation/javascript/commit-story-v2/run-27/rubric-scores.md`
+  Style reference: `Read docs/templates/eval-run-style-reference/rubric-scores.md`
+
+  **Before scoring, resolve four outstanding CodeRabbit findings in `per-file-evaluation.md`** (surfaced by the PR-artifact-evaluation milestone's review, out of that milestone's scope since they're in content from an earlier session): (1) the "Total canonical failures" line (490) should distinguish 11 rubric-scored failures across 8 files from `journal-manager.js`'s 1 unrubriced finding, rather than a flat "12 findings across 9 files"; (2) the file-count summary (line 6) should not count `reflection-tool.js` among "confirmed correct skips" given its own questionable-skip flag — report 17 confirmed + 1 questionable, or recategorize; (3) `journal-manager.js`'s CDQ-001 through CDQ-005 rows (277-280) use inconsistent rule-ID mappings vs. other files' sections — align to the canonical per-rule meaning used elsewhere in the document; (4) `summarize.js`'s trace-evidence conclusion (per-file-sections/11-summarize.md line 29) overclaims — narrow it to "no spans found in the queried instance/30-day window" rather than implying no evidence exists anywhere. Fix (1) also requires a matching correction to PROGRESS.md's per-file-evaluation entry.
+
+  **Result**: All four outstanding CodeRabbit findings resolved (also mirrored into `per-file-sections/09-journal-manager.md` and `per-file-sections/11-summarize.md` for consistency with the aggregate document; PROGRESS.md's two affected entries corrected). Dimension-level synthesis: **21/25 (84%)**, gates 5/5 — a regression from run-26's 92%, driven by two new failures neither of run-27's primary goals targeted: COV-003 (`summary-manager.js`'s partial-commit recurrence, same run-25 `isExpectedConditionCatch` validator gap against a different function pair) and SCH-002 (`summarize.js`'s `dates_count` contradicting its own declared meaning within the same file). SCH also absorbed two new-file recurrences of the RUN26-1 `String()`-vs-`int` pattern (`git-collector.js`, `summary-detector.js`), dropping SCH to 2/4 even though RUN26-1's original instance is confirmed type-fixed. CDQ held at 6/7 nominally but CDQ-007's footprint widened from 1 file (run-26) to 7 (run-27), all sharing one root cause (missing `basename()` import) that a single shared fix would resolve project-wide. Full failure analysis, root causes, and a Watch Items table (the `journal-manager.js` unrubriced semantic mismatch, `reflection-tool.js`'s questionable skip, `context-capture-tool.js`'s span-count reporting gap) are in `rubric-scores.md`. This run does not meet Success Criteria #3 (≥23/25, no regression from run-26) — flagged here for the actionable-fix-output handoff, since the Findings Discussion checkpoint already ran earlier in this PRD's sequence.
+
+  **Use run-26 rubric as the primary precedent reference** (`evaluation/javascript/commit-story-v2/run-26/rubric-scores.md`). Critical precedents:
+  1. **CDQ-006 precedent**: Advisory findings are not canonical failures — do NOT fail CDQ-006 for advisory findings.
+  2. **COV-001 failed-file precedent**: Files that failed to commit but whose output would have passed COV-001 are scored as COV-001 PASS.
+  3. **COV-005 delta observation precedent**: Coverage delta observations are narrative only.
+  4. **CDQ-007 self-identified-fix precedent** (new from run-26): a raw-path/similar advisory finding becomes a canonical FAIL when the agent's own generation-time notes name a specific, cost-free remediation and decline to apply it — do not apply this escalation to any other CDQ-007 finding this run unless the same self-identification condition holds.
+  **Rule set**: CDQ dimension is 7/7 max (CDQ-001, CDQ-002, CDQ-003, CDQ-005, CDQ-006, CDQ-007, CDQ-008). NDS-007 is Control Flow Preserved.
+
+- [x] **IS scoring run** — Follow `docs/language-extension-plan.md` step 9. Full protocol in `evaluation/is/README.md`.
+
+  **Note**: SPA-001 threshold for commit-story-v2 is 55 (set by PR #142). SPA-002 is de-facto resolved for commit-story-v2 (`SimpleSpanProcessor` + `shutdownAndExit` override — structurally impossible). IS 100/100 in run-25 and run-26 is the baseline. If IS returns <100/100 in run-27, check for a **different** rule failure — do NOT re-investigate SPA-002.
+
+  **Note on Datadog Agent**: Do NOT run `datadog-agent stop/start`. The Agent's embedded OTLP HTTP receiver is permanently disabled (port 4318 owned by `otelcol-contrib`).
+
+  **Read `~/.claude/rules/is-scoring-gotchas.md` before step 1.** `otelcol-contrib` now runs as a persistent macOS LaunchAgent (`com.whitney.otelcol-contrib`) that is almost always already listening on port 4318 — check with `lsof -i :4318 -sTCP:LISTEN` first. If it shows `otelcol-c` as the listener, skip starting a new instance entirely (do not set `COLLECTOR_PID`, and skip step 3's `kill` below). Only fall back to manually starting a new instance if the port shows no listener.
+
+  1. **If no listener was found above, Claude starts** the OTel Collector in the background:
+     ```bash
+     vals exec -f ~/Documents/Repositories/spinybacked-orbweaver-eval/.vals.yaml -- ~/.local/bin/otelcol-contrib --config ~/Documents/Repositories/spinybacked-orbweaver-eval/evaluation/is/otelcol-config.yaml > /tmp/otelcol.log 2>&1 &
+     COLLECTOR_PID=$!
+     timeout 30 bash -c 'until lsof -i :4318 >/dev/null 2>&1; do sleep 0.5; done' || { kill "$COLLECTOR_PID" 2>/dev/null; exit 1; }
+     ```
+  2. **Claude checks out** instrument files and runs the app from `~/Documents/Repositories/commit-story-v2`:
+     ```bash
+     git checkout <instrument-branch> -- src/ examples/
+     OTEL_EXPORTER_OTLP_TRACES_ENDPOINT=http://localhost:4318/v1/traces env -u ANTHROPIC_CUSTOM_HEADERS -u ANTHROPIC_BASE_URL vals exec -i -f .vals.yaml -- node --import ./examples/instrumentation.js src/index.js HEAD
+     git checkout main -- src/ examples/
+     ```
+     Note: omit `COMMIT_STORY_TRACELOOP=true`.
+  3. **Claude stops** the Collector: `kill "$COLLECTOR_PID"` — **skip this step entirely** if the persistent LaunchAgent instance was already running and no `COLLECTOR_PID` was set; leave it running.
+  4. **Claude filters, then runs the scorer**, from `~/Documents/Repositories/spinybacked-orbweaver-eval` (the preceding steps left the working directory in commit-story-v2). Do NOT score `evaluation/is/eval-traces.json` directly — it is shared and never truncated across sessions and targets (see `~/.claude/rules/is-scoring-gotchas.md`). Filter to `service.name == "commit-story"` and a time window around the app invocation, write the filtered subset to `evaluation/javascript/commit-story-v2/run-27/eval-traces-run27.json` (sanitizing local-machine identity fields before committing it), then: `cd ~/Documents/Repositories/spinybacked-orbweaver-eval && node evaluation/is/score-is.js evaluation/javascript/commit-story-v2/run-27/eval-traces-run27.json --target commit-story-v2 > evaluation/javascript/commit-story-v2/run-27/is-score.md`
+
+     *(Historical note, added post-completion: run-27 initially scored `evaluation/is/eval-traces.json` directly and got a false 70/100 from another target's spans mixed into the shared file. This step was corrected after the fact — see PRD Decision Log D-11 — and the text above reflects the corrected procedure, not what was literally run first.)*
+  5. **Confirm IS scoring traces in Datadog**: Record IS scoring run start time, then query `service:commit-story from:<run-start-time>`. Record `service.instance.id`.
+  Produces: `evaluation/javascript/commit-story-v2/run-27/is-score.md`
+
+- [x] **Baseline comparison** — Compare run-27 vs runs 2–26 (run-22 was never executed).
+  Produces: `evaluation/javascript/commit-story-v2/run-27/baseline-comparison.md`
+  Style reference: `Read docs/templates/eval-run-style-reference/baseline-comparison.md`
+
+  **Attribute-count trend caution**: before flagging any cross-run "declining richness" trend, verify reported attribute counts against direct source inspection rather than trusting logged figures alone — see `docs/language-extension-plan.md` step 10 (added from run-26's undercounting finding on commit-story-v2, which produced a false regression narrative for `context-capture-tool.js` that was disproved on source inspection).
+
+  **Result**: Run-27 scores 21/25 (84%) — a new series low since run-6, breaking the runs-23–26 oscillation between 23/25 and 24/25. Q×F drops to 10.92 (lowest since run-21), driven by two new failures neither of run-27's primary goals targeted (COV-003's `summary-manager.js` recurrence, SCH-002's `summarize.js` key-meaning contradiction) plus RUN26-1's partial (type-only) fix and RUN26-2's continued, now 7-file-wide, non-resolution. Total spans (48) tie run-24's record despite one fewer committed file. IS holds at 100/100 for a third consecutive run. Cost drops to $9.40 (-15.7% vs run-26), and push/PR returns to AUTO (#94) after run-26's one manual-recovery interruption. Full detail, records table, and active-issue tracker in `baseline-comparison.md`.
+
+- [x] **Update root README** — Add a row for run-27 to the run history table (quality, gates, files, spans, cost, push/PR, IS score). Update the "next run" sentence to reference run-28 and its primary goals.
+
+  **Result**: Added run-27 row (21/25 (84%), gates 5/5, 13+1p files, 48 spans, $9.40, YES, IS 100/100). Updated "next run" sentence to point at run-28's likely goals — the CDQ-007 raw-path finding now spanning 7 files (missing `basename()` import), `summary-manager.js`'s COV-003 partial-commit recurrence, and the SCH-003 `String()`-vs-`int` pattern's spread to `git-collector.js` and `summary-detector.js`.
+
+- [x] **Actionable fix output** — Primary handoff deliverable.
+
+  **Result**: Cross-document audit resolved 7 of the 10 listed CodeRabbit findings in place (`run-summary.md` ×2 (a-b), `per-file-evaluation.md` ×2 including c and e, `rubric-scores.md` ×1 (i), `eval-traces-run27.json` ×1 (g, `host.name` redacted and re-scored to confirm 100/100 unaffected), and this PRD's own text ×1 (j, reconciled `summarize.js`'s `dates_count` to the final scored SCH-002 classification)). (d) was already resolved in a prior pass — 7 resolved now + 1 already resolved + 2 skipped (below) accounts for all 10. (f) and (h) were assessed and skipped as misdiagnoses, not applied: (f) flags the shared NDJSON format as "not valid JSON," but `is-score.md`'s own methodology note already documents this as the intentional, established format both the file exporter and `score-is.js` require — converting it to a single array would break re-scoring; (h) claims a stale trace-supplement timestamp, but the timestamp it proposes belongs to an unrelated IS-scoring-milestone query captured six days later — the per-file-evaluation timestamps are correct and independently corroborated by `trace-artifact.md`'s own post-run check at the same time.
+
+  `actionable-fix-output.md` written (12 canonical findings synthesized into 5 numbered handoff items — RUN27-1 through RUN27-5 — plus 4 PR-artifact-quality findings and 3 eval-process observations explicitly marked out of spiny-orb's scope). Spoken summary delivered covering main points, root-cause-vs-symptom per fix, and the every-user generalization check. Absolute path printed.
+
+  **Handoff confirmed** (2026-09-11): rather than a bare acknowledgment, Whitney independently verified spiny-orb's `docs/ROADMAP.md` and the referenced GitHub issues. Confirmed: RUN27-1 → new issue #1055 (full acceptance criteria, correctly scoped to the catch-shape distinction only); RUN27-2/RUN27-5 → new issue #1056 (correctly tracks both as related-but-distinct scopes, matching the handoff's own framing); RUN27-3 → folded into existing #1037 via an update comment citing both new instances; RUN27-4 → folded into existing #1035 via an update comment with the full 7-file list and shared-helper framing preserved; the three §4 PR-quality findings → folded into existing #1036 via an update comment covering all three. `ROADMAP.md`'s run-27 completion note cross-references all five issue numbers correctly. One minor gap noted (not blocking): #1055/#1056 aren't yet slotted into a `Short-term`/`Medium-term` priority tier the way #1035-#1037 already are — likely pending the next roadmap-sequencing pass, not a sign of missed triage.
+
+  At milestone completion:
+  1. Run the cross-document audit agent to verify consistency across all run-27 evaluation artifacts. **Include these 10 outstanding CodeRabbit findings from earlier sessions' commits, surfaced during review passes but out of the reviewing milestone's own scope**: (a) `run-summary.md`'s RUN26-2 unresolved-raw-path list should exclude `journal-manager.js` — its `file_path` call site is deliberately relative-path-guaranteed, not a live CDQ-007 violation, per that file's per-file-evaluation section; (b) `run-summary.md`'s post-run-verification provenance note (line ~131) still describes the superseded `git.commit.sha` guidance as if the current milestone uses it — narrow the sentence to the original false-negative check and prior (now-corrected) guidance; (c) `per-file-evaluation.md`'s Pass 5 discussion (line ~169) presents `run-summary.md`'s "matches run-26" claim as currently inaccurate — since Pass 5 already corrected `run-summary.md`, reframe as historical context, not a live discrepancy; (d) PROGRESS.md's per-file-evaluation entry says "six documentation errors" where seven are listed — correct the count; (e) `per-file-evaluation.md` line ~504's Pass 6 final breakdown undercounts CDQ-007 failures — `summary-manager.js` is the seventh CDQ-007 failure and the stated total change should read 11, not 10, rubric-scored failures overall (surfaced during baseline-comparison's CodeRabbit review, out of that milestone's scope); (f) `eval-traces-run27.json` is not valid JSON — its records aren't wrapped in a single top-level array (surfaced during baseline-comparison's CodeRabbit review); (g) `eval-traces-run27.json`'s resource attributes may still carry `host.name` unredacted — the is-scoring milestone's sanitization list (`process.owner`, `host.id`, `process.command_args`, `process.executable.path`, `process.command`) didn't include it (surfaced during baseline-comparison's CodeRabbit review); (h) `per-file-evaluation.md` line ~57's Datadog trace supplement references use a stale capture timestamp instead of the actual 2026-09-09T18:05:19Z capture time recorded in `trace-artifact.md` — apply the correction consistently to every trace-supplement reference in the document (surfaced during a later CodeRabbit review pass, out of that pass's own scope); (i) `rubric-scores.md` line ~120's canonical metrics table still shows the IS row as "Pending IS scoring milestone" — replace with 100/100, matching the completed IS scoring milestone's result and `baseline-comparison.md`/PROGRESS.md (surfaced during the README-update milestone's CodeRabbit review, out of that milestone's scope); (j) this PRD's own text is internally inconsistent about `summarize.js`'s `dates_count` finding — the per-file-evaluation milestone's Result (line ~183) calls it an unrubriced "no existing rule to catch it" gap alongside `journal-manager.js`'s equivalent finding, but the later rubric-scoring milestone's Result (line ~220) classifies the same finding as a scored SCH-002 failure — reconcile to whichever classification the final rubric-scores.md canonical count actually used (surfaced during the README-update milestone's CodeRabbit review, out of that milestone's scope).
+  2. **Spoken summary (root cause + generalization)** *(user-facing checkpoint 2)*: Before printing the file path, provide a spoken summary with three elements: (a) **Main points** — key failures, category, priority; (b) **Root cause vs. symptom** — for each fix, state whether it addresses root cause or symptom; (c) **Every-user generalization check** — how each fix helps any spiny-orb user, not just commit-story-v2.
+  3. Print the absolute file path of `evaluation/javascript/commit-story-v2/run-27/actionable-fix-output.md`.
+  4. **Pause.** Do not proceed to Draft PRD #28 until Whitney confirms handoff to spiny-orb team.
+
+  **Handoff framing guidance** (carried forward from taze run-16 and run-26):
+  - **Fix language targets spiny-orb components, not target files.** "Fix:" entries should describe the spiny-orb component gap — auto-fix, validator, prompt, or fix-loop. Do not write "remove String() at line 42 of file.ts." Target repo files are overwritten every run; patching them is not durable and can mislead the team about the root cause.
+  - **Attribute disappearance is not automatically a finding.** If an attribute appeared in a prior run and is absent now, investigate before calling it wrong. Consider: does the attribute have a semconv basis? Is the absence a defensible agent decision? The spiny-orb team applies their own judgment — give them evidence and honest characterization, not a decision-free list.
+  - **Carry-forward table: consider distinguishing findings from observations.** Entries with a plausible spiny-orb root cause ("finding") vs. entries worth watching but without a clear industry basis for calling them wrong ("observation") serve different purposes for the team.
+  - **"0 attributes" in the run summary means 0 NEW schema attributes, not 0 attributes used.** Before finalizing any attribute-coverage finding, inspect the committed code directly rather than relying on the summary count — search for all attribute-writing paths (`setAttribute`, `setAttributes`, span-start `attributes` maps, wrapper helpers), not just a single grep — a file using only pre-registered attributes reports "0 attributes" even though it calls `setAttribute` (see `docs/language-extension-plan.md` step 9).
+
+- [x] **Draft PRD #28** — Follow `docs/language-extension-plan.md` step 12. Complete the template-update checkpoint first. Cascade approved process improvements to three places: (1) the template, (2) all other currently active open eval PRDs, and (3) the affected milestones of PRD #28 itself before committing — a cold AI reading only PRD #28 will not re-read the template during the run. Draft PRD #28 using this PRD as the style reference. Create on a separate branch from main. Merge the PRD PR to main so `/prd-start` can pick it up. Carry forward both user-facing checkpoints.
+
+  **"Active open eval PRDs" resolved (2026-09-11)**: `prds/` contains many old run-N PRD files whose `**Status:**` header still reads "Ready" even though their work completed runs ago — that field is not reliable. The reliable signal is the PRD's own GitHub Issue state. Checked via `gh issue list --state all` against every numbered PRD file in `prds/` (excluding `prds/done/`): #104, #107, #113, #115 (and the other old run-N PRDs for commit-story-v2/release-it) are all **CLOSED** — stranded in `prds/` instead of `prds/done/`, a housekeeping gap, not something blocking this milestone. Only **two** other eval PRDs are genuinely open: **#143** (content-manager-real-instrumentation) and **#147** (taze-evaluation-run-17). Cascade step (2) above means these two, plus PRD #28 itself once drafted.
+
+  **Result**: Template-update checkpoint presented as a structured (a)/(b) list with exact proposed text; Whitney approved all five improvements plus the standing "Unrubriced Findings" category (chosen over a new rule ID, to keep dimension max-scores stable across historical baseline comparisons). Committed to `docs/language-extension-plan.md`: restored D-7's approval-prompt guidance (found stranded — cascaded in PRD #144 but never actually landed in the mainline template, the same failure shape as the "step 3b" bug), a per-file-evaluation reconciliation pass with two reusable scoring tests (CDQ-007 structural guarantee, SCH-002 specific-wrong-noun), a correct-skip verification check, the Unrubriced Findings category, a handoff-confirmation roadmap-tier check, and an Eval Branch Convention caution about where template edits must land. Cascaded identically to PRD #143 and PRD #147 (PR #155) and baked directly into PRD #28's own milestones (PR #157, `prds/156-evaluation-run-28.md`, GitHub issue #156) per the required third cascade destination.
+
+  Both PRs went through 8 rounds of CodeRabbit review before merging clean — every finding was real, not noise, each fix exposing the next gap: a nonzero-CPU requirement that produced false negatives, process-existence alone being insufficient to detect a genuine prompt pause, an undefined CDQ-007 scoring rule for per-file (vs. shared-helper) fixes, an undefined `pre_run`/`post_run` trace-artifact field naming convention, PRD #143's incomplete trace-artifact fields, PRD #147's missing trace-absence fallback, and that fallback's `none` value not being handled by the very next step. One process mistake occurred and was self-corrected mid-session: the initial template edit was committed directly onto this eval execution branch (`feature/prd-153-evaluation-run-27`), which per the Eval Branch Convention never merges to main — exactly the failure this milestone's own D-7 restoration and template-edit caution exist to prevent. Caught via CodeRabbit review before it could be silently stranded; moved to a proper branch with `git cherry-pick` and merged correctly. Both PRs merged 2026-09-15; branches deleted (local + remote).
+
+- [x] **Copy artifacts to main** — From main, run `git checkout <eval-branch> -- evaluation/javascript/commit-story-v2/run-27/` to copy all artifacts. Commit to main with message `eval: save run-27 artifacts to main [skip ci]`. Add one row to `evaluation/javascript/commit-story-v2/run-log.md` for run-27. Update `PROGRESS.md` with an entry for run-27 (per global CLAUDE.md's PROGRESS.md style rules) before `/prd-done` runs. Push main. This step runs before `/prd-done`.
+
+  **Result**: Done via PR #159 (merged 2026-09-17) — all 27 run-27 artifacts, a `run-log.md` row, and a `PROGRESS.md` summary entry landed on main. Also brought over the root `README.md` update (run-27 row, "next run" pointer), which had been made on the eval branch but never reached main — the same stranded-content pattern this PRD's own D-7/template-caution work exists to prevent, caught here by the same discipline. Updated the "next run" pointer to reflect that two of run-28's originally-expected findings (COV-003, SCH-002) are already fixed as of spiny-orb PR #1058, rather than copying over stale text. CodeRabbit's review of the copy PR caught 6 further real issues in the copied artifacts (a three-way rule-ID mix-up in `summary-graph.js`, a span-naming rule citation error, a stale "correct skip" label on `reflection-tool.js` in `run-summary.md`, a stale run-28 forecast in `lessons-for-prd28.md`, an imprecise root-cause description in `baseline-comparison.md`, and an incomplete accuracy assessment in `pr-evaluation.md` that undercounted a genuine PR-generation defect) — all fixed before merge.
+
+---
+
+## Decision Log
+
+| ID | Decision | Rationale | Date |
+|----|----------|-----------|------|
+| D-1 | Schema stays as-is for SCH-003 / attribute type mismatches. Agents must comply with declared types. | Inherited from run-24 D-7 via run-25 D-1 and run-26. Schema is the source of truth; intentional type declarations stay. | 2026-06-20 |
+| D-4 | Extract instrument branch name from log output (`grep -m1 'Branch:' spiny-orb-output.log`), never from conversation context or memory. | Prevents recording stale branch names from prior runs. `run-summary.md` is the canonical record. | 2026-06-20 |
+| D-5 | SPA-002 is de-facto resolved for commit-story-v2. Do not carry it forward as a watch item. | commit-story-v2 uses `SimpleSpanProcessor` (immediate export) + `shutdownAndExit` override — batch-flush-before-exit is structurally impossible. IS 100/100 in run-25 and run-26 confirms. Systemic spiny-orb fix tracked in #930. | 2026-06-20 |
+| D-6 | **Superseded by D-10.** Use `git.commit.sha` (not `vcs.ref.head.revision`) to identify which instrument branch is running in Datadog spans. | `vcs.ref.head.revision` on commit-story-v2 spans is the CLI argument (the git commit SHA being processed), not the instrument branch HEAD. Confirmed in run-25 pre-run verification. **This row's guidance is now known to be backwards** — see D-10, which found `vcs.ref.head.revision` is the correct attribute and `git.commit.sha` is the journaled commit (domain data), not the running branch identity. | 2026-06-20 |
+| D-7 | A run that appears stalled must be checked for a live `Proceed? [y/N]` approval prompt before being treated as failed or manually recovered. | Run-26's apparent push/PR "failure" (RUN26-3) was actually a ~27.5-hour approval-prompt pause, not a spiny-orb defect. Premature manual recovery during that window produced a downstream duplicate-PR conflict. Cascaded to `docs/language-extension-plan.md` step 3 and to all active eval PRDs (#100, #143, #147). | 2026-07-20 |
+| D-8 | Before flagging a cross-run attribute-count "declining richness" trend, verify against direct source inspection, not logged `attributesCreated` figures alone. | `attributesCreated` counts only new schema extensions, not total attributes set in code. This produced a false regression narrative for `context-capture-tool.js` across runs 23–25 that source inspection disproved in run-26. Cascaded to `docs/language-extension-plan.md` step 10 and to taze (#147) and release-it (#100). | 2026-07-20 |
+| D-9 | For commit-story-v2 (organic/dogfooded target), every cited live trace must be labeled "instrument-branch evidence" or "main-branch evidence (corroborating, not direct)" based on `git.commit.sha`. | Run-26 found most cited per-file traces were ordinary main-branch dogfooding traffic, not run-26-branch evidence — only 2 of the files evaluated had confirmed branch-tip trace evidence. Cascaded to `docs/language-extension-plan.md` step 6 and to content-manager (#143), the only other organic/dogfooded target. **Superseded by D-10** — the labeling attribute in this row was itself wrong; use `vcs.ref.head.revision`, not `git.commit.sha`. | 2026-07-20 |
+| D-10 | **Corrects D-6.** Use `vcs.ref.head.revision` (not `git.commit.sha`) to identify which instrument branch is running in Datadog spans for commit-story-v2. `git.commit.sha` is the journaled commit (domain data — which commit's diff commit-story summarized), not the running code's own branch identity. | Run-27's post-run Datadog verification empirically confirmed the reverse of D-6's claim: `vcs.ref.head.revision:38dd870` matched the instrument branch's actual HEAD SHA on live spans, while `git.commit.sha` on those same spans was main's HEAD (the journaled commit). This matches what run-26's own post-run verification note already found and used successfully — D-6 (from run-25) and run-26's practice were already in silent conflict; following D-6's literal instruction produced a false "instrument branch not observed" negative in run-27 before this correction. D-9's labeling attribute is also affected (see its row). Needs cascading to `docs/language-extension-plan.md` step 6 and to content-manager (#143), the same places D-9 reached. | 2026-09-03 |
+| D-11 | IS scoring must filter the shared `evaluation/is/eval-traces.json` to `service.name == "commit-story"` (or the target's own service name) plus a time window around the app invocation, before running `score-is.js`. Do not score the raw file directly. | The persistent `otelcol-contrib` LaunchAgent (running since 2026-07-08) never truncates `eval-traces.json` — it appends across every session and target indefinitely. By run-27, the file held 4,759 spans spanning 2026-08-03–2026-09-09, mixing `commit-story` and `cluster-whisperer` (an unrelated target) traces. Scoring the unfiltered file gave a false 70/100 with failures attributable to the other target's spans. Filtering to this run's own 47 spans by service name + time window restored the expected 100/100, matching run-25/run-26 (both scored before 2026-08-03, so those baselines are unaffected). Documented as a permanent step in `~/.claude/rules/is-scoring-gotchas.md` — applies to every future run using the persistent collector, any target. | 2026-09-09 |
+
+---
