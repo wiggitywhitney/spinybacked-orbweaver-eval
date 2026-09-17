@@ -17,15 +17,15 @@
 
 ### Root Cause: `dates_requested` reused across three unrelated concepts
 
-`commit_story.summary.dates_requested` (registered `type: string`) is declared once in `runSummarize` (line 330) for a genuine date-string concept, then reused for a week count and a month count in the other two entry points:
+`commit_story.summary.dates_requested` (registered `type: string`) is declared once in `runSummarize` (`span.setAttribute(...)` call spanning lines 329-332, key literal on line 330) for a genuine date-string concept, then reused for a week count and a month count in the other two entry points:
 
-| Call site | Line | Value | Concept |
-|-----------|------|-------|---------|
-| `runSummarize` | 330-332 | `String(dates.length)` | date-range request count, joined semantics per agent notes |
-| `runWeeklySummarize` | 434-435 | `weeks.length` (raw, **not** wrapped in `String()`) | week count |
-| `runMonthlySummarize` | 521-524 | `months.length` (raw, **not** wrapped in `String()`) | month count |
+| Call site | Call spans | Value | Concept |
+|-----------|-----------|-------|---------|
+| `runSummarize` | 329-332 | `String(dates.length)` | date-range request count, joined semantics per agent notes |
+| `runWeeklySummarize` | 435 (single line) | `weeks.length` (raw, **not** wrapped in `String()`) | week count |
+| `runMonthlySummarize` | 522-525 | `months.length` (raw, **not** wrapped in `String()`) | month count |
 
-SCH-002 correctly rejected reassembly on both non-`runSummarize` call sites: "declared attribute extension `commit_story.summary.dates_requested` is used with an inconsistent value source... a different concept" (lines 435, 523 per the log). This is the RUN27-2 pattern recurring exactly — the validator-level fix from spiny-orb PR #1058 is confirmed working (it caught this on both call sites, at reassembly time), but it didn't stop the agent from generating the mistake three separate times across five attempts.
+SCH-002 correctly rejected reassembly on both non-`runSummarize` call sites: "declared attribute extension `commit_story.summary.dates_requested` is used with an inconsistent value source... a different concept" (the validator's own error cites line 435 for the weekly call and line 523 for the monthly call's key literal, one line into its multi-line `span.setAttribute(...)` block starting at line 522). This is the RUN27-2 pattern recurring exactly — the validator-level fix from spiny-orb PR #1058 is confirmed working (it caught this on both call sites, at reassembly time), but it didn't stop the agent from generating the mistake three separate times across five attempts.
 
 **New observation not present in run-27's version of this pattern**: the two rejected call sites don't just reuse the wrong key — they also skip the `String()` wrapping `runSummarize` uses, setting a raw number directly against a `string`-typed key (`weeks.length`, `months.length`, no conversion). This is a second, compounding type inconsistency layered on top of the semantic reuse. Fixing it correctly requires pairing each new key with a type that matches how its value is actually produced, not just picking distinct names: if `weeks_requested`/`months_requested` are declared `int` (the natural type for a `.length` value), the raw numbers used here are already correct and need no wrapper; if they're declared `string` instead (matching `dates_requested`'s own type, for consistency across all three), every one of the three call sites — including `runSummarize`'s own `String(dates.length)` — needs the same explicit `String(...)` wrapper, which today only `runSummarize` applies. Not independently flagged by any validator rule in this run — SCH-002 fired first and the fallback discarded these call sites' final form before a separate type check could run against them, if one exists at all.
 
