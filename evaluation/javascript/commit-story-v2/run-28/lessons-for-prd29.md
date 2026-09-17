@@ -18,4 +18,9 @@ Process observations captured during run-28. Populated incrementally as the run 
 - RUN27-4 (#1035): confirmed fixed and closed (`5a0636c`, `0180486`, `dc59703`; issue removed from ROADMAP.md Short-term in `089ba6a`).
 - Could not verify: Datadog pre-run health, push-auth dry-run, target-repo readiness checks, file inventory cross-check against run-27's count — all require being done before/during the run, which had already happened by the time this PRD execution branch was created.
 
+## Post-Write-Up Correction
+
+- **Fix-verification-by-log-grep missed a live SCH-003 recurrence.** The first pass of `run-summary.md` checked `spiny-orb-output.log`'s prose for `String(` and found nothing suspicious, and reported RUN27-3 as "no recurrence observed." A CodeRabbit CLI review of the PRD branch caught the actual discrepancy: `summarize.js`'s committed source sets `months_generated_count`/`months_failed_count` (both `type: int`) via `String(result.generated.length)`/`String(result.failed.length)` — present in both the debug dump and the instrument branch's committed file, just never spelled out in the log's narrative sections. **Recommend for PRD #29's template**: fix-verification for SCH-003 (and likely SCH-002) must grep/read the actual committed or debug-dumped source for every file touching a previously-registered numeric key, not just the log's Schema Extensions/Agent Notes sections — those sections describe *new* extensions and reasoning, not necessarily every `setAttribute` call on an *existing* key.
+- **A local CodeRabbit review on the eval-artifact branch caught a real evaluation-quality bug, not just a style nit.** Worth normalizing as a standard second pass on any run-summary/findings write-up before reporting to Whitney, not just before opening a PR — this run's write-up was corrected before it caused a wrong recommendation to the spiny-orb team.
+
 ## Pre-Run Observations

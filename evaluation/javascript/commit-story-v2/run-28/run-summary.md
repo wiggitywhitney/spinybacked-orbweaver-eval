@@ -5,7 +5,7 @@
 **Duration**: 1h 16m 9.4s (per spiny-orb's own "Completed in" line — no overnight interactive-prompt pause this run)
 **Branch**: `spiny-orb/instrument-1789648132789`
 **PR**: https://github.com/wiggitywhitney/commit-story-v2/pull/95 (auto-created ✅)
-**spiny-orb**: built from main pre-run; RUN27-4 (CDQ-007) fix confirmed merged (`5a0636c` "add import-free path fallback for CDQ-007", plus follow-up CodeRabbit-finding fixes `0180486`/`dc59703`) and issue #1035 closed (`089ba6a` removed it from ROADMAP.md Short-term). No RUN27-3 (SCH-003, #1037)-specific commit found on spiny-orb main since 2026-09-16.
+**spiny-orb**: built from main pre-run; RUN27-4 (CDQ-007) fix confirmed merged (`5a0636c` "add import-free path fallback for CDQ-007", plus follow-up CodeRabbit-finding fixes `0180486`/`dc59703`) and issue #1035 closed (`089ba6a` removed it from ROADMAP.md Short-term). No RUN27-3 (SCH-003, #1037)-specific commit found on spiny-orb main since 2026-09-16, and #1037 is confirmed still-live in this run's own committed output (see Fix Verification below).
 
 ---
 
@@ -31,7 +31,7 @@
 |------|----------|--------|
 | RUN27-1 (COV-003): `summary-manager.js` partial-commit recurrence | FIXED — expect PASS | **✅ CONFIRMED FIXED** — all 14 functions instrumented, 9 spans, full SUCCESS (2 attempts). No COV-003 rejection. |
 | RUN27-2 (SCH-002): `summarize.js` key-reuse contradiction (`dates_requested`/`dates_count`) | FIXED — expect PASS | **⚠️ VALIDATOR CAUGHT IT, BUT AGENT STILL MADE THE MISTAKE** — the agent reused `commit_story.summary.dates_requested` for a week value (line 435) and a month value (line 523) after first declaring it for "dates" (line 330), same pattern as run-27. This time the SCH-002 check **fired and rejected the reassembly**, forcing the file to PARTIAL (3 spans instead of the intended 7, 3 attempts) rather than silently committing the semantic violation. The validator-level fix is working — it is now catching this exact pattern — but agent generation behavior hasn't changed, so the practical outcome (a partial file) is new, not a full pass. |
-| RUN27-3 (SCH-003): `String(x.length)` vs int-typed key | Still open — expect recurrence | **No recurrence observed** — no `String()`-wrapped numeric attribute found anywhere in the log (checked `git-collector.js`, `summary-detector.js`, and all other committed files). No SCH-003 rejection fired. Cannot distinguish "validator fix landed" from "pattern simply wasn't attempted this run" — no spiny-orb commit specific to #1037 found since 2026-09-16. |
+| RUN27-3 (SCH-003): `String(x.length)` vs int-typed key | Still open — expect recurrence | **❌ CONFIRMED RECURRING, UNCAUGHT** — `src/commands/summarize.js` (the committed instrument branch) sets `commit_story.summary.months_generated_count` and `commit_story.summary.months_failed_count` (both `type: int` in `semconv/agent-extensions.yaml`) via `String(result.generated.length)` / `String(result.failed.length)`. Verified directly against `git show spiny-orb/instrument-1789648132789:src/commands/summarize.js` — this is live in the committed/partial output, not just a discarded attempt. No SCH-003 rejection fired for it (only SCH-002 fired, for the unrelated `dates_requested` reuse) — the validator gap is confirmed still open, not merely unverified. (An earlier version of this table incorrectly reported "no recurrence observed" — corrected after a CodeRabbit review caught the discrepancy against the debug-dump file; see git history.) |
 | RUN27-4 (CDQ-007): raw-path pattern (7 files, missing `basename` import) | Still open — expect recurrence | **✅ RESOLVED — via an inline fallback, not a per-file `basename` import.** Every path-like attribute this run (`journal-manager.js`'s `saveJournalEntry`, `index.js`'s `savedPath`) is sanitized using an inline `.split(/[\/]/).filter(Boolean).pop()` pattern instead of importing `basename`. Confirmed on spiny-orb main: `5a0636c` "add import-free path fallback for CDQ-007" (plus two CodeRabbit-finding follow-ups). This is the "shared representation" run-27's handoff asked for — the fix works without a per-file import, so it should generalize automatically to future files rather than needing 7 individual patches. |
 | RUN27-5 (Watch, unrubriced): correct type, wrong registered key | Watch — third instance would strengthen the case | Pending per-file evaluation — `journal-manager.js`'s prior `quotes_count`/reflections mismatch needs re-checking against this run's actual code. |
 | journal-graph.js | Eleventh consecutive success expected | **✅ CONFIRMED** — committed, 4 spans, 2 attempts. |
@@ -47,8 +47,8 @@
 | src/generators/journal-graph.js | ✅ committed | 4 | 0 | 2 | 11th consecutive success |
 | src/managers/journal-manager.js | ✅ committed | — | — | — | Path sanitized inline (CDQ-007 fix confirmed) |
 | src/managers/summary-manager.js | ✅ committed | 9 | 1 | 2 | **RUN27-1 RESOLVED** — all 14 functions instrumented |
-| src/commands/summarize.js | ⚠️ **partial** | 3 | 4 | 3 | **RUN27-2 validator catch** — SCH-002 rejected `dates_requested` reuse for weeks (line 435) and months (line 523) |
-| src/utils/summary-detector.js | ✅ committed | 9 | 4 | 1 | No SCH-003/String() issue found |
+| src/commands/summarize.js | ⚠️ **partial** | 3 | 4 | 3 | **RUN27-2 validator catch** — SCH-002 rejected `dates_requested` reuse for weeks (line 435) and months (line 523). **Also RUN27-3 recurrence** — `months_generated_count`/`months_failed_count` (int-typed) set via `String(...)`, uncaught |
+| src/utils/summary-detector.js | ✅ committed | 9 | 4 | 1 | No SCH-003/String() issue found (checked directly against source) |
 | src/managers/auto-summarize.js | ✅ committed | 3 | 4 | 1 | |
 | src/index.js | ✅ committed | 2 | 1 | — | `savedPath` sanitized inline via CDQ-007 fallback |
 
@@ -70,9 +70,11 @@ The agent reused `commit_story.summary.dates_requested` for weeks and months, re
 
 Confirmed on spiny-orb main (`5a0636c`) and via this run's log: every path attribute is now sanitized using an inline split/filter/pop pattern rather than importing `basename` per-file. This directly matches run-27's own handoff recommendation to commit to a fix that "applies automatically to all future files" rather than a per-file patch — no 8th instance risk from this mechanism.
 
-### RUN27-3 (SCH-003) — inconclusive, not a confirmed fix
+### RUN27-3 (SCH-003) — confirmed still open, uncaught in the committed output
 
-No `String()`-vs-int-key mismatch appeared anywhere in this run's log, but no spiny-orb commit specific to issue #1037 was found since 2026-09-16 either. Absence of the pattern this run is not strong evidence the validator gap is closed — could equally be that no file this run happened to produce a numeric attribute the agent chose to stringify. Flag as unresolved/unverified rather than fixed.
+`summarize.js`'s committed instrument-branch source sets `commit_story.summary.months_generated_count` and `commit_story.summary.months_failed_count` — both declared `type: int` — via `String(result.generated.length)` and `String(result.failed.length)`. This is the exact RUN26-1/RUN27-3 pattern recurring a third time, in a third file. Unlike RUN27-2 (SCH-002), no validator check caught this one — the file's only rejection was for the unrelated `dates_requested` key reuse. No spiny-orb commit specific to issue #1037 was found on main since 2026-09-16, consistent with this being a genuinely unfixed gap rather than a fixed-but-untriggered one.
+
+**Correction note**: this section originally (and the Fix Verification table row above) claimed "no recurrence observed," based on a log-only check that missed this instance because it never appears in `spiny-orb-output.log`'s narrative text — it only shows up in the actual committed source. A CodeRabbit CLI review of this PRD branch caught the discrepancy by cross-checking `debug-dumps/src/commands/summarize.js` directly. Lesson for `lessons-for-prd29.md`: fix-verification greps against the log's prose are not sufficient for SCH-003 — the committed/debug-dump source itself must be checked for every file touching a registered int-typed key.
 
 ### No overnight prompt pause this run
 
