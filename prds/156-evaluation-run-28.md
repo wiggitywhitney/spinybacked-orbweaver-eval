@@ -229,7 +229,9 @@ The **evaluation execution branch** created by `/prd-start` from main **never me
 
   **Completed** 2026-09-17: Reviewer Utility Score 2.25/5 (down from run-27's 3.25/5). The Per-File Results table is accurate (an improvement over run-27's fabricated "12/14" function count). But the Advisory Findings section regressed sharply — 6 of 13 line-items (46%) are false positives, mostly CDQ-007 firing on plain integer-count attributes across 5 files, some pointing at entirely wrong line numbers. All 6 of this run's SCH-003/CDQ-006 canonical failures (14 occurrences) are completely absent from Advisory Findings — the PR's own generated content gives a reviewer no signal any of them exist.
 
-- [ ] **Rubric scoring** — Synthesize dimension-level scores.
+- [x] **Rubric scoring** — Synthesize dimension-level scores.
+
+  **Completed** 2026-09-17: 21/25 (84%), gates 5/5 — ties run-27's series-low score, but via offsetting composition: COV recovered to 5/5 (RUN27-1's COV-003 bug confirmed fixed) while CDQ dropped to 5/7 (a new CDQ-006 failure, plus 3 new CDQ-007 instances distinct from the now-resolved RUN27-4 pattern). SCH held at 2/4 with SCH-003's footprint widening to 6 files/16 occurrences, the largest in the series. RUN27-5 (journal-manager.js `quotes_count`) does not persist this run — resolved, so no Unrubriced Findings entry needed.
   Produces: `evaluation/javascript/commit-story-v2/run-28/rubric-scores.md`
   Style reference: `Read docs/templates/eval-run-style-reference/rubric-scores.md`
 
