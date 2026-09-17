@@ -99,7 +99,7 @@
 | **Total** | **21/25 (84%)** | **21/25 (84%)** | **23/25 (92%)** | **24/25 (96%)** | **—** |
 | **Gates** | **5/5 (100%)** | **5/5 (100%)** | **5/5 (100%)** | **5/5 (100%)** | — |
 
-**This run ties run-27's series-low score (21/25, 84%) — but via a different, offsetting composition.** COV recovered fully (RUN27-1's partial-commit bug is genuinely fixed) while CDQ dropped by the same margin (a new CDQ-006 failure, RUN27-4 still not fully closed at `summary-manager.js`, plus a new PII regression at `git-collector.js`/`context-integrator.js`). SCH held flat at run-27's regressed level, but SCH-003's footprint widened from 2 files → 5 files. Net effect: only one of the run's two primary CDQ-related fix-verification goals (RUN27-1) is genuinely resolved — RUN27-4 is real progress (6 of 7 files fully fixed) but not complete, and the quality score doesn't distinguish that from a clean resolution.
+**This run ties run-27's series-low score (21/25, 84%) — but via a different, offsetting composition.** COV recovered fully (RUN27-1's partial-commit bug is genuinely fixed) while CDQ dropped by the same margin (a new CDQ-006 failure, RUN27-4 still not fully closed at `summary-manager.js`, plus a new PII regression at `git-collector.js`/`context-integrator.js`). SCH held flat at run-27's regressed level, but SCH-003's footprint widened from 2 files → 5 files. Net effect: of the run's two primary COV/CDQ-related fix-verification goals, RUN27-1 (COV-003) is genuinely resolved and RUN27-4 (CDQ-007) is real progress (6 of 7 files fully fixed) but not complete — and the quality score doesn't distinguish "fully resolved" from "mostly resolved."
 
 ---
 
