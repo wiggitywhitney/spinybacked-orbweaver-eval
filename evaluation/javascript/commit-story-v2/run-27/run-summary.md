@@ -62,7 +62,7 @@
 | src/generators/journal-graph.js | ✅ committed | 4 | 3 | 3 | Tenth consecutive success; matches run-26's attempt count |
 | src/generators/summary-graph.js | ✅ committed | 6 | 3 | 2 | Span and attempt counts match run-26; per-file evaluation found the attribute set itself changed (renamed/consolidated keys, dropped `section_type`/`gen_ai.request.temperature`) — not an exact instrumentation match |
 | src/mcp/tools/context-capture-tool.js | ✅ committed | 2 (corrected from an initially-reported 3 — per-file evaluation confirmed only 2 `startActiveSpan` calls via direct source inspection) | 0 | 1 | Spans up vs run-26 (1→2, corrected from an initially-reported 1→3) |
-| src/mcp/tools/reflection-tool.js | ✅ skip | 0 | 0 | 2 | RST-001 correct; matches run-26 |
+| src/mcp/tools/reflection-tool.js | ⚠️ questionable skip | 0 | 0 | 2 | Not confirmed correct — own pre-instrumentation analysis flagged `saveReflection` as needing a COV-004 span, which the final output never added; see `per-file-evaluation.md`'s Correct Skips entry for detail. Matches run-26 (same gap present and uncaught there too) |
 | src/mcp/server.js | ✅ committed | 1 | 1 | 1 | Matches run-26 |
 | src/traceloop-init.js | ✅ skip | 0 | 0 | 1 | RST-001 correct |
 | src/utils/commit-analyzer.js | ✅ skip | 0 | 0 | 1 | RST-001 correct |
