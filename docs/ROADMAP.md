@@ -5,7 +5,7 @@ Execution order within each tier matters. Items are listed in dependency order �
 ## Short-term
 - Content Manager real instrumentation run: spiny-orb on a production project + template recommendation ([PRD #143](https://github.com/wiggitywhitney/spinybacked-orbweaver-eval/issues/143)) — first run where instrument branch merges; includes Pino log-trace correlation, span-based metrics exploration, and template recommendation for repeatable real-instrumentation runs
 - JS evaluation run-5: release-it — LINT/NDS-003 indentation conflict resolution ([PRD #100](https://github.com/wiggitywhitney/spinybacked-orbweaver-eval/issues/100))
-- JS evaluation run-27: commit-story-v2 — SCH-003 AST check + CDQ-007 self-identified-fix verification ([PRD #153](https://github.com/wiggitywhitney/spinybacked-orbweaver-eval/issues/153))
+- JS evaluation run-28: commit-story-v2 — COV-003 recurrence + SCH-002/SCH-003 AST checks + CDQ-007 shared-helper verification ([PRD #156](https://github.com/wiggitywhitney/spinybacked-orbweaver-eval/issues/156)) — COV-003 and SCH-002 already fixed (spiny-orb PR #1058) as of PRD creation; SCH-003 and CDQ-007 remain open verification targets
 - TS evaluation run-17: taze — COV-005 packument.ts + SCH-003 + CDQ-006 resolution verification ([PRD #147](https://github.com/wiggitywhitney/spinybacked-orbweaver-eval/issues/147)) — primary goal: close COV-005 (packument.ts) and verify SCH-003 String() cast pattern fix
 
 ## Long-term (blocked by language providers)
