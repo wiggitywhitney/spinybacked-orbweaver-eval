@@ -23,7 +23,7 @@
 | CDQ-006 | PASS — `isRecording()` guards are applied specifically to the two attributes requiring non-trivial computation (`dates_requested` via `.join(',')`, `file_path` via `.split(/[\/]/).filter(Boolean).pop()`), while trivial direct-value sets (`force`, `mode`, the six count attributes, `vcs.ref.head.revision`) are set unguarded — consistent with the guard-only-nontrivial-computation convention used elsewhere in this run. |
 | CDQ-007 | PASS — the sole call site for `commit_story.journal.file_path` is sanitized via `.split(/[\/]/).filter(Boolean).pop() ?? ''`, applied consistently at the only site where this attribute is set (1/1) — unlike `summary-manager.js` in this same run, which sanitized 3/7 sites but shipped 4 raw ones. `vcs.ref.head.revision` is a git ref/SHA, not a filesystem path, so it is correctly exempt from this rule. |
 
-**Failures**: None — full PASS across all 19 rules.
+**Failures**: None — full PASS across all 20 rules in the table above.
 
 **Note on the CDQ-007 sanitization tradeoff**: the agent's own instrumentation report flags internal deliberation over this call — the registry's own example for `commit_story.journal.file_path` is a full relative path, but the agent chose to strip to bare filename, reasoning that any non-`file.*`-prefixed path-shaped attribute must be sanitized. This is stricter than the schema's own documented example and loses directory context, but does not violate the rule as written — worth flagging as a design tension for future schema/rule reconciliation, not a scoring failure.
 
