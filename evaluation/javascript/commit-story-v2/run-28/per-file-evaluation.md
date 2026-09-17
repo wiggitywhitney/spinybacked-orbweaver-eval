@@ -86,7 +86,7 @@
 
 **Notable cross-run observations for handoff**: (1) the run-27 `diff_size` SCH-003 bug appears resolved, but only because the committed schema's declared type now matches whatever the code emits (`string`), not because the code was fixed to emit a real int — the type-mismatch detection mechanism itself may be unreliable. (2) `is_merge`/`parent_count` were treated as SCH-002 duplicates (blocking) in run-27 but not in run-28, despite identical attribute pairing — inconsistent enforcement. (3) The CDQ-007 PII-author finding was a blocking canonical failure in run-27 (fixed) and has now regressed to an advisory-only, unfixed finding in run-28 for the identical attribute and identical code pattern.
 
-No Datadog MCP query was run (server unavailable in this subagent's session — `commit-story` MCP connection failed to connect); trace corroboration was skipped per the task's "optional" instruction.
+**Datadog trace supplement (added by the coordinating session, post-hoc)**: `search_datadog_spans` on `service:commit-story resource_name:commit_story.git.get_commit_metadata` in the confirmed post-run window returns live spans with `commit_story.commit.author: Whitney Lee` — the raw, un-redacted real name, confirming the CDQ-007 PII finding is not theoretical, it is live in production telemetry. Separately, `resource_name:commit_story.git.get_merge_info` returns `commit_story.git.is_merge: "false"` (a quoted string) alongside `commit_story.git.parent_count: 1` (a real number) in the same span — direct live confirmation of the SCH-003 type mismatch (declared `boolean`, emitted as `string`), matching the source-level finding exactly.
 ### 3. integrators/context-integrator.js (1 span)
 
 | Rule | Result |
@@ -411,7 +411,7 @@ By contrast, the two `months_*` counters (lines 222-223) are int-typed in the re
 
 **Datadog trace supplement**: Not queried — Datadog MCP tools were unavailable in this subagent's session. Static code review above is complete and sufficient for scoring.
 
-**Datadog trace supplement methodology note**: per-file evaluation was delegated to background subagents, none of which had working Datadog MCP tool access in their sessions (each reports `CONNECTION_CLOSED` where it tried). This is a real gap against the PRD's own D-2 trace supplement step, which expects per-file trace corroboration whenever `trace-artifact.md`'s `post_run_service.instance.id` and post-run query are available (they are — see `trace-artifact.md`). The coordinating session that assembled this document does have working Datadog MCP access and used it for the run-level "Post-run Datadog verification" milestone (confirming `vcs.ref.head.revision` matches the instrument branch across multiple files' spans), but did not re-run that per-file for every one of the 12 committed files individually. Every PASS/FAIL verdict in this document is still evidence-based — from direct source inspection (`git show`) and the run log/instrumentation reports — just not additionally cross-checked against a live trace per file. Treat per-file trace corroboration as outstanding, not complete, for any future audit of this document.
+**Datadog trace supplement methodology note**: per-file evaluation was delegated to background subagents, none of which had working Datadog MCP tool access in their sessions (each reports `CONNECTION_CLOSED` where it tried). This is a real gap against the PRD's own D-2 trace supplement step, which expects per-file trace corroboration whenever `trace-artifact.md`'s `post_run_service.instance.id` and post-run query are available (they are — see `trace-artifact.md`). The coordinating session that assembled this document does have working Datadog MCP access and used it for the run-level "Post-run Datadog verification" milestone, and added targeted per-file supplementation afterward for the two highest-severity confirmed findings — see `git-collector.js`'s section above and `trace-artifact.md`'s "Per-file trace supplement" section for the live-trace confirmation of its CDQ-007 PII exposure and SCH-003 type mismatch. Full per-file trace corroboration for the remaining 10 committed files (and the other 6 confirmed findings) was not performed and remains outstanding — every PASS/FAIL verdict in this document is still evidence-based from direct source inspection (`git show`) and the run log/instrumentation reports, just not additionally cross-checked against a live trace in every case.
 
 ## Partial File (1)
 
@@ -487,8 +487,8 @@ For `reflection-tool.js`, the same failure mode recurs for a third consecutive r
 
 | File | Rule | Finding |
 |------|------|---------|
-| git-collector.js | SCH-003 | `is_merge` declared `boolean`, set via `String(parentCount > 1)` |
-| git-collector.js | CDQ-007 | Regression — raw PII `commit.author` name ships (fixed in run-27), validator downgraded to advisory-only |
+| git-collector.js | SCH-003 | `is_merge` declared `boolean`, set via `String(parentCount > 1)` — **confirmed live via trace** (see `trace-artifact.md`) |
+| git-collector.js | CDQ-007 | Regression — raw PII `commit.author` name ships (fixed in run-27), validator downgraded to advisory-only — **confirmed live via trace** (see `trace-artifact.md`) |
 | context-integrator.js | CDQ-007 | Raw PII `commit.author` re-exposed on this span (same value as git-collector.js) |
 | summary-manager.js | SCH-003 | `summary_saved` declared `string`, always set as boolean (14 call sites) |
 | summary-manager.js | CDQ-006 | isRecording guard applied to only 3 of ~24 setAttribute calls |

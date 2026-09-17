@@ -12,3 +12,12 @@
 **Confirmation**: `vcs.ref.head.revision: c87b774` on multiple spans (e.g. `commit_story.journal.save_entry`, `commit_story.journal.generate_sections`, `commit_story.journal.dialogue_node`, `commit_story.journal.summary_node`, `commit_story.journal.technical_node`) matches the instrument branch `spiny-orb/instrument-1789648132789`'s HEAD SHA (`c87b7749c5a17a0b5f8c88d26d51d2cb37e331e1`, short `c87b774`) — confirmed via `git -C ~/Documents/Repositories/commit-story-v2 rev-parse spiny-orb/instrument-1789648132789`. Direct evidence the local commit-story-v2 checkout, on the instrument branch, self-journaled its own commits during and after the eval run (per D-10 — `vcs.ref.head.revision`, not `git.commit.sha`, identifies the running code's own branch).
 
 **Log-trace correlation check** (commit-story-v2 pino bridge): Sampled 87 of 170 logs from `service:commit-story` in the same window. 71/87 (~82%) carry non-empty `trace_id`/`span_id` — consistent with run-27's ~85% baseline (75/88), no regression. The uncorrelated 16/87 are all `"Journal entry saved"` log lines specifically (not a random spread across message types) — worth a watch item for whether this specific log call sits outside active span context, but not a new finding this run since run-27 already established a comparable overall rate.
+
+## Per-file trace supplement (partial — added during PR artifact evaluation)
+
+Per-file evaluation's 12 committed files were not individually cross-checked against live traces (delegated subagents lacked Datadog MCP access — see `per-file-evaluation.md`'s methodology note). The coordinating session added targeted supplementation for the run's two highest-severity confirmed findings after the fact:
+
+- **`git-collector.js` CDQ-007 (raw PII)**: `search_datadog_spans` on `resource_name:commit_story.git.get_commit_metadata` in the query window above returns live spans with `commit_story.commit.author: Whitney Lee` — the raw, un-redacted name, live in production telemetry, not theoretical.
+- **`git-collector.js` SCH-003 (`is_merge` type mismatch)**: `resource_name:commit_story.git.get_merge_info` returns `commit_story.git.is_merge: "false"` (quoted string) alongside `commit_story.git.parent_count: 1` (real number) in the same span — direct live confirmation of the declared-`boolean`-emitted-as-`string` mismatch.
+
+Full per-file trace corroboration for the remaining 10 committed files (and the other 6 confirmed findings) was not performed and remains outstanding.
