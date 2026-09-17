@@ -86,7 +86,7 @@
 
 **Notable cross-run observations for handoff**: (1) the run-27 `diff_size` SCH-003 bug appears resolved, but only because the committed schema's declared type now matches whatever the code emits (`string`), not because the code was fixed to emit a real int — the type-mismatch detection mechanism itself may be unreliable. (2) `is_merge`/`parent_count` were treated as SCH-002 duplicates (blocking) in run-27 but not in run-28, despite identical attribute pairing — inconsistent enforcement. (3) The CDQ-007 PII-author finding was a blocking canonical failure in run-27 (fixed) and has now regressed to an advisory-only, unfixed finding in run-28 for the identical attribute and identical code pattern.
 
-**Datadog trace supplement (added by the coordinating session, post-hoc)**: `search_datadog_spans` on `service:commit-story resource_name:commit_story.git.get_commit_metadata` in the confirmed post-run window returns live spans with `commit_story.commit.author: Whitney Lee` — the raw, un-redacted real name, confirming the CDQ-007 PII finding is not theoretical, it is live in production telemetry. Separately, `resource_name:commit_story.git.get_merge_info` returns `commit_story.git.is_merge: "false"` (a quoted string) alongside `commit_story.git.parent_count: 1` (a real number) in the same span — direct live confirmation of the SCH-003 type mismatch (declared `boolean`, emitted as `string`), matching the source-level finding exactly.
+**Datadog trace supplement (added by the coordinating session, post-hoc)**: `search_datadog_spans` on `service:commit-story resource_name:commit_story.git.get_commit_metadata` in the confirmed post-run window returns live spans with `commit_story.commit.author: <redacted-person-name>` — the raw, un-redacted real name, confirming the CDQ-007 PII finding is not theoretical, it is live in production telemetry. Separately, `resource_name:commit_story.git.get_merge_info` returns `commit_story.git.is_merge: "false"` (a quoted string) alongside `commit_story.git.parent_count: 1` (a real number) in the same span — direct live confirmation of the SCH-003 type mismatch (declared `boolean`, emitted as `string`), matching the source-level finding exactly.
 ### 3. integrators/context-integrator.js (1 span)
 
 | Rule | Result |
@@ -118,7 +118,7 @@
 
 **Fix-pattern note (repo_path only)**: For `commit_story.context.repo_path` specifically (not `commit.author`), this is not the "confirmed-fixed inline sanitization fallback" (`basename()`/manual split) applied — the file simply stopped emitting `repo_path` as a span attribute in this run's generation, so that particular CDQ-007 pattern is absent by omission rather than by a landed sanitization fix. Matches `claude-collector.js` in this same run (which originally declared/owns this attribute) — both files independently chose to drop `repo_path` rather than sanitize it.
 
-**Datadog trace supplement**: Not performed — the Datadog MCP server was not connected in this subagent's session, so no live-trace corroboration was attempted; the source-code and schema-registry review above is the primary evidence.
+**Datadog trace supplement (added by the coordinating session, post-hoc)**: `search_datadog_spans` on `resource_name:commit_story.context.gather_context_for_commit` in the confirmed post-run window returns live spans with `commit_story.commit.author: <redacted-person-name>` — confirming the CDQ-007 PII re-exposure finding above is live in production telemetry, not theoretical. See `trace-artifact.md`'s "Per-file trace supplement" section.
 ### 4. generators/journal-graph.js (4 spans, 2 attempts)
 
 | Rule | Result |
@@ -282,7 +282,7 @@
 | API-001 | PASS — `import { SpanStatusCode, trace } from '@opentelemetry/api'`; `tracer.startActiveSpan` used in all 9 spans, each with `span.end()` in `finally` |
 | NDS-004 | PASS — all attributes namespaced under `commit_story.journal.*` / `commit_story.summary.*`, consistent snake_case |
 | NDS-006 | PASS — no span-kind or context-propagation issues; straightforward sequential awaits, no manual context manipulation needed |
-| NDS-007 (Expected Catch Unmodified) | PASS (after 2 attempts) — validation journey: Attempt 1 had 2 blocking NDS-007 errors + 1 control-flow error; Attempt 2 reduced to 1 remaining NDS-007 error before the function-level fallback landed clean. Final source's three ENOENT-based expected catches are byte-for-byte unmodified (return `[]` / `throw err` semantics preserved) |
+| NDS-007 (Expected Catch Unmodified) | PASS (after 2 attempts) — validation journey: Attempt 1 had 2 blocking NDS-007 errors + 1 control-flow error; Attempt 2 reduced to 1 remaining NDS-007 error before the function-level fallback landed clean. Final source's four ENOENT-based expected catches (`readDayEntries` line 70, `readWeekDailySummaries` line 326, `readMonthWeeklySummaries` lines 568 and 593) are byte-for-byte unmodified (return `[]` / `throw err` semantics preserved) |
 | COV-001 | N/A — this is a library manager module with no CLI/top-level entry-point boundary; all 9 non-pure functions received direct spans anyway |
 | COV-003 (Error Recording) | PASS — confirmed resolved (see note above); all 9 catch blocks record + set error status + rethrow, `span.end()` in `finally` throughout |
 | COV-004 | PASS (1 advisory, non-blocking) — only the private unexported `_hasRealSummary` helper lacks a span; correctly exempted as an unexported internal helper covered by caller context propagation |
@@ -337,7 +337,7 @@
 
 **Historical note**: `run-summary.md` and `failure-deep-dives.md` originally stated "No SCH-003/String() issue found" for this file, based on a log-narrative-only check. Both have since been corrected to reflect the 4 confirmed SCH-003 violations found here via direct source inspection — see their own correction notes for detail; no further action needed against those documents from this section.
 
-**Datadog MCP query**: Not run (optional per task instructions; no MCP query executed this pass).
+**Datadog trace supplement (added by the coordinating session, post-hoc)**: `search_datadog_spans` on `resource_name:commit_story.journal.find_unsummarized_days` in the confirmed post-run window returns live spans with `commit_story.summary.unsummarized_days_count: "0"` — a quoted string against a declared-`int` key, confirming the SCH-003 finding above is live in production telemetry. See `trace-artifact.md`'s "Per-file trace supplement" section.
 ### 11. managers/auto-summarize.js (3 spans)
 
 | Rule | Result |
@@ -378,6 +378,8 @@ By contrast, the two `months_*` counters (lines 222-223) are int-typed in the re
 **Notes**: All three exported entry points (`triggerAutoSummaries`, `triggerAutoWeeklySummaries`, `triggerAutoMonthlySummaries`) are wrapped in `tracer.startActiveSpan` with try/catch/finally, `recordException`/`setStatus(ERROR)` on the outer catch, and `span.end()` in `finally`. `getErrorMessage` is correctly skipped as a pure, unexported, synchronous helper. The inner per-item catch blocks inside each for-loop (push to `result.failed`/`result.errors`, no rethrow) are correctly left untouched as expected graceful-degradation control flow. Three new span names were correctly declared as schema extensions after the semantically closer existing span IDs were confirmed already claimed by earlier files in this run. Unlike run-27's version of this file, this run-28 instrumentation does **not** set any `commit_story.context.repo_path` (or equivalent raw-path) attribute anywhere — CDQ-007 PASSes cleanly here, in contrast to run-27's canonical failure on this same file.
 
 **Cross-file pattern confirmation**: Checking every one of this file's 11 `setAttribute` call sites individually (not sampling) found the bug at 6 of them (all 4 newly-declared `days_*`/`weeks_*` keys, one doubled), absent at the other 5 (pre-registered `months_*`/`unsummarized_*` keys). The pattern specifically affects **newly agent-declared** int extension attributes, not pre-existing registered int keys, across all three affected files this run — a systemic, run-wide validator gap (no check catches `setAttribute(key, String(...))` against a numeric-typed key), now spanning 3 of ~32 files with 14 total occurrences. This is the single most significant unrubriced-pattern finding of run-28 and should be the primary SCH-003 handoff item.
+
+**Datadog trace supplement (added by the coordinating session, post-hoc)**: `search_datadog_spans` on `resource_name:commit_story.journal.trigger_auto_summaries` in the confirmed post-run window returns live spans with `commit_story.summary.days_failed_count: "0"` and `commit_story.summary.days_generated_count: "0"` — both quoted strings against declared-`int` keys, confirming this finding is live in production telemetry. See `trace-artifact.md`'s "Per-file trace supplement" section.
 ### 12. index.js (2 spans)
 
 | Rule | Result |
@@ -411,7 +413,7 @@ By contrast, the two `months_*` counters (lines 222-223) are int-typed in the re
 
 **Datadog trace supplement**: Not queried — Datadog MCP tools were unavailable in this subagent's session. Static code review above is complete and sufficient for scoring.
 
-**Datadog trace supplement methodology note**: per-file evaluation was delegated to background subagents, none of which had working Datadog MCP tool access in their sessions (each reports `CONNECTION_CLOSED` where it tried). This is a real gap against the PRD's own D-2 trace supplement step, which expects per-file trace corroboration whenever `trace-artifact.md`'s `post_run_service.instance.id` and post-run query are available (they are — see `trace-artifact.md`). The coordinating session that assembled this document does have working Datadog MCP access and used it for the run-level "Post-run Datadog verification" milestone, and added targeted per-file supplementation afterward for the two highest-severity confirmed findings — see `git-collector.js`'s section above and `trace-artifact.md`'s "Per-file trace supplement" section for the live-trace confirmation of its CDQ-007 PII exposure and SCH-003 type mismatch. Full per-file trace corroboration for the remaining 10 committed files (and the other 6 confirmed findings) was not performed and remains outstanding — every PASS/FAIL verdict in this document is still evidence-based from direct source inspection (`git show`) and the run log/instrumentation reports, just not additionally cross-checked against a live trace in every case.
+**Datadog trace supplement methodology note**: per-file evaluation was delegated to background subagents, none of which had working Datadog MCP tool access in their sessions. The coordinating session (which has MCP access) added live-trace supplementation afterward, covering 5 of the 6 files with confirmed findings — see each file's own section above and `trace-artifact.md`'s "Per-file trace supplement" section for details. `summary-manager.js`'s spans did not fire in the observed post-run window (no weekly/monthly summary was triggered), so that file's findings remain confirmed at the source level only, not via live trace.
 
 ## Partial File (1)
 
@@ -487,19 +489,21 @@ For `reflection-tool.js`, the same failure mode recurs for a third consecutive r
 
 | File | Rule | Finding |
 |------|------|---------|
-| git-collector.js | SCH-003 | `is_merge` declared `boolean`, set via `String(parentCount > 1)` — **confirmed live via trace** (see `trace-artifact.md`) |
-| git-collector.js | CDQ-007 | Regression — raw PII `commit.author` name ships (fixed in run-27), validator downgraded to advisory-only — **confirmed live via trace** (see `trace-artifact.md`) |
-| context-integrator.js | CDQ-007 | Raw PII `commit.author` re-exposed on this span (same value as git-collector.js) |
-| summary-manager.js | SCH-003 | `summary_saved` declared `string`, always set as boolean (14 call sites) |
+| git-collector.js | SCH-003 | `is_merge` declared `boolean`, set via `String(parentCount > 1)` — **confirmed live via trace** |
+| git-collector.js | CDQ-007 | Regression — raw PII `commit.author` name ships (fixed in run-27), validator downgraded to advisory-only — **confirmed live via trace** |
+| context-integrator.js | CDQ-007 | Raw PII `commit.author` re-exposed on this span (same value as git-collector.js) — **confirmed live via trace** |
+| summary-manager.js | SCH-003 | `summary_saved` declared `string`, always set as boolean (14 call sites) — confirmed at source level; no live traffic observed in this file's spans during the post-run window |
 | summary-manager.js | CDQ-006 | isRecording guard applied to only 3 of ~24 setAttribute calls |
 | summary-manager.js | CDQ-007 | Raw unsanitized path at 4 of 7 `file_path` sites; correctly sanitized at the other 3 in the same file |
 | summarize.js (PARTIAL) | SCH-002 | `dates_requested` reused for week count and month count after being declared for a date-string concept |
 | summarize.js (PARTIAL) | SCH-003 | 4 occurrences: `dates_requested` set as a raw number at 2 sites (opposite-direction mismatch vs. its string type), `months_generated_count`/`months_failed_count` set via `String(...)` at 2 sites (the RUN27-3 shape) |
-| summary-detector.js | SCH-003 | All 4 newly-invented int-typed keys (`unsummarized_days_count`, `unsummarized_weeks_count`, `summarized_months_count`, `unsummarized_months_count`) set via `String(...)` (RUN27-3 shape) |
-| auto-summarize.js | SCH-003 | `days_generated_count`/`days_failed_count`/`weeks_generated_count`/`weeks_failed_count` (all newly-invented, int-typed) set via `String(...)` — 6 occurrences (RUN27-3 shape) |
+| summary-detector.js | SCH-003 | All 4 newly-invented int-typed keys (`unsummarized_days_count`, `unsummarized_weeks_count`, `summarized_months_count`, `unsummarized_months_count`) set via `String(...)` (RUN27-3 shape) — **confirmed live via trace** |
+| auto-summarize.js | SCH-003 | `days_generated_count`/`days_failed_count`/`weeks_generated_count`/`weeks_failed_count` (all newly-invented, int-typed) set via `String(...)` — 6 occurrences (RUN27-3 shape) — **confirmed live via trace** |
 | context-capture-tool.js (skip) | COV-001 + COV-004 | Coverage regression — lost both the `saveContext` span and the MCP handler entry-point span (2 spans in run-27 → 0 in run-28) |
 | reflection-tool.js (skip) | COV-001 + COV-004 | Never previously committed (not a regression), but structurally identical to context-capture-tool.js — has the same latent 2-span gap (handler + saveReflection), and its own COV-004 flag on saveReflection was already self-identified and declined by the agent |
 
 **Clean files (no failures)**: claude-collector.js, journal-graph.js, summary-graph.js, mcp/server.js, journal-paths.js, journal-manager.js, index.js.
 
 **SCH-003 total this run**: 14 occurrences across 3 files (summarize.js: 4, summary-detector.js: 4, auto-summarize.js: 6) — 12 are the RUN27-3 shape (int-typed key set via `String()`), the remaining 2 (both in summarize.js) are the opposite-direction mismatch (string-typed key set via a raw number). Every occurrence is on a key the agent invents itself in that same file; every pre-existing/reused key across all three files is correctly typed.
+
+**Live-trace corroboration**: 5 of 6 confirmed-findings files now have direct Datadog trace confirmation (git-collector.js x2, context-integrator.js, summary-detector.js, auto-summarize.js). `summary-manager.js`'s findings remain source-level only — its spans did not fire in the observed post-run window.

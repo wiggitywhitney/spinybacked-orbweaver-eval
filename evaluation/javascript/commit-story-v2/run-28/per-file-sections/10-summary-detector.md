@@ -31,4 +31,4 @@
 
 **Historical note**: `run-summary.md` and `failure-deep-dives.md` originally stated "No SCH-003/String() issue found" for this file, based on a log-narrative-only check. Both have since been corrected to reflect the 4 confirmed SCH-003 violations found here via direct source inspection — see their own correction notes for detail; no further action needed against those documents from this section.
 
-**Datadog MCP query**: Not run (optional per task instructions; no MCP query executed this pass).
+**Datadog trace supplement (added by the coordinating session, post-hoc)**: `search_datadog_spans` on `resource_name:commit_story.journal.find_unsummarized_days` in the confirmed post-run window returns live spans with `commit_story.summary.unsummarized_days_count: "0"` — a quoted string against a declared-`int` key, confirming the SCH-003 finding above is live in production telemetry. See `trace-artifact.md`'s "Per-file trace supplement" section.
