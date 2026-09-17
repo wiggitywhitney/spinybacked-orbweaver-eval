@@ -1,4 +1,4 @@
-### 13. index.js (2 spans)
+### 12. index.js (2 spans)
 
 | Rule | Result |
 |------|--------|
