@@ -190,7 +190,9 @@ The **evaluation execution branch** created by `/prd-start` from main **never me
 
   **Priority check**: If `summary-manager.js` is partial again (RUN27-1 unresolved), confirm the same three-function catch-shape pattern from run-25/run-27 directly against source, rather than assuming it recurs unchanged. **N/A this run** — `summary-manager.js` committed cleanly (RUN27-1 resolved); the only partial file is `summarize.js` (SCH-002 reuse + newly-confirmed SCH-003 recurrence on `months_generated_count`/`months_failed_count`), documented in `failure-deep-dives.md`.
 
-- [ ] **Per-file evaluation** — Full rubric on ALL files (no spot-checking). Evaluate all rules across all committed and partial files.
+- [x] **Per-file evaluation** — Full rubric on ALL files (no spot-checking). Evaluate all rules across all committed and partial files.
+
+  **Completed** 2026-09-17: `per-file-evaluation.md` covers all 32 files (12 committed, 1 partial, 19 skips — 17 confirmed correct, 2 questionable). Batched background agents (D-2), reconciliation via multiple CodeRabbit review rounds. Found 6 genuine failures beyond the run-summary/failure-deep-dive scope: `git-collector.js` (SCH-003 `is_merge`, CDQ-007 PII regression), `context-integrator.js` (CDQ-007 PII, corrected from an initial wrong PASS), `summary-manager.js` (SCH-003, CDQ-006, CDQ-007 all FAIL despite its COV-003 fix being clean), `auto-summarize.js` (SCH-003, 6 occurrences), and a genuine coverage regression on `context-capture-tool.js` (2 spans in run-27 → 0 in run-28, agent notes contradict its own reasoning). SCH-003's true scope (12 occurrences, 3 files) and RUN27-4's true consistency (real but not uniform, even within one file) were both undercounted in earlier run-summary.md/failure-deep-dives.md passes and corrected here.
   Produces: `evaluation/javascript/commit-story-v2/run-28/per-file-evaluation.md`
   Style reference: `Read docs/templates/eval-run-style-reference/per-file-evaluation.md`
 
