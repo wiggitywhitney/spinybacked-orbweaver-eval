@@ -261,8 +261,8 @@ During the pre-write audit of run-28's artifacts, the following were reconciled 
 - **The original RUN27-4 7-file list is quoted verbatim from run-27's own `rubric-scores.md`** (`claude-collector.js, context-integrator.js, journal-paths.js, summarize.js, summary-detector.js, auto-summarize.js, summary-manager.js`) rather than reconstructed from memory, per the `lessons-for-prd29.md` correction note about this exact list getting corrupted in earlier drafts this run.
 - **`trace-artifact.md`'s span-count figures are IS-scoring-session counts (31 spans this run), not the canonical 48-span total** — these are two different measurements from two different sessions (a live production window vs. the eval's own controlled run), and this document's §6 Notable Positives corrects an initial drafting slip that conflated them (the parenthetical note in that section flags the distinction rather than silently using the wrong number).
 
-No outstanding CodeRabbit findings were pending against this specific document at write time (this is a new document, not yet reviewed) — future CodeRabbit findings against this file should be triaged per the project's standard CodeRabbit workflow before this document is considered final.
+This document has since been reviewed twice by CodeRabbit CLI on the PRD branch (2026-09-18) — the counting-unit inconsistency and PII/severity attribution findings from those passes are already corrected above; see the git history of this file for what changed.
 
 ---
 
-**Spoken summary to be provided to Whitney before this document is finalized as the handoff — see conversation.**
+**Spoken summary was provided to Whitney on 2026-09-18 before this document was finalized as the handoff.** Handoff confirmed; the spiny-orb team triaged this document into 4 new issues (#1065–#1068) and 5 corroborating updates to existing open issues (#1037, #927, #1036, #1060, #1063) — verified directly against `gh issue view`/`gh issue list`.
