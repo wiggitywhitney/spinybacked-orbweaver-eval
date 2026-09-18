@@ -217,10 +217,10 @@ Total duration 1h 16m matches the actual instrumentation work — no `PROGRESS.m
 
 | ID | Title | Priority | Status | Runs Open | spiny-orb Issue |
 |----|-------|----------|--------|-----------|-----------------|
-| RUN28-1 (CDQ-006) | `summary-manager.js` isRecording-guard inconsistency within one file | P2 | Open — new this run, no tracking issue yet | 1 | — (needs filing) |
+| RUN28-1 (CDQ-006) | `summary-manager.js` isRecording-guard inconsistency within one file | P2 | Open — filed | 1 | #1067 (open) |
 | RUN28-2 (SCH-003) | Widened to 5 files, 29 failing call sites, now confirmed bidirectional (String()-wrapped AND raw-into-string) | P1 | Open — update #1037's scope | 3 (run-26 origin, run-27 2 files, run-28 5 files) | #1037 (open, Short-term) |
-| RUN28-3 (CDQ-007) | `summary-manager.js`'s remaining 4-of-7 raw path sites | P1 | Open — new tracking needed, #1035 is closed | 3 (recurring subset of RUN27-4) | — (needs filing; do not reopen #1035) |
-| RUN28-4 (CDQ-007) | PII regression + validator severity downgrade (blocking → advisory) | P1 | Open — new this run, no tracking issue yet | 1 (regression) + severity-instability angle unprecedented | — (needs filing) |
+| RUN28-3 (CDQ-007) | `summary-manager.js`'s remaining 4-of-7 raw path sites | P1 | Open — filed (does not reopen closed #1035) | 3 (recurring subset of RUN27-4) | #1068 (open) |
+| RUN28-4 (CDQ-007) | PII regression + validator severity downgrade (blocking → advisory) | P1 | Open — filed (two issues: regression + severity investigation) | 1 (regression) + severity-instability angle unprecedented | #1066 (PII regression), #1065 (severity investigation), both open |
 | RUN28-5 (Watch) | `context-capture-tool.js` notes-vs-reasoning divergence | P2 (Watch) | Open — related to but distinct from #927 | 1 | #927 (related, open) |
 | RUN27-2 (SCH-002) | Same-key reuse across daily/weekly/monthly-parallel functions | P2 | Open, already correctly scoped and tracked | 2 (run-27, run-28, plus a same-day independent acceptance-gate discovery) | #1063 (open, Medium-term) |
 | PR summary omits SCH-003/CDQ-006 findings | 5 rule findings, 29 SCH-003 call sites, invisible in Advisory Findings this run | P2 | Open — run-28 contributes largest evidence set yet | 3+ | #1036 (open, Short-term) |
