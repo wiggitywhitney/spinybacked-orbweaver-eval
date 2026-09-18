@@ -275,7 +275,7 @@ The **evaluation execution branch** created by `/prd-start` from main **never me
      ```bash
      vals exec -f ~/Documents/Repositories/spinybacked-orbweaver-eval/.vals.yaml -- ~/.local/bin/otelcol-contrib --config ~/Documents/Repositories/spinybacked-orbweaver-eval/evaluation/is/otelcol-config.yaml > /tmp/otelcol.log 2>&1 &
      COLLECTOR_PID=$!
-     deadline=$((SECONDS + 30)); until lsof -sTCP:LISTEN -iTCP:4318 >/dev/null 2>&1; do [ "$SECONDS" -ge "$deadline" ] && { kill "$COLLECTOR_PID" 2>/dev/null; exit 1; }; sleep 0.5; done
+     deadline=$((SECONDS + 30)); until lsof -p "$COLLECTOR_PID" -a -iTCP:4318 -sTCP:LISTEN >/dev/null 2>&1; do kill -0 "$COLLECTOR_PID" 2>/dev/null || { echo "Collector exited before binding port 4318" >&2; exit 1; }; [ "$SECONDS" -ge "$deadline" ] && { kill "$COLLECTOR_PID" 2>/dev/null; exit 1; }; sleep 0.5; done
      ```
   2. **Claude checks out** instrument files and runs the app from `~/Documents/Repositories/commit-story-v2`:
      ```bash
