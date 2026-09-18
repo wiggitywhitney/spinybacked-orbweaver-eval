@@ -265,4 +265,4 @@ This document has since been reviewed twice by CodeRabbit CLI on the PRD branch 
 
 ---
 
-**Spoken summary was provided to Whitney on 2026-09-18 before this document was finalized as the handoff.** Handoff confirmed; the spiny-orb team triaged this document into 4 new issues (#1065–#1068) and 5 corroborating updates to existing open issues (#1037, #927, #1036, #1060, #1063) — verified directly against `gh issue view`/`gh issue list`.
+**Spoken summary was provided to Whitney on 2026-09-18 before this document was finalized as the handoff.** Handoff confirmed; the spiny-orb team triaged this document into 4 new issues (#1065–#1068) and 7 corroborating comments across 5 existing open issues (#1037, #927, #1036 ×3, #1060, #1063) — verified directly against `gh issue view`/`gh issue list`.
