@@ -141,6 +141,10 @@ The feature branch for this PRD (`feature/prd-100-evaluation-run-5-release-it`) 
 
   AI role: (1) confirm readiness, (2) once Whitney provides the log output, save it and write `evaluation/javascript/release-it/run-5/run-summary.md`, (3) **push the eval branch to origin immediately** — the branch holds the only copy of run artifacts until step 13 copies them to main, (4) **if auto PR creation failed**, create the PR from the file spiny-orb already wrote to disk — do NOT write a shortened manual body: `gh pr create --body-file ~/Documents/Repositories/release-it/spiny-orb-pr-summary.md --repo wiggitywhitney/release-it --head <instrument-branch> --title "..."`
 
+  **Hard prerequisite check** (cascaded from commit-story-v2 run-28, D-14): confirm the skeleton documents and pre-run verification milestones are both fully complete before handing Whitney the instrument command — running out of order forecloses pre-run-only steps permanently.
+
+  **Fix-verification claims** (cascaded from commit-story-v2 run-28): do not conclude "no recurrence" of a prior-run finding from the log's Schema Extensions/Agent Notes prose alone — those describe *new* extensions and stated reasoning, not every attribute-setting call on an *existing* key. Label any fix-verification claim in `run-summary.md` as provisional pending per-file evaluation.
+
 - [ ] **Findings Discussion** *(user-facing checkpoint 1)*
 
   After `run-summary.md` is written, before any evaluation documents: report to Whitney with a raw overview — files committed/failed/partial, quality score if visible in log, cost, push/PR status, top 1-2 surprises. Conversational, under 10 lines. Wait for acknowledgment before proceeding.
@@ -160,6 +164,13 @@ The feature branch for this PRD (`feature/prd-100-evaluation-run-5-release-it`) 
   Full 32-rule rubric on ALL processed files.
   Produces: `evaluation/javascript/release-it/run-5/per-file-evaluation.md`
   Style reference: `Read docs/templates/eval-run-style-reference/per-file-evaluation.md`
+
+  **Cascaded from commit-story-v2 run-28** — apply all of the following during this milestone:
+  - **Trace supplementation ownership**: delegated per-file evaluation subagents do not reliably have Datadog MCP access even when the coordinating session does. Treat trace supplementation as the coordinating session's own responsibility, scheduled as a separate pass after all batches return, not assumed inline per subagent.
+  - **PII redaction on citation**: any live-trace value pulled in as evidence for a PII-adjacent finding must be redacted in the same edit that adds it to a document, never as a follow-up cleanup step.
+  - **Rule-ID label audit**: before any reconciliation pass, spot-check that each per-file section's row content actually matches its stated rule ID's canonical definition, not just that the verdict is defensible.
+  - **Exemption-scope pre-commitment**: where a rubric rule's exemption conditions are ambiguous, write down the chosen interpretation explicitly before per-file evaluation starts, and apply it uniformly across every section in this run.
+  - **Fix-verification confirmation**: per-file evaluation is the authoritative check for whether a prior-run finding actually recurred — it supersedes, and may correct, `run-summary.md`'s provisional fix-verification claims.
 
 - [ ] **PR artifact evaluation**
 
@@ -204,6 +215,7 @@ The feature branch for this PRD (`feature/prd-100-evaluation-run-5-release-it`) 
   - **Fix language targets spiny-orb components, not target files.** "Fix:" entries should describe the spiny-orb component gap — auto-fix, validator, prompt, or fix-loop. Do not write "remove X at line Y of file.ts." Target repo files are overwritten every run; patching them is not durable.
   - **Attribute disappearance is not automatically a finding.** Investigate before calling it wrong — consider semconv basis and whether the absence is a defensible agent decision. Give the spiny-orb team evidence and honest characterization, not a decision-free action list.
   - **Carry-forward table: consider distinguishing findings from observations** — entries with a plausible spiny-orb root cause vs. watch items without a clear basis for calling them wrong.
+  - **Fix scope precision** (cascaded from commit-story-v2 run-28): for any fix originally reported across N files, state the fixed/total ratio explicitly (e.g. "6 of 7") rather than a bare PASS/FAIL or RESOLVED/UNRESOLVED claim. Distinguish "the failure pattern no longer reproduces" from "the fix mechanism actually fired" — a file can pass by omission, not because the fix worked. Only the latter is evidence the fix generalizes.
 
   Produces: `evaluation/javascript/release-it/run-5/actionable-fix-output.md`
 

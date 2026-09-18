@@ -117,6 +117,8 @@ Evaluation artifacts live at `evaluation/content-manager/run-1/` in this repo (s
 
   AI must confirm `debug-dumps/` directory exists before handing Whitney the command. Extract the instrument branch name from the log (`grep -m1 'Branch:' spiny-orb-output.log`) when writing `run-summary.md` — do not write it from memory.
 
+  **Hard prerequisite check** (cascaded from commit-story-v2 run-28, D-14): confirm the "Read prerequisite docs," "Pre-run setup," and "OTel SDK bootstrap" milestones are all fully complete — not just started — before handing Whitney the instrument command. Running out of order forecloses pre-run-only verification steps permanently.
+
   **Exact command** (run from `~/Documents/Repositories/content-manager`):
   ```bash
   caffeinate -s env -u ANTHROPIC_CUSTOM_HEADERS -u ANTHROPIC_BASE_URL vals exec -i -f .vals.yaml -- node ~/Documents/Repositories/spinybacked-orbweaver/bin/spiny-orb.js instrument src --verbose --thinking --debug-dump-dir ~/Documents/Repositories/spinybacked-orbweaver-eval/evaluation/content-manager/run-1/debug-dumps 2>&1 | tee ~/Documents/Repositories/spinybacked-orbweaver-eval/evaluation/content-manager/run-1/spiny-orb-output.log
@@ -155,6 +157,12 @@ Evaluation artifacts live at `evaluation/content-manager/run-1/` in this repo (s
   **Reconciliation pass (after all batches return, before the first CodeRabbit review):** Independent per-file agents scoring the same underlying pattern (e.g., a shared attribute or helper used across files) can disagree. Before writing the final document, do one targeted pass: for each rule that appears in more than one file's findings, diff the verdicts across those files and flag disagreements for resolution. Two reusable tests from commit-story-v2 run-27: **CDQ-007 "structural guarantee" test** (a raw-path-shaped attribute FAILs unless the source code structurally guarantees the value can never be absolute — an observed relative value in one trace sample is not sufficient); **SCH-002 "specific wrong noun vs. generic reasonable term" test** (a reused attribute key FAILs if its own name is a specific, different noun from what it holds, PASSes if the name is generic enough to cover all reused values). Full detail: `docs/language-extension-plan.md` step 6.
 
   **Correct-skip verification:** For each file the run summary labels a "correct skip," grep that file's own pre-instrumentation-analysis block in `spiny-orb-output.log` for a COV-001/COV-004 flag the final output didn't act on. A file that flags its own need for a span and then skips anyway with unrelated boilerplate justification is a "questionable skip," not a confirmed correct one.
+
+  **Cascaded from commit-story-v2 run-28** — apply all of the following during this milestone:
+  - **Trace supplementation ownership**: delegated per-file evaluation subagents do not reliably have Datadog MCP access even when the coordinating session does. Treat trace supplementation as the coordinating session's own responsibility, scheduled as a separate pass after all batches return, not assumed inline per subagent.
+  - **PII redaction on citation**: any live-trace value pulled in as evidence for a PII-adjacent finding (e.g. author names, contact info in publish-flow data) must be redacted in the same edit that adds it to a document, never as a follow-up cleanup step.
+  - **Rule-ID label audit**: before the reconciliation pass, spot-check that each per-file section's row content actually matches its stated rule ID's canonical definition, not just that the verdict is defensible.
+  - **Exemption-scope pre-commitment**: where a rubric rule's exemption conditions are ambiguous, write down the chosen interpretation explicitly before per-file evaluation starts, and apply it uniformly across every section in this run.
 
 - [ ] **PR artifact evaluation** — Evaluate PR quality.
   Produces: `evaluation/content-manager/run-1/pr-evaluation.md`

@@ -134,6 +134,10 @@ The eval execution branch (`feature/prd-147-taze-evaluation-run-17`) **never mer
 
 - [ ] **Evaluation run-17** — Whitney runs `spiny-orb instrument` in her terminal. The `debug-dumps/` directory must exist before running (created in skeleton step above).
 
+  **Hard prerequisite check** (cascaded from commit-story-v2 run-28, D-14): confirm the skeleton documents and pre-run verification milestones are both fully complete — not just started — before handing Whitney the instrument command. Running out of order forecloses pre-run-only steps (Datadog pre-run health check, push-auth dry-run, pre-run trace capture) permanently.
+
+  **Fix-verification claims** (cascaded from commit-story-v2 run-28): do not conclude "no recurrence" of a prior-run finding from the log's Schema Extensions/Agent Notes prose alone — those describe *new* extensions and stated reasoning, not every attribute-setting call on an *existing* key. Label any fix-verification claim in `run-summary.md`/`spiny-orb-findings.md` as provisional pending per-file evaluation.
+
   ```bash
   caffeinate -s env -u ANTHROPIC_CUSTOM_HEADERS -u ANTHROPIC_BASE_URL vals exec -i -f .vals.yaml -- bash -c 'GITHUB_TOKEN=$GITHUB_TOKEN_TAZE node ~/Documents/Repositories/spinybacked-orbweaver/bin/spiny-orb.js instrument src --verbose --thinking --debug-dump-dir ~/Documents/Repositories/spinybacked-orbweaver-eval/evaluation/typescript/taze/run-17/debug-dumps 2>&1 | tee ~/Documents/Repositories/spinybacked-orbweaver-eval/evaluation/typescript/taze/run-17/spiny-orb-output.log'
   ```
@@ -176,6 +180,16 @@ The eval execution branch (`feature/prd-147-taze-evaluation-run-17`) **never mer
 
   **Correct-skip verification:** For each file the run summary labels a "correct skip," grep that file's own pre-instrumentation-analysis block in `spiny-orb-output.log` for a COV-001/COV-004 flag the final output didn't act on. A file that flags its own need for a span and then skips anyway with unrelated boilerplate justification is a "questionable skip," not a confirmed correct one.
 
+  **Rule-ID label audit** (cascaded from commit-story-v2 run-28): before the reconciliation pass, spot-check that each per-file section's row content actually matches its stated rule ID's canonical definition, not just that the verdict is defensible — a row can carry a correct verdict while evaluating the wrong rule's concern.
+
+  **Trace supplementation ownership** (cascaded from commit-story-v2 run-28): delegated per-file evaluation subagents do not reliably have Datadog MCP access even when the coordinating session does. Treat trace supplementation as the coordinating session's own responsibility, scheduled as a separate pass after all batches return, rather than assumed inline per subagent.
+
+  **PII redaction on citation** (cascaded from commit-story-v2 run-28): any live-trace value pulled in as evidence for a PII-adjacent finding must be redacted in the same edit that adds it to a document, never as a follow-up cleanup step.
+
+  **Exemption-scope pre-commitment** (cascaded from commit-story-v2 run-28): where a rubric rule's exemption conditions are ambiguous, write down the chosen interpretation explicitly before per-file evaluation starts, and apply it uniformly across every section in this run.
+
+  **Fix-verification confirmation** (cascaded from commit-story-v2 run-28): per-file evaluation is the authoritative check for whether a prior-run finding (COV-005/SCH-003/CDQ-006) actually recurred — it supersedes, and may correct, the earlier findings-discussion pass's provisional read.
+
 - [ ] **PR artifact evaluation** — Evaluate the instrument branch PR: diff completeness, span registration accuracy, schema accuracy in `agent-extensions.yaml`, `traceloop-init.ts` registration block.
 
 - [ ] **Rubric scoring** — Score all dimensions against the rubric. Compare to run-16 baseline. COV-005/SCH-003/CDQ-006 resolution status are the primary data points.
@@ -214,6 +228,7 @@ The eval execution branch (`feature/prd-147-taze-evaluation-run-17`) **never mer
   - **Fix language targets spiny-orb components, not target files.** "Fix:" entries should describe the spiny-orb component gap — auto-fix, validator, prompt, or fix-loop. Do not write "remove X at line Y of file.ts." Target repo files are overwritten every run; patching them is not durable and misleads the team about where the root cause is.
   - **Attribute disappearance is not automatically a finding.** If an attribute appeared in a prior run and is absent now, investigate before calling it wrong — consider whether there is a semconv basis for the attribute and whether the absence is a defensible agent decision. Give the spiny-orb team evidence and honest characterization, not a decision-free action list.
   - **Carry-forward table: consider distinguishing findings from observations.** Entries with a plausible spiny-orb root cause ("finding") vs. entries worth watching but without a clear industry basis for calling them wrong ("observation") serve different purposes for the team.
+  - **Fix scope precision** (cascaded from commit-story-v2 run-28): for any fix originally reported across N files, state the fixed/total ratio explicitly (e.g. "6 of 7") rather than a bare PASS/FAIL or RESOLVED/UNRESOLVED claim. Distinguish "the failure pattern no longer reproduces" from "the fix mechanism actually fired" — a file can pass by omission (agent didn't emit the attribute this run), not because the fix worked. Only the latter is evidence the fix generalizes.
 
   **Handoff-confirmation depth**: When Whitney confirms handoff to the spiny-orb team, verify each finding's actual roadmap tier/sequencing (not just that an issue exists with acceptance criteria) against spiny-orb's `docs/ROADMAP.md`. A finding can be correctly filed and triaged while still not being scheduled to land before the next run — state this explicitly rather than treating an expected recurrence as a surprise.
 
