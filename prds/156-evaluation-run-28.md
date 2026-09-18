@@ -273,11 +273,13 @@ The **evaluation execution branch** created by `/prd-start` from main **never me
   5. **Confirm IS scoring traces in Datadog**: Record IS scoring run start time, then query `service:commit-story from:<run-start-time>`. Record `service.instance.id`.
   Produces: `evaluation/javascript/commit-story-v2/run-28/is-score.md`
 
-- [ ] **Baseline comparison** — Compare run-28 vs runs 2–27 (run-22 was never executed).
+- [x] **Baseline comparison** — Compare run-28 vs runs 2–27 (run-22 was never executed).
   Produces: `evaluation/javascript/commit-story-v2/run-28/baseline-comparison.md`
   Style reference: `Read docs/templates/eval-run-style-reference/baseline-comparison.md`
 
   **Attribute-count trend caution**: before flagging any cross-run "declining richness" trend, verify reported attribute counts against direct source inspection rather than trusting logged figures alone. See `docs/language-extension-plan.md` step 10.
+
+  **Completed** 2026-09-17: `baseline-comparison.md` written — run-28 ties run-27's series-low 21/25 but via an inverted dimension composition (COV recovers to 5/5, CDQ drops to a new series-low 5/7 including the first-ever CDQ-006 failure). Spans tie the 48 all-time record despite one fewer committed file. IS hits a fourth consecutive 100/100 (longest streak in the series). Cost drops to $7.23 (-23.1% vs run-27), the lowest among IS-scored runs. Score projection validation confirms RUN27-1 (COV-003) fully resolved; RUN27-2, RUN27-3, RUN27-4 all landed as partial progress rather than clean fixes. RUN27-5 does not recur — no third instance found.
 
 - [ ] **Update root README** — Add a row for run-28 to the run history table (quality, gates, files, spans, cost, push/PR, IS score). Update the "next run" sentence to reference run-29 and its primary goals.
 
