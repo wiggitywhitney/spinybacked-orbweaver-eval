@@ -146,6 +146,8 @@ Evaluation artifacts live at `evaluation/content-manager/run-1/` in this repo (s
   Produces: `evaluation/content-manager/run-1/per-file-evaluation.md`
   Style reference: `Read docs/templates/eval-run-style-reference/per-file-evaluation.md`
 
+  **Exemption-scope pre-commitment** (cascaded from run-28 — **decide this before spawning the first batch below**, not during reconciliation): where a rubric rule's exemption conditions are ambiguous (e.g. CDQ-006's isRecording-guard exemption for entry-point spans), write down the chosen interpretation explicitly before any agent is spawned, and apply it uniformly across every per-file evaluation agent in this run. Run-28 found this exemption applied inconsistently because it was never written down before agents started scoring — deciding it during reconciliation, after batches return, would repeat that gap.
+
   **(D-2) Spawn per-file evaluation agents in batches of 5**: Create output directory first: `mkdir -p evaluation/content-manager/run-1/per-file-sections/`. Spawn individual background Agent() calls with `run_in_background: true` in batches of 5. After each batch returns, write section files to disk immediately. After writing, clear context before the next batch. At the start of each new batch, run `ls per-file-sections/` to see what's done and pick the next 5.
 
   Each agent reads: style reference, run-25 per-file evaluation as rule description reference, original source (`git show main:src/file`), committed source (`git show <instrument-branch>:src/file`), agent notes from log, debug dump if applicable, and `semconv/attributes.yaml`. Each agent **writes its section directly to `evaluation/content-manager/run-1/per-file-sections/<filename>.md`**.
@@ -162,7 +164,6 @@ Evaluation artifacts live at `evaluation/content-manager/run-1/` in this repo (s
   - **Trace supplementation ownership**: delegated per-file evaluation subagents do not reliably have Datadog MCP access even when the coordinating session does. Treat trace supplementation as the coordinating session's own responsibility, scheduled as a separate pass after all batches return, not assumed inline per subagent.
   - **PII redaction on citation**: any live-trace value pulled in as evidence for a PII-adjacent finding (e.g. author names, contact info in publish-flow data) must be redacted in the same edit that adds it to a document, never as a follow-up cleanup step.
   - **Rule-ID label audit**: before the reconciliation pass, spot-check that each per-file section's row content actually matches its stated rule ID's canonical definition, not just that the verdict is defensible.
-  - **Exemption-scope pre-commitment**: where a rubric rule's exemption conditions are ambiguous, write down the chosen interpretation explicitly before per-file evaluation starts, and apply it uniformly across every section in this run.
 
 - [ ] **PR artifact evaluation** — Evaluate PR quality.
   Produces: `evaluation/content-manager/run-1/pr-evaluation.md`

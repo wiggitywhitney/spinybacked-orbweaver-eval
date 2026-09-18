@@ -160,6 +160,8 @@ The eval execution branch (`feature/prd-147-taze-evaluation-run-17`) **never mer
 
   **Use parallel subagent evaluation — up to 5 files at a time, one subagent per file.** Single-pass single-context evaluation misses findings that per-file subagents catch. Do NOT write the evaluation as a single sequential document. For spawning mechanics, follow the D-2 protocol in `docs/language-extension-plan.md` step 6.
 
+  **Exemption-scope pre-commitment** (cascaded from commit-story-v2 run-28 — **decide this before spawning the first batch below**, not during reconciliation): where a rubric rule's exemption conditions are ambiguous, write down the chosen interpretation explicitly before any agent is spawned, and apply it uniformly across every per-file evaluation agent in this run. Deciding it during reconciliation, after batches return, defeats the purpose — agents would already have scored inconsistently by then.
+
   **Spawn up to 5 agents per batch — no more than 5.** Required sequence per batch: spawn up to 5 agents → collect results → append results to `per-file-evaluation.md` → `/prd-update-progress` → `/clear` → spawn next batch. Number of batches: ⌈committed_files/5⌉. `per-file-evaluation.md` is written incrementally across batches — do not wait for all files before writing.
 
   **Output format**: Follow the per-file format from `prds/done/146-taze-evaluation-run-16.md` exactly — one section per committed file, rule table per span, failures summary table at the end.
@@ -185,8 +187,6 @@ The eval execution branch (`feature/prd-147-taze-evaluation-run-17`) **never mer
   **Trace supplementation ownership** (cascaded from commit-story-v2 run-28): delegated per-file evaluation subagents do not reliably have Datadog MCP access even when the coordinating session does. Treat trace supplementation as the coordinating session's own responsibility, scheduled as a separate pass after all batches return, rather than assumed inline per subagent.
 
   **PII redaction on citation** (cascaded from commit-story-v2 run-28): any live-trace value pulled in as evidence for a PII-adjacent finding must be redacted in the same edit that adds it to a document, never as a follow-up cleanup step.
-
-  **Exemption-scope pre-commitment** (cascaded from commit-story-v2 run-28): where a rubric rule's exemption conditions are ambiguous, write down the chosen interpretation explicitly before per-file evaluation starts, and apply it uniformly across every section in this run.
 
   **Fix-verification confirmation** (cascaded from commit-story-v2 run-28): per-file evaluation is the authoritative check for whether a prior-run finding (COV-005/SCH-003/CDQ-006) actually recurred — it supersedes, and may correct, the earlier findings-discussion pass's provisional read.
 
