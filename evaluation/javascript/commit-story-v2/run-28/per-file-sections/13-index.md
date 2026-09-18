@@ -1,0 +1,32 @@
+### 12. index.js (2 spans)
+
+| Rule | Result |
+|------|--------|
+| NDS-003 | PASS — span names `commit_story.journal.handle_summarize` and `commit_story.cli.main` use consistent dotted snake_case notation, no PII or dynamic values embedded in the span name itself. |
+| API-001 | PASS — `tracer.startActiveSpan(name, async (span) => {...})` used for both spans; correct `@opentelemetry/api` imports (`trace`, `SpanStatusCode`); one module-level `const tracer = trace.getTracer('commit-story')`. |
+| NDS-006 | PASS — instrumentation additions are confined to span creation/attribute/error-recording calls; no unrelated code motion. All original logic (arg parsing, subcommand routing, skip conditions, auto-summarize trigger) preserved verbatim. |
+| NDS-004 | PASS — `handleSummarize` still returns `EXIT_SUCCESS`/`EXIT_ERROR` per the original branching; `main` still returns `EXIT_SUCCESS`/`EXIT_ERROR`/`EXIT_SKIPPED` per the original branching. No return-shape changes. |
+| NDS-007 | PASS — outer catches in both `handleSummarize` and `main` correctly add `span.recordException(error)` + `span.setStatus({code: SpanStatusCode.ERROR})` before rethrowing. The inner `try/catch` around `triggerAutoSummaries` in `main` is correctly left untouched (no recordException/setStatus) since it logs a warning and does not rethrow — graceful-degradation catch preserved. |
+| COV-001 | PASS — both exported entry points (`handleSummarize`, `main`) got spans. |
+| COV-003 | PASS — both spans use try/catch/finally with `span.end()` in `finally`, and standard error recording on the outer catch. |
+| COV-004 | PASS — 6 synchronous, unexported utility functions (`parseArgs`, `showHelp`, `isGitRepository`, `isValidCommitRef`, `validateEnvironment`, `getPreviousCommitTime`) correctly flagged with 0 spans, all legitimately exempt per RST-001. |
+| COV-005 | PASS — `main` carries 2 attributes (`vcs.ref.head.revision`, `commit_story.journal.file_path`); `handleSummarize` carries up to 5 depending on branch (`commit_story.summary.force`, `commit_story.summary.mode`, mode-specific generated/failed counts, and `commit_story.summary.dates_requested` in the daily branch). Both spans clear the ≥1 meaningful-attribute bar. |
+| RST-001 | PASS — the 6 sync helpers above are correctly left unwrapped (none contain awaited I/O beyond synchronous `execFileSync` wrapped in try/catch). |
+| RST-004 | PASS — none of the 6 sync helpers carry an `export` keyword; correctly left unspanned. |
+| SCH-001 | PASS — 2 new span names registered as extensions (`span.commit_story.journal.handle_summarize`, `span.commit_story.cli.main`), matching the log's "Schema extensions" block exactly; no collision with existing registered spans. |
+| SCH-002 | PASS — `commit_story.summary.mode` is a genuinely new concept (which of weekly/monthly/daily was invoked), distinct from the pre-existing `week_label`/`month_label` single-item-label attributes; no semantic duplicate introduced. |
+| SCH-003 | PASS — verified every `setAttribute` call against the registry: `commit_story.summary.force` (bool ← `parsed.force`, native boolean), `commit_story.summary.mode` (string ← literal), `commit_story.summary.{weeks,months,days}_generated_count` and `_failed_count` (int ← `result.generated.length` / `result.failed.length`, native numbers — **not** `String()`-cast, unlike the coercion bug found in `summarize.js`/`summary-detector.js`/`auto-summarize.js` in this same run), `commit_story.summary.dates_requested` (string ← `parsed.dates.join(',')`), `vcs.ref.head.revision` (string ref), `commit_story.journal.file_path` (string ← sanitized `savedPath`). All types match their registry declarations exactly. |
+| CDQ-001 | PASS — single `finally { span.end(); }` per span; no double-end paths found across any return branch. |
+| CDQ-002 | PASS — single `const tracer = trace.getTracer('commit-story')` at module scope, reused for both spans. |
+| CDQ-003 | PASS — standard `span.recordException(error)` + `span.setStatus({code: SpanStatusCode.ERROR})` pattern in both outer catches, before rethrow. |
+| CDQ-005 | PASS — all logging goes through `logger.*`, no `console.log`; attribute values are bounded (booleans, ints, short literals, a comma-joined date-list string, a single sanitized filename). |
+| CDQ-006 | PASS — `isRecording()` guards are applied specifically to the two attributes requiring non-trivial computation (`dates_requested` via `.join(',')`, `file_path` via `.split(/[\/]/).filter(Boolean).pop()`), while trivial direct-value sets (`force`, `mode`, the six count attributes, `vcs.ref.head.revision`) are set unguarded — consistent with the guard-only-nontrivial-computation convention used elsewhere in this run. |
+| CDQ-007 | PASS — the sole call site for `commit_story.journal.file_path` is sanitized via `.split(/[\/]/).filter(Boolean).pop() ?? ''`, applied consistently at the only site where this attribute is set (1/1) — unlike `summary-manager.js` in this same run, which sanitized 3/7 sites but shipped 4 raw ones. `vcs.ref.head.revision` is a git ref/SHA, not a filesystem path, so it is correctly exempt from this rule. |
+
+**Failures**: None — full PASS across all 20 rules in the table above.
+
+**Note on the CDQ-007 sanitization tradeoff**: the agent's own instrumentation report flags internal deliberation over this call — the registry's own example for `commit_story.journal.file_path` is a full relative path, but the agent chose to strip to bare filename, reasoning that any non-`file.*`-prefixed path-shaped attribute must be sanitized. This is stricter than the schema's own documented example and loses directory context, but does not violate the rule as written — worth flagging as a design tension for future schema/rule reconciliation, not a scoring failure.
+
+**Note on numeric-count attributes**: this file reuses `days_generated_count`/`days_failed_count`, `weeks_generated_count`/`weeks_failed_count`, and `months_generated_count`/`months_failed_count` — all six are registry `type: int` and all six are set from native JS numbers, never from `String(...)`-cast values. This file does **not** exhibit the int-typed-key-set-via-`String()` coercion bug found in `summarize.js`, `summary-detector.js`, and `auto-summarize.js` in this same run.
+
+**Datadog trace supplement**: Not queried — Datadog MCP tools were unavailable in this subagent's session. Static code review above is complete and sufficient for scoring.
