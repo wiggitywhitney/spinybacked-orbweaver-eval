@@ -281,7 +281,9 @@ The **evaluation execution branch** created by `/prd-start` from main **never me
 
   **Completed** 2026-09-17: `baseline-comparison.md` written — run-28 ties run-27's series-low 21/25 but via an inverted dimension composition (COV recovers to 5/5, CDQ drops to a new series-low 5/7 including the first-ever CDQ-006 failure). Spans tie the 48 all-time record despite one fewer committed file. IS hits a fourth consecutive 100/100 (longest streak in the series). Cost drops to $7.23 (-23.1% vs run-27), the lowest among IS-scored runs. Score projection validation confirms RUN27-1 (COV-003) fully resolved; RUN27-2, RUN27-3, RUN27-4 all landed as partial progress rather than clean fixes. RUN27-5 does not recur — no third instance found.
 
-- [ ] **Update root README** — Add a row for run-28 to the run history table (quality, gates, files, spans, cost, push/PR, IS score). Update the "next run" sentence to reference run-29 and its primary goals.
+- [x] **Update root README** — Add a row for run-28 to the run history table (quality, gates, files, spans, cost, push/PR, IS score). Update the "next run" sentence to reference run-29 and its primary goals.
+
+  **Completed** 2026-09-18: Added run-28 row (21/25 84%, 5/5 gates, 12+1p files, 48 spans, $7.23, PR #95 merged, 100/100 IS) to the run history table in `README.md`. Replaced the "Run-28 is next" pointer with a run-29 pointer covering the residual CDQ-007 raw-path gap at `summary-manager.js` (4 of 7 sites), the widened SCH-003 pattern (14 occurrences across 3 files), the new CDQ-006 guard-coverage failure, and the PII regression in `git-collector.js`/`context-integrator.js`.
 
 - [ ] **Actionable fix output** — Primary handoff deliverable.
 

@@ -105,10 +105,11 @@ spinybacked-orbweaver-eval/
 | 25 | 24/25 (96%) | 5/5 | 13+1p | 47 | $7.38 | YES | **100/100** |
 | 26 | 23/25 (92%) | 5/5 | 14 | 41 | $11.15 | YES | 100/100 |
 | 27 | 21/25 (84%) | 5/5 | 13+1p | 48 | $9.40 | YES | 100/100 |
+| 28 | 21/25 (84%) | 5/5 | 12+1p | 48 | $7.23 | YES | **100/100** |
 
 Files column notation: plain count = committed files; `+Np` = N partial files (instrumentation started, not fully committed); `+Nf` = N files rolled back after a checkpoint test failure. Cost column: `~` prefix indicates an estimated/derived cost (early runs predating direct cost reporting in the tool); unprefixed values are directly reported by spiny-orb. Run-22 was never executed (skipped in the run sequence).
 
-**Run-28 is next** — the widened CDQ-007 raw-path finding (missing `basename()` import, now 7 modules and 30 call sites instead of run-26's 1) and the SCH-003 `String()`-vs-`int` pattern's spread to `git-collector.js` and `summary-detector.js`. The `summary-manager.js` COV-003 partial-commit recurrence and the `summarize.js` SCH-002 key-meaning mismatch are already fixed as of 2026-09-16 (spiny-orb PR #1058) and should not recur.
+**Run-29 is next** — the residual CDQ-007 raw-path gap at `summary-manager.js` (4 of its 7 `file_path` call sites still unsanitized, despite the split/filter/pop fallback working correctly in 6 of the 7 originally affected files) and the widened SCH-003 `String()`-vs-`int` mismatch (14 occurrences across 3 originating files: `summarize.js`, `summary-detector.js`, `auto-summarize.js`). New this run: a CDQ-006 guard-coverage failure at `summary-manager.js` (`isRecording()` applied to only 3 of ~24 `setAttribute` calls) and a PII regression — `commit_story.commit.author` (a raw person's name) reappearing in `git-collector.js` and `context-integrator.js` after being fixed in run-27.
 
 Full run-by-run analysis: [`evaluation/javascript/commit-story-v2/`](evaluation/javascript/commit-story-v2/)
 
