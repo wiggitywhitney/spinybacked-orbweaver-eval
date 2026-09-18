@@ -24,7 +24,7 @@ Self-contained handoff from evaluation run-28 to the spiny-orb team.
 | API | 3/3 (100%) | 3/3 (100%) | — | — |
 | SCH | 2/4 (50%) | 2/4 (50%) | — (footprint widened 2→5 files) | SCH-002: summarize.js; SCH-003: summarize.js, summary-detector.js, auto-summarize.js, git-collector.js, summary-manager.js |
 | CDQ | **5/7 (71%)** | 6/7 (86%) | **-15pp** | CDQ-006: summary-manager.js (new); CDQ-007: git-collector.js, context-integrator.js, summary-manager.js |
-| **Total** | **21/25 (84%)** | **21/25 (84%)** | **—** | **6 rule-level failures across 5 files, wider than run-27's 4/2 shape** |
+| **Total** | **21/25 (84%)** | **21/25 (84%)** | **—** | **SCH-003+CDQ-006 subset: 6 file-level findings across 5 files, wider than run-27's 4/2 shape for those two rules. Full failure list (also includes SCH-002 and CDQ-007) is in §3.** |
 | **Gates** | **5/5** | **5/5** | — | — |
 | **Files** | **12 + 1 partial** | **13 + 1 partial** | **-1 committed** | summarize.js |
 | **Cost** | **$7.23** | $9.40 | **-$2.17 (-23.1%)** | — |
