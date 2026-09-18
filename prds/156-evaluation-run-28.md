@@ -227,7 +227,7 @@ The **evaluation execution branch** created by `/prd-start` from main **never me
   Style reference: `Read docs/templates/eval-run-style-reference/pr-evaluation.md`
   PR: Find the URL in `evaluation/javascript/commit-story-v2/run-28/run-summary.md`.
 
-  **Completed** 2026-09-17: Reviewer Utility Score 2.25/5 (down from run-27's 3.25/5). The Per-File Results table is accurate (an improvement over run-27's fabricated "12/14" function count). But the Advisory Findings section regressed sharply — 6 of 13 line-items (46%) are false positives, mostly CDQ-007 firing on plain integer-count attributes across 5 files, some pointing at entirely wrong line numbers. All 6 of this run's SCH-003/CDQ-006 canonical failures (14 occurrences) are completely absent from Advisory Findings — the PR's own generated content gives a reviewer no signal any of them exist.
+  **Completed** 2026-09-17: Reviewer Utility Score 2.25/5 (down from run-27's 3.25/5). The Per-File Results table is accurate (an improvement over run-27's fabricated "12/14" function count). But the Advisory Findings section regressed sharply — 6 of 13 line-items (46%) are false positives, mostly CDQ-007 firing on plain integer-count attributes across 5 files, some pointing at entirely wrong line numbers. All 6 of this run's SCH-003/CDQ-006 canonical failures (5 SCH-003 rule findings across 29 call sites — 14 across 3 files, 14 on `summary_saved`, 1 on `is_merge` — plus 1 CDQ-006 finding) are completely absent from Advisory Findings — the PR's own generated content gives a reviewer no signal any of them exist.
 
 - [x] **Rubric scoring** — Synthesize dimension-level scores.
 
