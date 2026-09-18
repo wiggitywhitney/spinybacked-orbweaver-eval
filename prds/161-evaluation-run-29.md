@@ -162,7 +162,7 @@ The **evaluation execution branch** created by `/prd-start` from main **never me
   18. Rebuild spiny-orb from **main**: `cd ~/Documents/Repositories/spinybacked-orbweaver && npm install && npm run build`.
   19. Record version and findings status.
   20. **README check**: Verify `README.md` on main has a row for run-28.
-  21. **Datadog pre-run health check**: Use `search_datadog_spans` with `service:commit-story` (last 7 days). If no results, check Datadog Agent status. Do not start the eval run until spans appear.
+  21. **Datadog pre-run health check**: Use `search_datadog_spans` with `service:commit-story` (last 7 days, extending to 30 days if empty, per `evaluation/trace-capture-protocol.md`'s organic-target window). If still no results after both windows, check Datadog Agent status, record the absence, and proceed with the eval run rather than blocking indefinitely — consistent with the protocol's own "do not block evaluation" fallback for a missing pre-run trace.
   22. **Instrument branch confirmation**: Check `vcs.ref.head.revision` on recent `commit_story.journal.save_journal_entry` spans (note: NOT `git.commit.sha` — per D-10 in PRD #156). The run-28 instrument branch was `spiny-orb/instrument-1789648132789` — to get its HEAD SHA: `git -C ~/Documents/Repositories/commit-story-v2 rev-parse spiny-orb/instrument-1789648132789`.
   23. **Capture trace artifact** (organic target): Read `evaluation/trace-capture-protocol.md`. Use `search_datadog_spans` with `service:commit-story` (last 7 days). From the most recent complete journal generation run, record the UUID as `pre_run_service.instance.id`. Write `evaluation/javascript/commit-story-v2/run-29/trace-artifact.md` with this field plus a `query (pre-run instance, main-branch evidence)` field, matching run-28's `trace-artifact.md` format.
   24. Append observations to `evaluation/javascript/commit-story-v2/run-29/lessons-for-prd30.md`.
@@ -264,7 +264,7 @@ The **evaluation execution branch** created by `/prd-start` from main **never me
 
 - [ ] **IS scoring run** — Follow `docs/language-extension-plan.md` step 9. Full protocol in `evaluation/is/README.md`.
 
-  **Note**: SPA-001 threshold for commit-story-v2 is 55 (set by PR #142). SPA-002 is de-facto resolved for commit-story-v2 (`SimpleSpanProcessor` + `shutdownAndExit` override). IS 100/100 in runs 25 through 28 is the baseline. If IS returns <100/100 in run-29, check for a **different** rule failure — do NOT re-investigate SPA-002.
+  **Note**: SPA-001 threshold for commit-story-v2 is 55 (set by PR #142). SPA-002 is de-facto resolved for commit-story-v2 (`SimpleSpanProcessor` + `shutdownAndExit` override) — this is an architectural conclusion already validated across runs 25–28, not something to re-derive from scratch. IS 100/100 in runs 25 through 28 is the baseline. If IS returns <100/100 in run-29: check the scorer's own rule-level results first. If SPA-002 itself is reported as the failing rule, or Datadog shows an orphan span with an unknown `parentSpanId`, investigate it normally — the architectural conclusion doesn't override live evidence of an actual SPA-002 failure. Only skip re-investigating SPA-002 specifically when the score drop is attributable to a **different**, confirmed rule failure.
 
   **Note on Datadog Agent**: Do NOT run `datadog-agent stop/start`. The Agent's embedded OTLP HTTP receiver is permanently disabled (port 4318 owned by `otelcol-contrib`).
 
@@ -274,7 +274,7 @@ The **evaluation execution branch** created by `/prd-start` from main **never me
      ```bash
      vals exec -f ~/Documents/Repositories/spinybacked-orbweaver-eval/.vals.yaml -- ~/.local/bin/otelcol-contrib --config ~/Documents/Repositories/spinybacked-orbweaver-eval/evaluation/is/otelcol-config.yaml > /tmp/otelcol.log 2>&1 &
      COLLECTOR_PID=$!
-     timeout 30 bash -c 'until lsof -i :4318 >/dev/null 2>&1; do sleep 0.5; done' || { kill "$COLLECTOR_PID" 2>/dev/null; exit 1; }
+     deadline=$((SECONDS + 30)); until lsof -sTCP:LISTEN -iTCP:4318 >/dev/null 2>&1; do [ "$SECONDS" -ge "$deadline" ] && { kill "$COLLECTOR_PID" 2>/dev/null; exit 1; }; sleep 0.5; done
      ```
   2. **Claude checks out** instrument files and runs the app from `~/Documents/Repositories/commit-story-v2`:
      ```bash

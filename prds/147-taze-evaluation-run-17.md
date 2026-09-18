@@ -134,7 +134,7 @@ The eval execution branch (`feature/prd-147-taze-evaluation-run-17`) **never mer
 
 - [ ] **Evaluation run-17** — Whitney runs `spiny-orb instrument` in her terminal. The `debug-dumps/` directory must exist before running (created in skeleton step above).
 
-  **Hard prerequisite check** (cascaded from commit-story-v2 run-28, D-14): confirm the skeleton documents and pre-run verification milestones are both fully complete — not just started — before handing Whitney the instrument command. Running out of order forecloses pre-run-only steps (Datadog pre-run health check, push-auth dry-run, pre-run trace capture) permanently.
+  **Hard prerequisite check** (cascaded from commit-story-v2 run-28, D-14): confirm the skeleton documents and pre-run verification milestones are both fully complete — not just started — before handing Whitney the instrument command. Running out of order forecloses pre-run-only steps (Datadog pre-run health check, push-auth dry-run) permanently. Note: unlike commit-story-v2 (organic target), taze has no pre-run trace capture step — its trace artifact is captured in step 9.5, after IS scoring, so that step is unaffected by this milestone's ordering.
 
   **Fix-verification claims** (cascaded from commit-story-v2 run-28): do not conclude "no recurrence" of a prior-run finding from the log's Schema Extensions/Agent Notes prose alone — those describe *new* extensions and stated reasoning, not every attribute-setting call on an *existing* key. Label any fix-verification claim in `run-summary.md`/`spiny-orb-findings.md` as provisional pending per-file evaluation.
 
