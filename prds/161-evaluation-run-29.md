@@ -159,7 +159,7 @@ The **evaluation execution branch** created by `/prd-start` from main **never me
   15. **Target repo readiness** (commit-story-v2): Verify the target checkout is on `main`, clean working tree, `spiny-orb.yaml` and `semconv/` exist.
   16. **Push auth stability check**: Verify token still works (dry-run push to non-existent branch).
   17. **File inventory**: Count `.js` files in commit-story-v2's `src/` directory. Pull the expected count from run-28's own `run-summary.md` rather than carrying forward a hardcoded number.
-  18. Rebuild spiny-orb from **main**: `cd ~/Documents/Repositories/spinybacked-orbweaver && npm install && npm run build`.
+  18. Rebuild spiny-orb from **main**: `cd ~/Documents/Repositories/spinybacked-orbweaver && git status --short && git checkout main && git fetch origin main && git merge --ff-only origin/main`. If the working tree isn't clean, or the checkout/fetch/fast-forward fails for any reason, stop and resolve it — do not build from an unverified or stale checkout. Only once verified: `npm install && npm run build`.
   19. Record version and findings status.
   20. **README check**: Verify `README.md` on main has a row for run-28.
   21. **Datadog pre-run health check**: Use `search_datadog_spans` with `service:commit-story` (last 7 days, extending to 30 days if empty, per `evaluation/trace-capture-protocol.md`'s organic-target window). If still no results after both windows, check Datadog Agent status, record the absence, and proceed with the eval run rather than blocking indefinitely — consistent with the protocol's own "do not block evaluation" fallback for a missing pre-run trace.
