@@ -168,7 +168,7 @@ The feature branch for this PRD (`feature/prd-100-evaluation-run-5-release-it`) 
   **Cascaded from commit-story-v2 run-28** — apply all of the following during this milestone:
   - **Trace supplementation ownership**: delegated per-file evaluation subagents do not reliably have Datadog MCP access even when the coordinating session does. Treat trace supplementation as the coordinating session's own responsibility, scheduled as a separate pass after all batches return, not assumed inline per subagent.
   - **PII redaction on citation**: any live-trace value pulled in as evidence for a PII-adjacent finding must be redacted in the same edit that adds it to a document, never as a follow-up cleanup step.
-  - **Rule-ID label audit**: before any reconciliation pass, spot-check that each per-file section's row content actually matches its stated rule ID's canonical definition, not just that the verdict is defensible.
+  - **Rule-ID label audit**: before any reconciliation pass, check every per-file section's row against its stated rule ID's canonical definition — not a sample — since one unchecked row can carry an incorrect rule ID undetected.
   - **Exemption-scope pre-commitment**: where a rubric rule's exemption conditions are ambiguous, write down the chosen interpretation explicitly before per-file evaluation starts, and apply it uniformly across every section in this run.
   - **Fix-verification confirmation**: per-file evaluation is the authoritative check for whether a prior-run finding actually recurred — it supersedes, and may correct, `run-summary.md`'s provisional fix-verification claims.
 
