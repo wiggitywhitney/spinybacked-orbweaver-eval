@@ -119,7 +119,7 @@
 | Push/PR | **AUTO (#95)** | AUTO (#94) | MANUAL (#91) | AUTO (#86) |
 | IS | **100/100** | 100/100 | 100/100 | 100/100 |
 
-**Q×F = 10.08** (21/25 × 12 committed files). Down from run-27's 10.92 — the quality percentage held flat (84%) but the committed-file count dropped by one (12 vs 13), since run-28 has one fewer file overall (32 vs run-27's implied count) with the same 1 partial. This continues the pattern of Q×F tracking file-count changes more than quality-percentage changes when the percentage itself doesn't move.
+**Q×F = 10.08** (21/25 × 12 committed files). Down from run-27's 10.92 — the quality percentage held flat (84%) but the committed-file count dropped by one (12 vs 13). The source file inventory itself is unchanged (32 files in both runs); the drop is 13 committed → 12 committed, with the same 1 partial in each run — not a smaller inventory. This continues the pattern of Q×F tracking file-count changes more than quality-percentage changes when the percentage itself doesn't move.
 
 **Total spans ties run-27 and run-24's all-time record of 48**, despite one fewer committed file — `summary-manager.js` alone contributes 9 spans (all committed cleanly this run, vs. 7 in run-27's partial state) and `summary-detector.js` contributes another 9, more than offsetting the missing file's spans.
 
