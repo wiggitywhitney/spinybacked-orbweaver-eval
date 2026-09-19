@@ -462,7 +462,7 @@ D6 explicitly requires a Flask- or FastAPI-based target, specifically to exercis
 | I/O types | Database (PostgreSQL via asyncpg + aiosql, raw SQL via `pypika`), async route handlers, JWT auth |
 | Test suite | pytest + pytest-asyncio, requires a live Postgres for full pass (schema via Alembic) |
 
-**Verification result:** Passes cleanly. **90 passed, 0 failed, 100% coverage, identical across 3 runs.** Two setup steps are required and must be documented in the Type C PRD for this target:
+**Verification result:** Passes cleanly. **90 passed, 0 failed, 100% coverage, identical across 3 runs.** Three setup steps are required and must be documented in the Type C PRD for this target:
 1. Install from the exact `poetry.lock` pin set (99 packages), not from `pyproject.toml`'s caret ranges — resolving from ranges pulls a newer `pluggy` that breaks `pytest-cov`'s hook registration under this project's `filterwarnings = "error"` pytest config, and a newer `aiosql` that changed its SQL-file parsing rules. Extract locked pins with a small script parsing `poetry.lock`'s `[[package]]` blocks (name + version), or use `poetry install` directly if `poetry` is available.
 2. Run `alembic upgrade head` against the target Postgres before the test suite — the app's startup lifespan opens a real DB connection and `tests/conftest.py`'s `FakeAsyncPGPool` only fakes pool acquisition, not schema existence. Without this, tests fail with `asyncpg.exceptions.UndefinedTableError: relation "users" does not exist`.
 3. Postgres connection strings must use the `postgresql://` scheme, not the legacy `postgres://` — SQLAlchemy's dialect registry doesn't recognize the old scheme.
