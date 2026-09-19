@@ -1,0 +1,44 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git *)",
+      "Bash(git -C *)",
+      "Bash(grep *)",
+      "Bash(grep -A *)",
+      "Bash(grep -B *)",
+      "Bash(grep -E *)",
+      "Bash(grep -n *)",
+      "Bash(grep -r *)",
+      "Bash(grep -rn *)",
+      "Bash(wc -l *)",
+      "Bash(npm --prefix * install *)",
+      "Bash(npm --prefix * run build)",
+      "Bash(npm --prefix * run build *)",
+      "Bash(colima status *)",
+      "Bash(datadog-agent stop)",
+      "Bash(datadog-agent start)",
+      "Bash(docker run *)",
+      "Bash(docker stop *)",
+      "Bash(docker ps *)",
+      "Bash(otelcol-contrib *)",
+      "Bash(node evaluation/is/score-is.js *)",
+      "Bash(coderabbit review *)",
+      "Bash(vals exec *)"
+    ],
+    "ask": [
+      "Bash(git push --force*)",
+      "Bash(git push -f *)",
+      "Bash(git -C * push --force*)",
+      "Bash(git -C * push -f *)",
+      "Bash(git reset --hard*)",
+      "Bash(git -C * reset --hard*)",
+      "Bash(git clean -f*)",
+      "Bash(git -C * clean -f*)",
+      "Bash(git branch -D*)",
+      "Bash(git -C * branch -D*)",
+      "Bash(git checkout .)",
+      "Bash(git restore .)",
+      "Bash(vals exec * -- bash -c *)"
+    ]
+  }
+}
