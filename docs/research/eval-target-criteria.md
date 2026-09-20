@@ -2,8 +2,8 @@
 
 **Created:** 2026-04-11
 **Research basis:** [eval-target-selection-research.md](eval-target-selection-research.md)
-**Status:** Revised 2026-09-19 (third revision) — refreshed Python candidate research against PRD #373's D6 milestone, which requires a Flask- or FastAPI-based target; none of the original three Python CLI candidates satisfy this literally. Added and locally verified `fastapi-realworld-example-app`.
-**Last verified against spiny-orb main:** 2026-04-21 (post-PRD #483 advisory rules audit). Python candidate section separately re-verified against live GitHub state and local install/test runs on 2026-09-19 (see §2.3 and §2.3a).
+**Status:** Revised 2026-09-20 (third revision) — refreshed Python candidate research against PRD #373's D6 milestone, which requires a Flask- or FastAPI-based target; none of the original three Python CLI candidates satisfy this literally. Added and locally verified `fastapi-realworld-example-app`.
+**Last verified against spiny-orb main:** 2026-04-21 (post-PRD #483 advisory rules audit). Python candidate section separately re-verified against live GitHub state and local install/test runs on 2026-09-19, with a file-count methodology correction and CodeRabbit-flagged fixes on 2026-09-20 (see §2.3 and §2.3a).
 
 > **Rule definitions and OTel spec alignment**: the canonical reference is [`docs/rules-reference.md`](https://github.com/wiggitywhitney/spinybacked-orbweaver/blob/main/docs/rules-reference.md) in the spiny-orb repo. This document (`eval-target-criteria.md`) focuses on target-selection criteria — which rules fire against which target-repo structures. For what each rule checks and its OTel spec relationship, consult the canonical reference.
 
@@ -336,7 +336,7 @@ The 7 universal rules (NDS-001, NDS-003, API-001, API-002, API-004, NDS-006, CDQ
 | COV-004 Long-running/async | ✓ prompt_toolkit async | ✓ prompt_toolkit async | ✓ I/O throughout |
 | COV-005 Domain-specific attrs | ≈ | ≈ | ≈ |
 | **COV-006 Auto-instr preferred** | **🔍 unverified** (PyMySQL imported; Python provider has no AUTO_INSTRUMENTED_OPERATIONS yet) | **🔍 unverified** (redis+click imported; Python provider has no AUTO_INSTRUMENTED_OPERATIONS yet) | **🔍 unverified** (jinja2 imported; Python provider has no AUTO_INSTRUMENTED_OPERATIONS yet) |
-| RST-001 No utility spans | ✓ constants/lexer/style | ✓ renders/style/lexer/warning | ✓ 51 files many utility |
+| RST-001 No utility spans | ✓ constants/lexer/style | ✓ renders/style/lexer/warning | ✓ 52 files many utility |
 | RST-002 No accessor spans | 🔍 | 🔍 | 🔍 |
 | RST-003 No thin-wrapper spans | 🔍 | 🔍 | 🔍 |
 | RST-004 No internal spans | ✓ | ✓ | ✓ |
