@@ -222,6 +222,8 @@ Evaluation artifacts live at `evaluation/content-manager/run-1/` in this repo (s
   1. Run the cross-document audit agent to verify consistency across all run-1 evaluation artifacts.
 
   **Handoff-confirmation depth**: When Whitney confirms handoff to the spiny-orb team, verify each finding's actual roadmap tier/sequencing (not just that an issue exists with acceptance criteria) against spiny-orb's `docs/ROADMAP.md`. A finding can be correctly filed and triaged while still not being scheduled to land before the next run — state this explicitly rather than treating an expected recurrence as a surprise.
+
+  **Validator vs. agent-behavior maturity** (cascaded from commit-story-v2 run-28, added to template 2026-09-20): when a resolution status rests on a changed outcome (e.g., a violation that used to pass now fails a gate), state explicitly whether the fix worked by catching the agent's mistake (validator/gate improved) or by preventing the agent from making the mistake in the first place (prompt/generation improved).
   2. **Spoken summary**: Provide a spoken summary with: (a) main failures and their categories; (b) root cause vs. symptom for each recommended fix; (c) every-user generalization — how each fix helps any spiny-orb user, not just content-manager.
   3. Print the absolute path: `evaluation/content-manager/run-1/actionable-fix-output.md`.
   4. **Pause.** Do not proceed to the learnings milestone until Whitney confirms she has handed the document to the spiny-orb team.
