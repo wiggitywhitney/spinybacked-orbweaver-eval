@@ -367,7 +367,7 @@ The 7 universal rules (NDS-001, NDS-003, API-001, API-002, API-004, NDS-006, CDQ
 |-----------|-------|
 | License | BSD-3-Clause |
 | Stars | 11,976 (refreshed 2026-09-19) |
-| Source files | **64** Python files in `mycli/` (refreshed 2026-09-19 via GitHub tree API — was 15 at original research time) |
+| Source files | **59** Python files in `mycli/`, excluding `__init__.py` and tests (refreshed 2026-09-20 via GitHub tree API, corrected to match the original counting methodology — was 15 at original research time; an earlier pass of this refresh miscounted 64 by including `__init__.py` files) |
 | I/O types | Database (MySQL via PyMySQL), file R/W (config `~/.myclirc`, query logs, password keyring), terminal (interactive prompt, auto-completion). Newer additions: SSH/kubectl/boundary tunnels (`ssh_tunnel.py`, `kubectl_tunnel.py`, `boundary_tunnel.py`), an LLM integration (`packages/special/llm.py`), and Polars-based output (`packages/polars_completion.py`, `packages/polars_transform.py`) |
 | Auto-instr overlap | `PyMySQL` imported — OTel Python contrib has `opentelemetry-instrumentation-pymysql`; call-site pattern matching unverified (Python provider has no AUTO_INSTRUMENTED_OPERATIONS equivalent yet) |
 | Existing OTel | None confirmed |
@@ -381,7 +381,7 @@ The 7 universal rules (NDS-001, NDS-003, API-001, API-002, API-004, NDS-006, CDQ
 - RST-001: ✓ utility files (constants.py, lexer.py, style.py, clistyle.py)
 - SCH domain: Database query lifecycle (`db.query.text`, `db.operation.name`, `db.system.name`) — maps directly to OTel semantic conventions
 
-**Summary (revised 2026-09-19):** No longer the smallest/fastest candidate — the file count more than quadrupled since original research (15→64), pushing estimated runtime from ~20 min to ~80+ min and well outside the 30-file ideal. Still has the richest DB-instrumentation signal of the three CLI candidates, but iredis is now the better pick on size/runtime grounds. Demoted from first choice.
+**Summary (revised 2026-09-20):** No longer the smallest/fastest candidate — the file count roughly quadrupled since original research (15→59), pushing estimated runtime from ~20 min to ~77 min and well outside the 30-file ideal. Still has the richest DB-instrumentation signal of the three CLI candidates, but iredis is now the better pick on size/runtime grounds. Demoted from first choice.
 
 ---
 
@@ -391,7 +391,7 @@ The 7 universal rules (NDS-001, NDS-003, API-001, API-002, API-004, NDS-006, CDQ
 |-----------|-------|
 | License | BSD-3-Clause |
 | Stars | 2,744 (refreshed 2026-09-19) |
-| Source files | 19 Python files in `iredis/` (refreshed 2026-09-19; was 17 — minimal drift) |
+| Source files | 16 Python files in `iredis/`, excluding `__init__.py` and tests (refreshed 2026-09-20, corrected to match the original counting methodology; was 17 — minimal drift) |
 | I/O types | Network (Redis TCP/IP connections), file R/W (config `~/.iredisrc`, log `~/.iredis.log`), terminal (interactive CLI, autocomplete) |
 | Auto-instr overlap | `redis` and `click` imported — OTel Python contrib has instrumentations for both; call-site pattern matching unverified (Python provider has no AUTO_INSTRUMENTED_OPERATIONS equivalent yet) |
 | Existing OTel | None confirmed |
@@ -405,7 +405,7 @@ The 7 universal rules (NDS-001, NDS-003, API-001, API-002, API-004, NDS-006, CDQ
 - RST-001: ✓ utility files (renders.py, style.py, lexer.py, warning.py)
 - SCH domain: Redis command operations (`redis.command`, `redis.key`, `redis.database.index`) — rich domain-specific schema potential
 
-**Summary (revised 2026-09-19):** 19 files (~25 min runtime), stable size since original research. Two OTel Python contrib overlaps (redis + click). Different domain from mycli (key-value vs relational). **Now the recommended first choice among the CLI candidates** — mycli's file-count growth (15→64) pushed its runtime well past iredis's, and iredis's own footprint barely moved. Lower star count than mycli (2.7k vs 12k) but still well above the 500+ threshold.
+**Summary (revised 2026-09-20):** 16 files (~21 min runtime), stable size since original research. Two OTel Python contrib overlaps (redis + click). Different domain from mycli (key-value vs relational). **Now the recommended first choice among the CLI candidates** — mycli's file-count growth (15→59) pushed its runtime well past iredis's, and iredis's own footprint barely moved. Lower star count than mycli (2.7k vs 12k) but still well above the 500+ threshold.
 
 ---
 
@@ -415,7 +415,7 @@ The 7 universal rules (NDS-001, NDS-003, API-001, API-002, API-004, NDS-006, CDQ
 |-----------|-------|
 | License | MIT |
 | Stars | 3,513 (refreshed 2026-09-19) |
-| Source files | 61 Python files in `commitizen/` (refreshed 2026-09-19; was 51 — moderate growth, excluding `__init__.py` and non-Python files) |
+| Source files | 52 Python files in `commitizen/`, excluding `__init__.py` and non-Python files (refreshed 2026-09-20, corrected to match the original counting methodology; was 51 — essentially flat, not the moderate growth an earlier miscounted pass of this refresh reported) |
 | I/O types | Subprocess (git commands via Python subprocess), file R/W (changelog, version files, config files), template rendering (Jinja2) |
 | Auto-instr overlap | `jinja2` imported — OTel Python contrib has `opentelemetry-instrumentation-jinja2`; call-site pattern matching unverified (Python provider has no AUTO_INSTRUMENTED_OPERATIONS equivalent yet) |
 | Existing OTel | None confirmed |
@@ -428,15 +428,15 @@ The 7 universal rules (NDS-001, NDS-003, API-001, API-002, API-004, NDS-006, CDQ
 - CDQ-003: ✓ git failures, file write errors, config parse errors, version scheme errors
 - SCH domain: Commit lifecycle and versioning (`commit.type`, `version.current`, `version.new`, `tag.name`)
 
-**Caveat:** 61 files (up from 51 at original research time) is significantly above the 30-file ideal. Estimated runtime: ~80 minutes per eval run. Jinja2 is a weaker COV-006 signal than database or Redis drivers (template rendering is less central to OTel than I/O boundaries). Choose only if mycli and iredis both fail their test suites or have blocking issues.
+**Caveat:** 52 files, essentially unchanged from the original 51, is still significantly above the 30-file ideal. Estimated runtime: ~68 minutes per eval run. Jinja2 is a weaker COV-006 signal than database or Redis drivers (template rendering is less central to OTel than I/O boundaries). Choose only if mycli and iredis both fail their test suites or have blocking issues.
 
-**Summary (revised 2026-09-19):** Backup candidate, unchanged ranking. Large and growing file count (51→61) drives long runtime. COV-006 via jinja2 is weaker than database/Redis overlap. MIT license (vs BSD-3 for mycli/iredis) if license matters. Recommended third choice among the CLI candidates.
+**Summary (revised 2026-09-20):** Backup candidate, unchanged ranking. Large file count (51→52, stable) drives long runtime. COV-006 via jinja2 is weaker than database/Redis overlap. MIT license (vs BSD-3 for mycli/iredis) if license matters. Recommended third choice among the CLI candidates.
 
 ---
 
 ### 2.3a Python — Flask/FastAPI candidates (PRD #373 D6 requirement)
 
-D6 explicitly requires a Flask- or FastAPI-based target, specifically to exercise decorator-based route detection (`@app.route`, `@app.get`) for COV-001. Two RealWorld-spec reference implementations were located and locally verified against the mandatory "test suite passes 3× reproducibly" filter (2026-09-19). Both apps are feature-equivalent (Conduit/RealWorld: JWT auth, articles, comments, profiles, tags) with a layered architecture (routes → repositories → DB), giving strong CDQ-001/CDQ-003/COV-002 coverage on top of the COV-001 signal D6 asks for.
+D6 explicitly requires a Flask- or FastAPI-based target, specifically to exercise decorator-based route detection (`@app.route`, `@app.get`) for COV-001. Two RealWorld-spec reference implementations were located and locally verified against the mandatory "test suite passes 3× reproducibly" filter (2026-09-19), both on **Python 3.10.13** — the Python version installed in this verification environment, and the version the pass/fail verdicts below are scoped to. Both apps are feature-equivalent (Conduit/RealWorld: JWT auth, articles, comments, profiles, tags) with a layered architecture (routes → repositories → DB), giving strong CDQ-001/CDQ-003/COV-002 coverage on top of the COV-001 signal D6 asks for.
 
 #### flask-realworld-example-app (gothinkster/flask-realworld-example-app) — **disqualified**
 
@@ -463,7 +463,7 @@ D6 explicitly requires a Flask- or FastAPI-based target, specifically to exercis
 | Test suite | pytest + pytest-asyncio, requires a live Postgres for full pass (schema via Alembic) |
 
 **Verification result:** Passes cleanly. **90 passed, 0 failed, 100% coverage, identical across 3 runs.** Three setup steps are required and must be documented in the Type C PRD for this target:
-1. Install from the exact `poetry.lock` pin set (99 packages), not from `pyproject.toml`'s caret ranges — resolving from ranges pulls a newer `pluggy` that breaks `pytest-cov`'s hook registration under this project's `filterwarnings = "error"` pytest config, and a newer `aiosql` that changed its SQL-file parsing rules. Extract locked pins with a small script parsing `poetry.lock`'s `[[package]]` blocks (name + version), or use `poetry install` directly if `poetry` is available.
+1. Install from the exact `poetry.lock` pin set, not from `pyproject.toml`'s caret ranges — resolving from ranges pulls a newer `pluggy` that breaks `pytest-cov`'s hook registration under this project's `filterwarnings = "error"` pytest config, and a newer `aiosql` that changed its SQL-file parsing rules. **Prefer `poetry install` directly** — it reproduces the lock exactly, including extras, environment markers, and hash verification. This verification used a fallback script that parses `poetry.lock`'s `[[package]]` blocks for name+version only (99 packages) and installs via `pip`; that fallback passed the 3× reproducibility check here, but it does not preserve extras/markers/hashes the way `poetry install` does, so treat it as a documented workaround for environments without `poetry` available, not as an equivalent-by-default method.
 2. Run `alembic upgrade head` against the target Postgres before the test suite — the app's startup lifespan opens a real DB connection and `tests/conftest.py`'s `FakeAsyncPGPool` only fakes pool acquisition, not schema existence. Without this, tests fail with `asyncpg.exceptions.UndefinedTableError: relation "users" does not exist`.
 3. Postgres connection strings must use the `postgresql://` scheme, not the legacy `postgres://` — SQLAlchemy's dialect registry doesn't recognize the old scheme.
 
@@ -625,9 +625,9 @@ IS (Instrumentation Score) scoring requires the target repo to emit OpenTelemetr
 | **TS** | taze | 33 | 🔍 unverified | ~44 min | **Preferred** — best I/O diversity |
 | **TS** | changesets | 25 | 🔍 likely ✗ | ~33 min | Runner-up |
 | **TS** | wireit | 62 | 🔍 likely ✗ | ~83 min | Backup — high runtime |
-| **Python (CLI)** | mycli | 64 (was 15) | 🔍 unverified | ~85 min | Demoted — file count quadrupled since original research |
-| **Python (CLI)** | iredis | 19 | 🔍 unverified | ~25 min | **Preferred among CLIs** — most stable size, strongest import signal (redis+click) |
-| **Python (CLI)** | commitizen | 61 (was 51) | 🔍 unverified | ~80 min | Backup — high runtime |
+| **Python (CLI)** | mycli | 59 (was 15) | 🔍 unverified | ~77 min | Demoted — file count roughly quadrupled since original research |
+| **Python (CLI)** | iredis | 16 (was 17) | 🔍 unverified | ~21 min | **Preferred among CLIs** — most stable size, strongest import signal (redis+click) |
+| **Python (CLI)** | commitizen | 52 (was 51) | 🔍 unverified | ~68 min | Backup — high runtime, essentially flat since original research |
 | **Python (Flask/FastAPI, D6)** | flask-realworld-example-app | 22 | N/A | N/A | **Disqualified** — pinned SQLAlchemy 1.1.9 incompatible with Python 3.10+ |
 | **Python (Flask/FastAPI, D6)** | fastapi-realworld-example-app | 56 | 🔍 unverified | ~70 min | **Verified, recommended for D6** — 90/90 tests pass reproducibly with locked deps + Alembic migration |
 | **Go** | mods | 32 | 🔍 unverified | ~43 min | **Preferred** — most I/O-diverse |
