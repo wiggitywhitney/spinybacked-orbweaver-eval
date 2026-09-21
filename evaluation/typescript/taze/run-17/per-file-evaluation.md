@@ -5,7 +5,7 @@
 **Branch**: spiny-orb/instrument-1789998344404
 **Rubric**: `~/Documents/Repositories/spinybacked-orbweaver/docs/research/evaluation-rubric.md`
 **Exemption scope**: `evaluation/typescript/taze/run-17/exemption-scope.md`
-**Files to evaluate**: 13 committed with spans + correct-skip verification pass
+**Files evaluated**: 13 committed with spans (full rubric scoring) + 20 correct-skip pre-scan verification
 
 **Primary goals for this run:**
 1. COV-005 (packument.ts): `taze.package.latest_version` recovery on both fetch spans
@@ -19,7 +19,14 @@
 
 <!-- BATCH 1 COMPLETE: files 1-5 (checkGlobal.ts, check/index.ts, interactive.ts, config.ts, bunWorkspaces.ts) -->
 <!-- BATCH 2 COMPLETE: files 6-10 (packageJson.ts, packageYaml.ts, packages.ts, pnpmWorkspaces.ts, resolves.ts) -->
-<!-- PENDING: files 11-13 (yarnWorkspaces.ts, api/check.ts, packument.ts) -->
+<!-- BATCH 3 COMPLETE: files 11-13 (yarnWorkspaces.ts, api/check.ts, packument.ts) -->
+<!-- ALL 13 COMMITTED FILES EVALUATED. -->
+
+<!-- RECONCILIATION PASS COMPLETE (2026-09-21):
+1. CDQ-007 on raw filesystem paths: RESOLVED as PASS across all files. The rubric's literal CDQ-007 mechanism (evaluation-rubric.md line 503) covers only object spreads, JSON.stringify of req/response objects, unbounded arrays, and PII-pattern keys (email/password/ssn/phone/creditCard/address/*_name) — it does not cover raw filesystem paths. packages.ts and yarnWorkspaces.ts had this right; packageJson.ts's and packageYaml.ts's FAIL verdicts were corrected to PASS in their per-file sections above (search "RECONCILED" in this file). The underlying path-sanitization regressions vs. run-16 are still noted as quality observations, just not scored as CDQ-007 rubric violations.
+2. SCH-001 on renamed previously-registered spans: RESOLVED as PASS (naming-quality fallback) across all files. SCH-001's mechanism (evaluation-rubric.md line 406) compares against the currently resolved registry, not a prior run's baseline — and run-16's schema extensions never merged to main (eval branches don't merge per this project's convention), so they aren't part of what run-17 is compared against. resolves.ts's original FAIL verdict (comparing against run-16's baseline) was corrected to PASS in its per-file section above, matching how every other file in this run treated the same cross-run naming-drift pattern.
+-->
+
 
 ### 1. src/commands/check/checkGlobal.ts (4 spans)
 
@@ -261,9 +268,9 @@
 | CDQ-003 | PASS — both catch blocks use `recordException` + `setStatus({ code: SpanStatusCode.ERROR })`, not ad-hoc attributes |
 | CDQ-005 | PASS — `startActiveSpan` callback pattern; context propagation automatic |
 | CDQ-006 | PASS — `taze.io.file_path`'s method-chain computation (`filepath.split(...).filter(...).pop()`) is correctly wrapped in `if (span.isRecording())` (lines 39-41); `String(raw.name)` is an exempt trivial conversion (line 64); all other `setAttribute` calls are plain property/variable reads needing no guard. Note: the instrumentation.md notes text claims "CDQ-006 isRecording() guard omitted because this is a COV-001 entry point span" — that statement is inconsistent with the actual code, which does apply the guard; the code is correct, only the rationale doc is wrong |
-| CDQ-007 | **FAIL (partial)** — `taze.write.file_path` is set to `pkg.filepath` (line 98), the full absolute resolved filesystem path, not the sanitized basename or relative path used elsewhere in this same file. This regresses from run-16, where the identical attribute key was populated from `pkg.relative`. The agent explicitly reasoned about and fixed this exact class of problem for `taze.io.file_path` on the load side ("to avoid exposing absolute developer-environment paths as high-cardinality attribute values") but did not apply the same fix to the write side in the same file |
+| CDQ-007 | **RECONCILED: PASS** — `taze.write.file_path` is set to `pkg.filepath` (line 98), the full absolute resolved filesystem path, not the sanitized basename or relative path used elsewhere in this same file. Originally scored FAIL (partial) by this file's evaluator; corrected on reconciliation because CDQ-007's literal rubric mechanism (object spreads, `JSON.stringify` of req/response objects, unbounded arrays, PII-pattern keys) does not cover raw filesystem paths at all — confirmed against `packages.ts` and `yarnWorkspaces.ts` in this same run, which read the identical pattern as PASS. Still a genuine regression from run-16 (which used the relative `pkg.relative` for this key) and an internal inconsistency within this file (the load side is sanitized, the write side isn't) — worth flagging as a quality note, just not a rubric-literal CDQ-007 violation |
 
-**Failures**: CDQ-007 partial fail — `writePackageJSON`'s `taze.write.file_path` (line 98) is set to the absolute, unsanitized `pkg.filepath`, exposing a developer-machine-specific path as a high-cardinality attribute value. This is a regression from run-16 (which used the relative `pkg.relative` for the same key) and an internal inconsistency within run-17's own file, since `loadPackageJSON`'s `taze.io.file_path` was correctly sanitized to a basename just a few lines earlier in the same commit.
+**Failures**: None after reconciliation. `writePackageJSON`'s `taze.write.file_path` (line 98) uses the absolute, unsanitized `pkg.filepath` where the load side of this same file uses a sanitized basename and run-16 used a relative path for this exact key — a genuine internal-consistency regression worth noting, but not a CDQ-007 rubric violation per the reconciled reading (raw filesystem paths are outside that rule's literal scope).
 
 ---
 
@@ -304,12 +311,10 @@
 | CDQ-003 | PASS — all catch blocks use `span.recordException(...)` + `span.setStatus({ code: SpanStatusCode.ERROR })`, no ad-hoc error attributes |
 | CDQ-005 | PASS — `startActiveSpan` callback pattern throughout; context managed automatically |
 | CDQ-006 | PASS — `String(deps.length)` (line 109) is a trivial type-conversion explicitly exempt per rubric text listing `String()` among exempt trivial conversions; `changed` (boolean var) and literal `'package.yaml'` need no guard; no `.map`/`.reduce`/`.join`/`JSON.stringify` in any `setAttribute` call |
-| CDQ-007 | **FAIL** — `taze.io.file_path` set to the absolute `filepath` in `readYAML` (line 31), `writeYAML` (line 56), and `loadPackageYAML` (line 88), and `taze.write.file_path` set to absolute `pkg.filepath` in `writePackageYAML` (line 143). This is a regression from run-16, which used the `relative` parameter for `loadPackageYAML` and `pkg.relative` for `writePackageYAML` (both CDQ-007-clean, no advisory needed) — run-17 now exposes absolute local filesystem paths (potentially containing the developer's home-directory username) at all four sites. The agent's own tool-generated advisories (`packageYaml.instrumentation.md`) flagged only 3 of these 4 occurrences (lines 31, 56, 88) and, per the instrumentation.md's own recommendation, left them unfixed rather than swapping to `basename()`/relative path; the 4th occurrence (line 143, `writePackageYAML`) wasn't even flagged by the tool, despite `pkg.relative` being available in scope exactly as it was used in run-16 |
+| CDQ-007 | **RECONCILED: PASS** — `taze.io.file_path` set to the absolute `filepath` in `readYAML` (line 31), `writeYAML` (line 56), and `loadPackageYAML` (line 88), and `taze.write.file_path` set to absolute `pkg.filepath` in `writePackageYAML` (line 143). Originally scored FAIL by this file's evaluator; corrected on reconciliation because CDQ-007's literal rubric mechanism does not cover raw filesystem paths at all (confirmed against `packages.ts`/`yarnWorkspaces.ts` in this same run, and against `packageJson.ts`'s reconciliation above). This is a regression from run-16, which used the `relative` parameter for `loadPackageYAML` and `pkg.relative` for `writePackageYAML` (both CDQ-007-clean, no advisory needed) — run-17 now exposes absolute local filesystem paths (potentially containing the developer's home-directory username) at all four sites. The agent's own tool-generated advisories (`packageYaml.instrumentation.md`) flagged only 3 of these 4 occurrences (lines 31, 56, 88) and, per the instrumentation.md's own recommendation, left them unfixed rather than swapping to `basename()`/relative path; the 4th occurrence (line 143, `writePackageYAML`) wasn't even flagged by the tool, despite `pkg.relative` being available in scope exactly as it was used in run-16 |
 | CDQ-011 | PASS — `trace.getTracer('taze')` literal matches canonical tracer name |
 
-**Failures**:
-- SCH-003 (Important) — `taze.check.packages_loaded` cast via `String(deps.length)` at line 109; count value forced into a string-typed schema field, per this run's pre-committed exemption-scope decision.
-- CDQ-007 (Important) — absolute filesystem paths used for `file_path` attributes at lines 31, 56, 88, 143; a regression from run-16, which used relative paths for 2 of these 4 sites. Line 143 (`writePackageYAML`) is a new, previously-unflagged occurrence not caught by the agent's own advisory pass.
+**Failures**: SCH-003 (Important) — `taze.check.packages_loaded` cast via `String(deps.length)` at line 109; count value forced into a string-typed schema field, per this run's pre-committed exemption-scope decision. After reconciliation, CDQ-007 is not scored as a failure, but the absolute-path regression at lines 31, 56, 88, 143 (run-16 used relative paths at 2 of these 4 sites; line 143 was never even flagged by the agent's own advisory pass) remains worth noting as a quality observation outside the rubric's literal scope.
 
 ---
 
@@ -347,10 +352,10 @@
 | CDQ-003 | PASS — all outer catches use `span.recordException(...)` + `span.setStatus({code: SpanStatusCode.ERROR})`; inner silent catch in `loadPackage` correctly left unmodified per NDS-005b |
 | CDQ-005 | PASS — `startActiveSpan` callback pattern used throughout; context propagation automatic |
 | CDQ-006 | PASS — all `setAttribute` value expressions are trivial property/variable access (`filepath`, `pkg.type`, `pkg.filepath`, `options.recursive ?? false`, `packagesNames.length`); none involve method chains, `.map`/`.reduce`/`.filter`, or `JSON.stringify`, so no `isRecording()` guard is required |
-| CDQ-007 | PASS under rubric's literal mechanism — `taze.io.file_path`/`taze.write.file_path` are raw absolute/relative paths (lines 22, 37, 60, 93), but the rubric's CDQ-007 mechanism only flags object spreads, `JSON.stringify` of request/response objects, unbounded arrays, or PII-pattern keys — "file_path" matches none of those. **Flagged for reconciliation**: this reading disagrees with the `packageJson.ts`/`packageYaml.ts` agents in this same batch, which scored raw absolute file paths as CDQ-007 FAIL/advisory. Needs one consistent verdict across all files before final scoring |
+| CDQ-007 | PASS under rubric's literal mechanism — `taze.io.file_path`/`taze.write.file_path` are raw absolute/relative paths (lines 22, 37, 60, 93), but the rubric's CDQ-007 mechanism only flags object spreads, `JSON.stringify` of request/response objects, unbounded arrays, or PII-pattern keys — "file_path" matches none of those. Confirmed correct on reconciliation (see top-of-file note) — `packageJson.ts`/`packageYaml.ts`'s FAIL verdicts on the identical pattern were the ones corrected, not this file |
 | CDQ-011 | PASS — `getTracer('taze')` matches both `package.json#name` and the Weaver registry manifest `name` field |
 
-**Failures**: None under this agent's reading of CDQ-007. Two advisory-only notes carried forward with no rubric impact under that reading: (1) RST-003 on `readJSON` — thin-wrapper shape, judged non-canonical-FAIL consistent with run-16; (2) the instrumentation tool's own CDQ-007 advisory is internally inconsistent (flags 2 of 4 identical raw-path attribute sites). **See CDQ-007 cross-file disagreement flagged above — needs reconciliation pass before this file's CDQ-007 verdict is finalized.**
+**Failures**: None. Two advisory-only notes carried forward with no rubric impact: (1) RST-003 on `readJSON` — thin-wrapper shape, judged non-canonical-FAIL consistent with run-16; (2) the instrumentation tool's own CDQ-007 advisory is internally inconsistent (flags 2 of 4 identical raw-path attribute sites).
 
 ---
 
@@ -423,7 +428,7 @@
 | RST-003 | PASS — no thin-wrapper spans |
 | RST-004 | PASS — `parseAliasedPackage` correctly excluded: unexported, no I/O, called only from within already-spanned `resolveDependency` |
 | RST-005 | PASS — no pre-existing tracer calls in original source |
-| SCH-001 | **FAIL** — 4 of 6 span names do not match the registry operations already established for these exact functions in run-16; confirmed by 4 SCH-001 advisory findings and by the old names' absence from `agent-extensions.yaml` |
+| SCH-001 | **RECONCILED: PASS (naming-quality fallback)** — 4 of 6 span names do not match run-16's registered names for these functions, but run-16's schema extensions never merged to main (eval branches don't merge per this project's convention), so they are not part of the registry SCH-001 actually resolves against for run-17. Originally scored FAIL by this file's evaluator, comparing against run-16's baseline rather than the currently resolved registry; corrected on reconciliation to match how every other file in this run treated the identical cross-run naming-drift pattern (PASS via naming-quality fallback, e.g. `pnpmWorkspaces.ts`, `packageJson.ts`, `packageYaml.ts`, `packument.ts`). The underlying schema-naming instability across runs is still a real quality concern, just not a rubric-literal SCH-001 violation |
 | SCH-002 | PASS — all attribute keys used are registered in `agent-extensions.yaml`/`attributes.yaml` |
 | SCH-003 | PASS — no `String()`-cast counts in this file; `taze.check.packages_total`/`taze.check.packages_outdated` are raw `.length`/`.filter().length` ints matching the registry's declared `type: int` — not one of the exemption-scope's flagged cast cases |
 | SCH-004 | PARTIAL — no new near-duplicate keys within this run, but `taze.package.deps_count` (run-16's registered attribute for this exact quantity on `resolvePackage`) was silently retired and replaced by reusing `taze.check.packages_total`; combined with the SCH-001 span renames, this is schema churn rather than a clean redundancy case |
@@ -435,7 +440,159 @@
 | CDQ-007 | PASS — no PII keys, no unbounded object/array attributes; `taze.io.file_path` is sanitized to basename per CDQ-007 guidance (line 72) |
 | CDQ-011 | PASS — `trace.getTracer('taze')` matches canonical tracer name |
 
-**Failures**: COV-005 — `resolveDependency` lost the registered `taze.package.update_available` attribute present in run-16. SCH-001 — 4 of 6 span names diverged from run-16's already-registered operations for the same functions, contradicted by the agent's own (incorrect) claim that no matching schema span existed. SCH-004 marked PARTIAL — `taze.package.deps_count` was retired/replaced rather than flagged as a duplicate, reflecting the same underlying schema-naming instability rather than a rubric-literal redundant-entry violation.
+**Failures**: COV-005 — `resolveDependency` lost the registered `taze.package.update_available` attribute present in run-16. After reconciliation, SCH-001 is not scored as a failure (see reconciled row above), but the underlying span-naming drift is still real and contradicted by the agent's own incorrect claim that no matching schema span existed. SCH-004 marked PARTIAL — `taze.package.deps_count` was retired/replaced rather than flagged as a duplicate, reflecting the same underlying schema-naming instability rather than a rubric-literal redundant-entry violation.
+
+---
+
+### 11. src/io/yarnWorkspaces.ts (2 spans)
+
+**Spans**: `taze.io.load_yarn_workspace`, `taze.io.write_yarn_workspace`
+**vs run-16**: Same 2 functions instrumented (`loadYarnWorkspace`, `writeYarnWorkspace`), same span count. Span names drifted: run-16 registered `span.taze.package.load_yarn_workspace` / `span.taze.write.yarn_workspace`; run-17 registered `span.taze.io.load_yarn_workspace` / `span.taze.io.write_yarn_workspace` — different naming convention for the same two operations across runs. **Count attribute regressed from PASS to FAIL on SCH-003**: run-16 set the catalog-count attribute (`taze.catalog.count`) as a raw int and passed SCH-003 cleanly. Run-17 sets the equivalent attribute (renamed `taze.io.catalogs_count`) via `String(catalogs.length)` (line 58) against a schema that declares it `type: int` (`agent-extensions.yaml:34-37`) — a literal SCH-003 type mismatch, distinct from (and more clear-cut than) the schema-laundering pattern seen elsewhere; the exemption-scope doc explicitly names this file as "not ambiguous — literal mismatch, clear violation," confirmed on inspection. **File-path attribute reused instead of the write-specific key**: run-16 used `taze.write.file_path` for the write operation; run-17 reuses the generic `taze.io.file_path` key for *both* load and write, even though the pre-existing registry already defines a write-specific `taze.write.file_path` that run-16 used correctly at this exact call site. Attempts dropped from 2 (run-16 hit a regex-syntax bug) to 1.
+**Attempts**: 1 (per `yarnWorkspaces.instrumentation.md` Validation Journey: "Attempt 1: 0 errors")
+**Trace supplement**: Not independently verified in this pass; trace supplementation is the coordinating session's responsibility.
+
+| Rule | Result |
+|------|--------|
+| NDS-001 | PASS — 0 compilation errors on attempt 1 |
+| NDS-003 | PASS — diff is import additions, tracer acquisition, span wrapping, and `setAttribute` calls only; no business-logic lines changed |
+| API-001 | PASS — only `trace`, `SpanStatusCode` imported from `@opentelemetry/api` (line 1) |
+| NDS-006 | PASS — ESM import/export syntax, consistent with project `"type": "module"` |
+| NDS-004 | PASS — `loadYarnWorkspace` and `writeYarnWorkspace` signatures unchanged |
+| NDS-005 | PASS — no pre-existing try/catch/finally restructured; both functions get new try/catch/finally wrapping span lifecycle with re-throw (lines 17-66, 75-111) |
+| COV-001 | PASS — both exported async entry points (`loadYarnWorkspace` line 11, `writeYarnWorkspace` line 70) receive spans |
+| COV-002 | PASS — `readFile` (line 20) and `writeFile` (via `writeYaml`, line 115) I/O calls are within the spanned scope |
+| COV-003 | PASS — both spans call `span.recordException(...)` + `span.setStatus({ code: SpanStatusCode.ERROR })` in catch blocks (lines 61-62, 105-106) |
+| COV-004 | PASS — both async I/O entry points are spanned |
+| COV-005 | PASS — `load_yarn_workspace` carries `taze.io.file_path`, `taze.io.catalogs_count`; `write_yarn_workspace` carries `taze.io.file_path`, `taze.package.name`, `taze.write.package_type`, `taze.write.changes_count` |
+| COV-006 | N/A — no auto-instrumentation library covers YAML file I/O or yarn workspace management |
+| RST-001 | PASS — `createYarnWorkspaceEntry` (unexported, synchronous, no I/O) correctly left unspanned |
+| RST-002 | N/A — no accessor methods in this file |
+| RST-003 | PASS — `writeYaml` (exported single-statement wrapper around `writeFile`) correctly excluded |
+| RST-004 | PASS — `createYarnWorkspaceEntry` unexported with no I/O, correctly excluded |
+| RST-005 | PASS — no pre-existing tracer calls in original source |
+| SCH-001 | PASS (naming-quality fallback mode) — no registry operation name pre-existed for either function; both new span names follow bounded, `verb_object`-style convention with no embedded dynamic values |
+| SCH-002 | PASS — `taze.io.file_path`, `taze.io.catalogs_count` are registered agent extensions; `taze.package.name`, `taze.write.package_type`, `taze.write.changes_count` are pre-existing registry attributes |
+| SCH-003 | **FAIL** — `taze.io.catalogs_count` is set via `String(catalogs.length)` (line 58) against a schema-declared `type: int`. Per the exemption-scope pre-commitment for this run, this is scored as a literal violation — schema and code disagree outright, no laundering involved |
+| SCH-004 | **FAIL** — `taze.io.file_path` (newly agent-registered) is used for the write operation (line 76) where the pre-existing, more specific `taze.write.file_path` attribute already exists in the registry and was the correct choice used by this exact call site in run-16. Token overlap (`{io,file,path}` vs `{write,file,path}`, Jaccard 0.5) plus identical semantic role make this a near-duplicate schema entry for the write context |
+| CDQ-001 | PASS — both spans use `startActiveSpan` callback pattern with `span.end()` in `finally` (lines 64-66, 108-110) |
+| CDQ-002 | PASS — `trace.getTracer('taze')` matches project name |
+| CDQ-003 | PASS — both catch blocks use `recordException` + `setStatus({ code: SpanStatusCode.ERROR })`, no ad-hoc error attributes |
+| CDQ-005 | PASS — `startActiveSpan` callback pattern; context propagation automatic |
+| CDQ-006 | PASS — `String(catalogs.length)` is an exempt trivial type conversion per the rubric's literal exemption list; `Object.keys(versions).length` (line 82) is correctly guarded with `if (span.isRecording())` (line 81) |
+| CDQ-007 | PASS under the literal rubric mechanism — no PII-pattern attribute keys; `taze.io.file_path` values are raw package-manifest paths. Confirmed correct on reconciliation (see top-of-file note) — agrees with `packages.ts`; `packageJson.ts`/`packageYaml.ts`'s FAIL verdicts on the identical pattern were the ones corrected |
+| CDQ-011 | PASS — tracer name `'taze'` is a literal string matching the canonical project name |
+
+**Failures**: SCH-003 (`taze.io.catalogs_count` cast with `String()` against an int-typed schema attribute — literal type mismatch, confirmed by direct inspection of both the code and the schema) and SCH-004 (`taze.io.file_path` reused for the write path, duplicating the pre-existing, more specific `taze.write.file_path` attribute that run-16 used correctly at the same call site). Both are regressions relative to run-16, which passed SCH-003 and SCH-004 cleanly for the analogous attributes on this same file.
+
+---
+
+### 12. src/api/check.ts (2 spans)
+
+**Spans**: `taze.check.packages`, `taze.check.single_project`
+**vs run-16**: Span count and names unchanged. Attribute set regressed on two points: (1) `CheckSingleProject`'s change-count attribute reverted from run-16's `taze.check.packages_outdated` (a run-16 semantic improvement) back to `taze.write.changes_count` (line 95) — the same regression run-16 explicitly called out as fixed, now undone. Still type-correct (raw int matching registry `type: int`), so this is a COV-005 semantic regression, not an SCH-003 violation. (2) Run-16 also set `taze.package.file_path` on `CheckSingleProject`; run-17 drops this attribute entirely, leaving only `taze.package.name`. `CheckPackages`'s attributes (`taze.check.mode`, `taze.check.recursive`, `taze.check.write_mode`, `taze.check.packages_total`) are unchanged from run-16.
+**Attempts**: 1 (per `check.instrumentation.md` header and log, single "Attempt 1" block, 0 validation errors)
+**Trace supplement**: Not independently verified in this pass; trace supplementation is the coordinating session's responsibility.
+
+| Rule | Result |
+|------|--------|
+| NDS-003 | PASS — diff is limited to import, tracer acquisition, span lifecycle, and the try/finally wrapper; no business logic altered |
+| NDS-004 | PASS — `CheckPackages` and `CheckSingleProject` signatures unchanged |
+| NDS-005 | PASS — neither function had pre-existing try/catch/finally; the new wrapping is instrumentation-added, not a restructuring |
+| NDS-006 | PASS — ESM `import`/`export` syntax matches project module system |
+| API-001 | PASS — only `trace`/`SpanStatusCode` imported from `@opentelemetry/api` |
+| COV-001 | PASS — `CheckPackages` (exported async entry point) instrumented with `taze.check.packages` span |
+| COV-002 | N/A — no direct outbound HTTP/DB call sites in this file |
+| COV-003 | PASS — both spans record errors via `recordException` + `setStatus({ code: SpanStatusCode.ERROR })` |
+| COV-004 | PASS — `CheckSingleProject` (unexported async, I/O via `resolvePackage`/`writePackage`) is instrumented |
+| COV-005 | PARTIAL — `taze.check.single_project` has only 2 attributes (name, changes_count) — down from run-16's 3 (name, file_path, packages_outdated) on the same span. The dropped `file_path` attribute and the reverted change-count key both reduce per-package diagnostic context vs. the run-16 baseline |
+| COV-006 | N/A — no auto-instrumentation library covers this package-resolution/file-write API |
+| RST-001 | PASS — no spans on synchronous utility functions |
+| RST-002 | PASS — no spans on accessors |
+| RST-003 | PASS — no spans on thin wrappers |
+| RST-004 | PASS — `CheckSingleProject` is unexported but performs I/O; qualifies for the I/O exemption |
+| RST-005 | PASS — no pre-existing tracer/span calls in original source |
+| API-004 | PASS — no `@opentelemetry/sdk-*`/`exporter-*`/`instrumentation-*` imports |
+| SCH-001 | PASS — both spans declared as schema extensions; legitimately new operation names, not a defect |
+| SCH-002 | PASS — all attribute keys registered: `taze.check.mode`, `taze.check.recursive`, `taze.check.write_mode`, `taze.check.packages_total`, `taze.package.name`, `taze.write.changes_count` |
+| SCH-003 | PASS — `taze.check.packages_total`/`taze.write.changes_count` set as raw ints matching registry `type: int`, no `String()` cast — not one of the three ambiguous cast cases named in `exemption-scope.md` |
+| SCH-004 | PASS — no new attribute keys added this run; no redundant schema entries introduced |
+| CDQ-001 | PASS — both `startActiveSpan` calls have `span.end()` in a `finally` block |
+| CDQ-002 | PASS — `trace.getTracer('taze')` matches `package.json#name` |
+| CDQ-003 | PASS — both catch blocks use `recordException` + `setStatus(ERROR)`, not ad-hoc attributes |
+| CDQ-005 | PASS — `startActiveSpan` callback pattern; context propagation automatic |
+| CDQ-006 | PASS — all `setAttribute` calls use direct property accesses with no method chains or serialization requiring a guard |
+| CDQ-007 | PASS — neither flagged line (37, 95) is a PII attribute name or a filesystem path; the instrumentation report's own CDQ-007 advisories at these lines appear to be false positives. Optional/nullable attributes are all guarded with `!= null` checks |
+| CDQ-011 | PASS — `trace.getTracer('taze')` matches the project's canonical tracer name |
+
+**Failures**: None outright, but two regressions vs. the run-16 baseline: (1) COV-005 (PARTIAL) — `CheckSingleProject`'s change-count attribute reverted to a less semantically accurate key and `taze.package.file_path` was dropped entirely, reducing per-package diagnostic context; (2) the CDQ-007 advisory findings in the instrumentation report appear to be false positives, worth noting in the run's advisory-accuracy tally.
+
+---
+
+### 13. src/utils/packument.ts (2 spans)
+
+**Spans**: `taze.fetch.npm_package`, `taze.fetch.jsr_package_meta`
+**vs run-16**: Span names changed again — run-16 used `taze.fetch.package`/`taze.fetch.jsr_package`; run-17 uses `taze.fetch.npm_package`/`taze.fetch.jsr_package_meta` (both registered as new schema extensions). Third distinct naming pair across runs for this file — a recurring naming-instability pattern, though each individual name is a valid dotted-notation extension, not a rule violation on its own. **TAZE-RUN3-1 / COV-005 resolution: RESOLVED on both spans.** `taze.package.latest_version` (a pre-existing registered attribute) is now set on both fetch spans: npm span (`fetchPackage`, line 76) via `result.tags.latest`, guarded by `if (result.tags != null)`, sourced from the actual npm fetch response (`data.distTags` via `toPackageData`); JSR span (`fetchJsrPackageMeta`, line 107) via `meta.latest`, set unconditionally because `latest` is a required (non-optional) field on `JsrPackageMeta`, so no guard is needed. Both fetch functions now genuinely expose the resolved latest version, sourced correctly from each function's own fetch result, closing the run-16 gap.
+**Attempts**: 1 (per instrumentation report and log: "Attempts: 1 (initial-generation)")
+**Trace supplement**: Not independently verified in this pass; trace supplementation is the coordinating session's responsibility.
+
+| Rule | Result |
+|------|--------|
+| NDS-003 | PASS — diff is import + tracer + span/attribute/error-handling additions only; no non-instrumentation lines changed |
+| API-001 | PASS — only `trace`, `SpanStatusCode` imported from `@opentelemetry/api` |
+| NDS-006 | PASS — ESM import/export syntax throughout, consistent with project module system |
+| NDS-004 | PASS — `fetchPackage`/`fetchJsrPackageMeta` signatures unchanged |
+| NDS-005 | PASS — try/catch/finally wrapping is new instrumentation; no pre-existing error handling restructured |
+| COV-001 | PASS — both exported async entry points instrumented |
+| COV-002 | PASS — `taze.fetch.npm_package` wraps the npm registry fetch; `taze.fetch.jsr_package_meta` wraps the JSR registry fetch; both cover outbound HTTP calls |
+| COV-003 | PASS — both catch blocks call `recordException` + `setStatus({ code: SpanStatusCode.ERROR })` |
+| COV-004 | PASS — both are async functions performing network I/O and are spanned |
+| COV-005 | PASS (resolved) — `taze.package.name`, `taze.fetch.registry`, and now `taze.package.latest_version` are present on both spans; `taze.fetch.force` is a deliberate, justified new extension for `fetchPackage`'s force-refresh flag |
+| COV-006 | N/A — no auto-instrumentation library covers npm/JSR registry HTTP fetches |
+| RST-001 | PASS — `toPackageData` (unexported pure sync transform, no I/O) correctly left uninstrumented |
+| RST-002 | PASS — no accessor spans |
+| RST-003 | PASS — `fetchWithUserAgent` (thin wrapper delegating to `ofetch`) correctly excluded |
+| RST-004 | PASS — `fetchWithUserAgent` is unexported; I/O boundary value is captured at the calling spans instead |
+| RST-005 | PASS — no pre-existing tracer/span calls in original source |
+| SCH-001 | PASS — both span names declared as registered extensions; naming churn across runs noted above as a quality observation, not a rule failure |
+| SCH-002 | PASS — all attribute keys registered: `taze.package.name`, `taze.fetch.registry`, `taze.package.latest_version` (pre-existing), `taze.fetch.force` (registered extension) |
+| SCH-003 | PASS — no count/length-derived value is cast to string anywhere in this file; the exemption-scope SCH-003 override does not apply here |
+| SCH-004 | PASS — `taze.fetch.force` was deliberately checked against `taze.cache.hit`/`taze.cache.changed` and found semantically distinct; no redundant entries introduced |
+| CDQ-001 | PASS — both spans use `startActiveSpan` callback pattern with `span.end()` in `finally` |
+| CDQ-002 | PASS — `trace.getTracer('taze')` matches project identity |
+| CDQ-003 | PASS — both catch blocks use `recordException` + `setStatus(ERROR)`, no ad-hoc error attributes |
+| CDQ-005 | PASS — `startActiveSpan` callback pattern; context propagation automatic |
+| CDQ-006 | PASS — `result.tags.latest` and `meta.latest` are trivial property accesses, exempt per the rubric's literal exemption text; no guard required |
+| CDQ-007 | PASS — no PII field names, no unbounded objects/arrays, no unguarded optional/nullable access: `meta.latest` is a required field, and `result.tags.latest` is guarded by `result.tags != null`. The instrumentation report's own CDQ-007 advisory at line 107 appears to be a false positive — neither PII nor a filesystem path applies to `taze.package.latest_version` |
+| CDQ-011 | PASS — `trace.getTracer('taze')` matches the project's canonical tracer name |
+
+**Failures**: None. **COV-005/TAZE-RUN3-1 is fully resolved on both fetch spans**, correctly sourced from each fetch function's actual result data — this is the run's primary investigation target and it comes back clean. Two non-blocking observations: (1) span naming has changed on every run for this file (run-15 → run-16 → run-17), a naming-stability quality concern worth flagging at the run level; (2) the agent's own CDQ-007 advisory finding at line 107 appears to be a false positive.
+
+---
+
+## Correct-Skip Verification (20 files)
+
+For each file the run summary labels a "correct skip" (0 spans, 0 attributes), grepped that file's own pre-scan block in `spiny-orb-output.log` for a COV-001/COV-004 flag the final output didn't act on — a file that flags its own need for a span and then skips anyway with unrelated boilerplate justification is a "questionable skip," not a confirmed correct one.
+
+**Files checked**: `src/addons/index.ts`, `src/addons/vscode.ts`, `src/cli.ts`, `src/constants.ts`, `src/index.ts`, `src/io/dependencies.ts`, `src/types.ts`, `src/utils/context.ts`, `src/utils/dependenciesFilter.ts`, `src/utils/config.ts`, `src/utils/diff.ts`, `src/filters/diff-sorter.ts`, `src/render.ts`, `src/log.ts`, `src/utils/package.ts`, `src/utils/sha.ts`, `src/utils/time.ts`, `src/commands/check/render.ts`, `src/utils/sort.ts`, `src/utils/versions.ts`.
+
+**Result**: 0 of 20 blocks contain a self-flagged COV-001/COV-004 need. Every block's pre-scan note states an explicit, on-point reason for skipping (e.g., `src/addons/index.ts`: "Pre-scan: no instrumentable functions — all are pure sync utilities or unexported helpers. No LLM call made."). None fall back to unrelated boilerplate after flagging their own need for a span. All 20 are confirmed correct skips.
+
+---
+
+## Reconciliation Pass Summary
+
+Completed after all 13 committed files were scored. Two cross-file rule-verdict disagreements were found and resolved (see "RECONCILED" markers in the per-file sections above and the tracking note at the top of this file):
+
+1. **CDQ-007 on raw filesystem paths** — `packageJson.ts` and `packageYaml.ts` originally scored FAIL/advisory; corrected to PASS. The rubric's literal CDQ-007 mechanism (object spreads, `JSON.stringify` of req/response objects, unbounded arrays, PII-pattern keys) does not cover raw filesystem paths. `packages.ts` and `yarnWorkspaces.ts` had the correct reading from the start.
+2. **SCH-001 on renamed previously-registered spans** — `resolves.ts` originally scored FAIL; corrected to PASS (naming-quality fallback). SCH-001 compares against the currently resolved registry, not a prior run's baseline, and run-16's schema extensions never merged to main. `pnpmWorkspaces.ts` and every other file with cross-run span-name drift had the correct reading from the start.
+
+**Rule-ID label audit**: every FAIL/PARTIAL row across all 13 files was checked against its rule's canonical rubric definition during the reconciliation pass (not a sample) — no additional mislabeled rows were found beyond the two corrected above.
+
+**Fix-verification confirmation** (supersedes the Findings Discussion checkpoint's provisional read):
+- **COV-005 (packument.ts)**: RESOLVED. `taze.package.latest_version` present and correctly sourced on both fetch spans.
+- **SCH-003**: MIXED. Resolved cleanly in `bunWorkspaces.ts`. Recurred in disguised form (count cast to string, schema retyped to match) in `checkGlobal.ts`, `check/index.ts`, `pnpmWorkspaces.ts`, and `packageYaml.ts`. Recurred as a literal type mismatch (no disguise) in `yarnWorkspaces.ts`.
+- **CDQ-006 (bunWorkspaces.ts)**: RESOLVED.
+- **resolves.ts stability (#954/#958)**: PARTIALLY RESOLVED. The specific NDS-001 compilation oscillation is fixed — first-attempt clean compile, an improvement over run-16's 2 attempts. But the file traded that instability for a new one: 4 of 6 span names and 1 attribute (`taze.package.update_available`) drifted/dropped from run-16, which wasn't a problem in the prior run.
 
 ---
 

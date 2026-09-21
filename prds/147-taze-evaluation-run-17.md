@@ -181,7 +181,7 @@ The eval execution branch (`feature/prd-147-taze-evaluation-run-17`) **never mer
 
   **Result (2026-09-21)**: 0 failed files, 0 partially committed files — `debug-dumps/` is empty, matching the run summary. Only one committed file needed ≥3 attempts: `src/io/packageYaml.ts` (attempt 1 hit a TS2322 type-widening error on a discriminated union field; attempt 2's proposed fix was rejected for also extracting `doc.get('name')` into a const, an NDS-003 non-instrumentation change; attempt 3 applied only the `as const` fix and succeeded). Assessed as a working retry loop, not a quality failure — no carry-forward finding logged. Documented in `evaluation/typescript/taze/run-17/spiny-orb-findings.md`.
 
-- [ ] **Per-file evaluation** *(complete IS scoring and step 9.5 trace capture first — taze is non-organic; trace artifact does not exist until after IS scoring)* — Evaluate each committed file against the rubric.
+- [x] **Per-file evaluation** *(complete IS scoring and step 9.5 trace capture first — taze is non-organic; trace artifact does not exist until after IS scoring)* — Evaluate each committed file against the rubric.
 
   **Use parallel subagent evaluation — up to 5 files at a time, one subagent per file.** Single-pass single-context evaluation misses findings that per-file subagents catch. Do NOT write the evaluation as a single sequential document. For spawning mechanics, follow the D-2 protocol in `docs/language-extension-plan.md` step 6.
 
