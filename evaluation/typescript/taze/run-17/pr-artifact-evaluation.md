@@ -47,7 +47,7 @@ Total: 35 spans, matching both the per-file evaluation total and the `agent-exte
 
 ## Schema Changes Section Accuracy
 
-**New attributes added** (5): `taze.check.agent`, `taze.check.packages_loaded`, `taze.fetch.force`, `taze.io.catalogs_count`, `taze.io.file_path`. Cross-checked against the committed `semconv/agent-extensions.yaml` on the instrument branch — all 5 present with matching types (`string`, `string`, `boolean`, `int`, `string`). The PR summary accurately lists these as the only new attribute extensions; no omissions or extras found.
+**New attributes added** (5): `taze.check.agent`, `taze.check.packages_loaded`, `taze.fetch.force`, `taze.io.catalogs_count`, `taze.io.file_path`. Cross-checked against the committed `semconv/agent-extensions.yaml` on the instrument branch — all 5 are present with declared types (`string`, `string`, `boolean`, `int`, `string`) matching what the PR summary claims. The PR summary accurately lists these as the only new attribute extensions; no omissions or extras found. This confirms only that the *declared* schema types match the PR's own listing — it says nothing about whether the *code* setting each attribute matches its declared type. Two of these five (`taze.check.packages_loaded`, `taze.io.catalogs_count`) fail that separate check; see the "Schema Accuracy" section below.
 
 **New span IDs**: 35 span IDs listed in the PR body. Cross-referencing against `agent-extensions.yaml` (`grep -c '^  - id: span\.'` → 35) and against the 13 committed files' per-file span counts:
 
