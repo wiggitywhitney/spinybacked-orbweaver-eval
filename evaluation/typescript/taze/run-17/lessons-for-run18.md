@@ -5,15 +5,23 @@ Process observations captured during run-17. Populated incrementally as the run 
 
 ## Target-Specific Findings
 
-*(Findings specific to taze that do not belong in the template)*
+- **PRD #147's issue-number mapping for the pre-run verification checklist (#954/#958/#1008/#1009/#1010/#1011) was wrong.** Actual status: #954 (resolves.ts oscillation investigation) OPEN, #958 (resolves.ts oscillation fix) OPEN, #1008 (IS SPA-002 orphan span watch — not COV-005 as the PRD text implied) OPEN, #1009 (unrelated research spike on semconv required attributes — not CDQ-006 as the PRD text implied) OPEN, #1010 (SCH-003 fixAttributeTypeCoercions) **CLOSED** via merged #1012, #1011 (CDQ-006 fixIsRecordingGuards) **CLOSED** via merged #1012. **COV-005 (packument.ts `taze.package.latest_version`, TAZE-RUN3-1) had no tracked spiny-orb issue at pre-run-verification time** — searched "packument," "COV-005," "latest_version," and issues #1005–#1013, found nothing. #1012 fixed SCH-003 and CDQ-006 but never touched COV-005, so run-17 should expect it to still be broken with no fix attempted (not "fix failed"). Flagged to Whitney for handoff to the spiny-orb-side session rather than filed directly from this eval session, per this project's convention that eval sessions document findings rather than file spiny-orb issues themselves. **Update**: Whitney had the spiny-orb-side session file it after all (didn't wait for run-17's outcome) — now tracked as [#1070](https://github.com/wiggitywhitney/spinybacked-orbweaver/issues/1070), also added to `docs/ROADMAP.md`'s Watch issues section. Run-17's actual packument.ts outcome (recovered vs. still broken, root cause if still absent) should be posted to #1070 once known — post it from this session directly rather than routing back through the spiny-orb-side session, since the eval-findings-in-handoff-doc convention is about *filing* new issues, not commenting on one that already exists and is asking for this run's data.
+- **taze fork was left checked out on a stale run-16 instrument branch** (`spiny-orb/instrument-1782059121456`, still-open PR #11) with two untracked leftover artifact files (`spiny-orb-test-failure.log`, `spiny-orb-live-check-report.json`) instead of on `main`. Switched to `main` and removed the leftovers before proceeding. Future runs should check `git status --short --branch` on the target fork as an explicit pre-run step rather than assuming it's on `main`.
+- **`test/versions.test.ts`'s `getMaxSatisfying` test fetches live npm registry data for the `typescript` package and asserts against its `latest` dist-tag.** TypeScript's `latest` moved from major 6 to major 7 since this test's baseline was last set (previously fixed once in `8452fc7`), breaking the `^6.0.0`/`>6.0.0` range assertions. Fixed by bumping the baseline to major 7 (taze PR #12, merged) — but also found a latent fragility CodeRabbit caught: the `'default'`-mode undefined-case assertion used an exact-pin literal (`'7.0.0'`/formerly `'6.0.0'`) that could itself become a real published version, silently breaking the same way again. Replaced with `'999.0.0'`, a version that can never be published, decoupling that specific assertion from any live major-version boundary. This class of test (asserting against live third-party registry data) will keep drifting on a schedule tied to the real package's release cadence, not to anything in this repo — worth a standing watch item for any eval target whose test suite hits a live external API.
 
 ## Generalizable Process Improvements
 
-*(Observations about the eval process itself that may warrant template updates)*
+- **A milestone step that commits a fix directly to a target fork's `main` needs an explicit branch-and-PR reminder.** Mid pre-run-verification, a test fix got committed directly to taze's `main` before catching that this violates the global "feature branches only" rule — even for a solo-owned eval-target fork with no other contributors. Recovered by branching off the bad commit, hard-resetting `main` to `origin/main`, then pushing/PR'ing/CodeRabbit-reviewing/merging normally. Future template text for "target repo readiness" pre-run steps should say explicitly: any fix needed to make the target's own test suite pass goes through a branch + PR, never a direct commit to main, regardless of how trivial the fix or how solely-owned the fork is.
 
 ## Pre-Run Observations
 
-*(Populated during pre-run verification)*
+- Datadog MCP health check: `search_datadog_spans service:taze now-1h` returned 0 results with no error — expected (no run has happened yet), not a connectivity failure.
+- spiny-orb SHA at pre-run: `4e7c2f0` (PRD-373 Python COV-004 checker work — unrelated to taze's carry-forward findings). `npm run build` succeeded with no errors.
+- Schema: `taze.catalog.count` already declared `type: int` in `semconv/agent-extensions.yaml` (added run-16) — confirmed still present, not re-seeded.
+- `provenanceDowngraded` skip: confirmed still in place at `test/resolves.test.ts:158`.
+- File inventory: 33 `.ts` files under `src/` (confirmed via recursive `find`, not a flat glob — a flat `ls src/*.ts` undercounts since taze's source is organized into subdirectories).
+- Push auth (`GITHUB_TOKEN_TAZE`): dry-run push succeeded.
+- Node/pnpm versions: Node v25.8.0, pnpm 10.33.2.
 
 ## Post-Run Observations
 

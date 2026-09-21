@@ -114,27 +114,40 @@ The eval execution branch (`feature/prd-147-taze-evaluation-run-17`) **never mer
 
   **Skeleton content**: `spiny-orb-findings.md`'s skeleton is not a blank template — pre-populate its sections with `TBD` placeholders for this run's own primary investigation targets: COV-005 (packument.ts), SCH-003 (checkGlobal.ts + bunWorkspaces.ts String() casts), CDQ-006 (bunWorkspaces.ts `loadBunWorkspace`), resolves.ts stability, and IS SPA-002. For the exact prior-run example of this shape (a "primary investigation target" section per finding, plus a comparison table for multi-file findings like CDQ-006), find the commit that created `evaluation/taze/run-16/spiny-orb-findings.md` (before the `evaluation/` language-directory rename) with `git log --oneline --all --follow -- evaluation/typescript/taze/run-16/spiny-orb-findings.md | tail -1`, then `git show <that-commit>:evaluation/taze/run-16/spiny-orb-findings.md` — the file's current path was `evaluation/typescript/taze/run-16/...` only after the rename, so a direct `git show` at the old commit against the new path will fail. `lessons-for-run18.md`'s skeleton uses the four standing section headers (Target-Specific Findings, Generalizable Process Improvements, Pre-Run Observations, Post-Run Observations) with no placeholder content — those fill in as the run progresses.
 
-- [ ] **Pre-run verification** — Confirm prerequisites and validate taze fork state:
+- [x] **Pre-run verification** — Confirm prerequisites and validate taze fork state:
 
   1. **Datadog MCP health check**: Before any other setup work, run a sanity check: `search_datadog_spans` with `service:taze` for the last 1 hour. If it fails with an unexpected error (not just "no results"), re-run `/ddsetup` and `/reload-plugins` before proceeding.
   2. **Spiny-orb build** (P1): Check current spiny-orb SHA: `cd ~/Documents/Repositories/spinybacked-orbweaver && git log --oneline -5`. Run `npm run build` to produce current binaries. Record SHA in `lessons-for-run18.md`.
   3. **Issue status check** (P1 — determines run-17 goals): Check whether the following spiny-orb issues are closed:
      - #954 (resolves.ts oscillation root cause investigation)
      - #958 (resolves.ts oscillation fix)
-     - #1008 (TAZE-RUN3-1: COV-005 packument.ts)
-     - #1009 (TAZE-RUN3-2: CDQ-006 bunWorkspaces.ts)
-     - #1010 (TAZE-RUN3-3/4: SCH-003 String() cast)
-     - #1011 (IS SPA-002 orphan span)
+     - #1008 (IS SPA-002 orphan span watch)
+     - #1009 (unrelated research spike — semconv required attributes)
+     - #1010 (SCH-003 String() cast — `fixAttributeTypeCoercions()`)
+     - #1011 (CDQ-006 bunWorkspaces.ts — `fixIsRecordingGuards()`)
      Document open/closed status and update the run-17 primary goals accordingly.
+
+     **Result (2026-09-21)**: this checklist's own issue-number mapping was wrong — see Decision Log. Actual: #954 OPEN, #958 OPEN, #1008 OPEN (IS SPA-002 watch, not COV-005), #1009 OPEN (unrelated research spike, not CDQ-006), #1010 **CLOSED** (SCH-003, via merged #1012), #1011 **CLOSED** (CDQ-006, via merged #1012). COV-005 (packument.ts) had no tracked issue at pre-run time; now filed as [#1070](https://github.com/wiggitywhitney/spinybacked-orbweaver/issues/1070). Updated primary goals: goal 2 (SCH-003) and goal 3 (CDQ-006) should verify a real fix landed; goal 1 (COV-005) should expect no change since no fix was ever attempted.
   4. **Schema type state**: Confirm `semconv/agent-extensions.yaml` in `~/Documents/Repositories/taze` correctly declares `taze.catalog.count` as `type: int` (added in run-16). If absent, leave it absent — do not pre-seed schema attributes before the run.
+
+     **Result**: confirmed present, unchanged since run-16.
   5. **provenanceDowngraded skip on taze fork main**: Confirm `it.skip(...)` for provenanceDowngraded test is still in place in `test/resolves.test.ts` (commit `6a25b4d`). Required for `pnpm test` to pass.
+
+     **Result**: confirmed in place at line 158.
   6. **Target repo readiness**: Verify taze fork on `main`, clean working tree, `spiny-orb.yaml` present with `language: typescript` and `testCommand: pnpm test`, `pnpm test` passes with the skip in place.
+
+     **Result**: fork was found checked out on a stale run-16 instrument branch with leftover untracked files — corrected to clean `main`. `pnpm test` was separately failing on a live-npm-registry drift unrelated to instrumentation (TypeScript's `latest` dist-tag moved to major 7); fixed via taze PR #12 (CodeRabbit-reviewed, merged). `main` now passes 73/74 (1 pre-existing skip). Full detail in `lessons-for-run18.md`.
   7. **Push auth**: Dry-run push to verify `GITHUB_TOKEN_TAZE` still works:
       ```bash
       vals exec -i -f .vals.yaml -- bash -c 'git -C ~/Documents/Repositories/taze push --dry-run https://x-access-token:$GITHUB_TOKEN_TAZE@github.com/wiggitywhitney/taze.git HEAD:refs/heads/spiny-orb/auth-test'
       ```
+     **Result**: succeeded.
   8. **File inventory**: Count `.ts` files in `~/Documents/Repositories/taze/src/` — should be 33.
+
+     **Result**: 33, confirmed.
   9. **Record environment**: Append spiny-orb SHA, Node version, and pnpm version to `evaluation/typescript/taze/run-17/lessons-for-run18.md`.
+
+     **Result**: spiny-orb SHA `4e7c2f0`, Node v25.8.0, pnpm 10.33.2 — recorded.
 
 - [ ] **Evaluation run-17** — Whitney runs `spiny-orb instrument` in her terminal. The `debug-dumps/` directory must exist before running (created in skeleton step above).
 
@@ -228,6 +241,8 @@ The eval execution branch (`feature/prd-147-taze-evaluation-run-17`) **never mer
 
 - [ ] **Actionable fix output** *(user-facing checkpoint 2 — interpreted summary + handoff pause)* — Write `evaluation/typescript/taze/run-17/actionable-fix-output.md` with the full structured format: what happened, COV-005/SCH-003/CDQ-006 resolution status, resolves.ts stability outcome, IS SPA-002 status, new findings, updated carry-forward table. When complete, print the absolute path: `/Users/whitney.lee/Documents/Repositories/spinybacked-orbweaver-eval/evaluation/typescript/taze/run-17/actionable-fix-output.md`. Pause until Whitney confirms she has handed the document to the spiny-orb team. Do not proceed to the next PRD until confirmed.
 
+  **COV-005 tracking issue already exists**: unlike SCH-003/CDQ-006 (filed after run-16 completed), COV-005 was filed mid-run-17 as [#1070](https://github.com/wiggitywhitney/spinybacked-orbweaver/issues/1070) rather than after this run's outcome was known (see Decision Log, 2026-09-21). Post this run's packument.ts outcome (recovered vs. still broken, root cause if still absent) as a comment on #1070 directly from this session — do not wait for the spiny-orb-side session to ask for it, and do not route it back through that session.
+
   **Handoff framing guidance**:
   - **Fix language targets spiny-orb components, not target files.** "Fix:" entries should describe the spiny-orb component gap — auto-fix, validator, prompt, or fix-loop. Do not write "remove X at line Y of file.ts." Target repo files are overwritten every run; patching them is not durable and misleads the team about where the root cause is.
   - **Attribute disappearance is not automatically a finding.** If an attribute appeared in a prior run and is absent now, investigate before calling it wrong — consider whether there is a semconv basis for the attribute and whether the absence is a defensible agent decision. Give the spiny-orb team evidence and honest characterization, not a decision-free action list.
@@ -292,3 +307,4 @@ The eval execution branch (`feature/prd-147-taze-evaluation-run-17`) **never mer
 | 2026-06-22 | Per-file evaluation must use the parallel subagent approach (up to 5 at a time, one per file) | Validated during run-16 per Decision 4 in PRD #146: parallel agents found gaps that sequential evaluation missed. Required process for all future runs. |
 | 2026-06-22 | `spiny-orb-output.log` is the primary agent reasoning source when debug-dumps is empty | When all files succeed, `--debug-dump-dir` writes nothing (confirmed in run-16: 0 failures → empty debug-dumps). The `Agent thinking` and `Agent notes` blocks in the log are the only window into agent decision-making for successful files. Each per-file subagent must read the log excerpt for its file. |
 | 2026-09-20 | Adopted "Validator vs. agent-behavior maturity" as a required distinction in handoff findings; cascaded to `docs/language-extension-plan.md` step 11 and to this PRD's "Actionable fix output" milestone | Step 0.5 cross-run process review surfaced this from commit-story-v2 run-28's `lessons-for-prd29.md`: run-28's SCH-002 fix changed an outcome (silent bad commit → rejected partial) without the underlying agent mistake (key reuse) actually stopping. Conflating "validator caught it" with "agent stopped doing it" overstates root-cause progress. Directly applicable to this run's CDQ-006/SCH-003 goals. User-approved. |
+| 2026-09-21 | Corrected this PRD's pre-run verification issue-number mapping (#1008-#1011) and its "update primary goals accordingly" instruction after live GitHub verification found the original mapping wrong | #1008 is actually the IS SPA-002 watch issue (not COV-005), #1009 is an unrelated research spike (not CDQ-006). #1010 (SCH-003) and #1011 (CDQ-006) were correct and are both CLOSED via merged #1012. COV-005 (packument.ts) had no tracked issue at all — filed after pre-run verification as #1070, once Whitney decided not to wait for run-17's outcome. Updated goals: SCH-003/CDQ-006 verification should check whether #1012's fix actually held; COV-005 verification should expect no change since no fix was attempted. |
