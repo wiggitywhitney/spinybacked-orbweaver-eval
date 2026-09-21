@@ -215,7 +215,7 @@ The eval execution branch (`feature/prd-147-taze-evaluation-run-17`) **never mer
 
   **Fix-verification confirmation** (cascaded from commit-story-v2 run-28): per-file evaluation is the authoritative check for whether a prior-run finding (COV-005/SCH-003/CDQ-006) actually recurred — it supersedes, and may correct, the earlier findings-discussion pass's provisional read.
 
-- [ ] **PR artifact evaluation** — Evaluate the instrument branch PR: diff completeness, span registration accuracy, schema accuracy in `agent-extensions.yaml`, `traceloop-init.ts` registration block.
+- [ ] **PR artifact evaluation** — Evaluate the instrument branch PR ([taze PR #13](https://github.com/wiggitywhitney/taze/pull/13), branch `spiny-orb/instrument-1789998344404`): diff completeness, span registration accuracy, schema accuracy in `agent-extensions.yaml`, `traceloop-init.ts` registration block. Write `evaluation/typescript/taze/run-17/pr-artifact-evaluation.md` — follow `evaluation/typescript/taze/run-16/pr-artifact-evaluation.md` exactly as the style/structure reference (run-summary accuracy table, per-file span-count cross-check against `per-file-evaluation.md`, PR/branch header). Cross-check against this run's own `per-file-evaluation.md` (13 committed files, spans/attributes per file) rather than re-deriving counts from the log.
 
 - [ ] **Rubric scoring** — Score all dimensions against the rubric. Compare to run-16 baseline. COV-005/SCH-003/CDQ-006 resolution status are the primary data points.
 
