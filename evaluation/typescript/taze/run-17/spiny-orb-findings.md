@@ -21,11 +21,11 @@ Per-file analysis from run-17. Populated during failure deep-dives and per-file 
 
 *(Primary investigation target — COV-005, TAZE-RUN3-1: `taze.package.latest_version` dropped from both fetch spans in run-16)*
 
-**Outcome**: TBD
+**Outcome**: Resolved. Full detail in `per-file-evaluation.md` § 13.
 
-**Attribute recovered on both fetch spans**: TBD
+**Attribute recovered on both fetch spans**: Yes. `taze.package.latest_version` is set on the npm span (`result.tags.latest`, line 76, guarded by `if (result.tags != null)`) and the JSR span (`meta.latest`, line 107, unconditional because `latest` is a required field on `JsrPackageMeta`). Both values are sourced from each fetch function's own real result data, not placeholders.
 
-**Root cause (if still absent)**: TBD
+**Root cause (if still absent)**: N/A — resolved.
 
 ---
 
@@ -33,9 +33,9 @@ Per-file analysis from run-17. Populated during failure deep-dives and per-file 
 
 *(Primary investigation target — SCH-003, TAZE-RUN3-3: `String(deps.length)` cast on `taze.package.deps_count`, an int-typed schema attribute)*
 
-**Outcome**: TBD
+**Outcome**: Not fixed — recurred in disguised form. Full detail in `per-file-evaluation.md` § 1.
 
-**String() cast removed**: TBD
+**String() cast removed**: No. The cast is still present (`String(deps.length)`, line 216), now on a renamed attribute (`taze.check.packages_loaded`). The schema was retyped to `type: string` to match the cast instead of the cast being removed — code and schema agree literally, but the underlying value is still a `.length`-derived count. Scored as an SCH-003 violation under this run's exemption-scope pre-commitment (schema/code agreement doesn't cure a count stored as a string).
 
 ---
 
@@ -43,14 +43,14 @@ Per-file analysis from run-17. Populated during failure deep-dives and per-file 
 
 *(Primary investigation target — SCH-003 (TAZE-RUN3-4: `String(catalogs.length)` cast on `taze.catalog.count`) and CDQ-006 (TAZE-RUN3-2: 3 post-await `setAttribute` calls in `loadBunWorkspace` without `isRecording` guard))*
 
-**SCH-003 outcome**: TBD
+**SCH-003 outcome**: Resolved. Full detail in `per-file-evaluation.md` § 5.
 
-**CDQ-006 outcome**: TBD
+**CDQ-006 outcome**: Resolved.
 
 | Rule | Run-16 status | Run-17 status | Notes |
 |------|---------------|----------------|-------|
-| SCH-003 (`String(catalogs.length)`) | Violation | TBD | |
-| CDQ-006 (3 post-await calls in `loadBunWorkspace`) | Violation | TBD | |
+| SCH-003 (`String(catalogs.length)`) | Violation | Resolved | `taze.config.sources_found` set as a raw int (`catalogs.length`, line 63), no `String()` cast |
+| CDQ-006 (3 post-await calls in `loadBunWorkspace`) | Violation | Resolved | Only unguarded post-await calls left are trivial property access (exempt); the one method-chain computation (`Object.keys(versions).length`) is correctly guarded with `if (span.isRecording())` |
 
 ---
 
@@ -58,13 +58,13 @@ Per-file analysis from run-17. Populated during failure deep-dives and per-file 
 
 *(Primary investigation target — stability check after run-16 recovery from run-15 oscillation)*
 
-**Outcome**: TBD
+**Outcome**: Partially resolved. Full detail in `per-file-evaluation.md` § 10. The NDS-001 compilation oscillation itself is fixed — first attempt, 0 validation errors, an improvement over run-16's 2 attempts. But the file traded that instability for a new one: 4 of 6 span names and 1 attribute (`taze.package.update_available`) drifted or dropped relative to run-16, which wasn't a problem in the prior run.
 
-**Debug dump captured (if oscillation recurs)**: TBD
+**Debug dump captured (if oscillation recurs)**: N/A — no failure occurred; attempt 1 succeeded, so `--debug-dump-dir` never fired for this file.
 
-**tsc error (if oscillation recurs)**: TBD
+**tsc error (if oscillation recurs)**: N/A — no compilation error occurred this run.
 
-**Root cause**: TBD
+**Root cause**: N/A for the compilation oscillation (genuinely fixed). The new instability's root cause is that the agent isn't converging on a consistent schema (span names, attribute set) for this file run-over-run, even once syntax stabilized — a different failure mode than #954/#958 originally tracked, worth a new watch item rather than closing those issues outright.
 
 ---
 
