@@ -72,7 +72,7 @@ Source evidence: `per-file-evaluation.md` (13 committed files, post-reconciliati
 | SCH-003 (Attribute types match schema) | **FAIL** | 5 files: `checkGlobal.ts`, `check/index.ts`, `pnpmWorkspaces.ts`, `packageYaml.ts` (disguised recurrence — count cast to string, schema retyped to `string` to match instead of the cast being removed), and `yarnWorkspaces.ts` (literal recurrence — schema says `int`, code passes a string). The run-16 carry-forward finding (TAZE-RUN3-3/4) is **not resolved**; it broadened from 2 files to 5, per the exemption-scope pre-commitment's semantic reading |
 | SCH-004 (No near-synonym redundancy) | **FAIL** | `yarnWorkspaces.ts`: the newly agent-registered `taze.io.file_path` is reused for the write operation, duplicating the pre-existing, more specific `taze.write.file_path` that run-16 used correctly at this exact call site (Jaccard 0.5, identical semantic role). New this run — run-16 passed SCH-004 cleanly |
 
-### Code Quality (CDQ): 7/7 (100%)
+### Code Quality (CDQ): 6/7 (86%)
 
 | Rule | Result | Files |
 |------|--------|-------|
@@ -81,7 +81,7 @@ Source evidence: `per-file-evaluation.md` (13 committed files, post-reconciliati
 | CDQ-003 (Standard error recording pattern) | **PASS** | 13/13 |
 | CDQ-005 (Async context maintained) | **PASS** | 13/13 — `startActiveSpan` callback pattern throughout |
 | CDQ-006 (Expensive attribute computation guarded) | **PASS** | 13/13 — **resolves TAZE-RUN3-2**. `bunWorkspaces.ts`'s 3 previously-unguarded post-await `setAttribute` calls in `loadBunWorkspace` are now either trivial-and-exempt or, for the one true method-chain computation (`Object.keys(versions).length`), correctly wrapped in `if (span.isRecording())` |
-| CDQ-007 (No unbounded or PII attributes) | **PASS** | 13/13, after reconciliation — the rubric's literal CDQ-007 mechanism (object spreads, `JSON.stringify` of req/response objects, unbounded arrays, PII-pattern keys) does not cover raw filesystem paths; `packageJson.ts`/`packageYaml.ts`'s initial FAIL verdicts on that pattern were corrected to PASS to match `packages.ts`/`yarnWorkspaces.ts`'s original (correct) reading. The underlying absolute-path exposure (vs. run-16's relative paths in some of these same files) is tracked as a quality observation outside the rubric's literal scope, not a rubric violation |
+| CDQ-007 (No unbounded or PII attributes) | **FAIL** | 6 files (`bunWorkspaces.ts`, `packageJson.ts` write side, `packageYaml.ts`, `packages.ts` 3 of 4 sites, `pnpmWorkspaces.ts`, `yarnWorkspaces.ts`) — per the PRD's own required "structural guarantee" test (`prds/147-taze-evaluation-run-17.md` line 206: a raw-path-shaped attribute FAILs unless the source structurally guarantees the value can never be absolute), each of these sets an unsanitized absolute filesystem path (`pathe`'s `resolve()` output or `pkg.filepath`) with no guarantee it's ever relative. Confirmed by reading the instrument-branch source directly. This was **corrected after an initial reconciliation error**: the first per-file reconciliation pass scored all of these PASS using CDQ-007's literal rubric mechanism (object spreads/`JSON.stringify`/unbounded arrays/PII-pattern keys) instead of the PRD-mandated test — caught by CodeRabbit CLI review, then fixed by re-reading the source. Only `resolves.ts` (basename-sanitized) and `packageJson.ts`'s load side (basename-sanitized) genuinely pass this test. Regression from run-16, which used relative paths at several of these exact call sites |
 | CDQ-011 (Canonical tracer name) | **PASS** | 13/13 |
 
 ---
@@ -95,16 +95,18 @@ Source evidence: `per-file-evaluation.md` (13 committed files, post-reconciliati
 | RST | 5/5 (100%) | 5/5 (100%) | — |
 | API | 3/3 (100%) | 3/3 (100%) | — |
 | SCH | 2/4 (50%) | 3/4 (75%) | **-1** |
-| CDQ | 7/7 (100%) | 6/7 (86%) | **+1** |
-| **Overall quality** | **26/29 (90%)** | **26/29 (90%)** | — |
+| CDQ | 6/7 (86%) | 6/7 (86%) | — |
+| **Overall quality** | **25/29 (86%)** | **26/29 (90%)** | **-1** |
 | **Gates** | **2/2 (100%)** | **2/2 (100%)** | — |
 | **Files committed** | **13** | **13** | — |
 | **IS Score** | **77.8/100** | **88.9/100** | **-11.1** |
-| **Q×F** | **11.7** | **11.7** | — |
+| **Q×F** | **11.2** | **11.7** | **-0.5** |
 
-**Q×F calculation**: (26/29) × 13 = 0.8966 × 13 = **11.7**
+**Q×F calculation**: (25/29) × 13 = 0.8621 × 13 = **11.2**
 
-**Composition note**: the overall quality total held flat at 26/29, but the dimensions it's made of shifted. CDQ improved by exactly the carry-forward fix this run targeted (CDQ-006, bunWorkspaces.ts, resolved). SCH regressed by exactly one rule's worth — not because the targeted carry-forward finding (SCH-003) was fixed, but because it broadened from 2 files to 5 (disguised via schema retyping in 4, literal in 1) while a *new* SCH-004 violation appeared in `yarnWorkspaces.ts`. A flat total score masks a real trade: one long-standing quality problem got fixed while a related one got measurably worse.
+**Correction note (2026-09-21, post-CodeRabbit)**: an earlier version of this file scored CDQ 7/7 and overall 26/29 (flat vs. run-16). That was wrong — it inherited a per-file-evaluation.md reconciliation error on CDQ-007 (raw filesystem paths) that used the rubric's literal mechanism instead of the PRD's own required "structural guarantee" test (`prds/147-taze-evaluation-run-17.md` line 206). CodeRabbit CLI review caught the inconsistency; re-reading the instrument-branch source confirmed CDQ-007 genuinely fails in 6 of 13 files. See `per-file-evaluation.md`'s "Second reconciliation pass" section for the full per-file basis.
+
+**Composition note**: quality actually regressed a full point from run-16 (25/29 vs. 26/29), not held flat. SCH regressed by one rule's worth — not because the targeted carry-forward finding (SCH-003) was fixed, but because it broadened from 2 files to 5 (disguised via schema retyping in 4, literal in 1) while a *new* SCH-004 violation appeared in `yarnWorkspaces.ts`. CDQ held flat at 6/7, but for a different reason than run-16: CDQ-006 (the targeted carry-forward fix) is genuinely resolved, while a new, untracked CDQ-007 regression (unsanitized absolute filesystem paths, spreading from 1 advisory-only file in run-16 to 6 files failing outright in run-17) took its place. Net picture: one long-standing problem got fixed, a related one got worse, and a third, previously-minor one crossed from advisory into an outright rubric failure — three independent movements that happened to net out to roughly the same CDQ score.
 
 ---
 
@@ -132,6 +134,7 @@ Source evidence: `per-file-evaluation.md` (13 committed files, post-reconciliati
 | — | COV-005 | resolves.ts | `resolveDependency` drops the registered `taze.package.update_available` boolean, present in run-16 |
 | — | COV-005 | api/check.ts | `CheckSingleProject` drops `taze.package.file_path`; reverts its change-count key from run-16's more semantically accurate `taze.check.packages_outdated` back to `taze.write.changes_count` |
 | — | IS SPA-005 | resolves.ts (13 spans across the run) | 24 spans <5ms vs. the 20-span limit — investigated against source (`resolves.ts:264` early-return for local/URL/no-update/filtered/ignore-mode deps); not a defect, a structural mismatch between a flat threshold and a run's natural span volume, same shape as the existing SPA-001 CLI exemption |
+| — | CDQ-007 | bunWorkspaces.ts, packageJson.ts (write), packageYaml.ts, packages.ts (3 sites), pnpmWorkspaces.ts, yarnWorkspaces.ts | Unsanitized absolute local filesystem paths set via `pathe`'s `resolve()` or `pkg.filepath`, with no structural guarantee against absoluteness — fails the PRD's required structural-guarantee test in 6 of 13 files. A genuine, widespread regression from run-16, which used relative paths or basename sanitization at several of these exact call sites. Not one of this run's tracked primary goals, but the single largest new finding by file count |
 
 ### Resolved vs run-16
 
@@ -150,6 +153,7 @@ Source evidence: `per-file-evaluation.md` (13 committed files, post-reconciliati
 | — | SCH-004: taze.io.file_path/taze.write.file_path near-duplicate in yarnWorkspaces.ts | Low (new) |
 | — | COV-005: attribute regressions in resolves.ts and api/check.ts | Low (new) |
 | — | resolves.ts schema-naming instability (span names + attributes churn run-over-run) | Info (watch item) |
+| — | CDQ-007: unsanitized absolute filesystem paths, 6 of 13 files | Important (new, widespread) |
 | TAZE-RUN1-6 | IS SPA-001: INTERNAL span count — structural; CLI design | Info |
 | — | IS SPA-002: orphan span, confirmed consistent across 2 runs | Normal (real spiny-orb fix candidate) |
 | — | IS SPA-005: short-span threshold vs. run span volume | Info (rubric/threshold observation, not a defect) |
