@@ -110,6 +110,10 @@ The eval execution branch (`feature/prd-147-taze-evaluation-run-17`) **never mer
 
 - [ ] **Collect skeleton documents** — Create `evaluation/typescript/taze/run-17/` directory with `lessons-for-run18.md` and `spiny-orb-findings.md` skeleton files. Also create `evaluation/typescript/taze/run-17/debug-dumps/` directory — required before providing the instrument command. Must run before pre-run verification.
 
+  **Comment syntax**: These are `.md` files, exempt from the global ABOUTME rule — but this repo's established convention still opens every eval artifact `.md` file with an ABOUTME line using HTML comment syntax: `<!-- ABOUTME: ... -->`, not `// ABOUTME:`. Run-16's own skeleton creation got this wrong on the first pass (`//`) and needed a follow-up fix commit — use `<!-- ABOUTME: ... -->` from the start.
+
+  **Skeleton content**: `spiny-orb-findings.md`'s skeleton is not a blank template — follow run-16's skeleton shape (`git show a7e3d739:evaluation/taze/run-16/spiny-orb-findings.md` for the exact prior example) by pre-populating sections with `TBD` placeholders for this run's own primary investigation targets: COV-005 (packument.ts), SCH-003 (checkGlobal.ts + bunWorkspaces.ts String() casts), CDQ-006 (bunWorkspaces.ts `loadBunWorkspace`), resolves.ts stability, and IS SPA-002. `lessons-for-run18.md`'s skeleton uses the four standing section headers (Target-Specific Findings, Generalizable Process Improvements, Pre-Run Observations, Post-Run Observations) with no placeholder content — those fill in as the run progresses.
+
 - [ ] **Pre-run verification** — Confirm prerequisites and validate taze fork state:
 
   1. **Datadog MCP health check**: Before any other setup work, run a sanity check: `search_datadog_spans` with `service:taze` for the last 1 hour. If it fails with an unexpected error (not just "no results"), re-run `/ddsetup` and `/reload-plugins` before proceeding.
