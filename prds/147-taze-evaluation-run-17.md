@@ -223,7 +223,9 @@ The eval execution branch (`feature/prd-147-taze-evaluation-run-17`) **never mer
 
   **Unrubriced findings category**: some real failures have no matching rule ID — e.g. an attribute with the correct declared type written to the wrong pre-existing registry key. Score these as canonical failures in the narrative for consistency, but list them separately under a standing "Unrubriced Findings" section rather than folding them into any dimension's score or inventing an ad hoc rule ID. Full detail: `docs/language-extension-plan.md` step 8.
 
-- [ ] **IS scoring run** — See `evaluation/is/README.md` for collector setup.
+- [x] **IS scoring run** — See `evaluation/is/README.md` for collector setup.
+
+  **Result**: 77.8/100 (down from run-16's 88.9/100). SPA-001 not applicable (CLI app, structural). Two failures: SPA-002 (orphan span, recurred in the same shape as run-16 — confirmed real, not transient) and SPA-005 (24 spans under 5ms, exceeding the 20-span limit — traced to a legitimate early-exit code path in the target's own source, not an instrumentation defect; the fixed limit doesn't scale with a run's natural span volume). Full detail: `evaluation/typescript/taze/run-17/is-score.md`.
 
   IS scoring invocation for taze (from `evaluation/typescript/taze/run-16/lessons-for-run17.md`):
   ```bash
