@@ -72,9 +72,31 @@ Per-file analysis from run-17. Populated during failure deep-dives and per-file 
 
 *(Primary investigation target — new in run-16 with the resolves.ts recovery; determines whether async-boundary context loss is consistent or transient)*
 
-**Outcome**: TBD
+**Outcome**: Recurred. Run-16: span `0fa594f2` orphaned (parentSpanId `3b6a551d`). Run-17: span `1b89a19e` orphaned (parentSpanId `5997dc1b`) — different span IDs, same shape.
 
-**Consistent vs. transient**: TBD
+**Consistent vs. transient**: Consistent across two consecutive runs. This is a real spiny-orb fix candidate — the fix belongs in spiny-orb's context propagation across an async boundary in `resolves.ts`, not in the eval target.
+
+## IS SPA-005 (short spans over limit)
+
+*(New this run — 24 spans <5ms vs. limit of 20, up from run-16's 20/20 at the limit)*
+
+**Outcome**: Investigated against source, not a defect.
+
+**Root cause**: `SPA-005` counts all spans with duration <5ms against a flat threshold of 20, without normalizing by total span count. Run-17's 24 short spans (of 140 total, across 13 span names vs. run-16's 10) break down as 18 `taze.check.resolve_dependency` (of 51 total) plus 6 scattered across `io.load_cache`, `io.read_json`, `io.load_package`, `io.load_package_json`, and `config.resolve`.
+
+The `resolve_dependency` durations are bimodal, not noisy: 18 spans at ~0.00–0.01ms, then a hard jump to 67ms–888ms for the other 33. `src/io/resolves.ts:264` shows why — a synchronous early-return fires before `getPackageData` (the network fetch) is ever called, for deps that are local/URL-referenced, have no update flag, fail the filter, or are in "ignore" mode:
+
+```js
+if (isLocalPackage(raw.currentVersion) || isUrlPackage(raw.currentVersion) || !raw.update || !await Promise.resolve(filter(raw)) || mergeMode === 'ignore') {
+  return { ...raw, diff: null, targetVersion: raw.currentVersion, update: false }
+}
+```
+
+No I/O happens on that path, so a sub-millisecond span duration is the correct measurement. The other 33 spans go through the real network round-trip and land at 67ms+, as expected. The io/config spans are the same story — local file reads/parses with nothing to wait on.
+
+**Why this crossed the threshold vs. run-16 (exactly 20, passing)**: run-17 has more total spans overall (140 across 13 span names vs. run-16's 10) — more instrumentation coverage plus whatever the current dependency set in the fork's package.json/pnpm-workspace happens to contain. More total dependencies checked means more early-exits, and the flat cap of 20 doesn't scale with that.
+
+**Assessment**: not a code or instrumentation defect. Same shape as the existing SPA-001 CLI-app exemption already documented in this PRD — an absolute threshold rule bumping into a target whose span volume legitimately varies run-to-run. Flag as a rubric/threshold observation in the actionable-fix-output, not a regression to chase.
 
 ---
 
