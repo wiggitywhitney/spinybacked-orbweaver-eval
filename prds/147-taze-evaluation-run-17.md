@@ -149,7 +149,9 @@ The eval execution branch (`feature/prd-147-taze-evaluation-run-17`) **never mer
 
      **Result**: spiny-orb SHA `4e7c2f0`, Node v25.8.0, pnpm 10.33.2 — recorded.
 
-- [ ] **Evaluation run-17** — Whitney runs `spiny-orb instrument` in her terminal. The `debug-dumps/` directory must exist before running (created in skeleton step above).
+- [x] **Evaluation run-17** — Whitney runs `spiny-orb instrument` in her terminal. The `debug-dumps/` directory must exist before running (created in skeleton step above).
+
+  **Result (2026-09-21)**: Run completed in 41m 44.7s, cost $4.03 (vs. run-16's $4.36). 13 files committed, 0 failed, 0 partial, 20 correct skips — identical file-count shape to run-16. Total attributes added: 5 (vs. run-16's 4) — `packument.ts` now shows 1 attribute where run-16 had 0 (COV-005 target). `resolves.ts` held stable at 6 spans in 1 attempt (no oscillation). PR created: [taze PR #13](https://github.com/wiggitywhitney/taze/pull/13). Raw findings presented to Whitney per the next milestone's requirement; per-file evaluation still required to confirm whether COV-005/SCH-003/CDQ-006 actually resolved (see that milestone's fix-verification note — attribute presence alone is not proof of fix). A throwaway monitoring script (`evaluation/typescript/taze/run-17/monitor-log.sh`) was written during the run to parse live progress for periodic chat updates — not part of the eval methodology, safe to delete once the run's artifacts are finalized.
 
   **Hard prerequisite check** (cascaded from commit-story-v2 run-28, D-14): confirm Step 0.5 (Cross-run process review, including its user-approval checkpoint), the skeleton documents, and pre-run verification milestones are all fully complete — not just started — before handing Whitney the instrument command. Running out of order forecloses pre-run-only steps (Datadog pre-run health check, push-auth dry-run) permanently. Note: unlike commit-story-v2 (organic target), taze has no pre-run trace capture step — its trace artifact is captured in step 9.5, after IS scoring, so that step is unaffected by this milestone's ordering.
 
