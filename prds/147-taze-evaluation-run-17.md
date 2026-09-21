@@ -173,6 +173,8 @@ The eval execution branch (`feature/prd-147-taze-evaluation-run-17`) **never mer
 
 - [ ] **Findings Discussion** *(user-facing checkpoint 1 — raw signal before analysis)* — Present raw findings from the log: committed files, failed files, pre-scan skips, cost, resolves.ts outcome, COV-005/SCH-003/CDQ-006 guard status. Do not interpret yet. Wait for Whitney's response before proceeding to failure deep-dives.
 
+  **Note (2026-09-21)**: Raw findings were already presented in chat, milestone-by-milestone, as the run progressed in the session that ran the instrument command — including the final summary in that session's own transcript. Whitney moved directly to `/prd-update-progress` afterward without an explicit "proceed" response to that presentation. A cold AI resuming this milestone should not assume it's already satisfied just because progress was saved — open by asking Whitney directly whether she's ready to move to failure deep-dives, rather than silently re-presenting the same findings from scratch or skipping ahead.
+
 - [ ] **Failure deep-dives** — For each failed file (0 committed spans), partially committed file, and committed file requiring ≥ 3 attempts with a quality failure: analyze debug dumps, verbose log, thinking blocks, companion `.instrumentation.md` files. Follow the diagnostic protocol from `docs/language-extension-plan.md` (all 5 dimensions). Document in `evaluation/typescript/taze/run-17/spiny-orb-findings.md`.
 
 - [ ] **Per-file evaluation** *(complete IS scoring and step 9.5 trace capture first — taze is non-organic; trace artifact does not exist until after IS scoring)* — Evaluate each committed file against the rubric.
