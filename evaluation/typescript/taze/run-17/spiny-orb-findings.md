@@ -102,4 +102,4 @@ No I/O happens on that path, so a sub-millisecond span duration is the correct m
 
 ## Other Files
 
-*(Populated during per-file evaluation)*
+The remaining 9 committed files with no primary-investigation status this run (`check/index.ts`, `interactive.ts`, `config.ts`, `packageJson.ts`, `packageYaml.ts`, `packages.ts`, `pnpmWorkspaces.ts`, `yarnWorkspaces.ts`, `api/check.ts`) received full rubric scoring during per-file evaluation — see `per-file-evaluation.md` §§ 2-4, 6-9, 11-12. Notable non-primary findings surfaced there: a new SCH-003 regression in `check/index.ts` (a count attribute newly cast to string, not present in run-16), a CDQ-007-adjacent path-sanitization regression in `packageJson.ts`/`packageYaml.ts` (raw absolute paths at several call sites, though not a rubric violation per the reconciliation pass), and an SCH-003/SCH-004 regression in `yarnWorkspaces.ts` (a literal type mismatch plus a reused attribute key duplicating an existing more-specific one). No new findings beyond what's already documented in `per-file-evaluation.md`.
