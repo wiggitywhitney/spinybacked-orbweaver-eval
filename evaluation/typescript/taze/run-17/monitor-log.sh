@@ -19,7 +19,7 @@ non_skip_success=$((success - skips))
 total_attempts=$(grep -c "^  Attempt [0-9]" "$LOG" || true)
 
 # attributes: sum "N attribute" / "N attributes" from SUCCESS/FAILED lines
-total_attrs=$(grep -oE '[0-9]+ attributes?' "$LOG" | grep -oE '[0-9]+' | awk '{s+=$1} END {print s+0}')
+total_attrs=$( { grep -oE '[0-9]+ attributes?' "$LOG" || true; } | { grep -oE '[0-9]+' || true; } | awk '{s+=$1} END {print s+0}')
 
 # authoritative final tally line, if the run has finished: "Run complete: X committed, Y failed, Z partial, W correct skips, V skipped"
 final_line=$(grep -m1 "^Run complete:" "$LOG" || true)
@@ -35,7 +35,7 @@ else
   echo "Failed so far: ${failed}"
   echo "Total attempts across completed files: ${total_attempts}"
   echo "Total attributes added so far: ${total_attrs}"
-  if [ "$processed" -gt 0 ] && [ "$processed" -lt "$total_files" ]; then
+  if [ "$processed" -gt 0 ] && [[ "$total_files" =~ ^[0-9]+$ ]] && [ "$processed" -lt "$total_files" ]; then
     current_file=$(grep "^Processing file " "$LOG" | tail -1 | sed 's/^Processing file [0-9]* of [0-9]*: //')
     echo "Currently on: ${current_file}"
   fi
