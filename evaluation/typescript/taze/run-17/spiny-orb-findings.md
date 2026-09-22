@@ -92,7 +92,7 @@ if (isLocalPackage(raw.currentVersion) || isUrlPackage(raw.currentVersion) || !r
 }
 ```
 
-No I/O happens on that path, so a sub-millisecond span duration is the correct measurement. The other 33 spans go through the real network round-trip and land at 67ms+, as expected. The io/config spans are the same story — local file reads/parses with nothing to wait on.
+`getPackageData` — the network fetch — is skipped whenever an earlier condition short-circuits the check, so a sub-millisecond span duration is the correct measurement for that early-return path (the `await Promise.resolve(filter(raw))` on the same line is a synchronous predicate wrapped in a resolved promise, not I/O). The other 33 spans go through the real network round-trip and land at 67ms+, as expected. The io/config spans are the same story — local file reads/parses with nothing to wait on.
 
 **Why this crossed the threshold vs. run-16 (exactly 20, passing)**: run-17 has more total spans overall (140 across 13 span names vs. run-16's 10) — more instrumentation coverage plus whatever the current dependency set in the fork's package.json/pnpm-workspace happens to contain. More total dependencies checked means more early-exits, and the flat cap of 20 doesn't scale with that.
 
