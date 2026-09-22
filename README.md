@@ -143,10 +143,11 @@ taze is the TypeScript evaluation target. It is a dependency-update CLI for Node
 | 14 | N/A (aborted) | — | N/A | 0 | 0 | — | YES (#9) | — |
 | 15 | 27/29 (93%) | 10.2 | 2/2 | 11 | 27 | $4.82 | YES (#10) | 80/100 |
 | 16 | 26/29 (90%) | 11.7 | 2/2 | 13 | 35 | $4.36 | YES (#11) | 88.9/100 |
+| 17 | 25/29 (86%) | 11.2 | 2/2 | 13 | 35 | $4.03 | YES (#13) | 77.8/100 |
 
-Run-14 was aborted after 5 files due to a ts-morph crash (#933) and a checkpoint stop on a known baseline failure. Run-15 introduced the IS RES-001 fix (+20 IS) but suffered a resolves.ts oscillation (lost 6 spans) and a yarnWorkspaces.ts regex error. Run-16 recovered both files and improved Q×F to 11.7, with IS improving to 88.9/100.
+Run-14 was aborted after 5 files due to a ts-morph crash (#933) and a checkpoint stop on a known baseline failure. Run-15 introduced the IS RES-001 fix (+20 IS) but suffered a resolves.ts oscillation (lost 6 spans) and a yarnWorkspaces.ts regex error. Run-16 recovered both files and improved Q×F to 11.7, with IS improving to 88.9/100. Run-17 resolved the run-16 CDQ-006 and COV-005 (packument.ts) carry-forward goals, but SCH-003's count-cast pattern broadened from 2 files to 5, a new CDQ-007 regression (unsanitized absolute filesystem paths) appeared in 6 of 13 files, and IS SPA-002 (orphan span) recurred alongside a new SPA-005 failure — dropping Q×F to 11.2 and IS to 77.8/100.
 
-**Run-17 is next** — primary goals: COV-005 packument.ts (taze.package.latest_version dropped), SCH-003 String() cast pattern (checkGlobal.ts + bunWorkspaces.ts), CDQ-006 bunWorkspaces.ts (3 unguarded post-await setAttribute calls), resolves.ts stability verification, IS SPA-002 orphan span.
+**Run-18 is next** — primary goals: SCH-003 count-cast pattern (now 5 files, including 2 disguised via schema retyping), CDQ-007 unsanitized filesystem paths (new, 6 of 13 files), IS SPA-002 orphan span (confirmed consistent across 2 runs — real spiny-orb fix candidate), COV-005 regressions in resolves.ts and api/check.ts, SCH-004 near-synonym in yarnWorkspaces.ts.
 
 Full run-by-run analysis: [`evaluation/typescript/taze/`](evaluation/typescript/taze/)
 
