@@ -108,7 +108,7 @@ The feature branch for this PRD **never merges to main**. The PR exists for Code
 - [ ] **Pre-run verification**
 
   1. Confirm Python provider on spiny-orb main
-  2. Verify spiny-orb.yaml and semconv/
+  2. Verify spiny-orb.yaml and semconv/. Run `git status --short --branch` on the target fork — if it is not on `main`, or reports untracked leftover artifact files, switch to `main` and remove the leftovers before proceeding; do not assume the fork returned to `main` after a prior run. **Cascaded from taze run-17 (PRD #147)**: if this check or any other pre-run step finds the target's own test suite failing, fix it on a branch + PR — never commit the fix directly to the fork's `main`, even for a solely-owned fork.
   3. Count .py files — record inventory
   4. Rebuild spiny-orb
   5. Verify push auth: confirm `GITHUB_TOKEN` resolves to a fine-grained PAT with Contents + Pull requests write access for the fork. Push to a non-existent branch to avoid false "fetch first" rejections: `git -C ~/Documents/Repositories/<target> push --dry-run https://x-access-token:$GITHUB_TOKEN@github.com/wiggitywhitney/<target>.git HEAD:refs/heads/spiny-orb/auth-test` — expect `[new branch] HEAD -> spiny-orb/auth-test`. See `~/.claude/rules/eval-github-pat.md` for setup pattern.
@@ -151,6 +151,8 @@ The feature branch for this PRD **never merges to main**. The PR exists for Code
 
   Produces: `evaluation/<target-name>/run-1/pr-evaluation.md`
   Style reference: `Read docs/templates/eval-run-style-reference/pr-evaluation.md`
+
+  **Cross-file attribute attribution** (cascaded from taze run-17, PRD #147): when compiling the schema-accuracy table, copy each attribute's exact name and file from that file's own `per-file-evaluation.md` section — do not reconstruct the pairing from the narrative summary. Two files handling structurally similar operations can carry differently-named attributes for the same concept, which is easy to conflate when writing from memory.
 
 - [ ] **Rubric scoring**
 

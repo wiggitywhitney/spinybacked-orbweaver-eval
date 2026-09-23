@@ -156,7 +156,7 @@ The **evaluation execution branch** created by `/prd-start` from main **never me
   12. **RUN21-6 watch** (Watch, ninth run): Check whether any further changes landed for issue #927, including whether RUN28-5 was folded into its scope.
   13. **Registry version discrepancy**: Check for any fix to the version-bump reporting gap.
   14. **Other spiny-orb fixes since run-28**: Check spiny-orb main for any merged PRs relevant to commit-story-v2 evaluation.
-  15. **Target repo readiness** (commit-story-v2): Verify the target checkout is on `main`, clean working tree, `spiny-orb.yaml` and `semconv/` exist.
+  15. **Target repo readiness** (commit-story-v2): Verify the target checkout is on `main`, clean working tree, `spiny-orb.yaml` and `semconv/` exist. Run `git status --short --branch` — if it is not on `main`, or reports untracked leftover artifact files, switch to `main` and remove the leftovers before proceeding. **Cascaded from taze run-17 (PRD #147)**: if this check or any other pre-run step finds the target's own test suite failing, fix it on a branch + PR — never commit the fix directly to `main`, even for a solely-owned repo.
   16. **Push auth stability check**: Verify token still works (dry-run push to non-existent branch).
   17. **File inventory**: Count `.js` files in commit-story-v2's `src/` directory. Pull the expected count from run-28's own `run-summary.md` rather than carrying forward a hardcoded number.
   18. Rebuild spiny-orb from **main**: `cd ~/Documents/Repositories/spinybacked-orbweaver && git status --short && git checkout main && git fetch origin main && git merge --ff-only origin/main`. If the working tree isn't clean, or the checkout/fetch/fast-forward fails for any reason, stop and resolve it — do not build from an unverified or stale checkout. Only once verified: `npm install && npm run build`.
@@ -248,6 +248,8 @@ The **evaluation execution branch** created by `/prd-start` from main **never me
   **RUN28/#1036 watch**: check specifically whether this run's SCH-003/CDQ-006 canonical failures (if any recur) appear in the PR's Advisory Findings section — run-28 found zero of five rule findings surfaced there.
 
   **RUN28/#1060 watch**: track the advisory contradiction rate (false-positive/mistargeted line items ÷ total advisory line items) and compare to run-27's 8% and run-28's 46%.
+
+  **Cross-file attribute attribution** (cascaded from taze run-17, PRD #147): when compiling the schema-accuracy table, copy each attribute's exact name and file from that file's own `per-file-evaluation.md` section — do not reconstruct the pairing from the narrative summary. Two files handling structurally similar operations can carry differently-named attributes for the same concept, which is easy to conflate when writing from memory.
 
 - [ ] **Rubric scoring** — Synthesize dimension-level scores.
   Produces: `evaluation/javascript/commit-story-v2/run-29/rubric-scores.md`
