@@ -113,12 +113,12 @@ The feature branch for this PRD (`feature/prd-100-evaluation-run-5-release-it`) 
 
   Verify run-4 P1 blockers and validate run prerequisites:
 
-  1. **RUN4-1 (LINT/NDS-003 indentation-width conflict) — CHECK**: On spiny-orb main, check if the Prettier post-pass fix has landed (look for a PR addressing LINT/NDS-003 conflict or Prettier formatting before NDS-003 validation). Test on `lib/plugin/github/GitHub.js`: if the pre-scan identifies it as instrumentable AND the agent can produce a LINT-passing result, the fix is live. If not, expect ~7 files committed (same set as run-4).
-  2. **RUN4-2 (PR body E2BIG) — CHECK**: On spiny-orb main, check if `createPr` now uses `--body-file` or if the compliance report is written to a separate file rather than embedded inline. If fixed, auto PR creation should work. If not, manual PR workaround still required.
-  3. **RUN4-3 (COV-003 Promise.reject gap) — CHECK**: Check if the COV-003 validator now recognizes `return Promise.reject(err)` as a rethrow pattern. If fixed, shell.js should pass COV-003.
-  4. **RUN4-4 (GitLab.js SCH-002) — CHECK**: Check if the SCH-002 duplicate detection now constrains matching to same-namespace attributes. If fixed, `release_it.gitlab.asset_name` should not be flagged as a duplicate of `release_it.github.assets_count`.
-  5. **RUN3-3 (HOME forwarding) — MUST APPLY**: Confirm `HOME="$HOME"` is included in the instrument command regardless of whether spiny-orb fix has landed.
-  6. **Target repo readiness**: Verify release-it fork is on `main`, working tree is clean. Run `git status` in `~/Documents/Repositories/release-it` — if OTel devDeps from a prior IS scoring run are present in package.json/package-lock.json, restore with `git restore package.json package-lock.json` before proceeding.
+  1. **Target repo readiness** *(runs first — later checks assume a clean, on-`main` checkout)*: Verify release-it fork is on `main`, working tree is clean. Run `git status --short --branch` in `~/Documents/Repositories/release-it` — if it is not on `main`, or reports untracked leftover artifact files (e.g., from a prior IS scoring run), switch to `main` and remove the leftovers before proceeding; do not assume the fork returned to `main` after a prior run. If OTel devDeps from a prior IS scoring run are present in package.json/package-lock.json, restore with `git restore package.json package-lock.json`. **Cascaded from taze run-17 (PRD #147)**: if this check or any other pre-run step finds the target's own test suite failing, fix it on a branch + PR — never commit the fix directly to the fork's `main`, even though this is a solo-owned fork.
+  2. **RUN4-1 (LINT/NDS-003 indentation-width conflict) — CHECK**: On spiny-orb main, check if the Prettier post-pass fix has landed (look for a PR addressing LINT/NDS-003 conflict or Prettier formatting before NDS-003 validation). Test on `lib/plugin/github/GitHub.js`: if the pre-scan identifies it as instrumentable AND the agent can produce a LINT-passing result, the fix is live. If not, expect ~7 files committed (same set as run-4).
+  3. **RUN4-2 (PR body E2BIG) — CHECK**: On spiny-orb main, check if `createPr` now uses `--body-file` or if the compliance report is written to a separate file rather than embedded inline. If fixed, auto PR creation should work. If not, manual PR workaround still required.
+  4. **RUN4-3 (COV-003 Promise.reject gap) — CHECK**: Check if the COV-003 validator now recognizes `return Promise.reject(err)` as a rethrow pattern. If fixed, shell.js should pass COV-003.
+  5. **RUN4-4 (GitLab.js SCH-002) — CHECK**: Check if the SCH-002 duplicate detection now constrains matching to same-namespace attributes. If fixed, `release_it.gitlab.asset_name` should not be flagged as a duplicate of `release_it.github.assets_count`.
+  6. **RUN3-3 (HOME forwarding) — MUST APPLY**: Confirm `HOME="$HOME"` is included in the instrument command regardless of whether spiny-orb fix has landed.
   7. **File inventory**: Confirm 23 `.js` files in `lib/` — run `find lib -name "*.js" | wc -l` from `~/Documents/Repositories/release-it/`.
   8. **Rebuild spiny-orb**: Rebuild from **main**. Record SHA.
   9. **Record versions**: Node.js version, spiny-orb version/SHA, release-it version.
@@ -178,6 +178,8 @@ The feature branch for this PRD (`feature/prd-100-evaluation-run-5-release-it`) 
 
   Produces: `evaluation/javascript/release-it/run-5/pr-evaluation.md`
   Style reference: `Read docs/templates/eval-run-style-reference/pr-evaluation.md`
+
+  **Cross-file attribute attribution** (cascaded from taze run-17, PRD #147): when compiling the schema-accuracy table, copy each attribute's exact name and file from that file's own `per-file-evaluation.md` section — do not reconstruct the pairing from the narrative summary. Two files handling structurally similar operations can carry differently-named attributes for the same concept, which is easy to conflate when writing from memory.
 
 - [ ] **Rubric scoring**
 

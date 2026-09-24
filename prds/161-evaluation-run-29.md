@@ -142,7 +142,10 @@ The **evaluation execution branch** created by `/prd-start` from main **never me
 - [ ] **Collect skeleton documents** — Create `evaluation/javascript/commit-story-v2/run-29/` directory with `debug-dumps/` and a `lessons-for-prd30.md` skeleton. Must run before pre-run verification begins.
 
 - [ ] **Pre-run verification** — Verify spiny-orb fixes and validate run prerequisites:
-  1. **Datadog MCP health check** *(first, before any other pre-run step)*: Run `search_datadog_spans` with `service:commit-story` for the last 1 hour. If it fails or returns an unexpected error (not just "no results"), re-run `/ddsetup`, then `/reload-plugins`. Do not proceed until Datadog MCP queries succeed.
+
+  **Target-fork branch state (runs before item 1 and everything else below)**: Run `git status --short --branch` on the commit-story-v2 checkout. If it is not on `main`, or reports untracked leftover artifact files, switch to `main` and remove the leftovers before proceeding — do not assume the checkout returned to `main` after a prior run. Item 15 below still performs the fuller readiness check (clean working tree, `spiny-orb.yaml`/`semconv/` presence); this step only resolves branch/leftover state first so item 15 and everything after it run against a verified checkout.
+
+  1. **Datadog MCP health check** *(first Datadog-dependent step)*: Run `search_datadog_spans` with `service:commit-story` for the last 1 hour. If it fails or returns an unexpected error (not just "no results"), re-run `/ddsetup`, then `/reload-plugins`. Do not proceed until Datadog MCP queries succeed.
   2. **Handoff triage review**: Read the spiny-orb team's triage of `evaluation/javascript/commit-story-v2/run-28/actionable-fix-output.md`. Confirm the 4 new issues (#1065–#1068) and 5 corroborating comments (#1037, #927, #1036, #1060, #1063) are as recorded.
   3. **RUN28-1 fix** (P2, CDQ-006, #1067): Check whether spiny-orb main has a merged fix — either a stricter within-file consistency check, or updated prompt guidance on when to guard `setAttribute` calls. Note open/closed status.
   4. **RUN28-2 fix** (P1, SCH-003, #1037): Check whether the bidirectional type-mismatch check (String()-wrapped value into a numeric/boolean key, AND a raw numeric/boolean value into a string-typed key) has landed. This supersedes the original narrower framing — confirm the issue's acceptance criteria were actually updated to the broadened scope, not just commented on.
@@ -156,7 +159,7 @@ The **evaluation execution branch** created by `/prd-start` from main **never me
   12. **RUN21-6 watch** (Watch, ninth run): Check whether any further changes landed for issue #927, including whether RUN28-5 was folded into its scope.
   13. **Registry version discrepancy**: Check for any fix to the version-bump reporting gap.
   14. **Other spiny-orb fixes since run-28**: Check spiny-orb main for any merged PRs relevant to commit-story-v2 evaluation.
-  15. **Target repo readiness** (commit-story-v2): Verify the target checkout is on `main`, clean working tree, `spiny-orb.yaml` and `semconv/` exist.
+  15. **Target repo readiness** (commit-story-v2): Verify the target checkout is on `main`, clean working tree, `spiny-orb.yaml` and `semconv/` exist. Run `git status --short --branch` — if it is not on `main`, or reports untracked leftover artifact files, switch to `main` and remove the leftovers before proceeding. **Cascaded from taze run-17 (PRD #147)**: if this check or any other pre-run step finds the target's own test suite failing, fix it on a branch + PR — never commit the fix directly to `main`, even for a solely-owned repo.
   16. **Push auth stability check**: Verify token still works (dry-run push to non-existent branch).
   17. **File inventory**: Count `.js` files in commit-story-v2's `src/` directory. Pull the expected count from run-28's own `run-summary.md` rather than carrying forward a hardcoded number.
   18. Rebuild spiny-orb from **main**: `cd ~/Documents/Repositories/spinybacked-orbweaver && git status --short && git checkout main && git fetch origin main && git merge --ff-only origin/main`. If the working tree isn't clean, or the checkout/fetch/fast-forward fails for any reason, stop and resolve it — do not build from an unverified or stale checkout. Only once verified: `npm install && npm run build`.
@@ -248,6 +251,8 @@ The **evaluation execution branch** created by `/prd-start` from main **never me
   **RUN28/#1036 watch**: check specifically whether this run's SCH-003/CDQ-006 canonical failures (if any recur) appear in the PR's Advisory Findings section — run-28 found zero of five rule findings surfaced there.
 
   **RUN28/#1060 watch**: track the advisory contradiction rate (false-positive/mistargeted line items ÷ total advisory line items) and compare to run-27's 8% and run-28's 46%.
+
+  **Cross-file attribute attribution** (cascaded from taze run-17, PRD #147): when compiling the schema-accuracy table, copy each attribute's exact name and file from that file's own `per-file-evaluation.md` section — do not reconstruct the pairing from the narrative summary. Two files handling structurally similar operations can carry differently-named attributes for the same concept, which is easy to conflate when writing from memory.
 
 - [ ] **Rubric scoring** — Synthesize dimension-level scores.
   Produces: `evaluation/javascript/commit-story-v2/run-29/rubric-scores.md`

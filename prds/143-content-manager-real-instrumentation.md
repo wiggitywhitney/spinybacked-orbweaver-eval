@@ -170,6 +170,8 @@ Evaluation artifacts live at `evaluation/content-manager/run-1/` in this repo (s
   Style reference: `Read docs/templates/eval-run-style-reference/pr-evaluation.md`
   PR: Find the URL in `evaluation/content-manager/run-1/run-summary.md`.
 
+  **Cross-file attribute attribution** (cascaded from taze run-17, PRD #147): when compiling the schema-accuracy table, copy each attribute's exact name and file from that file's own `per-file-evaluation.md` section — do not reconstruct the pairing from the narrative summary. Two files handling structurally similar operations can carry differently-named attributes for the same concept, which is easy to conflate when writing from memory.
+
 - [ ] **Rubric scoring** — Synthesize dimension-level scores.
   Produces: `evaluation/content-manager/run-1/rubric-scores.md`
   Style reference: `Read docs/templates/eval-run-style-reference/rubric-scores.md`
