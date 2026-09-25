@@ -1,6 +1,6 @@
 # PRD #147: TS Evaluation Run-17: taze — COV-005 + SCH-003 + CDQ-006 Resolution Verification
 
-**Status:** Active
+**Status:** Complete (2026-09-24)
 **Created:** 2026-06-22
 **GitHub Issue:** [#147](https://github.com/wiggitywhitney/spinybacked-orbweaver-eval/issues/147)
 **Depends on:** PRD #146 (run-16 complete, actionable fix output delivered, findings TAZE-RUN3-1 through TAZE-RUN3-4 filed)
@@ -270,13 +270,17 @@ The eval execution branch (`feature/prd-147-taze-evaluation-run-17`) **never mer
 
   **Handoff-confirmation depth**: When Whitney confirms handoff to the spiny-orb team, verify each finding's actual roadmap tier/sequencing (not just that an issue exists with acceptance criteria) against spiny-orb's `docs/ROADMAP.md`. A finding can be correctly filed and triaged while still not being scheduled to land before the next run — state this explicitly rather than treating an expected recurrence as a surprise.
 
-- [ ] **Draft next PRD** *(includes template-update checkpoint before drafting)* — Follow `docs/language-extension-plan.md` step 12: (1) review `lessons-for-run18.md` and `actionable-fix-output.md` for process observations; (2) present two-section checkpoint to user (target-specific vs. generalizable); (3) after approval, commit any template changes as a separate commit **on a branch that merges to main — never on this PRD's own eval execution branch, which per the Eval Branch Convention never merges** (a template edit committed there is silently stranded, exactly like the "step 3b" bug this template's own history documents); (4) draft the next taze run PRD using this PRD as the style reference; (5) run `/write-prompt` before committing.
+- [x] **Draft next PRD** *(includes template-update checkpoint before drafting)* — Follow `docs/language-extension-plan.md` step 12: (1) review `lessons-for-run18.md` and `actionable-fix-output.md` for process observations; (2) present two-section checkpoint to user (target-specific vs. generalizable); (3) after approval, commit any template changes as a separate commit **on a branch that merges to main — never on this PRD's own eval execution branch, which per the Eval Branch Convention never merges** (a template edit committed there is silently stranded, exactly like the "step 3b" bug this template's own history documents); (4) draft the next taze run PRD using this PRD as the style reference; (5) run `/write-prompt` before committing.
 
-- [ ] **Copy artifacts to main** — Switch to main, pull, then run:
+  Completed via PR #167 (`docs/language-extension-plan-run17-lessons`, merged to main): cascaded the target-fork branch-state check + test-fix branch discipline, and the cross-file attribute attribution reminder, into `docs/language-extension-plan.md` and five active open eval PRDs (#100, #143, #161, #51, #52). Drafted PRD #168 (`prds/168-taze-evaluation-run-18.md`, GitHub issue [#168](https://github.com/wiggitywhitney/spinybacked-orbweaver-eval/issues/168)) as the next taze run PRD, baking both cascaded improvements into its own milestones. `/write-prompt` run on all modified/created PRD files and the template before committing. Two rounds of CodeRabbit findings on PR #167 addressed (ordering conflicts between the new fork-check and existing checks; missing `set -o pipefail`; an overclaimed resolves.ts causation; an IS-scorer working-directory error) before merge.
+
+- [x] **Copy artifacts to main** — Switch to main, pull, then run:
   ```bash
   git checkout feature/prd-147-taze-evaluation-run-17 -- evaluation/typescript/taze/run-17/
   ```
   Commit to main with message `eval: save taze run-17 artifacts to main [skip ci]`. The run-17 row in `evaluation/typescript/taze/run-log.md` and the taze run history section in `README.md` were added on the eval branch — verify they are present after the checkout and do NOT duplicate them. Push to origin/main. Then return to the eval branch and run `/prd-done`.
+
+  Completed (commit `ba02c8d` on main): all 13 run-17 artifact files copied. The run-17 row was present in `README.md` but missing from `run-log.md` (the baseline-comparison milestone only updated the former) — added it directly to main as part of this step rather than duplicating the gap. `PROGRESS.md` entry added in a follow-up commit (`8a395b2`).
 
 ---
 
