@@ -106,7 +106,7 @@ The eval execution branch (`feature/prd-168-taze-evaluation-run-18`) **never mer
 
 - [ ] **Step 0 — Bootstrap reading.** Before proceeding with any other milestone, read these documents in order:
   1. `docs/language-extension-plan.md` — completely. Pay particular attention to: (a) Type D structure and full step sequence including step 9.6 (correlated signals check); (b) "Two User-Facing Checkpoints" section — exact wording for Findings Discussion and handoff pause; (c) eval branch convention (never merges to main); (d) step 13 (copy artifacts to main before closing); (e) step 9.5 (capture trace artifact after IS scoring — taze is non-organic); (f) the two additions cascaded from run-17 in step 2 (target fork branch state + test-suite fix branch discipline) and step 7 (cross-file attribute attribution).
-  2. `prds/147-taze-evaluation-run-17.md` — the immediately prior taze run PRD. Note: taze is non-organic (trace artifact created during IS scoring step 9.5, NOT during pre-run verification).
+  2. `prds/done/147-taze-evaluation-run-17.md` — the immediately prior taze run PRD, archived after completion. Note: taze is non-organic (trace artifact created during IS scoring step 9.5, NOT during pre-run verification).
   3. `evaluation/typescript/taze/run-17/actionable-fix-output.md` — prior run findings. RUN17-1 (SCH-003 broadening), RUN17-2 (CDQ-007 new regression), RUN17-3 (IS SPA-002 confirmed consistent), RUN17-4 (resolves.ts schema drift) are the primary goals for this run.
   4. `evaluation/typescript/taze/run-17/lessons-for-run18.md` — process notes, including the target-fork branch-state and CDQ-007 structural-guarantee lessons already folded into the template.
   **Do not mark this complete until you have read all four documents.**
@@ -168,7 +168,7 @@ The eval execution branch (`feature/prd-168-taze-evaluation-run-18`) **never mer
 
   **Spawn up to 5 agents per batch — no more than 5.** Required sequence per batch: spawn up to 5 agents → collect results → append results to `per-file-evaluation.md` → `/prd-update-progress` → `/clear` → spawn next batch. Number of batches: ⌈committed_files/5⌉. `per-file-evaluation.md` is written incrementally across batches — do not wait for all files before writing.
 
-  **Output format**: Follow the per-file format from `prds/147-taze-evaluation-run-17.md`'s corresponding milestone exactly — one section per committed file, rule table per span, failures summary table at the end.
+  **Output format**: Follow the per-file format from `prds/done/147-taze-evaluation-run-17.md`'s corresponding milestone exactly — one section per committed file, rule table per span, failures summary table at the end.
 
   **Entry point — read these produced artifacts before starting**:
   - `evaluation/typescript/taze/run-18/spiny-orb-findings.md` — failure deep-dives are already documented here. Start here rather than re-deriving from the log.
