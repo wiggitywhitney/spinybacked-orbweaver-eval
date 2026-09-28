@@ -95,7 +95,7 @@ The feature branch for this PRD (`feature/prd-100-evaluation-run-5-release-it`) 
 
 ## Milestones
 
-- [ ] **Step 0 — Bootstrap reading.** Before proceeding with any other milestone, read these documents in order:
+- [x] **Step 0 — Bootstrap reading.** Before proceeding with any other milestone, read these documents in order:
   1. `docs/language-extension-plan.md` — completely.
   2. `prds/115-evaluation-run-22.md` — canonical Type D milestone style reference. **Release-it is non-organic** (unlike commit-story-v2): the trace artifact is created during IS scoring (step 9.5), NOT during pre-run verification. The IS scoring milestone and per-file trace supplement timing differ accordingly — read both PRDs side by side to understand where release-it diverges.
   3. `evaluation/javascript/release-it/run-4/actionable-fix-output.md` — prior run findings. RUN4-1 (LINT/NDS-003 indentation-width conflict) and RUN4-2 (PR body E2BIG) are the P1 blockers that drive run-5's pre-run verification.
