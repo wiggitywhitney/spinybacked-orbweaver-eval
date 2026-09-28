@@ -38,15 +38,15 @@ The feature branch for this PRD **never merges to main**. The PR exists for Code
 
 - [ ] **Step 0: Read `docs/language-extension-plan.md` completely before proceeding with any other milestone**
 
-  Read the full document, paying particular attention to: (1) "Type C: Setup + Run-1 PRD" section; (2) "Language Candidates" table — confirm Python provider status; (3) "Two User-Facing Checkpoints" section; (4) eval branch convention. Also read `docs/research/eval-target-criteria.md` to review the 3 Python candidates. Read `docs/research/instrumentation-score-integration.md` for Python OTel bootstrap details: `opentelemetry-instrument` wrapper OR manual bootstrap module, atexit hook + explicit SIGTERM handler (atexit alone does not cover SIGTERM in containerized deployments).
+  Read the full document, paying particular attention to: (1) "Type C: Setup + Run-1 PRD" section; (2) "Language Candidates" table — confirm Python provider status; (3) "Two User-Facing Checkpoints" section; (4) eval branch convention. Also read `docs/research/eval-target-criteria.md` Sections 2.3 and 2.3a to review all Python candidates. Read `docs/research/instrumentation-score-integration.md` for Python OTel bootstrap details: `opentelemetry-instrument` wrapper OR manual bootstrap module, atexit hook + explicit SIGTERM handler (atexit alone does not cover SIGTERM in containerized deployments).
 
-  Success criteria: Can answer — what are the 3 Python candidates? What is the Python OTel bootstrap mechanism? Why does atexit alone not suffice?
+  Success criteria: Can answer — what are the Python candidates in Sections 2.3 and 2.3a? What is the Python OTel bootstrap mechanism? Why does atexit alone not suffice?
 
 - [ ] **Milestone 0: Evaluate Python candidates and choose target**
 
   Read `docs/research/eval-target-criteria.md` Sections 2.3 and 2.3a before cloning anything. The COV-006 overlap analysis and per-rule coverage tables for all 4 candidates are already complete — do not redo them.
 
-  **Research update (2026-09-20):** the criteria doc was revised to add a 4th candidate, `fastapi-realworld-example-app` (§2.3a), researched because spiny-orb PRD #373's own Milestone D6 requires a Flask- or FastAPI-based target to exercise decorator-based route handlers for COV-001 — none of the original 3 CLI candidates are web apps. `fastapi-realworld-example-app` is locally verified (90/90 tests pass reproducibly with locked deps + Alembic migration) and is the doc's current recommendation for this reason: it covers the decorator-route COV-001 signal the CLI candidates structurally cannot, on top of strong CDQ-001/CDQ-003/COV-002 coverage. Its COV-006 status is unverified (🔍) — no worse than the 3 CLI candidates, all of which are also unverified pending the Python provider gaining an `AUTO_INSTRUMENTED_OPERATIONS` equivalent.
+  **Research update (2026-09-20):** the criteria doc was revised to add a 4th candidate, `fastapi-realworld-example-app` (§2.3a), researched because spiny-orb PRD #373's own Milestone D6 requires a Flask- or FastAPI-based target to exercise decorator-based route handlers for COV-001 — none of the original 3 CLI candidates are web apps. `fastapi-realworld-example-app` is locally verified (90/90 tests pass reproducibly with `poetry.lock`-derived name/version pins installed with `pip` and an Alembic migration; extras, markers, and hashes were not preserved) and is the doc's current recommendation for this reason: it covers the decorator-route COV-001 signal the CLI candidates structurally cannot, on top of strong CDQ-001/CDQ-003/COV-002 coverage. Its COV-006 status is unverified (🔍) — no worse than the 3 CLI candidates, all of which are also unverified pending the Python provider gaining an `AUTO_INSTRUMENTED_OPERATIONS` equivalent.
 
   **What the research already covers (do not repeat):**
   - COV-006 overlap: mycli (PyMySQL), iredis (redis + click — 2 overlaps), commitizen (jinja2), fastapi-realworld-example-app (unverified)
@@ -190,7 +190,7 @@ The feature branch for this PRD **never merges to main**. The PR exists for Code
 ## Dependencies and Constraints
 
 - **Depends on**: Python language provider in spiny-orb (Gate 1)
-- **Depends on**: `docs/research/eval-target-criteria.md` with 3 Python candidates (Gate 2)
+- **Depends on**: `docs/research/eval-target-criteria.md` with the Python candidates in Sections 2.3 and 2.3a (Gate 2)
 - **Blocks**: Python Run-2 PRD
 
 ## Risks and Mitigations
