@@ -103,7 +103,7 @@ The feature branch for this PRD (`feature/prd-100-evaluation-run-5-release-it`) 
 
 - [x] **Step 0.5 — Cross-run process review** *(user-facing checkpoint — template changes require user approval)*. Follow the full procedure in `docs/language-extension-plan.md` Step 0.5. In brief: (1) find the most recently completed release-it run (completion signal: `actionable-fix-output.md` present in `evaluation/javascript/release-it/run-N/`); (2) check all other `evaluation/` subdirectories for a more recently completed cross-target run — compare using the `captured:` field in `trace-artifact.md` if it exists, or the file modification time of `actionable-fix-output.md` as a proxy; if release-it has no completed runs, treat it as timestamp zero so any cross-target run qualifies; (3) if a more recent cross-target run exists, read its `actionable-fix-output.md` and any `lessons-for-prd*.md` files; (4) compare findings against the template's milestone structure as instantiated in this PRD (from `docs/language-extension-plan.md`); (5) present the structured three-section checkpoint report to the user (already in template, missing from template with proposed text, target-specific only); (6) after user approves, make the approved template edits. Do NOT make any edits without explicit user approval. If no cross-target run is more recent, note this in the report and proceed.
 
-- [ ] **Collect skeleton documents**
+- [x] **Collect skeleton documents**
 
   Create `evaluation/javascript/release-it/run-5/` directory in the eval repo with skeleton files:
   - `lessons-for-run6.md` (copy structure from `evaluation/javascript/release-it/run-4/lessons-for-run5.md`)
