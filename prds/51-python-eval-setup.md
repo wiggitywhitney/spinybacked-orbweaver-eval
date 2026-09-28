@@ -4,17 +4,17 @@
 **Status**: Draft
 **Owner**: Whitney Lee
 **Created**: 2026-04-11
-**Last Updated**: 2026-04-11
+**Last Updated**: 2026-09-28
 **Type**: C (Setup + Run-1)
 
 ## Overview
 
-The eval framework has no Python evaluation chain. This PRD evaluates 3 Python candidates from the shortlist in `docs/research/eval-target-criteria.md`, selects the best one based on rubric rule coverage, forks it, adds spiny-orb prerequisites, and runs the first baseline evaluation (Run-1).
+The eval framework has no Python evaluation chain. This PRD evaluates the Python candidates in `docs/research/eval-target-criteria.md` §2.3/§2.3a, selects the best one based on rubric rule coverage, forks it, adds spiny-orb prerequisites, and runs the first baseline evaluation (Run-1).
 
 ## Prerequisites / Gates
 
-- **Gate 1 (provider):** The Python language provider must be merged to spiny-orb main. Check current status in `docs/language-extension-plan.md` "Language Candidates" table.
-- **Gate 2 (research):** `docs/research/eval-target-criteria.md` must exist with 3 Python candidates before this PRD can start.
+- **Gate 1 (provider):** The Python language provider must be merged to spiny-orb main. As of 2026-09-28, spiny-orb PRD #373 (Python provider) is open and in active development on `feature/prd-373-python-provider` — not yet merged. Check current status in `docs/language-extension-plan.md` "Language Candidates" table before starting.
+- **Gate 2 (research):** `docs/research/eval-target-criteria.md` must exist with Python candidates before this PRD can start. **Satisfied** — the doc was revised 2026-09-20 to add a 4th candidate (§2.3a, see Milestone 0 note below).
 
 ### Eval Branch Convention
 
@@ -42,26 +42,28 @@ The feature branch for this PRD **never merges to main**. The PR exists for Code
 
   Success criteria: Can answer — what are the 3 Python candidates? What is the Python OTel bootstrap mechanism? Why does atexit alone not suffice?
 
-- [ ] **Milestone 0: Evaluate 3 Python candidates and choose target**
+- [ ] **Milestone 0: Evaluate Python candidates and choose target**
 
-  Read `docs/research/eval-target-criteria.md` Section 2.3 before cloning anything. The COV-006 overlap analysis and per-rule coverage table for all 3 Python candidates are already complete — do not redo them.
+  Read `docs/research/eval-target-criteria.md` Sections 2.3 and 2.3a before cloning anything. The COV-006 overlap analysis and per-rule coverage tables for all 4 candidates are already complete — do not redo them.
+
+  **Research update (2026-09-20):** the criteria doc was revised to add a 4th candidate, `fastapi-realworld-example-app` (§2.3a), researched because spiny-orb PRD #373's own Milestone D6 requires a Flask- or FastAPI-based target to exercise decorator-based route handlers for COV-001 — none of the original 3 CLI candidates are web apps. `fastapi-realworld-example-app` is locally verified (90/90 tests pass reproducibly with locked deps + Alembic migration) and is the doc's current recommendation for this reason: it covers the decorator-route COV-001 signal the CLI candidates structurally cannot, on top of strong CDQ-001/CDQ-003/COV-002 coverage. Its COV-006 status is unverified (🔍) — no worse than the 3 CLI candidates, all of which are also unverified pending the Python provider gaining an `AUTO_INSTRUMENTED_OPERATIONS` equivalent.
 
   **What the research already covers (do not repeat):**
-  - COV-006 overlap: mycli (PyMySQL), iredis (redis + click — 2 overlaps), commitizen (jinja2)
-  - Full 24-rule differentiating coverage table with ✓/✗/🔍 for all 3 candidates
-  - File counts (mycli: 15, iredis: 17, commitizen: 51), I/O types, licenses, star counts
-  - IS scoring setup requirements (mycli needs MySQL Docker; iredis needs Redis Docker; commitizen is standalone)
+  - COV-006 overlap: mycli (PyMySQL), iredis (redis + click — 2 overlaps), commitizen (jinja2), fastapi-realworld-example-app (unverified)
+  - Full differentiating coverage tables with ✓/✗/🔍 for all 4 candidates
+  - File counts (mycli: 15 at original research, since grown to 59 — see §2.3 refresh; iredis: 16; commitizen: 52; fastapi-realworld-example-app: 56), I/O types, licenses, star counts
+  - IS scoring setup requirements (mycli needs MySQL Docker; iredis needs Redis Docker; commitizen is standalone; fastapi-realworld-example-app needs Postgres + Alembic per §2.3a's three setup steps)
 
-  **What still requires local verification (do these for all 3 candidates):**
+  **What still requires local verification (do these for whichever candidates remain in contention):**
   1. Clone the repo
-  2. Run the test suite once — must pass; this cannot be pre-researched
-  3. Confirm source file count from local clone matches the research doc's count
+  2. Run the test suite once — must pass; this cannot be pre-researched (fastapi-realworld-example-app's 90/90 pass was already verified during §2.3a's research — re-confirm rather than treat as new)
+  3. Confirm source file count from local clone matches the research doc's current count
   4. Confirm no existing OTel instrumentation (grep for `opentelemetry` imports)
   5. Note any caveats discovered during cloning that differ from the research
 
-  Using the pre-researched comparison table from Section 2.3 and the local verification results above, make the final selection. Decision factors: rubric coverage (pre-researched in table), test reliability (local), confirmed file count (local), no existing OTel (local). Accept an above-30-file candidate only if the extra rules it exercises justify the longer runtime — document that justification. Prefer candidates from different GitHub orgs (same-org candidates share coding conventions).
+  Using the pre-researched comparison tables from Sections 2.3/2.3a and the local verification results above, make the final selection. Decision factors: rubric coverage (pre-researched in tables), test reliability (local), confirmed file count (local), no existing OTel (local). Accept an above-30-file candidate only if the extra rules it exercises justify the longer runtime — document that justification (fastapi-realworld-example-app's decorator-route coverage is the documented justification if selected). Prefer candidates from different GitHub orgs (same-org candidates share coding conventions).
 
-  Present the recommendation to Whitney with rationale. Do not proceed until Whitney confirms the selection.
+  Present the recommendation to Whitney with rationale, including whether to follow the criteria doc's D6-driven recommendation or a CLI-first candidate instead. Do not proceed until Whitney confirms the selection.
 
   Success criteria: One candidate selected with documented rubric-coverage rationale. Whitney's approval obtained.
 
@@ -203,6 +205,7 @@ The feature branch for this PRD **never merges to main**. The PR exists for Code
 
 | Date | Decision | Rationale | Impact |
 |------|----------|-----------|--------|
+| 2026-09-28 | Updated Milestone 0 and Gate 2 to reflect `eval-target-criteria.md`'s 2026-09-20 revision, which added a 4th candidate (`fastapi-realworld-example-app`, §2.3a) and recommended it over the 3 original CLI candidates | spiny-orb PRD #373's own Milestone D6 requires a Flask/FastAPI target for decorator-based route detection (COV-001), which none of the CLI candidates satisfy; the new candidate is already locally verified (90/90 tests passing). Gate 1 (Python provider merged to main) remains unmet — PRD #373 is still open and in active development as of this date — so this PRD stays blocked; only the target-research input changed. | Milestone 0 rewritten to present both the D6-driven recommendation and the CLI-first candidates as options for Whitney's approval, rather than assuming the original 3-candidate framing |
 | 2026-06-30 | Added a required pre-run-1 SPA-002 bootstrap fix + SPA-001 calibration spike step | Issue #133: both bugs surfaced independently in commit-story-v2 and taze and were previously caught after multiple failed runs instead of before run-1. SPA-002 (spiny-orb #926) is a batch-exporter-vs-process-exit race; SPA-001's fixed threshold doesn't generalize to per-item-iteration targets — the real fix is the per-target `SPA001_PER_TARGET_LIMITS` mechanism in `evaluation/is/score-is.js` (eval-repo issue #134), not a research-spike doc (spiny-orb issue #951, closed without that deliverable). | New "SPA-002 bootstrap fix and SPA-001 calibration spike" milestone added before Evaluation run-1. Mirrors the same addition in PRDs #50, #52, #53. |
 | 2026-04-11 | 3 candidates evaluated in milestone 0 | Hands-on validation beats desk research | Milestone 0 added |
 | 2026-04-11 | Python auto-instrumentation library list is a milestone | Python provider needs its own KNOWN_FRAMEWORK_PACKAGES | Contribution to spiny-orb |
@@ -212,3 +215,4 @@ The feature branch for this PRD **never merges to main**. The PR exists for Code
 | Date | Update | Status | Next Steps |
 |------|--------|--------|------------|
 | 2026-04-11 | PRD created (revised from initial commitizen-assumed version) | Draft | Await Gates 1 and 2 |
+| 2026-09-28 | Milestone 0 target research refreshed; Gate 2 now satisfied | Draft | Still blocked on Gate 1 (Python provider merge to spiny-orb main — PRD #373 in progress) |
