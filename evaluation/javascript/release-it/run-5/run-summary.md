@@ -79,7 +79,7 @@ All ten were pre-scan skips with no LLM call: lib/args.js, lib/cli.js, lib/index
 | RUN4-4 | GitLab.js SCH-002 cross-domain duplicate | Not seen this run, provisional | GitLab.js committed with no SCH-002 failure. The pre-run check found no namespace scoping in the duplicate detection, so this may be run-to-run variation rather than a fix. |
 | RUN3-3 | HOME not forwarded to weaver | Workaround kept | `HOME="$HOME"` was in the instrument command; no weaver failure occurred. |
 
-"Fix mechanism fired" is not established for any row. A file can pass because the agent wrote differently, not because a fix worked.
+"Fix mechanism fired" is established for RUN4-3 only, and only from the shell.js log and debug dump (`failure-deep-dives.md` has the evidence). It is not established for any other row. A file can pass because the agent wrote differently, not because a fix worked.
 
 ---
 

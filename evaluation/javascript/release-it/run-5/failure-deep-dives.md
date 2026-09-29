@@ -42,7 +42,8 @@ The defect is real. In each dump, an un-awaited promise is returned inside `try 
 | GitBase.js | `getRemoteUrl`, line 133 | `return this.isRemoteName(...) ? this.exec(...).catch(...) : remoteNameOrUrl` |
 | GitBase.js | `getSecondLatestTagName`, about line 211 | `return this.exec(...).catch(() => null)` |
 | npm.js | `getLatestRegistryVersion`, line 245 | `return this.exec(...).catch(() => null)` |
-| shell.js | `execFormattedCommand` | `return result`, where `result` is the promise from `execStringCommand`/`execWithArguments` |
+| shell.js | `execFormattedCommand`, line 48 (cache-hit path) | `return this.cache.get(cacheKey)`, which returns the cached promise stored by the un-awaited `this.cache.set(cacheKey, result)` |
+| shell.js | `execFormattedCommand`, final return | `return result`, where `result` is the promise from `execStringCommand`/`execWithArguments` |
 
 The hypothesis to test was "the agent kept the original `return` lines to avoid NDS-003 and hit LINT or NDS-003 elsewhere". The evidence does not support it as the cause of any of the four failures:
 
@@ -60,7 +61,7 @@ The dumps stay unedited as evidence, per the Decision Log.
 
 The shell.js dump sets `release_it.shell.command` to `cacheKey` (line 36) and to `command.join(' ')` (line 99). `cacheKey` is the full command line, including whatever arguments release-it passes to git, npm, and hook commands. Those can carry credentials or tokens. CDQ-007 (`src/languages/javascript/rules/cdq007.ts`) works from a list of sensitive identifier names (`password`, `username`, `email`, and similar) and path-shaped identifiers. It checks what the value expression is called, not what the value contains, and neither `cacheKey` nor `command` is on its list. So nothing would stop this attribute from shipping. Worth noting for contrast: in npm.js the same rule did steer the agent away from recording `username` (agent notes say it matched a CDQ-007 key exactly).
 
-Because shell.js never committed, PR #4 does not contain this attribute. The gap is a finding about the validator, not about the shipped PR. It would surface the moment shell.js commits.
+The same gap shows in Git.js: the dump sets `release_it.git.push_repo` from `pushRepo` (lines 223 and 308). `pushRepo` may be a remote name or a URL, and a URL can embed credentials. Nothing checks that either. Because shell.js and Git.js never committed, PR #4 does not contain these attributes. The gap is a finding about the validator, not about the shipped PR. It would surface the moment shell.js commits.
 
 ### Attempt budget
 
