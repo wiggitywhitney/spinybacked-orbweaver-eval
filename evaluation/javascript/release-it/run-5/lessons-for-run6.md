@@ -57,3 +57,5 @@ Checked against spiny-orb `origin/main` `a55bd92` by reading source and git hist
 
 | # | Item | Priority | Type |
 |---|------|---------|------|
+| 1 | Decide the run-log tracking policy: require `git add -f` of `spiny-orb-output.log` in the template, or carve out `evaluation/**/spiny-orb-output.log` in the ignore rule. Run-5's log is already committed. | P2 | Template change, needs user approval at the Draft Run-6 PRD checkpoint |
+| 2 | Decide whether to commit a corrected live-progress script under `evaluation/`. The current copy at `/tmp/run-progress.py` is outside the repository and under-reads attempts for wrapped NDS-003 failures. | P3 | Process tooling, decision for Whitney |
