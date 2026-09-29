@@ -24,7 +24,7 @@ Every fix-verification statement below is provisional. It comes from the run log
 | Total spans | 33 | 20 |
 | Total attributes | 13 | 8 |
 | Attempts (committed files) | 17 | 11 |
-| Attempts (all files sent to the agent) | 27 | 24 |
+| Attempts (all files sent to the agent) | 28 | 26 |
 | Input tokens | 219.7K | 218.8K |
 | Output tokens | 254.8K (199.7K cached) | 334.7K (219.1K cached) |
 | Cost | $6.55 (claude-sonnet-4-6) | ~$5–6 |
