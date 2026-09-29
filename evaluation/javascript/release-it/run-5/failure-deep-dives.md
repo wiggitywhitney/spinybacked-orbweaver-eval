@@ -61,7 +61,7 @@ The dumps stay unedited as evidence, per the Decision Log.
 
 The shell.js dump sets `release_it.shell.command` to `cacheKey` (line 36) and to `command.join(' ')` (line 99). `cacheKey` is the full command line, including whatever arguments release-it passes to git, npm, and hook commands. Those can carry credentials or tokens. CDQ-007 (`src/languages/javascript/rules/cdq007.ts`) works from a list of sensitive identifier names (`password`, `username`, `email`, and similar) and path-shaped identifiers. It checks what the value expression is called, not what the value contains, and neither `cacheKey` nor `command` is on its list. So nothing would stop this attribute from shipping. Worth noting for contrast: in npm.js the same rule did steer the agent away from recording `username` (agent notes say it matched a CDQ-007 key exactly).
 
-The same gap shows in Git.js: the dump sets `release_it.git.push_repo` from `pushRepo` (lines 223 and 308). `pushRepo` may be a remote name or a URL, and a URL can embed credentials. Nothing checks that either. Because shell.js and Git.js never committed, PR #4 does not contain these attributes. The gap is a finding about the validator, not about the shipped PR. It would surface the moment shell.js commits.
+The same gap shows in Git.js: the dump sets `release_it.git.push_repo` from `pushRepo` (lines 223 and 308). `pushRepo` may be a remote name or a URL, and a URL can embed credentials. Nothing checks that either. npm.js has a third case: the dump records `release_it.npm.registry` from `registry` (lines 243 and 372), and a registry URL can also embed credentials. Because shell.js, Git.js, and npm.js never committed, PR #4 does not contain these attributes. The gap is a finding about the validator, not about the shipped PR. It would surface the moment shell.js commits.
 
 ### Attempt budget
 
@@ -75,7 +75,7 @@ Failed files consumed 11 of the run's 28 agent attempts (GitBase 3, Git 3, npm 2
 
 **What the dump shows**: two lines exceed 120 characters. Line 59 (138 characters) is the problem. Line 187 (128 characters) is not: it is an original template literal (original line 114, also 128 characters) that Prettier cannot break and that was already in the Prettier-compliant original.
 
-**Mechanism**: original line 38 is `return this.exec(\`git rev-list ${ref} --count ...\`, { options }).then(Number);` at exactly 120 characters. Inside the span wrapper it gains 4 spaces of indent and is 124 characters even unchanged. The agent additionally turned `return` into `const result = await` to capture a count attribute (`release_it.git.commits_since_tag`), which brought it to 138. Prettier needs it split as:
+**Mechanism**: original line 38 is ``return this.exec(`git rev-list ${ref} --count ...`, { options }).then(Number);`` at exactly 120 characters. Inside the span wrapper it gains 4 spaces of indent and is 124 characters even unchanged. The agent additionally turned `return` into `const result = await` to capture a count attribute (`release_it.git.commits_since_tag`), which brought it to 138. Prettier needs it split as:
 
 ```javascript
 const result = await this.exec(`git rev-list ${ref} --count ${commitsPath ? `-- ${commitsPath}` : ''}`, {
@@ -129,7 +129,7 @@ The original file has no line over 120. This line was within the limit before in
 | Original line | What the agent did | Category |
 |---------------|--------------------|----------|
 | `const { name, version: latestVersion, private: isPrivate, publishConfig } = readJSON(...)` | split across five lines | Prettier-forced reformat |
-| `const task = () => this.exec(\`npm version ...\`, ...)` | split across two lines | Prettier-forced reformat |
+| ``const task = () => this.exec(`npm version ...`, ...)`` | split across two lines | Prettier-forced reformat |
 | `const match = Object.entries(distTags).find(...)` | split across lines | Prettier-forced reformat |
 | `return this.spinner.show({ task, label: 'npm version' });` | `return await this.spinner.show(...)` | Adds `await` (the flagged line 73) |
 | `return this.exec([publishPackageManager, 'publish', ...args], {` | `return await this.exec(...)` | Adds `await` |
@@ -137,7 +137,7 @@ The original file has no line over 120. This line was within the limit before in
 
 The validator reported four. NDS-003 normalizes through Prettier, so the three pure-reformat rows should normalize away, which leaves the last three rows as candidates for the four violations. The log does not confirm this mapping, so treat it as the likely account, not an established one.
 
-**Attempt sequence**: attempt 2's thinking says the failure was Prettier and lists the destructuring and `task` arrow lines as the fix. The agent notes end with two "Formatting fix" entries (destructuring, `Object.entries().find()`). Then the final result failed NDS-003, not LINT. The agent moved from a LINT problem to an NDS-003 problem by reformatting original lines by hand.
+**Attempt sequence**: attempt 2's thinking says the failure was Prettier and lists the destructuring and `task` arrow lines as the fix. The agent notes end with two "Formatting fix" entries (destructuring, `Object.entries().find()`). Then the final result failed NDS-003, not LINT. The formatting edits addressed the LINT failure. The first reported NDS-003 violation is the added `await` on line 73, and the cause of the other three is not fully mapped (see the table above). So the agent moved from a LINT problem to an NDS-003 problem, but the log does not show that the hand reformatting itself caused any of the four violations.
 
 **The `await` decision**: the agent's notes say it wrote `return await` in `bump()` and `publish()` so `span.end()` fires after the operation settles. That is correct span behaviour and it is an NDS-003 violation, which is the same trade-off run-4's GitBase agent declined to make. In `getLatestRegistryVersion` it made the opposite choice. See the run-level section.
 
@@ -160,7 +160,7 @@ They are the same value. Line 32 of the dump is `const cacheKey = typeof command
 
 **Classification**: false positive from a lexical check. The rule's stated goal (catch a key reused for two concepts, such as `dates.length` versus `weeks.length`) is sound. The failure mode is that a local alias for the same expression looks like a different concept.
 
-**What the agent could have done**: use a different key per function (`release_it.shell.command` on one, a separately named key on the other). It tried `program` for that, and the semantic-duplicate check rejected it against `command`. The two checks together left no accepted spelling that also recorded the command in both functions. The agent's final note says nothing about this conflict.
+**What the agent could have done**: use a different key per function (`release_it.shell.command` on one, a separately named key on the other). It tried `program` for that, and the semantic-duplicate check rejected it against `command`. Of the spellings the agent tried, none satisfied both checks while recording the command in both functions. One spelling was never tried: assigning `command.join(' ')` to a local named `cacheKey` inside `execWithArguments`, which would share an identifier with the other site. Whether that would pass is untested. The agent's final note says nothing about this conflict.
 
 **Un-awaited return**: `execFormattedCommand` ends `return result` inside `try`/`finally` with `result` an un-awaited promise, so the span ends before the shell call completes. This is original code and is independent of the SCH-002 failure.
 
