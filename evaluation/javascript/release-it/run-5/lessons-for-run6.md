@@ -6,20 +6,34 @@ Observations collected during run-5 evaluation that should inform the next evalu
 
 ## Pre-Run Observations
 
-### Pre-run verification — *(fill in during pre-run verification)*
+### Pre-run verification
 
 | Item | Status | Detail |
 |------|--------|--------|
-| spiny-orb.yaml | | |
-| semconv/ | | |
-| .js file inventory | | |
-| GITHUB_TOKEN_RELEASE_IT | | |
-| GIT_CONFIG_GLOBAL override | | |
-| @opentelemetry/api | | |
-| Working tree | | |
-| Node.js version | | |
-| spiny-orb SHA | | |
-| release-it version | | |
+| spiny-orb.yaml | OK | Present in the release-it fork root |
+| semconv/ | OK | `attributes.yaml`, `registry_manifest.yaml` present |
+| .js file inventory | OK | 23 `.js` files in `lib/` |
+| GITHUB_TOKEN_RELEASE_IT | OK | Referenced in the fork's `.vals.yaml`; `git push --dry-run` to non-existent branch `spiny-orb/auth-test` succeeded |
+| GIT_CONFIG_GLOBAL override | OK | `/Users/whitney.lee/.config/spiny-orb-eval/gitconfig` exists |
+| @opentelemetry/api | OK | devDependency 1.9.1, peerDependency `>=1.0.0` |
+| Working tree | OK | Fork was dirty on entry: leftover OTel SDK devDeps (4 packages) in `package.json`/`package-lock.json` from a prior IS scoring run, restored with `git restore`. Untracked `bin/release-it` symlink (pointed at `../lib/node_modules/release-it/bin/release-it.js`) removed. Untracked `.vals.yaml` is required config and was left in place. Now on `main`, clean apart from `.vals.yaml`. |
+| Node.js version | recorded | v25.8.0 (spiny-orb requires >= 24) |
+| spiny-orb SHA | recorded | `a55bd92` (`origin/main`), built in a detached worktree at `~/Documents/Repositories/spinybacked-orbweaver-main` (`npm ci` + `npm run build`; `spiny-orb --version` reports 2.0.0). The primary checkout was on `feature/prd-373-python-provider` (129 commits ahead of main, uncommitted work), so it was not used. |
+| release-it version | recorded | 20.0.0 (`package.json`) |
+
+**Instrument command path change:** because the build lives in the worktree, the command's `node` path must be `~/Documents/Repositories/spinybacked-orbweaver-main/bin/spiny-orb.js` instead of `~/Documents/Repositories/spinybacked-orbweaver/bin/spiny-orb.js`.
+
+### Run-4 blocker status entering run-5
+
+Checked against spiny-orb `origin/main` `a55bd92` by reading source and git history. No file has been instrumented yet, so "fixed in code" is not the same as "verified by the run".
+
+| # | Blocker | Status | Evidence |
+|---|---------|--------|----------|
+| RUN4-1 | LINT/NDS-003 indentation-width conflict | Fixes landed in code; effect on GitHub.js unverified | PRDs #820 (Prettier-normalized NDS-003), #845, #875, #885 are in `prds/done/`; `instrument-with-retry.ts` normalizes through Prettier before comparison. |
+| RUN4-2 | PR body E2BIG | Fixed | `src/deliverables/git-workflow.ts` writes the body to a temp file and passes `--body-file`. |
+| RUN4-3 | COV-003 `Promise.reject` not seen as rethrow | Fixed in code | `src/languages/javascript/rules/cov003.ts` handles `return Promise.reject(err)`. |
+| RUN4-4 | GitLab.js SCH-002 cross-domain duplicate | Not confirmed fixed | The recent SCH-002 change (#1056) covers the same new key reused for a different concept in one pass, which is a different problem. No namespace scoping found in the duplicate detection. Expect `release_it.gitlab.asset_name` to be flagged again. |
+| RUN3-3 | HOME not forwarded to weaver | Workaround kept | `HOME="$HOME"` stays in the instrument command per the PRD decision log. |
 
 ---
 

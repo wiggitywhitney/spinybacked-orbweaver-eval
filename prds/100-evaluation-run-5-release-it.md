@@ -73,7 +73,7 @@ Same milestone structure as all Type D eval runs. Pre-run verification explicitl
 |------|------|------|
 | **release-it** (target) | `~/Documents/Repositories/release-it` | spiny-orb instruments this repo |
 | **spinybacked-orbweaver-eval** (evaluation) | `~/Documents/Repositories/spinybacked-orbweaver-eval` | Evaluation artifacts live here |
-| **spinybacked-orbweaver** (agent) | `~/Documents/Repositories/spinybacked-orbweaver` | The spiny-orb agent |
+| **spinybacked-orbweaver** (agent) | `~/Documents/Repositories/spinybacked-orbweaver-main` (detached worktree of `origin/main`; the primary `spinybacked-orbweaver` checkout is not used for this run) | The spiny-orb agent |
 
 ### Eval Branch Convention
 
@@ -109,7 +109,7 @@ The feature branch for this PRD (`feature/prd-100-evaluation-run-5-release-it`) 
   - `lessons-for-run6.md` (copy structure from `evaluation/javascript/release-it/run-4/lessons-for-run5.md`)
   - `spiny-orb-findings.md` (fresh skeleton with P1/P2/P3 sections)
 
-- [ ] **Pre-run verification**
+- [x] **Pre-run verification**
 
   Verify run-4 P1 blockers and validate run prerequisites:
 
@@ -134,8 +134,10 @@ The feature branch for this PRD (`feature/prd-100-evaluation-run-5-release-it`) 
 
   **Instrument command** (run from `~/Documents/Repositories/release-it/`):
   ```bash
-  caffeinate -s env -u ANTHROPIC_CUSTOM_HEADERS -u ANTHROPIC_BASE_URL HOME="$HOME" GIT_CONFIG_GLOBAL=/Users/whitney.lee/.config/spiny-orb-eval/gitconfig vals exec -i -f ~/Documents/Repositories/release-it/.vals.yaml -- bash -c 'GITHUB_TOKEN=$GITHUB_TOKEN_RELEASE_IT node ~/Documents/Repositories/spinybacked-orbweaver/bin/spiny-orb.js instrument lib --verbose --thinking --debug-dump-dir ~/Documents/Repositories/spinybacked-orbweaver-eval/evaluation/javascript/release-it/run-5/debug-dumps 2>&1 | tee ~/Documents/Repositories/spinybacked-orbweaver-eval/evaluation/javascript/release-it/run-5/spiny-orb-output.log'
+  caffeinate -s env -u ANTHROPIC_CUSTOM_HEADERS -u ANTHROPIC_BASE_URL HOME="$HOME" GIT_CONFIG_GLOBAL=/Users/whitney.lee/.config/spiny-orb-eval/gitconfig vals exec -i -f ~/Documents/Repositories/release-it/.vals.yaml -- bash -c 'GITHUB_TOKEN=$GITHUB_TOKEN_RELEASE_IT node ~/Documents/Repositories/spinybacked-orbweaver-main/bin/spiny-orb.js instrument lib --verbose --thinking --debug-dump-dir ~/Documents/Repositories/spinybacked-orbweaver-eval/evaluation/javascript/release-it/run-5/debug-dumps 2>&1 | tee ~/Documents/Repositories/spinybacked-orbweaver-eval/evaluation/javascript/release-it/run-5/spiny-orb-output.log'
   ```
+
+  Note: the `node` path points at `spinybacked-orbweaver-main`, a detached git worktree of spiny-orb `origin/main` (SHA `a55bd92` at pre-run verification, built with `npm ci` and `npm run build`), not the primary `spinybacked-orbweaver` checkout, which is used for other in-progress branches. Before handing Whitney the command, confirm the worktree still exists and is still at the SHA recorded in `lessons-for-run6.md`. The RUN4-1 through RUN4-4 status in `lessons-for-run6.md` was checked against that SHA. Do not move the worktree unless Whitney asks; if she does, run `git fetch` in the primary checkout, then `git checkout --detach origin/main` in the worktree, rebuild with `npm ci && npm run build`, record the new SHA, and re-run pre-run verification items 2 through 5 against it.
 
   Note: `HOME="$HOME"` is required — weaver prerequisite check needs HOME for `~/.weaver/vdir_cache/`. `vals exec` reads from release-it fork's `.vals.yaml` (NOT the eval repo's). Source directory is `lib/`.
 
@@ -287,6 +289,7 @@ The feature branch for this PRD (`feature/prd-100-evaluation-run-5-release-it`) 
 | 2026-05-07 | Run-5 proceeds regardless of whether RUN4-1 indentation-width fix has landed | Even without the fix, run-5 validates quality on run-4's committed files and produces a valid data point for the trend |
 | 2026-05-07 | HOME="$HOME" stays in instrument command | Safe workaround with no downside; removing without confirming spiny-orb fix would risk repeating the weaver timeout failure |
 | 2026-05-07 | IS scoring is fully automated — AI runs all commands | Canonical instructions in CLAUDE.md "IS Scoring Runs" section and `docs/language-extension-plan.md` step 9 |
+| 2026-09-29 | Build spiny-orb for run-5 from a detached worktree of `origin/main` at `~/Documents/Repositories/spinybacked-orbweaver-main`, not from the primary checkout | The primary checkout was on `feature/prd-373-python-provider` (129 commits ahead of main, including edits to shared files such as `src/validation/chain.ts` and the TypeScript provider) with uncommitted work. Building there would make results non-comparable to prior runs and unattributable to a SHA. A worktree leaves that checkout untouched; the cost is that the instrument command's `node` path changes. |
 
 ---
 
