@@ -39,7 +39,17 @@ Checked against spiny-orb `origin/main` `a55bd92` by reading source and git hist
 
 ## Run-5 Observations
 
-*(fill in during and after the run)*
+### Process observations
+
+- **Run-log tracking is inconsistent across the eval repo.** The `*.log` ignore rule excludes `spiny-orb-output.log`, and only some runs were force-added: commit-story-v2 tracks 12 of 25 logs, taze 5 of 16, and release-it had 0 of 5 before run-5. Run-5's log was force-added on the eval branch so step 13 carries it to main. Run-1 through run-4 logs for release-it exist only on the local machine. Whether the template should require the force-add (or the ignore rule should carve out `evaluation/**/spiny-orb-output.log`) is a template change and needs user approval at the Draft Run-6 PRD checkpoint.
+- **Live progress checks worked well from a polling script.** During the run, a script parsed `spiny-orb-output.log` into per-file results next to the run-4 baseline, and Whitney read the output as a table with ✅ / ❌ / 🟡 markers. The script lived at `/tmp/run-progress.py`, outside the repository, so it does not survive a restart. Its attempt count under-reads for wrapped NDS-003 failures (it showed one attempt for npm.js, whose log shows two). Whether to commit a corrected version under `evaluation/` is an open question for Whitney.
+- **Stalls of 5 to 10 minutes on large files were normal.** The log paused on Git.js, GitHub.js, and npm.js while the process stayed alive, then resumed on its own.
+- **CodeRabbit reviews of the committed branch vary between runs.** Reviews of an unchanged head returned 0 findings twice and 3 findings once, and the 3 findings were about the unedited debug dumps.
+
+### Run-5 results entering evaluation
+
+- 9 of 23 files committed (run-4: 7), 33 spans and 13 attributes (run-4: 20 and 8), 10 correct skips, PR #4 created automatically. See `run-summary.md`.
+- Git.js and shell.js regressed against run-4. Four run-4 failures now commit. GitHub.js committed 13 spans with 0 attributes.
 
 ---
 
