@@ -87,4 +87,4 @@ All ten were pre-scan skips with no LLM call: lib/args.js, lib/cli.js, lib/index
 
 - PR #4 lists 31 changed files, including `semconv/agent-extensions.yaml`, `spiny-orb-live-check-report.json`, and `spiny-orb-pr-summary.md`. The PR adds about 153K lines, which is dominated by the live-check report and warrants a look in PR artifact evaluation.
 - The live-check line reads "OK" while the next line warns that 4 files failed instrumentation.
-- `spiny-orb-output.log` is excluded by the repository's `*.log` ignore rule, so it is not part of the pushed eval branch unless it is added explicitly. The same was true of run-4's log.
+- `spiny-orb-output.log` is committed on the eval branch with `git add -f`, because the repository's `*.log` ignore rule would otherwise exclude it. Run-4's log was not committed and exists only on the local machine.
