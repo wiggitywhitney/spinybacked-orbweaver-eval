@@ -75,7 +75,7 @@ All ten were pre-scan skips with no LLM call: lib/args.js, lib/cli.js, lib/index
 |---|---------|--------------------|----------|
 | RUN4-1 | LINT/NDS-003 indentation-width conflict | Partly resolved | 3 of 5 blocked files now commit (GitHub.js, GitRelease.js, prompt.js). GitBase.js still fails LINT and npm.js still fails NDS-003 (26 violations down to 4). Git.js newly fails LINT. |
 | RUN4-2 | PR body E2BIG | Resolved | PR #4 created automatically; the summary file was also written to disk. |
-| RUN4-3 | COV-003 `Promise.reject` gap | Not observed | shell.js failed on SCH-002 instead, so no COV-003 result exists for it. Per-file evaluation must check. |
+| RUN4-3 | COV-003 `Promise.reject` gap | Fix fired (corrected from "not observed" after reading the log) | COV-003 flagged shell.js's inner `return Promise.reject(err)` catch on attempt 1, and the agent then added `recordException` to it. shell.js still failed, later on SCH-002. See `failure-deep-dives.md`. |
 | RUN4-4 | GitLab.js SCH-002 cross-domain duplicate | Not seen this run, provisional | GitLab.js committed with no SCH-002 failure. The pre-run check found no namespace scoping in the duplicate detection, so this may be run-to-run variation rather than a fix. |
 | RUN3-3 | HOME not forwarded to weaver | Workaround kept | `HOME="$HOME"` was in the instrument command; no weaver failure occurred. |
 
