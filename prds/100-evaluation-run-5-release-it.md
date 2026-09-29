@@ -151,7 +151,11 @@ The feature branch for this PRD (`feature/prd-100-evaluation-run-5-release-it`) 
 
   After `run-summary.md` is written, before any evaluation documents: report to Whitney with a raw overview — files committed/failed/partial, quality score if visible in log, cost, push/PR status, top 1-2 surprises. Conversational, under 10 lines. Wait for acknowledgment before proceeding.
 
-  Success criteria: Whitney has acknowledged the findings overview.
+  **Process for a cold session**:
+  1. Read `evaluation/javascript/release-it/run-5/run-summary.md`. It holds the per-file table and run totals: 9 committed, 4 failed, 10 correct skips, PR #4 created automatically.
+  2. Lead the overview with what is new to Whitney. She already saw a per-file comparison table while the run was in progress, so cover the final totals, the two regressions, and the PR. The regressions are Git.js (LINT) and shell.js (SCH-002), which committed in run-4 and fail in run-5. Also mention that prompt.js, GitRelease.js, GitHub.js, and GitLab.js now commit, and that GitHub.js has 13 spans with 0 attributes.
+  3. Before reading anything from the log, note that `evaluation/javascript/release-it/run-5/spiny-orb-output.log` exists only on the local machine. The repository's `*.log` ignore rule keeps it out of commits, and run-4's log is likewise untracked. The failure deep-dives and per-file evaluation need it, because agent notes and full validator messages live there. Do not delete it, and do not assume a fresh clone has it.
+  4. When counting attempts per file, read each file's own result block in the log. The count appears in three places: on the `✅ SUCCESS` line after the span and attribute counts, on a line beginning with three backticks for LINT failures, and at the end of the wrapped validator message for NDS-003 failures. A single grep misses at least one of these.
 
 - [ ] **Failure deep-dives**
 
