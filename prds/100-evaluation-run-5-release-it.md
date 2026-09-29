@@ -157,7 +157,7 @@ The feature branch for this PRD (`feature/prd-100-evaluation-run-5-release-it`) 
   3. The full run log is `evaluation/javascript/release-it/run-5/spiny-orb-output.log`, committed with `git add -f` because the repository's `*.log` ignore rule would otherwise exclude it. The failure deep-dives and per-file evaluation need it, because agent notes and full validator messages live there. Run-1 through run-4 of this target have untracked logs that exist only on the local machine.
   4. When counting attempts per file, read each file's own result block in the log. The count appears in three places: on the `✅ SUCCESS` line after the span and attribute counts, on a line beginning with three backticks for LINT failures, and at the end of the wrapped validator message for NDS-003 failures. A single grep misses at least one of these.
 
-- [ ] **Failure deep-dives**
+- [x] **Failure deep-dives**
 
   Root cause analysis for each failed/partial file and run-level failures.
   Produces: `evaluation/javascript/release-it/run-5/failure-deep-dives.md`
@@ -183,6 +183,7 @@ The feature branch for this PRD (`feature/prd-100-evaluation-run-5-release-it`) 
   - **Rule-ID label audit**: before any reconciliation pass, check every per-file section's row against its stated rule ID's canonical definition — not a sample — since one unchecked row can carry an incorrect rule ID undetected.
   - **Exemption-scope pre-commitment**: where a rubric rule's exemption conditions are ambiguous, write down the chosen interpretation explicitly before per-file evaluation starts, and apply it uniformly across every section in this run.
   - **Fix-verification confirmation**: per-file evaluation is the authoritative check for whether a prior-run finding actually recurred — it supersedes, and may correct, `run-summary.md`'s provisional fix-verification claims.
+  - **Read `evaluation/javascript/release-it/run-5/failure-deep-dives.md` first** (written in the Failure deep-dives milestone). It already corrects one provisional claim: `run-summary.md` says RUN4-3 (COV-003 `Promise.reject`) was "not observed", but the log shows COV-003 firing on shell.js's inner catch in attempt 1 and the agent then adding `recordException` to it, so the fix mechanism fired. shell.js never committed, so it is outside this milestone's scope; take the RUN4-3 verdict from the deep-dives and do not try to re-derive it from the committed files. The deep-dives also record that the un-awaited-return pattern is present in the debug dumps of failed files. The pattern is a `return <call>` with no `await`, inside a `try` whose `finally` calls `span.end()`, so the span ends before the returned promise settles. Check whether the same pattern appears in the 9 committed files, where it would ship in PR #4.
 
 - [ ] **PR artifact evaluation**
 
@@ -232,6 +233,8 @@ The feature branch for this PRD (`feature/prd-100-evaluation-run-5-release-it`) 
   - **Attribute disappearance is not automatically a finding.** Investigate before calling it wrong — consider semconv basis and whether the absence is a defensible agent decision. Give the spiny-orb team evidence and honest characterization, not a decision-free action list.
   - **Carry-forward table: consider distinguishing findings from observations** — entries with a plausible spiny-orb root cause vs. watch items without a clear basis for calling them wrong.
   - **Fix scope precision** (cascaded from commit-story-v2 run-28): for any fix originally reported across N files, a bare "M of N fixed" ratio conflates "confirmed still broken" with "not evaluated this run" (e.g. a skipped or failed file). State fixed/evaluated and evaluated/total separately (e.g. "5 of 6 evaluated files fixed; 1 of 7 original files not evaluated this run — failed to commit"), or list which specific files are fixed, still-broken, and not-evaluated, so no file's status is ambiguous. Distinguish "the failure pattern no longer reproduces" from "the fix mechanism actually fired" — a file can pass by omission, not because the fix worked. Only the latter is evidence the fix generalizes.
+
+  **Carry in the open questions from `failure-deep-dives.md`** (final section, "What This Deep-Dive Could Not Establish"): (1) validator output for GitBase.js and Git.js attempt 2 is not in the log; (2) which four of npm.js's six changed lines produced the NDS-003 ×4; (3) whether the agent prompt states that LINT is a blocking check; (4) whether NDS-003's Prettier normalization accepts the split form of a return-value-capture line, which needs a reproduction against spiny-orb. Present these as questions for the spiny-orb team, not as findings. The deep-dives also record two validator findings with source evidence: SCH-002's meaning-consistency check is lexical (`cacheKey` versus `command.join(' ')` in shell.js), and no rule checks command-string attribute values for credentials.
 
   Produces: `evaluation/javascript/release-it/run-5/actionable-fix-output.md`
 
