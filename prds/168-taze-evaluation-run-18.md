@@ -204,16 +204,18 @@ The eval execution branch (`feature/prd-168-taze-evaluation-run-18`) **never mer
 
 - [ ] **IS scoring run** — See `evaluation/is/README.md` for collector setup.
 
+  Record the run's start and end as epoch seconds (`date -u +%s`), once immediately before the invocation below and once immediately after it, and write both values into `run-summary.md`.
+
   IS scoring invocation for taze:
   ```bash
   OTEL_EXPORTER_OTLP_TRACES_ENDPOINT=http://localhost:4318/v1/traces node --import ./examples/instrumentation.js ./bin/taze.mjs major
   ```
   Run the instrumented target command from `~/Documents/Repositories/taze` on the instrument branch. OTel SDK packages are already in node_modules on the instrument branch — no `npm install` needed. OTel Collector must be running on port 4318 (Docker or binary). See `~/.claude/rules/is-scoring-gotchas.md` for full sequence.
 
-  Then change to the evaluation repo root and score (the scorer, trace file, and output path are all relative to `~/Documents/Repositories/spinybacked-orbweaver-eval`, not the taze checkout):
+  Then change to the evaluation repo root. **Filter before scoring**: `evaluation/is/eval-traces.json` is append-only and holds spans from every target and every earlier run, so scoring it directly can score another target's spans (commit-story-v2 run-27 got a false 70/100 this way). Keep only spans whose `resource.attributes` `service.name` is `taze` and whose `startTimeUnixNano` divided by 1,000,000,000 falls between the recorded start and the recorded end plus 5 seconds for collector ingestion, and write them to `evaluation/typescript/taze/run-18/eval-traces-run18.json`. Sanitize that file before committing: redact `process.owner`, `host.name`, `host.id`, `process.command_args`, `process.executable.path`, `process.command`, and any span attribute holding an absolute local path, then re-score the sanitized file to confirm the score is unchanged. The file is JSON Lines (one object per line) despite the `.json` extension, so do not convert it to an array. Then score the filtered file (the scorer, trace file, and output path are all relative to `~/Documents/Repositories/spinybacked-orbweaver-eval`, not the taze checkout):
   ```bash
   cd ~/Documents/Repositories/spinybacked-orbweaver-eval
-  node evaluation/is/score-is.js evaluation/is/eval-traces.json --target taze > evaluation/typescript/taze/run-18/is-score.md
+  node evaluation/is/score-is.js evaluation/typescript/taze/run-18/eval-traces-run18.json --target taze > evaluation/typescript/taze/run-18/is-score.md
   ```
 
   **SPA-001 note**: taze is a CLI app; per-target limit is `not_applicable`. If it fires anyway, this is structural — document but do not treat as a regression.
