@@ -161,6 +161,8 @@ The feature branch for this PRD (`feature/prd-100-evaluation-run-5-release-it`) 
 
   Root cause analysis for each failed/partial file and run-level failures.
   Produces: `evaluation/javascript/release-it/run-5/failure-deep-dives.md`
+
+  **Lead from the CodeRabbit review of the debug dumps**: the dumps for GitBase.js (`getRemoteUrl`), npm.js (`getLatestRegistryVersion`), and shell.js (`execFormattedCommand`) return an un-awaited promise inside a `try/finally`, so `span.end()` runs before the call settles. Run-4's GitBase.js agent notes describe the same timing limitation. Check whether this pattern is why the agent kept the original `return` lines and hit LINT or NDS-003 instead, and whether any validator rule covers it. The dumps are the agent's rejected output and must stay unedited as evidence.
   Style reference: `Read docs/templates/eval-run-style-reference/failure-deep-dives.md`
 
 - [ ] **Per-file evaluation**
