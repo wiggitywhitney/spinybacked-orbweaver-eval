@@ -126,7 +126,7 @@ The feature branch for this PRD (`feature/prd-100-evaluation-run-5-release-it`) 
 
   **If RUN4-1 is not fixed**: proceed anyway. Document the miss. Q×F will remain near 6.7 but run-5 still produces valid evaluation data.
 
-- [ ] **Evaluation run-5**
+- [x] **Evaluation run-5**
 
   Whitney runs `spiny-orb instrument` in her own terminal. **Do NOT run the command yourself.**
 
