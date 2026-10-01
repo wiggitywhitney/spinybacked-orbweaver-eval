@@ -7,6 +7,7 @@ import { fileURLToPath } from 'node:url';
 import { scoreIS } from './score-is.js';
 
 const REDACTED = { stringValue: 'REDACTED' };
+const NO_KEYS = new Set();
 
 // Resource attributes that identify the machine or user that ran the target.
 const REDACTED_RESOURCE_KEYS = new Set([
@@ -73,13 +74,21 @@ export function filterTraces(lines, { service, startNs, endNs } = {}) {
   return kept;
 }
 
+// Redacts local paths inside one OTLP attribute value, including values nested in arrays and key-value lists.
+function redactValue(value) {
+  if (!value) return value;
+  if (typeof value.stringValue === 'string' && LOCAL_PATH_PATTERN.test(value.stringValue)) return REDACTED;
+  if (value.arrayValue?.values) {
+    return { ...value, arrayValue: { ...value.arrayValue, values: value.arrayValue.values.map(redactValue) } };
+  }
+  if (value.kvlistValue?.values) {
+    return { ...value, kvlistValue: { ...value.kvlistValue, values: value.kvlistValue.values.map((kv) => ({ ...kv, value: redactValue(kv.value) })) } };
+  }
+  return value;
+}
+
 function redactAttributes(attrs, redactKeys) {
-  return (attrs ?? []).map((a) => {
-    if (redactKeys.has(a.key)) return { ...a, value: REDACTED };
-    const v = a.value?.stringValue;
-    if (typeof v === 'string' && LOCAL_PATH_PATTERN.test(v)) return { ...a, value: REDACTED };
-    return a;
-  });
+  return (attrs ?? []).map((a) => (redactKeys.has(a.key) ? { ...a, value: REDACTED } : { ...a, value: redactValue(a.value) }));
 }
 
 // Redacts machine-identity resource attributes and any attribute whose value is an absolute local path.
@@ -90,7 +99,13 @@ export function sanitizeTraces(lines) {
       resource: { ...rs.resource, attributes: redactAttributes(rs.resource?.attributes, REDACTED_RESOURCE_KEYS) },
       scopeSpans: (rs.scopeSpans ?? []).map((ss) => ({
         ...ss,
-        spans: (ss.spans ?? []).map((s) => ({ ...s, attributes: redactAttributes(s.attributes, new Set()) })),
+        ...(ss.scope?.attributes ? { scope: { ...ss.scope, attributes: redactAttributes(ss.scope.attributes, NO_KEYS) } } : {}),
+        spans: (ss.spans ?? []).map((s) => ({
+          ...s,
+          attributes: redactAttributes(s.attributes, NO_KEYS),
+          ...(s.events ? { events: s.events.map((e) => ({ ...e, attributes: redactAttributes(e.attributes, NO_KEYS) })) } : {}),
+          ...(s.links ? { links: s.links.map((l) => ({ ...l, attributes: redactAttributes(l.attributes, NO_KEYS) })) } : {}),
+        })),
       })),
     }));
     return JSON.stringify({ ...obj, resourceSpans });

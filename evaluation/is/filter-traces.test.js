@@ -159,6 +159,33 @@ describe('sanitizeTraces', () => {
     expect(attrs['app.name']).toBe('plain');
   });
 
+  it('redacts local paths inside array-valued attributes and keeps the other elements', () => {
+    const arrayAttr = {
+      key: 'app.files',
+      value: { arrayValue: { values: [{ stringValue: '/Users/alice/repo/file.js' }, { stringValue: 'plain.txt' }, { stringValue: '/api/health' }, { intValue: '7' }] } },
+    };
+    const lines = [line(resourceSpans('target-app', [[span('s', 1500, [arrayAttr])]]))];
+
+    const [out] = parse(sanitizeTraces(lines));
+    const values = out.resourceSpans[0].scopeSpans[0].spans[0].attributes[0].value.arrayValue.values;
+
+    expect(values).toEqual([{ stringValue: 'REDACTED' }, { stringValue: 'plain.txt' }, { stringValue: '/api/health' }, { intValue: '7' }]);
+  });
+
+  it('redacts local paths in scope, event, and link attributes', () => {
+    const path = str('app.path', '/home/bob/project/a.js');
+    const resource = resourceSpans('target-app', [[{ ...span('s', 1500), events: [{ name: 'e', attributes: [path] }], links: [{ traceId: 'b'.repeat(32), spanId: '1'.repeat(16), attributes: [path] }] }]]);
+    resource.scopeSpans[0].scope = { name: 'scope-0', attributes: [path] };
+
+    const text = sanitizeTraces([line(resource)])[0];
+
+    expect(text).not.toContain('/home/bob');
+    const out = JSON.parse(text).resourceSpans[0].scopeSpans[0];
+    expect(out.scope.attributes[0].value).toEqual({ stringValue: 'REDACTED' });
+    expect(out.spans[0].events[0].attributes[0].value).toEqual({ stringValue: 'REDACTED' });
+    expect(out.spans[0].links[0].attributes[0].value).toEqual({ stringValue: 'REDACTED' });
+  });
+
   it('does not mutate its input', () => {
     const original = line(resourceSpans('target-app', [[span('s', 1500)]], sensitive));
     const copy = JSON.stringify(JSON.parse(original));

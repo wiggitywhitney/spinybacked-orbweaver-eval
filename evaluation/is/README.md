@@ -61,13 +61,13 @@ Do not score `evaluation/is/eval-traces.json` directly. It holds spans from ever
 node evaluation/is/filter-traces.js --input evaluation/is/eval-traces.json --output evaluation/<language>/<target>/run-<N>/eval-traces-run<N>.json --service <otel-service-name> --start-ns <start> --end-ns <end> --target <target>
 ```
 
-`--service` is the target's OpenTelemetry service name, and `--start-ns` and `--end-ns` are the two numbers you saved in Step 2. The script keeps only that service's spans that started between the two times, redacts machine details (user name, host name, command lines, and any attribute holding an absolute local path), and scores the traces before and after redaction. It writes the output file only if the two scores match. For the taze run-17 traces it prints:
+`--service` is the target's OpenTelemetry service name, and `--start-ns` and `--end-ns` are the two numbers you saved in Step 2. The script keeps only that service's spans that started between the two times, redacts machine details (user name, host name, command lines, and any attribute holding an absolute local path), and scores the traces before and after redaction. It writes the output file only if the two scores match. The example output below comes from running it on the taze run-17 traces, using the output path a run-18 would use. The script prints:
 
 ```text
 Filtered "taze": kept 140 of 140 spans between 1790003712848000000 and 1790003713757000000 ns
 score before sanitizing: 77.8
 score unchanged by sanitizing: 77.8
-wrote /tmp/doc-out/eval-traces-run17.json
+wrote evaluation/typescript/taze/run-18/eval-traces-run18.json
 ```
 
 The script exits with an error and writes nothing when a required option is missing, or when no spans match, which usually means the times or the service name are wrong:
@@ -77,10 +77,8 @@ filter-traces: Missing required option --end-ns
 ```
 
 ```text
-filter-traces: No spans from service "taze" started between 1 and 2 ns in evaluation/typescript/taze/run-17/eval-traces-run17.json
+filter-traces: No spans from service "taze" started between 1 and 2 ns in evaluation/is/eval-traces.json
 ```
-
-The message shows the full path to the input file. It is shortened here.
 
 The output file is line-delimited JSON despite the `.json` extension, so do not convert it to an array. Then score the filtered file:
 
