@@ -204,7 +204,7 @@ The eval execution branch (`feature/prd-168-taze-evaluation-run-18`) **never mer
 
 - [ ] **IS scoring run** — See `evaluation/is/README.md` for collector setup.
 
-  Record the run's start and end as nanosecond timestamps (`python3 -c 'import time; print(time.time_ns())'`), once immediately before the invocation below and once immediately after it, and write both values into `run-summary.md`. Wait 10 seconds after the run for the collector to flush before filtering.
+  Record the run's start and end as nanosecond timestamps (`python3 -c 'import time; print(time.time_ns())'`), once immediately before the invocation below and once immediately after it, and write both values into `run-summary.md`. After the run, run `sleep 10` so the collector flushes before filtering.
 
   IS scoring invocation for taze:
   ```bash
@@ -217,7 +217,7 @@ The eval execution branch (`feature/prd-168-taze-evaluation-run-18`) **never mer
   cd ~/Documents/Repositories/spinybacked-orbweaver-eval
   node evaluation/is/filter-traces.js --input evaluation/is/eval-traces.json --output evaluation/typescript/taze/run-18/eval-traces-run18.json --service taze --start-ns <start-ns> --end-ns <end-ns> --target taze
   ```
-  The output is JSON Lines despite the `.json` extension; do not convert it to an array. Then score the filtered file (the scorer, trace file, and output path are all relative to `~/Documents/Repositories/spinybacked-orbweaver-eval`, not the taze checkout):
+  The output is JSON Lines despite the `.json` extension; do not convert it to an array. Do not filter by hand (for example with `jq` or your own script): output that loses the OTLP envelope scores as empty or wrong. Then score the filtered file (the scorer, trace file, and output path are all relative to `~/Documents/Repositories/spinybacked-orbweaver-eval`, not the taze checkout):
   ```bash
   node evaluation/is/score-is.js evaluation/typescript/taze/run-18/eval-traces-run18.json --target taze > evaluation/typescript/taze/run-18/is-score.md
   ```
