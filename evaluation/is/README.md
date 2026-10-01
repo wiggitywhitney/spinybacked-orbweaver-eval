@@ -61,7 +61,7 @@ Do not score `evaluation/is/eval-traces.json` directly. It holds spans from ever
 node evaluation/is/filter-traces.js --input evaluation/is/eval-traces.json --output evaluation/<language>/<target>/run-<N>/eval-traces-run<N>.json --service <otel-service-name> --start-ns <start> --end-ns <end> --target <target>
 ```
 
-`--service` is the target's OpenTelemetry service name, and `--start-ns` and `--end-ns` are the two numbers you saved in Step 2. The script keeps only that service's spans that started between the two times, redacts machine details (user name, host name, command lines, and any attribute holding an absolute local path), and scores the traces before and after redaction. It writes the output file only if the two scores match. The example output below comes from running it on the taze run-17 traces, using the output path a run-18 would use. The script prints:
+`--service` is the target's OpenTelemetry service name, and `--start-ns` and `--end-ns` are the two numbers you saved in Step 2. The script keeps only that service's spans that started between the two times, redacts machine details (user name, host name, command lines, and any attribute value that is an absolute path under `/Users`, `/home`, `/private`, `/var`, `/tmp`, `/opt`, `/root`, `/etc`, `/usr`, or a Windows drive letter), and scores the traces before and after redaction. It writes the output file only if the two scores match. The example output below comes from running it on the taze run-17 traces, using the output path a run-18 would use. The script prints:
 
 ```text
 Filtered "taze": kept 140 of 140 spans between 1790003712848000000 and 1790003713757000000 ns
@@ -79,6 +79,14 @@ filter-traces: Missing required option --end-ns
 ```text
 filter-traces: No spans from service "taze" started between 1 and 2 ns in evaluation/is/eval-traces.json
 ```
+
+Paths under other roots, such as `/workspace` or `/mnt`, are not redacted, because the match is deliberately limited so URL paths like `/api/users` are left alone. If a target records paths under another root, add the root to `LOCAL_PATH_PATTERN` in `filter-traces.js`. Before committing the output, check that it holds no local user name or home path:
+
+```bash
+grep --count "$(whoami)" evaluation/<language>/<target>/run-<N>/eval-traces-run<N>.json
+```
+
+The count should be `0`. (`grep` exits with status 1 when nothing matches, which is the passing result here.)
 
 The output file is line-delimited JSON despite the `.json` extension, so do not convert it to an array. Then score the filtered file:
 

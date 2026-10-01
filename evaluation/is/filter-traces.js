@@ -91,7 +91,8 @@ function redactAttributes(attrs, redactKeys) {
   return (attrs ?? []).map((a) => (redactKeys.has(a.key) ? { ...a, value: REDACTED } : { ...a, value: redactValue(a.value) }));
 }
 
-// Redacts machine-identity resource attributes and any attribute whose value is an absolute local path.
+// Redacts machine-identity resource attributes and any attribute value that is an absolute path under
+// the roots in LOCAL_PATH_PATTERN. Paths under other roots are not redacted.
 export function sanitizeTraces(lines) {
   return parseLines(lines).map((obj) => {
     const resourceSpans = (obj.resourceSpans ?? []).map((rs) => ({
