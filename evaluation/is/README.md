@@ -45,15 +45,54 @@ For commit-story-v2 example:
 OTEL_EXPORTER_OTLP_TRACES_ENDPOINT=http://localhost:4318/v1/traces node --import ./examples/instrumentation.js src/cli.js <args>
 ```
 
-### Step 3: Run the IS scorer
-
-From the repo root:
+The Collector's trace file is shared by every target and every earlier run, so note when this run started and ended. Run this command once immediately before the app command and once immediately after it, and save both numbers:
 
 ```bash
-node evaluation/is/score-is.js evaluation/is/eval-traces.json --target <target> > evaluation/<target>/run-<N>/is-score.md
+python3 -c 'import time; print(time.time_ns())'
 ```
 
-Output includes an overall weighted IS score (0–100) and per-rule pass/fail breakdown, written to `is-score.md`.
+It prints the current time in nanoseconds, for example `1790874784122382000`. After the run, wait 10 seconds for the Collector to write the last spans.
+
+### Step 3: Filter the traces, then run the IS scorer
+
+Do not score `evaluation/is/eval-traces.json` directly. It holds spans from every target and every earlier run, so scoring it can report another target's spans as yours. Filter it down to this run first. From the repo root:
+
+```bash
+node evaluation/is/filter-traces.js --input evaluation/is/eval-traces.json --output evaluation/<language>/<target>/run-<N>/eval-traces-run<N>.json --service <otel-service-name> --start-ns <start> --end-ns <end> --target <target>
+```
+
+`--service` is the target's OpenTelemetry service name, and `--start-ns` and `--end-ns` are the two numbers you saved in Step 2. The script keeps only that service's spans that started between the two times, redacts machine details (user name, host name, command lines, and any attribute holding an absolute local path), and scores the traces before and after redaction. It writes the output file only if the two scores match. For the taze run-17 traces it prints:
+
+```text
+Filtered "taze": kept 140 of 140 spans between 1790003712848000000 and 1790003713757000000 ns
+score before sanitizing: 77.8
+score unchanged by sanitizing: 77.8
+wrote /tmp/doc-out/eval-traces-run17.json
+```
+
+The script exits with an error and writes nothing when a required option is missing, or when no spans match, which usually means the times or the service name are wrong:
+
+```text
+filter-traces: Missing required option --end-ns
+```
+
+```text
+filter-traces: No spans from service "taze" started between 1 and 2 ns in evaluation/typescript/taze/run-17/eval-traces-run17.json
+```
+
+The message shows the full path to the input file. It is shortened here.
+
+The output file is line-delimited JSON despite the `.json` extension, so do not convert it to an array. Then score the filtered file:
+
+```bash
+node evaluation/is/score-is.js evaluation/<language>/<target>/run-<N>/eval-traces-run<N>.json --target <target> > evaluation/<language>/<target>/run-<N>/is-score.md
+```
+
+Output includes an overall weighted IS score (0–100) and per-rule pass/fail breakdown, written to `is-score.md`. The first line looks like this:
+
+```text
+IS Score: 77.8 / 100
+```
 
 ## Notes
 
