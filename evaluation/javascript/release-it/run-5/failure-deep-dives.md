@@ -40,7 +40,7 @@ The defect is real. In each dump, an un-awaited promise is returned inside `try 
 | Dump | Location | Code |
 |------|----------|------|
 | GitBase.js | `getRemoteUrl`, line 133 | `return this.isRemoteName(...) ? this.exec(...).catch(...) : remoteNameOrUrl` |
-| GitBase.js | `getSecondLatestTagName`, about line 211 | `return this.exec(...).catch(() => null)` |
+| GitBase.js | `getSecondLatestTagName`, line 210 | `return this.exec(...).catch(() => null)` |
 | npm.js | `getLatestRegistryVersion`, line 245 | `return this.exec(...).catch(() => null)` |
 | shell.js | `execFormattedCommand`, line 48 (cache-hit path) | `return this.cache.get(cacheKey)`, which returns the cached promise stored by the un-awaited `this.cache.set(cacheKey, result)` |
 | shell.js | `execFormattedCommand`, final return | `return result`, where `result` is the promise from `execStringCommand`/`execWithArguments` |
