@@ -204,16 +204,22 @@ The eval execution branch (`feature/prd-168-taze-evaluation-run-18`) **never mer
 
 - [ ] **IS scoring run** — See `evaluation/is/README.md` for collector setup.
 
+  Record the run's start and end as nanosecond timestamps (`python3 -c 'import time; print(time.time_ns())'`), once immediately before the invocation below and once immediately after it, and write both values into `run-summary.md`. After the run, run `sleep 10` so the collector flushes before filtering.
+
   IS scoring invocation for taze:
   ```bash
   OTEL_EXPORTER_OTLP_TRACES_ENDPOINT=http://localhost:4318/v1/traces node --import ./examples/instrumentation.js ./bin/taze.mjs major
   ```
   Run the instrumented target command from `~/Documents/Repositories/taze` on the instrument branch. OTel SDK packages are already in node_modules on the instrument branch — no `npm install` needed. OTel Collector must be running on port 4318 (Docker or binary). See `~/.claude/rules/is-scoring-gotchas.md` for full sequence.
 
-  Then change to the evaluation repo root and score (the scorer, trace file, and output path are all relative to `~/Documents/Repositories/spinybacked-orbweaver-eval`, not the taze checkout):
+  Then change to the evaluation repo root and filter the shared trace file down to this run. Do not score `evaluation/is/eval-traces.json` directly: it is append-only and holds spans from every target and every earlier run (commit-story-v2 run-27 got a false 70/100 this way). `evaluation/is/filter-traces.js` keeps only taze spans that started between the two recorded times, keeps each span inside its original OTLP envelope, redacts machine identity and absolute local paths under common roots (`/Users`, `/home`, `/private`, `/var`, `/tmp`, `/opt`, `/root`, `/etc`, `/usr`, or a Windows drive; the README lists them), and refuses to write its output if redaction changes the IS score. It must exist on the branch you run from; if it is missing, run `git checkout origin/main -- evaluation/is/filter-traces.js` first. Substitute the two recorded numbers for `<start-ns>` and `<end-ns>`:
   ```bash
   cd ~/Documents/Repositories/spinybacked-orbweaver-eval
-  node evaluation/is/score-is.js evaluation/is/eval-traces.json --target taze > evaluation/typescript/taze/run-18/is-score.md
+  node evaluation/is/filter-traces.js --input evaluation/is/eval-traces.json --output evaluation/typescript/taze/run-18/eval-traces-run18.json --service taze --start-ns <start-ns> --end-ns <end-ns> --target taze
+  ```
+  The output is JSON Lines despite the `.json` extension; do not convert it to an array. Do not filter by hand (for example with `jq` or your own script): output that loses the OTLP envelope scores as empty or wrong. Then score the filtered file (the scorer, trace file, and output path are all relative to `~/Documents/Repositories/spinybacked-orbweaver-eval`, not the taze checkout):
+  ```bash
+  node evaluation/is/score-is.js evaluation/typescript/taze/run-18/eval-traces-run18.json --target taze > evaluation/typescript/taze/run-18/is-score.md
   ```
 
   **SPA-001 note**: taze is a CLI app; per-target limit is `not_applicable`. If it fires anyway, this is structural — document but do not treat as a regression.
