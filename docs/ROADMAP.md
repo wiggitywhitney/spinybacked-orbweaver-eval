@@ -8,6 +8,7 @@ Execution order within each tier matters. Items are listed in dependency order �
 - JS evaluation run-29: commit-story-v2 — SCH-003 bidirectional check + CDQ-006/CDQ-007 consistency + PII severity investigation ([PRD #161](https://github.com/wiggitywhitney/spinybacked-orbweaver-eval/issues/161)) — verifies run-28's RUN28-1 through RUN28-4 findings; none confirmed scheduled to land before this run per spiny-orb's own roadmap tiers
 - TS evaluation run-18: taze — SCH-003 generalization + CDQ-007 path sanitization ([PRD #168](https://github.com/wiggitywhitney/spinybacked-orbweaver-eval/issues/168)) — primary goal: resolve SCH-003's count-cast pattern across the 5 files it broadened into and CDQ-007's unsanitized filesystem paths across 6 files; also verify IS SPA-002 orphan-span fix
 - Fix `score-is.js` silently doing nothing when run through a symlinked path ([#173](https://github.com/wiggitywhitney/spinybacked-orbweaver-eval/issues/173)) — one-line real-path comparison; the approach is already proven in `filter-traces.js`
+- Add `--instance-id` and `--redact-attribute` to the trace filter script so PRD #161 can use it ([#175](https://github.com/wiggitywhitney/spinybacked-orbweaver-eval/issues/175)) — #161's own filter is stricter than the script today, so it must not be switched until this lands
 
 ## Long-term (blocked by language providers)
 1. Python eval setup + Run-1: target selection from 3 candidates ([PRD #51](https://github.com/wiggitywhitney/spinybacked-orbweaver-eval/issues/51)) — depends on Python provider landing
