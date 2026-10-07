@@ -67,6 +67,8 @@ Git.js and shell.js are regressions against run-4. Together they cost 12 spans t
 
 All ten were pre-scan skips with no LLM call: lib/args.js, lib/cli.js, lib/index.js, lib/log.js, lib/spinner.js, lib/plugin/git/prompts.js, lib/plugin/github/prompts.js, lib/plugin/github/util.js, lib/plugin/gitlab/prompts.js, lib/plugin/npm/prompts.js. This is the same count as run-4.
 
+Corrected in per-file evaluation: 8 of the 10 are confirmed correct skips, and 2 are questionable. `lib/index.js` (`runTasks`, the async orchestrator) and `lib/cli.js` (the async CLI entry point) were skipped because of pre-scan false negatives, which reproduce on a55bd92. See `per-file-evaluation.md`, "Correct Skips (10)".
+
 ---
 
 ## Run-4 Blocker Status (provisional)

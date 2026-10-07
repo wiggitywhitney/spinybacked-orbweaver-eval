@@ -135,6 +135,19 @@ factory.js `release_it.plugin.namespace` set this precedent in batch 1. Batch 2 
 
 **Decision**: FAIL. A key that names one concept and holds a different one mixes two things in every query on that key. A generic key whose brief covers the value (for example `release_it.github.release_id` on update) PASSES.
 
+
+## Decisions added during correct-skip verification
+
+Correct-skip verification for the ten skipped files surfaced one more reading. The coordinating session decided it under Whitney's 2026-10-07 delegation. It follows the rubric's evaluation scope note and commit-story-v2 run-27's handling of `reflection-tool.js`, so it reverses no precedent.
+
+## 14. A questionable skip is a handoff finding, not a COV-001 or COV-004 FAIL
+
+`lib/index.js` (`runTasks`, async, the orchestrator) and `lib/cli.js` (the async default export, the CLI entry point) got no span because the pre-scan returned no instrumentable functions and no LLM call was made.
+
+**Decision**: list both as questionable skips in `per-file-evaluation.md`'s "Correct Skips" section and carry them to the handoff. They do not enter any rubric score, and they add no COV-001 or COV-004 FAIL to the per-run or per-file tables.
+
+**Rationale**: the rubric's evaluation scope note says coverage rules apply to instrumented files only, and a file that was never instrumented "cannot fail a coverage rule — it is a coverage gap for the run". Run-27 scored its questionable skip the same way.
+
 ---
 
 ## Rule-fit issues for the handoff
@@ -152,3 +165,5 @@ These go into `actionable-fix-output.md` (the spiny-orb handoff) and `lessons-fo
 9. **COV-004 does not say how to treat nested async callbacks** (GitHub.js `uploadAsset`, the async arrow passed to `this.retry`). The implemented rule skips nested functions.
 10. **No rule covers duplicate exception events on one span.** GitLab.js records each error in an inner rethrowing catch and again in the outer catch, because COV-003 flagged the inner catches even when the outer catch already records. CDQ-003 checks only the recording pattern.
 11. **SCH-002's mechanism is about key names, and value-concept mismatches are scored through it** (item 13). The rubric does not state that a registered key can fail on what it holds.
+12. **The pre-scan's COV-001 entry-point test misses two common export forms** (item 14). `classifyFunctions` reads `isExported` from the declaring statement, so `const runTasks = async () => {}` followed by `export default runTasks` reads as unexported. It also never collects an anonymous `export default async () => {}`. Both release-it entry points (`lib/index.js`, `lib/cli.js`) are skipped this way, reproduced on a55bd92. The rubric's scope note keeps a skipped file out of coverage scoring, so only correct-skip verification catches it.
+13. **The pre-scan's `process.exit()` carve-out drops an async function whose only exits are conditional** (item 14). `hasDirectProcessExit` counts `process.exit()` inside `if` branches within the `try` block as direct, and only an entry point overrides the carve-out. `lib/index.js` `runTasks` exits early on two flags (`--changelog`, `--release-version`) and otherwise runs the whole release, so the carve-out removes the orchestrator once rule-fit item 12 has already misclassified it.
