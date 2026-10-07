@@ -93,6 +93,50 @@ factory.js `load` wraps a three-stage dynamic-import fallback in try/finally wit
 
 ---
 
+## Decisions added after batch 2
+
+Batch 2 (prompt.js, GitRelease.js, GitHub.js, GitLab.js) surfaced five more readings. The coordinating session decided them under Whitney's 2026-10-07 delegation. None reverses an earlier run's or another target's precedent. Each misfit is added to the list below.
+
+## 9. COV-003 at un-awaited-return sites: PASS, item 1 governs
+
+GitRelease.js `processReleaseNotes` and GitHub.js `release`, `createRelease`, and `updateRelease` return un-awaited promises whose rejections settle after `span.end()` and never reach the span's catch.
+
+**Decision**: COV-003 PASSES when the span has a recording catch, even though these late rejections go unrecorded. The span callback does not throw on these paths. It returns a promise normally, so item 8's test ("can throw out of the span callback") does not apply. The missed rejection belongs to the item-1 unrubriced finding for that site, which names it.
+
+**Rationale**: scoring the same defect under COV-003 and as an unrubriced finding would count it twice and break item 1's single home for the pattern.
+
+## 10. NDS-003: a token-identical reflow of an original statement counts as re-indentation
+
+prompt.js L39–41, GitRelease.js L39–42, and GitHub.js L562–564 split one original line into several with identical tokens, because the span wrapper's indentation pushed the line past the project's 120-character Prettier width.
+
+**Decision**: PASS. A change to whitespace or line breaks only, with the same tokens in the same order, is equivalent to the re-indentation the rubric already allows.
+
+**Rationale**: failing it would make these files unfixable under LINT and NDS-003 together, which is the run-4 conflict this run set out to resolve.
+
+## 11. CDQ-007: "optional or nullable input" is judged by the value's source, not by in-tree call sites
+
+prompt.js `promptName` is an optional destructured parameter with no default. GitHub.js `latestTag` is `null` on a first release.
+
+**Decision**: a value is optional or nullable when its source allows `undefined` or `null` on a reachable path where the operation still proceeds: an optional parameter of a public method with no default, or a getter or context value that returns `null` in a normal run. Both cases FAIL when unguarded. A value that is null only on a misconfiguration path where the operation cannot succeed (GitHub.js `owner`/`repository` from `parseGitUrl` with no remote) does not count.
+
+**Rationale**: public methods are reachable by external plugins, so the in-tree callers are not the full set. Plugin.js guarding the same `prompt` value shows the guard is expected.
+
+## 12. COV-006: a span on a domain method that calls an auto-instrumented library PASSES
+
+GitLab.js `request` wraps global `fetch` (covered by `@opentelemetry/instrumentation-undici`), and GitHub.js methods wrap Octokit, which uses `fetch`.
+
+**Decision**: PASS when the span covers the domain method's own work (URL building, parsing, retries, branching). FAIL only for a span whose body is the bare library call.
+
+**Rationale**: auto-instrumentation produces an HTTP child span under the domain span, so the two do not duplicate each other.
+
+## 13. SCH-002: a registered key holding a different concept than its brief FAILs
+
+factory.js `release_it.plugin.namespace` set this precedent in batch 1. Batch 2 has two more cases: GitRelease.js `release_it.hook.command` holds the release-notes generator command, not a lifecycle hook command, and GitHub.js L603 `release_it.git.tag_name` holds the previous tag, while the brief says the tag created for this release.
+
+**Decision**: FAIL. A key that names one concept and holds a different one mixes two things in every query on that key. A generic key whose brief covers the value (for example `release_it.github.release_id` on update) PASSES.
+
+---
+
 ## Rule-fit issues for the handoff
 
 These go into `actionable-fix-output.md` (the spiny-orb handoff) and `lessons-for-run6.md`. They are places where a rule, or the documents describing it, does not fit what this run found.
@@ -103,3 +147,8 @@ These go into `actionable-fix-output.md` (the spiny-orb handoff) and `lessons-fo
 4. **RST-003's same-file narrowing leaves cross-file duplicate spans undetected by the validator** (item 7). Plugin.js `showPrompt` → `prompt.show` is the concrete case.
 5. **SCH-003's mechanism does not say whether enums are open or closed, or how to treat reachable non-string values** (item 5).
 6. **The research rubric lists CDQ-011, while run-4's per-run table used CDQ-008, which the rubric says was deleted.** Run-5 reports CDQ-011 per file and does not report CDQ-008.
+7. **COV-003 cannot see rejections that settle after a premature close** (item 9). Its mechanism checks for a recording catch, which these spans have. This is the same gap as issue 1, seen from COV-003.
+8. **NDS-003's mechanism does not say whether a token-identical reflow counts as unchanged** (item 10). Run-4's validator rejected the same reflows that run-5's accepted; observed across runs, not yet explained.
+9. **COV-004 does not say how to treat nested async callbacks** (GitHub.js `uploadAsset`, the async arrow passed to `this.retry`). The implemented rule skips nested functions.
+10. **No rule covers duplicate exception events on one span.** GitLab.js records each error in an inner rethrowing catch and again in the outer catch, because COV-003 flagged the inner catches even when the outer catch already records. CDQ-003 checks only the recording pattern.
+11. **SCH-002's mechanism is about key names, and value-concept mismatches are scored through it** (item 13). The rubric does not state that a registered key can fail on what it holds.
