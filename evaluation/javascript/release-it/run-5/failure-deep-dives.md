@@ -1,6 +1,6 @@
 # Failure Deep-Dives: Run-5
 
-**Run-5 result**: 9 committed, 4 failed, 0 partial, 10 correct skips. PR #4 created automatically.
+**Run-5 result**: 9 committed, 4 failed, 0 partial, 10 skips labeled correct by the harness (per-file evaluation confirmed 8 and found 2 questionable). PR #4 created automatically.
 
 Evidence sources for every claim below: `spiny-orb-output.log` (agent thinking, agent notes, validator messages), the unedited files under `debug-dumps/lib/` (the agent's rejected output), the original files on release-it `main`, and spiny-orb source at SHA `a55bd92` (`~/Documents/Repositories/spinybacked-orbweaver-main`). Where the log does not record something, the section says so instead of inferring.
 

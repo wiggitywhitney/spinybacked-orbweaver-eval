@@ -19,7 +19,7 @@ Every fix-verification statement below is provisional. It comes from the run log
 | Files committed | 9 | 7 |
 | Files failed | 4 | 6 |
 | Files partial | 0 | 0 |
-| Correct skips | 10 | 10 |
+| Correct skips (harness-labeled; 8 confirmed, 2 questionable per per-file evaluation) | 10 | 10 |
 | Total processed | 23 | 23 |
 | Total spans | 33 | 20 |
 | Total attributes | 13 | 8 |
