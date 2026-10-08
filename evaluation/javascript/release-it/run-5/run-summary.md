@@ -22,7 +22,7 @@ Every fix-verification statement below is provisional. It comes from the run log
 | Correct skips (harness-labeled; 8 confirmed, 2 questionable per per-file evaluation) | 10 | 10 |
 | Total processed | 23 | 23 |
 | Total spans | 33 | 20 |
-| Total attributes | 13 | 8 |
+| Total attributes (new schema keys only, as the log counts them; emitted keys are in `per-file-evaluation.md`) | 13 | 8 |
 | Attempts (committed files) | 17 | 11 |
 | Attempts (all files sent to the agent) | 28 | 26 |
 | Input tokens | 219.7K | 218.8K |
@@ -38,7 +38,7 @@ Quality score, Q×F, and IS score come from later milestones and are not part of
 
 ## Committed Files
 
-| File | Spans | Attributes | Attempts | Run-4 |
+| File | Spans | New schema keys | Attempts | Run-4 |
 |------|-------|-----------|---------|-------|
 | lib/config.js | 3 | 1 | 3 | committed, 1 attempt |
 | lib/plugin/Plugin.js | 1 | 0 | 1 | committed, 1 attempt |
