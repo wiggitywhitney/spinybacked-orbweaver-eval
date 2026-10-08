@@ -163,7 +163,7 @@ The rule-ID label audit surfaced two more readings. The coordinating session dec
 
 ## 16. SCH-004: the token step flags candidates, and the semantic check decides
 
-**Decision**: compute the delimiter-split Jaccard similarity (split on `.` and `_`) of each agent-added key against every key in `attributes.yaml` and `agent-extensions.yaml`, including keys the same agent added. A score above 0.5 makes the pair a candidate. The pair FAILs only if the two keys hold the same concept, which is the semantic check. Each row records the candidates it cleared.
+**Decision**: compute the delimiter-split Jaccard similarity (split on `.` and `_`) of each agent-added key against every other key in `attributes.yaml` and `agent-extensions.yaml` (never against itself), including other keys the same agent added. A score above 0.5 makes the pair a candidate. The pair FAILs only if the two keys hold the same concept, which is the semantic check. Each row records the candidates it cleared.
 
 **Rationale**: the shared `release_it` prefix contributes two tokens to every key, so any two keys with a short shared area or a shared last token score 0.6 or more. On its own the token step flags 8 of the 13 agent-added keys, most of them against sibling keys on the same span. prompt.js's FAIL already used both steps.
 
