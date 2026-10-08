@@ -14,7 +14,7 @@ Observations collected during run-5 evaluation that should inform the next evalu
 | semconv/ | OK | `attributes.yaml`, `registry_manifest.yaml` present |
 | .js file inventory | OK | 23 `.js` files in `lib/` |
 | GITHUB_TOKEN_RELEASE_IT | OK | Referenced in the fork's `.vals.yaml`; `git push --dry-run` to non-existent branch `spiny-orb/auth-test` succeeded |
-| GIT_CONFIG_GLOBAL override | OK | `/Users/whitney.lee/.config/spiny-orb-eval/gitconfig` exists |
+| GIT_CONFIG_GLOBAL override | OK | `~/.config/spiny-orb-eval/gitconfig` exists |
 | @opentelemetry/api | OK | devDependency 1.9.1, peerDependency `>=1.0.0` |
 | Working tree | OK | Fork was dirty on entry: leftover OTel SDK devDeps (4 packages) in `package.json`/`package-lock.json` from a prior IS scoring run, restored with `git restore`. Untracked `bin/release-it` symlink (pointed at `../lib/node_modules/release-it/bin/release-it.js`) removed. Untracked `.vals.yaml` is required config and was left in place. Now on `main`, clean apart from `.vals.yaml`. |
 | Node.js version | recorded | v25.8.0 (spiny-orb requires >= 24) |
