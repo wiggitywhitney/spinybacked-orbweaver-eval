@@ -50,7 +50,7 @@ Quality score, Q×F, and IS score come from later milestones and are not part of
 | lib/plugin/github/GitHub.js | 13 | 0 | 2 | **failed** (NDS-003 ×8) |
 | lib/plugin/gitlab/GitLab.js | 9 | 4 | 2 | **failed** (COV-003, SCH-002 ×2) |
 
-Four files committed that failed in run-4. GitLab.js had never committed in an earlier run of this target (per this PRD's problem statement and run-4). GitHub.js committed 13 spans with 0 attributes, which per-file evaluation should examine.
+Four files committed that failed in run-4. GitLab.js had never committed in an earlier run of this target (per this PRD's problem statement and run-4). GitHub.js committed 13 spans with 0 new schema keys. Per-file evaluation found that it makes 33 `setAttribute` calls across 10 registered keys; the log's attribute count covers new schema keys only.
 
 ## Failed Files
 

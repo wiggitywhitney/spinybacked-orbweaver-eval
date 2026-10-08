@@ -49,7 +49,7 @@ Checked against spiny-orb `origin/main` `a55bd92` by reading source and git hist
 ### Run-5 results entering evaluation
 
 - 9 of 23 files committed (run-4: 7), 33 spans and 13 attributes (run-4: 20 and 8), 10 harness-labeled correct skips (8 confirmed and 2 questionable in per-file evaluation: `lib/index.js` and `lib/cli.js`), PR #4 created automatically. See `run-summary.md`.
-- Git.js and shell.js regressed against run-4. Four run-4 failures now commit. GitHub.js committed 13 spans with 0 attributes.
+- Git.js and shell.js regressed against run-4. Four run-4 failures now commit. GitHub.js committed 13 spans and 0 new schema keys (33 `setAttribute` calls across 10 registered keys, per `per-file-evaluation.md`).
 
 ---
 
