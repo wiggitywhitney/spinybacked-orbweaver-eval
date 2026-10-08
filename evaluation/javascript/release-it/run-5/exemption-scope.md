@@ -83,7 +83,7 @@ spiny-orb's implemented RST-003 is narrowed to same-file delegations. `rules-ref
 
 **Decision**: a span on a function whose meaningful body is a single delegating `return` (argument transformation allowed) FAILs RST-003 when the delegated function, in any file, has its own span. Plugin.js `showPrompt` → `prompt.show` (`release_it.prompt.show`) is a FAIL.
 
-**Comparability note**: run-4's per-file tables had 21 rows and no RST-003 row. A run-5 RST-003 FAIL on a span that is unchanged since run-4 is a new evaluation, not a regression. Say so in that file's Run-4 comparison line.
+**Comparability note**: run-4's per-file tables had 20 rows and no RST-003 row. A run-5 RST-003 FAIL on a span that is unchanged since run-4 is a new evaluation, not a regression. Say so in that file's Run-4 comparison line.
 
 ## 8. COV-003: a span whose wrapped operation can throw out of it with no error recording FAILs, even when the inner catches are graceful
 
