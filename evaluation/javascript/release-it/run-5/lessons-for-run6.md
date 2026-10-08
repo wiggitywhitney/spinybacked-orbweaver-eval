@@ -46,6 +46,8 @@ Checked against spiny-orb `origin/main` `a55bd92` by reading source and git hist
 - **Stalls of 5 to 10 minutes on large files were normal.** The log paused on Git.js, GitHub.js, and npm.js while the process stayed alive, then resumed on its own.
 - **CodeRabbit reviews of the committed branch vary between runs.** Reviews of an unchanged head returned 0 findings twice and 3 findings once, and the 3 findings were about the unedited debug dumps.
 
+- **Datadog cannot tell a boolean attribute from a string one.** In trace reconciliation the `search_datadog_spans` results showed `is_ci: "true"` and `draft: "false"`, quoted like the real string counts `enabled_count: "3"`, while the run's OTLP export had `boolValue` for the first two and `stringValue` for the third. Take attribute types for SCH-003 from the filtered `eval-traces-run<N>.json`, and use Datadog for structure and values. Whether `evaluation/trace-capture-protocol.md` should say this for every target is a template question for the end-of-run checkpoint.
+
 ### Run-5 results entering evaluation
 
 - 9 of 23 files committed (run-4: 7), 33 spans and 13 attributes (run-4: 20 and 8), 10 harness-labeled correct skips (8 confirmed and 2 questionable in per-file evaluation: `lib/index.js` and `lib/cli.js`), PR #4 created automatically. See `run-summary.md`.

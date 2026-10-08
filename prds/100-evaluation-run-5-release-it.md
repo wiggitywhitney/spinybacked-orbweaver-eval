@@ -242,7 +242,7 @@ The feature branch for this PRD (`feature/prd-100-evaluation-run-5-release-it`) 
 - [ ] **Baseline comparison**
 
   Compare run-5 against run-4 and run-3, and against the most recent commit-story-v2 run (check `evaluation/javascript/commit-story-v2/run-log.md`). Highlight dimensions that differ by more than 1 point from commit-story-v2.
-  When comparing IS results, say that run-5's 18 spans and run-4's 9 are not strictly comparable: run-5 used a modified dry-run command and run-4's command was never recorded (2026-10-08 Decision Log row). Both runs scored 100/100.
+  When comparing IS results, say that run-5's 18 spans and run-4's 9 are not strictly comparable: run-5 used a modified dry-run command and run-4's command was never recorded (2026-10-08 Decision Log row). Both runs scored 100/100. Also say that run-5's 18 spans under-count what ran by at least one: `release_it.github.comment_on_resolved_items` ran but was not exported ("Trace Reconciliation" in `per-file-evaluation.md`, and the second 2026-10-08 trace-reconciliation Decision Log row).
   When comparing the advisory contradiction rate, say which count each run uses. Run-4's 56% (5 of 9) counts PR-body advisories only. Run-5's 100% counts 18 sites, the 12 in the PR body plus 6 SCH-001 advisories found only in companion files, and the 12 PR-body sites alone are also 100% (2026-10-08 Decision Log row).
   Produces: `evaluation/javascript/release-it/run-5/baseline-comparison.md`
   Style reference: `Read docs/templates/eval-run-style-reference/baseline-comparison.md`
