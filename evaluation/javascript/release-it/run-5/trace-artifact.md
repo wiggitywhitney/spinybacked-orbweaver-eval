@@ -21,4 +21,4 @@ Captured from IS scoring attempt 3 (`--dry-run --ci --no-npm --git.requireCleanW
 | 3432f3da | `release_it.git_release.before_release` | none |
 | b5e12ef4 | `release_it.github.release` | → `github.create_release` → `github.get_octokit_release_options` → `github.render_release_notes` → `github.get_commits` (a nested chain, each about 848-850ms) |
 
-All spans report status `ok`. The spans query with `custom_attributes: ["service.instance.id"]` returned only `env`, `git.commit.sha`, `git.repository.id`, and `service.instance.id` in the custom block. Custom `release_it.*` attributes are not checked here; that belongs to the per-file trace reconciliation step.
+All spans have UNSET status (`"status":{}` in `eval-traces-run5.json`, with no explicit OK code). Datadog displays UNSET as `ok`. The spans query with `custom_attributes: ["service.instance.id"]` returned only `env`, `git.commit.sha`, `git.repository.id`, and `service.instance.id` in the custom block. Custom `release_it.*` attributes are not checked here; that belongs to the per-file trace reconciliation step.
