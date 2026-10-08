@@ -248,7 +248,7 @@ The feature branch for this PRD (`feature/prd-100-evaluation-run-5-release-it`) 
   Produces: `evaluation/javascript/release-it/run-5/baseline-comparison.md`
   Style reference: `Read docs/templates/eval-run-style-reference/baseline-comparison.md`
 
-- [ ] **Update root README**
+- [x] **Update root README** *(done 2026-10-08: rows for runs 3, 4, and 5 added; the Files legend now says `+Nf` = files that did not commit, because runs 3–5 failed files at validation (run-3's Git.js on a terminated API call) rather than rolling them back; run-5's Quality carries a ‡ footnote with the shared-rule 18/24; the "Run-3 is next" sentence is replaced by a run-6 sentence that also names the `lib/index.js`/`lib/cli.js` pre-scan misses, an open row in `baseline-comparison.md`. Do not redo it. The next task in this PRD is Actionable fix output)*
 
   After baseline comparison: (1) add a row for run-5 to the release-it run history table in `README.md`; (2) update the "next run" sentence below the release-it run history table to reference run-6 and its primary goals.
 

@@ -122,12 +122,16 @@ release-it is the JavaScript evaluation target for testing spiny-orb on a foreig
 |-----|---------|-------|-------|-------|------|---------|-----|
 | 1 | N/A (halted) | N/A | 0+5f | 0 | $0.68 | NO | — |
 | 2 | 24/25 (96%) | 4/5† | 0+13f | 0 | $5.69 | branch YES / PR FAILED | N/E |
+| 3 | 25/25 (100%) | 5/5 | 3+2f | 6 | $1.59 | branch YES / manual PR #2 | 90/100 |
+| 4 | 24/25 (96%) | 5/5 | 7+6f | 20 | $6.97 | branch YES / manual PR #3 (E2BIG) | 100/100 |
+| 5 | 21/27 (78%)‡ | 5/5 | 9+4f | 33 | $6.55 | branch YES / auto PR #4 | 100/100 |
 
-Files column: `+Nf` = N files rolled back by checkpoint or end-of-run test failure. Run-1 halted at file 5/23. Run-2 processed all 23 files; 0 committed net due to OTel module resolution failures at every checkpoint.
+Files column: plain count = committed files; `+Nf` = N files that did not commit. In runs 1–2 these were rolled back by checkpoint or end-of-run test failures. In runs 3–5 they failed validation (LINT, NDS-003, SCH-002), except run-3's Git.js, where the API call was terminated. Run-1 halted at file 5/23. Run-2 processed all 23 files; 0 committed net due to OTel module resolution failures at every checkpoint.
 † Gates: 4 pass + 1 NOT EVALUABLE (NDS-002 — checkpoint tests fail for infrastructure reasons, not agent error). NDS-003 gate fails for GitHub.js.
+‡ Run-5 was scored against 27 rules; earlier runs used 25. On the 24 rules shared with run-4, run-5 scores 18/24 (75%) against run-4's 23/24. Most of the drop comes from four files committing for the first time and stricter per-file scoring, not from code that passed in run-4 breaking.
 IS column: N/E = Not Evaluable (no instrumented files survived to the working tree).
 
-**Run-3 is next** — two P1 blockers must be resolved before running: (1) OTel module resolution at checkpoint (`@opentelemetry/api` not resolvable under peerDependencies strategy — needs devDependency or install step before checkpoint tests); (2) PAT scope in GCP Secret Manager (`github-token-release-it` lacks `pull_requests:write`).
+**Run-6 is next** — primary goals: the remaining LINT/NDS-003 failures (GitBase.js and npm.js still fail, Git.js newly fails), the shell.js failure caused by SCH-002's lexical meaning check rejecting a correct key reuse, the schema-fidelity failures new in run-5 (counts recorded as strings on int-declared keys, `false` reaching string attributes, registered keys reused for different values, none blocked by the validator), and pre-scan false negatives on `lib/index.js` and `lib/cli.js` that fragment the trace.
 
 Full run-by-run analysis: [`evaluation/javascript/release-it/`](evaluation/javascript/release-it/)
 
