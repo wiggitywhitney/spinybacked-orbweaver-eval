@@ -199,6 +199,12 @@ The feature branch for this PRD (`feature/prd-100-evaluation-run-5-release-it`) 
 
 - [ ] **PR artifact evaluation**
 
+  **Entry point (added 2026-10-08)**: the PR is #4 in the fork `wiggitywhitney/release-it` (open, 31 changed files, about 153K added lines, head `spiny-orb/instrument-1790686416741`). Read it with `gh pr view 4 --repo wiggitywhitney/release-it --json body,files` (always pass `--repo`, since `gh` targets the upstream in a fork). The same summary is on disk at `~/Documents/Repositories/release-it/spiny-orb-pr-summary.md`. Use `evaluation/javascript/release-it/run-4/pr-evaluation.md` as the prior-run comparison. Inputs already gathered:
+  - RUN4-2 (PR body E2BIG) is verified here. The PR was created automatically, so record it as resolved with that evidence.
+  - `run-summary.md` "Observations for Later Milestones": the added lines are dominated by `spiny-orb-live-check-report.json`, and the live-check line reads "OK" while the next line warns that 4 files failed.
+  - Per-file evaluation has already checked spiny-orb's advisory findings against the code. False positives: CDQ-007 at Plugin.js L71 and prompt.js L37, eight CDQ-007 advisories in GitHub.js (L344–346, L457–459, L513, L636), the four stale SCH-001 advisories in GitHub.js, GitRelease.js's SCH-001 advisory, and GitLab.js's `create_release`/`release` SCH-001 advisory. Missed: the real nullable-value site at GitHub.js L603, which the validator did not flag. Copy these from each file's Advisories in `per-file-evaluation.md` rather than re-deriving them.
+  - Take verdicts from `per-file-evaluation.md` as reconciled (its "Cross-File Reconciliation" section), not from the batch agents' first pass.
+
   Produces: `evaluation/javascript/release-it/run-5/pr-evaluation.md`
   Style reference: `Read docs/templates/eval-run-style-reference/pr-evaluation.md`
 
