@@ -141,7 +141,7 @@ The validator reported four. NDS-003 normalizes through Prettier, so the three p
 
 **The `await` decision**: the agent's notes say it wrote `return await` in `bump()` and `publish()` so `span.end()` fires after the operation settles. That is correct span behaviour and it is an NDS-003 violation, which is the same trade-off run-4's GitBase agent declined to make. In `getLatestRegistryVersion` it made the opposite choice. See the run-level section.
 
-**Run-4 comparison**: NDS-003 violations dropped from 26 to 4. That is progress on RUN4-1 for this file, most likely from the Prettier-normalized comparison. The residual four come from `await` insertions and capture rewrites rather than from formatting.
+**Run-4 comparison**: NDS-003 violations dropped from 26 to 4. That is progress on RUN4-1 for this file, most likely from the Prettier-normalized comparison. Of the residual four, the first is the added `await` on line 73. The causes of the other three are not fully mapped (see the table above).
 
 ---
 

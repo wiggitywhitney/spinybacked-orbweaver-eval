@@ -9,7 +9,7 @@ Interpretations of ambiguous rules are fixed in `exemption-scope.md` and applied
 
 Every section is static-only. Live trace data is created during IS scoring, which has not run yet. The reconciliation step folds it in once `trace-artifact.md` exists.
 
-Run-4's per-file tables had 21 rows. Run-5's have 28. The added rows are COV-002, RST-002, RST-003, RST-005, API-004, SCH-004, and CDQ-011 (CDQ-011 replaces CDQ-008, which the rubric marks as deleted). A FAIL on one of these rows is a new evaluation, not a regression, unless the code changed.
+Run-4's per-file tables had 20 rows. Run-5's have 28. The eight added rows are COV-002, RST-002, RST-003, RST-005, API-004, SCH-004, CDQ-006, and CDQ-011. Run-4 scored API-004 and CDQ-008 in its separate per-run table. CDQ-011 replaces CDQ-008, which the rubric marks as deleted. A FAIL on one of these rows is a new evaluation, not a regression, unless the code changed.
 
 ---
 
