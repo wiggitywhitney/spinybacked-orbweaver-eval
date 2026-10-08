@@ -90,3 +90,43 @@ Corrected in per-file evaluation: 8 of the 10 are confirmed correct skips, and 2
 - PR #4 lists 31 changed files, including `semconv/agent-extensions.yaml`, `spiny-orb-live-check-report.json`, and `spiny-orb-pr-summary.md`. The PR adds about 153K lines, which is dominated by the live-check report and warrants a look in PR artifact evaluation.
 - The live-check line reads "OK" while the next line warns that 4 files failed instrumentation.
 - `spiny-orb-output.log` is committed on the eval branch with `git add -f`, because the repository's `*.log` ignore rule would otherwise exclude it. Run-4's log was not committed and exists only on the local machine.
+
+---
+
+## IS Scoring Run (2026-10-08)
+
+**IS score: 100/100** (8 of 8 applicable rules pass; 7 not applicable). Run-4 also scored 100/100.
+
+**Run-4 and run-5 span counts are not strictly comparable.** Run-5's scored trace has 18 spans and run-4's had 9, but run-5 used a modified dry-run command (below) and run-4's exact command was never recorded. Treat the two counts as two separate observations, not as a trend.
+
+### Commands and changes from the PRD command
+
+The PRD's command (`node --import ./examples/instrumentation.js ./bin/release-it.js --dry-run`) stops at release-it's npm login check (`ERROR Not authenticated with npm`). That point comes before any Git, GitHub, prompt, or shell code runs, so the trace would hold only config loading and plugin discovery. Three attempts ran against the instrument branch's `lib/` and `examples/`:
+
+| Attempt | Command additions | Start ns | End ns | Outcome | Spans |
+|---------|-------------------|----------|--------|---------|-------|
+| 1 | `--ci` | 1791470181087747000 | 1791470182181105000 | Stopped at the npm login check | 4 (2 traces) |
+| 2 | `--ci --no-npm`, run under `vals exec -f ~/Documents/Repositories/release-it/.vals.yaml` for `GITHUB_TOKEN_RELEASE_IT` | 1791471341277407000 | 1791471343313055000 | Stopped at the Git plugin's clean-working-directory check (the instrumented checkout and the temporary SDK install make the tree dirty) | not scored |
+| **3 (scored)** | `--ci --no-npm --git.requireCleanWorkingDir=false`, same `vals exec` wrapper | **1791471356820887000** | **1791471360007383000** | Completed, exit 0 | **18 (10 traces)** |
+
+- `--ci` stops release-it from waiting on interactive prompts. It does not change where attempt 1 stopped, because the npm check comes before any prompt.
+- `--no-npm` disables the npm plugin, so the npm.js code paths are not exercised. npm.js failed instrumentation in this run, so it has no committed spans to lose.
+- The `after:init` hook in the fork's `.release-it.json` (lint, knip, tests) did not run; the dry run finished in about 3 seconds.
+- The dry run printed its skipped writes (`git commit`, `git tag`, `git push`, `octokit repos.createRelease`, `octokit issues.createComment`) with the `!` prefix. Checked afterward: there is no local or remote `20.0.1` tag, and `gh release view 20.0.1` returns "release not found".
+
+Scored file: `eval-traces-run5.json` (filtered with `filter-traces.js` for service `release-it` between attempt 3's timestamps; 18 of the 26 `release-it` spans in the shared file fall in that window; redaction left the score unchanged; `grep --count "$(whoami)"` returns 0).
+
+### Trace artifact
+
+Captured: `trace-artifact.md` (`service.instance.id` 7719aa1c-8095-4835-be12-f08c3eb837b3; 18 spans in Datadog after one retry, matching the filtered file).
+
+### Missing-root-span check
+
+The prediction held. One dry run produced **10 distinct trace IDs, each with its own root span, and no orphans** (all spans share `service.instance.id` 7719aa1c-8095-4835-be12-f08c3eb837b3). Roots: `release_it.config.init`, `release_it.plugin.get_plugins`, `release_it.github.init`, five separate `release_it.util.reduce_until`, `release_it.git_release.before_release`, and `release_it.github.release`. Only three traces have children: `config.init` (a two-level chain), `github.init` (two direct children), and `github.release` (a four-level chain: `create_release` → `get_octokit_release_options` → `render_release_notes` → `get_commits`, per the Datadog parent IDs in `trace-artifact.md`). Without spans on `lib/index.js` `runTasks` and the `lib/cli.js` default export, there is no common root.
+
+Leads for the per-file trace reconciliation step (not yet assessed):
+
+- `release_it.github.is_collaborator` and `release_it.github.is_authenticated` last 0.0ms under a 1.3ms `github.init`.
+- The four spans under `release_it.github.release` are nested one inside the next, and each lasts about 848-850ms. Check whether that nesting matches the call structure in GitHub.js or comes from active-context propagation across calls that are not nested in the source.
+- No `release_it.git.*`, `release_it.shell.*`, or `release_it.npm.*` spans appear; Git.js, shell.js, and npm.js failed instrumentation in this run. Of the committed files, prompt.js and Plugin.js (prompt spans, skipped by `--ci`) and GitLab.js (not configured) emit nothing. factory.js, GitRelease.js, and GitHub.js emit some of their span names (1 of 2, 1 of 2, 7 of 13).
+- Version.js's `release_it.version.get_incremented_version` is absent although the run computed version 20.0.1.
