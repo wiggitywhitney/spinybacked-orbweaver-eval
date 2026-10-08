@@ -7,7 +7,7 @@
 
 Interpretations of ambiguous rules are fixed in `exemption-scope.md` and applied the same way in every section. Sections were written by delegated per-file agents and then reconciled by the coordinating session. Where reconciliation changed an agent's verdict, the row says so.
 
-Every section is static-only. Live trace data is created during IS scoring, which has not run yet. The reconciliation step folds it in once `trace-artifact.md` exists.
+Sections were written from static review. Trace evidence from the IS scoring run (2026-10-08) was folded in afterward. Each section's "Trace supplementation" line gives what the captured run exercised, and "Trace Reconciliation" at the end gives the method and the run-level findings. No verdict changed.
 
 Run-4's per-file tables had 20 rows. Run-5's have 28. The eight added rows are COV-002, RST-002, RST-003, RST-005, API-004, SCH-004, CDQ-006, and CDQ-011. Run-4 scored API-004 and CDQ-008 in its separate per-run table. CDQ-011 replaces CDQ-008, which the rubric marks as deleted. A FAIL on one of these rows is a new evaluation, not a regression, unless the code changed.
 
@@ -37,7 +37,7 @@ CDQ-011 (canonical tracer name) is per-file under the current rubric and appears
 
 Spans: `release_it.config.init`, `release_it.config.load_options`, `release_it.config.load_local_config`
 
-Trace supplementation: unavailable (IS scoring not yet run)
+Trace supplementation (2026-10-08, IS scoring attempt 3; see "Trace Reconciliation" below): all 3 spans exercised, in one trace, as the chain `config.init` → `config.load_options` → `config.load_local_config`, which matches the awaited call structure (L25, L163). `is_ci` and `is_dry_run` are `boolValue: true` on both `init` and `load_options`, which confirms the repeated-values advisory. `release_it.config.file` is `.release-it`, a relative file name, so this run did not expose an absolute path. The SCH-003 `false` path (`--no-increment`) and the `config: false` path were not exercised, so those verdicts stay static-only. No verdict changes.
 
 | Rule | Result |
 |------|--------|
@@ -89,7 +89,7 @@ Trace supplementation: unavailable (IS scoring not yet run)
 
 Spans: `release_it.plugin.show_prompt`
 
-Trace supplementation: unavailable (IS scoring not yet run)
+Trace supplementation (2026-10-08): not exercised in the captured run. `--ci` routes `Plugin.step` to the spinner instead of `showPrompt` (Plugin.js `step`), so no `release_it.plugin.show_prompt` span was created. Static-only verdicts stand.
 
 | Rule | Result |
 |------|--------|
@@ -139,7 +139,7 @@ Trace supplementation: unavailable (IS scoring not yet run)
 
 Spans: `release_it.plugin.load`, `release_it.plugin.get_plugins`
 
-Trace supplementation: unavailable (IS scoring not yet run)
+Trace supplementation (2026-10-08): `release_it.plugin.get_plugins` exercised once, as its own root trace. `release_it.plugin.load` was not exercised, because `load()` runs only for configured external plugins and this run had none (`external_count` 0). The runtime values confirm the SCH-003 FAIL: `release_it.plugin.enabled_count` and `release_it.plugin.external_count` arrive as `stringValue` `"3"` and `"0"` in the OTLP export, against their `int` declarations. No verdict changes.
 
 | Rule | Result |
 |------|--------|
@@ -189,7 +189,7 @@ Trace supplementation: unavailable (IS scoring not yet run)
 
 Spans: `release_it.version.get_incremented_version`
 
-Trace supplementation: unavailable (IS scoring not yet run)
+Trace supplementation (2026-10-08): not exercised in the captured run, although the run computed version 20.0.1. With `--ci`, `config.isIncrement` is true, so `lib/index.js` L86 computes the version through the synchronous, unspanned `getIncrementedVersionCI`. L101 calls `getIncrementedVersion` only when that result is falsy, so it short-circuited. The span is reached only when the CI computation returns nothing. Static-only verdicts stand.
 
 | Rule | Result |
 |------|--------|
@@ -240,7 +240,7 @@ Trace supplementation: unavailable (IS scoring not yet run)
 
 Spans: `release_it.util.reduce_until`
 
-Trace supplementation: unavailable (IS scoring not yet run)
+Trace supplementation (2026-10-08): `release_it.util.reduce_until` exercised 5 times, each as its own root trace, because the caller `lib/index.js` `runTasks` has no span. The five calls match `lib/index.js` L61, L62, L63, L85, and L86 in start order. The 22.7ms call is the third, `getChangelog`, and the other four take under 0.3ms. L101, the sixth call site, short-circuited (see Version.js). Every span carries `release_it.util.collection_size` as `stringValue` `"3"`, which confirms the SCH-003 FAIL and the advisory that the attribute cannot tell the calls apart. No verdict changes.
 
 | Rule | Result |
 |------|--------|
@@ -289,7 +289,7 @@ Trace supplementation: unavailable (IS scoring not yet run)
 
 Spans: `release_it.prompt.show`
 
-Trace supplementation: unavailable (IS scoring not yet run)
+Trace supplementation (2026-10-08): not exercised in the captured run. `--ci` routes every step to the spinner, so `Prompt.show` never ran. Static-only verdicts stand.
 
 | Rule | Result |
 |------|--------|
@@ -341,7 +341,7 @@ Trace supplementation: unavailable (IS scoring not yet run)
 
 Spans: `release_it.git_release.before_release`, `release_it.git_release.process_release_notes`
 
-Trace supplementation: unavailable (IS scoring not yet run)
+Trace supplementation (2026-10-08): `release_it.git_release.before_release` exercised once, as its own root trace, which confirms the advisory that it stands alone for GitHub (GitHub inherits `beforeRelease` without overriding it). `release_it.git_release.process_release_notes` was not exercised. `github.releaseNotes` is an object (`{ commit, excludeMatches }` in the target's `.release-it.json`), so `beforeRelease` takes the `changelog` branch, and the two un-awaited returns did not run. `release_it.changelog.length` is `intValue` 464 with no cast, which confirms the SCH-003 PASS. That 464 is the Git changelog, while GitHub's `render_release_notes` reported 683 for the release body in the same run (exemption-scope item 17). No verdict changes.
 
 | Rule | Result |
 |------|--------|
@@ -398,7 +398,9 @@ Trace supplementation: unavailable (IS scoring not yet run)
 
 Spans: `release_it.github.init`, `release_it.github.is_authenticated`, `release_it.github.is_collaborator`, `release_it.github.release`, `release_it.github.get_latest_release`, `release_it.github.get_octokit_release_options`, `release_it.github.create_release`, `release_it.github.generate_web_url`, `release_it.github.create_web_release`, `release_it.github.update_release`, `release_it.github.comment_on_resolved_items`, `release_it.github.get_commits`, `release_it.github.render_release_notes`
 
-Trace supplementation: unavailable (IS scoring not yet run)
+Trace supplementation (2026-10-08): 8 of 13 span names exercised (`run-summary.md` said 7; corrected there). Exercised: `init` with direct children `is_authenticated` and `is_collaborator`, and the chain `release` → `create_release` → `get_octokit_release_options` → `render_release_notes` → `get_commits`, which matches the awaited calls at L187 (through the spinner), L340, L296, and L622. Each chain span lasts about 848-850ms, almost all of it the `compareCommits` HTTP call inside `get_commits`. The 0ms `is_authenticated` and `is_collaborator` spans come from the dry-run short-circuit (`if (this.config.isDryRun) return true`), not from an un-awaited return, and each span ID appears once, so there is no CDQ-001 double-end signal. Not exercised: `get_latest_release` and `update_release` (no `update`), and `generate_web_url` and `create_web_release` (token present, not web). `comment_on_resolved_items` ran but its span is missing from the trace (see the next paragraph). The SCH-002 FAIL at L603 shows up at runtime: `get_commits` carries `release_it.git.tag_name` `20.0.0` (the previous tag) while `create_release` and `get_octokit_release_options` carry `20.0.1`. The CDQ-007 null path at L603 was not exercised, because a previous tag existed. `release_id` is absent because the dry run returns before `retry` (L350–353), so the L355 and L376 findings were not exercised. No verdict changes.
+
+The L189 un-awaited return was exercised. `comments.submit` is `true` in the target's `.release-it.json`, and the run's console printed the dry-run line `octokit issues.createComment`, so `commentOnResolvedItems` ran and created its span. `release_it.github.release` ended 764ms before the process exited, which leaves time for the `searchQueries` HTTP calls (L561) in that span. The span is absent from both the Datadog query and the OTLP export. The likely cause, not verified: `bin/release-it.js` L9 calls `process.exit(0)` once the CLI's promise resolves, and `examples/instrumentation.js` flushes only on SIGTERM and SIGINT. `SimpleSpanProcessor` starts an asynchronous HTTP export on `span.end()`, so a span that ends just before the exit can be lost. The span still started inside the active context of `release_it.github.release`, so it would have been its child. The parent's 850ms excludes about 764ms of comment work, which is the timing cost the unrubriced L189 finding predicts.
 
 | Rule | Result |
 |------|--------|
@@ -458,7 +460,7 @@ Trace supplementation: unavailable (IS scoring not yet run)
 
 Spans: `release_it.gitlab.init`, `release_it.gitlab.is_authenticated`, `release_it.gitlab.is_collaborator`, `release_it.gitlab.before_release`, `release_it.gitlab.check_release_milestones`, `release_it.gitlab.release`, `release_it.gitlab.request`, `release_it.gitlab.create_release`, `release_it.gitlab.upload_asset`
 
-Trace supplementation: unavailable (IS scoring not yet run)
+Trace supplementation (2026-10-08): not exercised in the captured run. The target's configuration has no `gitlab` section, so the GitLab plugin was not enabled. Static-only verdicts stand.
 
 | Rule | Result |
 |------|--------|
@@ -604,3 +606,33 @@ Eight of nine companion `.instrumentation.md` files or agent notes contradict th
 | lib/plugin/GitRelease.js | COV-006 | PASS | N/A | item 15 |
 
 No FAIL was added or removed. The failure count across the nine files is unchanged at 14 rule failures. Evidence was corrected without a verdict change in three SCH-004 rows (factory.js, prompt.js, GitLab.js) and in the CDQ-011 per-run note.
+
+---
+
+## Trace Reconciliation
+
+Completed 2026-10-08 by the coordinating session, after IS scoring wrote `trace-artifact.md`. Each section's "Trace supplementation" line holds the per-file result.
+
+### Method
+
+- **Sources**: `eval-traces-run5.json` (the OTLP export, 18 spans) and the Datadog spans query `service:release-it @service.instance.id:7719aa1c-8095-4835-be12-f08c3eb837b3 resource_name:release_it.*` with `custom_attributes: ["release_it*"]`, 2026-10-08 14:30–16:00 UTC. Both return the same 18 span IDs, parent IDs, and attribute values.
+- **Types come from the OTLP export.** Datadog shows booleans as quoted strings (`is_ci: "true"`), so it cannot tell a boolean from a string. The export's `boolValue`, `intValue`, and `stringValue` fields can.
+- **Parent-child structure comes from the parent IDs**, per the PRD's instruction. All three multi-span traces match the awaited call structure in the source.
+- **PII**: no trace value cited in this document is PII-adjacent. The resource attributes that could identify the machine or user (`host.name`, `host.id`, `process.owner`, `process.command`, `process.command_args`, `process.executable.path`) are already `REDACTED` in the export.
+
+### Leads from the IS scoring run
+
+| Lead | Result |
+|------|--------|
+| (i) 0ms `is_collaborator` and `is_authenticated` | The dry-run short-circuit returns `true` before any I/O. It is not an un-awaited return, and each span ID appears once, so there is no CDQ-001 signal. |
+| (ii) The four-level chain under `github.release` | It matches GitHub.js's awaited calls. The about 848ms is the `compareCommits` call in `get_commits`, which every ancestor awaits. |
+| (iii) Five root `reduce_until` traces | These are the five `lib/index.js` call sites that ran (L61–63, L85–86). Each is a root because `runTasks` has no span, which is the questionable skip recorded under "Correct Skips". |
+| (iv) Span-name coverage | config.js 3 of 3, factory.js 1 of 2, util.js 1 of 1, GitRelease.js 1 of 2, and GitHub.js 8 of 13, not 7. One more GitHub.js span ran without being exported (see below). Plugin.js, prompt.js, and GitLab.js were not exercised in the captured run. |
+| (v) Modified command | The run used `--dry-run --ci --no-npm --git.requireCleanWorkingDir=false` (`run-summary.md`). `--ci` explains the three unexercised prompt paths and the Version.js CI path. |
+| (vi) Version.js span absent | The CI path computes the version through the synchronous `getIncrementedVersionCI` (`lib/index.js` L86), so `getIncrementedVersion` (L101) short-circuited. Not exercised. |
+
+### Run-level findings
+
+- **No verdict changes.** Runtime evidence confirms four static FAILs: factory.js SCH-003 (`stringValue` counts), util.js SCH-003 (`stringValue` count), GitHub.js SCH-002 at L603 (`20.0.0` on `get_commits` and `20.0.1` on its ancestors in one trace), and the GitRelease.js SCH-003 PASS (`intValue` 464). Every other FAIL sits on a path this run did not exercise, so it stays static-only. Nothing in `pr-evaluation.md` changes.
+- **The L189 un-awaited return lost a span from the trace.** `commentOnResolvedItems` ran (its dry-run line printed), but `release_it.github.comment_on_resolved_items` is in neither source. The likely cause, not verified: the process exits through `process.exit(0)` (`bin/release-it.js` L9) about 764ms after `release_it.github.release` ends, and the bootstrap in `examples/instrumentation.js` flushes only on SIGTERM and SIGINT, so an export started by a late `span.end()` can be cut off. The IS score's 18 spans therefore under-count what ran by at least one. This is a capture-harness finding for run-6's IS scoring (`lessons-for-run6.md`), not a per-file verdict.
+- **`release_it.changelog.length` holds two different texts in one run**: 464 on GitRelease.js's `before_release` (the Git changelog) and 683 on GitHub.js's `render_release_notes` (the release body rendered from commits). The verdicts stay PASS under exemption-scope item 17.

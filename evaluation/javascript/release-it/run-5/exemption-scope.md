@@ -169,6 +169,16 @@ The rule-ID label audit surfaced two more readings. The coordinating session dec
 
 ---
 
+## Decisions added during trace reconciliation
+
+Trace reconciliation surfaced one more reading. The coordinating session decided it under Whitney's 2026-10-07 delegation. It keeps the reading every section already used, so it reverses no precedent.
+
+## 17. SCH-002: `release_it.changelog.length` on commit-rendered release notes PASSES
+
+**Decision**: GitHub.js L636 (`render_release_notes`) and GitRelease.js L45 (`before_release`) both PASS SCH-002 on `release_it.changelog.length`, although the captured run gave them different texts: 683 for the GitHub release body rendered from commits and 464 for the Git changelog. The registry brief is "Character length of the generated changelog text", and release notes rendered from commit messages are generated changelog text. Both sections' "Trace supplementation" lines record the divergence.
+
+**Rationale**: item 13 fails a key that holds a different concept than its brief. Here both values are changelog text produced for this release, from two generators. The PASS keeps the reading every section already used (GitRelease.js, GitHub.js, GitLab.js), so no precedent is reversed. A query on the key mixes the two lengths when a GitHub `releaseNotes.commit` template is configured, which the advisory records.
+
 ## Rule-fit issues for the handoff
 
 These go into `actionable-fix-output.md` (the spiny-orb handoff) and `lessons-for-run6.md`. They are places where a rule, or the documents describing it, does not fit what this run found.
