@@ -27,7 +27,7 @@ Run-4's per-file tables had 21 rows. Run-5's have 28. The added rows are COV-002
 | API-002 | **PASS** | `@opentelemetry/api` is in `peerDependencies` at `>=1.0.0` and in `devDependencies`, and absent from `dependencies`. Correct for a package that is distributed and also used as a library (`spiny-orb.yaml` sets `dependencyStrategy: peerDependencies`). |
 | API-003 | **PASS** | No vendor-specific instrumentation packages (dd-trace, New Relic, Splunk) in any dependency section |
 
-CDQ-011 (canonical tracer name) is per-file under the current rubric and appears in each section. All 9 committed files call `trace.getTracer('release-it')`.
+CDQ-011 (canonical tracer name) is per-file under the current rubric and appears in each section. All 9 committed files call `trace.getTracer('release-it')`. The rubric takes the canonical name from `tracerName` in the spiny-orb config or, when that is unset, from the Weaver registry manifest's `name` normalized to hyphens. No `tracerName` is set, and `semconv/registry_manifest.yaml` has `name: release_it`, so the canonical name is `release-it`. Several CDQ-011 rows cite package.json `name` instead. That is the CDQ-002 source, and it gives the same name, so no verdict changes (noted in reconciliation).
 
 ---
 
@@ -47,11 +47,11 @@ Trace supplementation: unavailable (IS scoring not yet run)
 | NDS-004 | PASS. `export default Config` (L221) and the signatures of `init()`, `loadOptions`, and `loadLocalConfig` are unchanged. |
 | NDS-005 | PASS. The file had no pre-existing try/catch. The original `loadC12(...).catch(() => { throw new Error(...) })` is kept verbatim (L183–185). The new catches record the error and rethrow (L32–35, L130–133, L211–214). There is no silent catch, so NDS-005b does not apply. |
 | COV-001 | PASS. `Config.init()` (L22), the async entry point of the exported class, has a span (L23). The other public methods are sync accessors or utilities. |
-| COV-002 | PASS. The only outbound operation is the c12 `loadC12` config read (L174), which runs inside `release_it.config.load_local_config`. The module-level `readJSON` (L12) runs at import time, outside any function. |
+| COV-002 | N/A (changed from PASS in reconciliation, per exemption-scope item 15). The file has no outbound HTTP, database, or queue call site. The c12 `loadC12` call (L174) is a local config-file read, and it runs inside `release_it.config.load_local_config`. The module-level `readJSON` (L12) runs at import time, outside any function. |
 | COV-003 | PASS. All three spans have `recordException` + `setStatus(ERROR)` + rethrow. The wrapped c12 error from L184 reaches the L211 catch. |
 | COV-004 | PASS. All three async functions have spans: `init` (L22), `loadOptions` (L107), `loadLocalConfig` (L162). |
 | COV-005 | PASS. The registry defines no required or recommended attributes per span. The domain attributes are present: `release_it.is_ci` and `release_it.is_dry_run` (L30–31, L121–122), `release_it.version.increment` (L124), `release_it.config.file` (L170). |
-| COV-006 | PASS. No auto-instrumentation package covers c12 config resolution or option merging. |
+| COV-006 | N/A (changed from PASS in reconciliation, per exemption-scope item 15). No auto-instrumentation package covers c12 config resolution or option merging. |
 | RST-001 | PASS. Every spanned function is async and awaits I/O. Sync helpers (`expandPreReleaseShorthand`, `resolveFile`, `resolveDir`, `resolveExtend`, `resolveDefaultConfig`) and `getContext`/`setContext`/`setCI` are correctly left unspanned. |
 | RST-002 | PASS. None of the getters (L56–104) has a span. |
 | RST-003 | PASS. No spanned body is a single `return otherFn()`. `init` awaits `loadOptions(...).then(...)` and assigns instance state. Advisory: the `init` and `load_options` spans nest almost 1:1 and repeat the same `is_ci`/`is_dry_run` values. |
@@ -99,7 +99,7 @@ Trace supplementation: unavailable (IS scoring not yet run)
 | NDS-004 | PASS. `async showPrompt(options)`, `export default Plugin` (L93), and all other method signatures are unchanged. |
 | NDS-005 | PASS. The original file had no try/catch/finally. The only error handling is the agent's own wrapper (L68–81). |
 | COV-001 | PASS. `showPrompt` (L65), the only `async` method on the exported `Plugin` base class, has a span. |
-| COV-002 | PASS. No direct outbound call sites. `exec` (L58) reaches subprocesses only through the `this.shell.exec` wrapper, and prompts go through `this.prompt.show`. |
+| COV-002 | N/A (changed from PASS in reconciliation, per exemption-scope item 15). No direct outbound call sites. `exec` (L58) reaches subprocesses only through the `this.shell.exec` wrapper, and prompts go through `this.prompt.show`. |
 | COV-003 | PASS. L76–77 call `recordException` and `setStatus(ERROR)`, then L78 rethrows. |
 | COV-004 | PASS. `showPrompt` is the only `async` function or function containing `await`. `exec` (L56) and `step` (L85) are not async and contain no `await`, so the implemented rule does not flag them (exemption-scope item 6). `lib/shell.js` failed instrumentation this run, so subprocess execution reached through `Plugin.exec` is untraced. The place to fix that is `shell.js`, not this pass-through. |
 | COV-005 | PASS. L69 sets `release_it.plugin.namespace` and L71 sets `release_it.prompt.name` (guarded). The span definition lists no required attributes. |
@@ -163,7 +163,7 @@ Trace supplementation: unavailable (IS scoring not yet run)
 | SCH-001 | PASS. `span.release_it.plugin.load` and `span.release_it.plugin.get_plugins` are declared in `agent-extensions.yaml` (L214, L219). |
 | SCH-002 | **FAIL** (changed from PASS in reconciliation). `release_it.plugin.namespace` is set at L30 from the raw `pluginName`, the user's module specifier key from `context.plugins` (for example `@release-it/conventional-changelog` or `./plugins/my-plugin.js`). The registry brief defines the key as "The namespace identifier for the plugin" (examples `git`, `npm`), and Plugin.js L69 sets it from the derived namespace (`getPluginName(pluginName)` or the user-supplied `pluginConfig[0]`). Under the template's "specific wrong noun" test, the key names a specific concept (the namespace) and holds a different one (the module specifier), so this site fails. `enabled_count` and `external_count` are declared in `agent-extensions.yaml` (L51, L55) and pass. |
 | SCH-003 | **FAIL**. `release_it.plugin.enabled_count` (L100) is `String(enabledPlugins.length)` and `release_it.plugin.external_count` (L101) is `String(enabledExternalPlugins.length)`, against `type: int` declarations (`agent-extensions.yaml` L52, L56). That is a literal mismatch, and also a count cast to string (exemption-scope item 2). `namespace` (string) conforms. |
-| SCH-004 | PASS. The two count keys do not closely match any registered key (the closest, `release_it.github.assets_count`, is a different concept). The agent considered and rejected reusing `release_it.util.collection_size`. |
+| SCH-004 | PASS (evidence corrected in reconciliation, per exemption-scope item 16; verdict unchanged). The token step does flag one pair: `release_it.plugin.enabled_count` and `release_it.plugin.external_count` score a Jaccard similarity of 0.67 against each other. The semantic check clears it, because the two keys count different sets (all enabled plugins and the external subset), set side by side on one span. Neither key crosses 0.5 against any other registry key; `release_it.github.assets_count` scores 0.43. The agent considered and rejected reusing `release_it.util.collection_size`. |
 | CDQ-001 | PASS. `span.end()` is in `finally` on both spans (L49–51, L107–109). |
 | CDQ-002 | PASS. `trace.getTracer('release-it')` (L15). |
 | CDQ-003 | PASS. `get_plugins` uses the standard pattern (L104–105). `load` has no span catch, so there is no ad-hoc pattern to check. |
@@ -313,7 +313,7 @@ Trace supplementation: unavailable (IS scoring not yet run)
 | SCH-001 | PASS. `span.release_it.prompt.show` is declared in `agent-extensions.yaml` (L74–78), follows `release_it.<area>.<op>`, and contains no dynamic values. |
 | SCH-002 | PASS. All four keys (`release_it.prompt.namespace`, `.name`, `.enabled`, `.type`) are declared in `agent-extensions.yaml` (L11–26), and each key holds the concept its name states. The duplication of `release_it.prompt.namespace` with the registered `release_it.plugin.namespace` is a redundancy, not a wrong noun, so it is scored under SCH-004. |
 | SCH-003 | **FAIL**. L23 `span.setAttribute('release_it.prompt.enabled', enabled)` records a boolean (the default is `true`, and the in-tree callers in `Git.js` L93–95 pass the boolean `commit`/`tag`/`push` options), but `agent-extensions.yaml` L19–20 declares the key `type: string`. A non-string value reaches a string attribute on every call (exemption-scope item 5). The other three attributes conform: `namespace` is a string (default `'default'`, otherwise the plugin namespace), `promptName` is a prompt-name string when defined, and `prompt.type` is `'confirm'`/`'input'`/`'list'`. |
-| SCH-004 | **FAIL**. `release_it.prompt.namespace` (L21) is an agent-added key with a near-duplicate in the registry. Split on delimiters, its tokens `{release, it, prompt, namespace}` and `release_it.plugin.namespace`'s tokens `{release, it, plugin, namespace}` give a Jaccard similarity of 0.6, above the 0.5 threshold. The semantic check confirms it. The only in-tree caller, `Plugin.showPrompt`, sets `options.namespace = this.namespace` (Plugin.js L66) and then records the same `this.namespace` as `release_it.plugin.namespace` on the parent span (Plugin.js L69). Prompts are registered under that same namespace (`registerPrompts`, Plugin.js L62), and the registry brief for `release_it.plugin.namespace` is "The namespace identifier for the plugin". One value is recorded under two keys on adjacent spans. |
+| SCH-004 | **FAIL**. `release_it.prompt.namespace` (L21) is an agent-added key with a near-duplicate in the registry. Split on delimiters, its tokens `{release, it, prompt, namespace}` and `release_it.plugin.namespace`'s tokens `{release, it, plugin, namespace}` give a Jaccard similarity of 0.6, above the 0.5 threshold. The semantic check confirms it. The only in-tree caller, `Plugin.showPrompt`, sets `options.namespace = this.namespace` (Plugin.js L66) and then records the same `this.namespace` as `release_it.plugin.namespace` on the parent span (Plugin.js L69). Prompts are registered under that same namespace (`registerPrompts`, Plugin.js L62), and the registry brief for `release_it.plugin.namespace` is "The namespace identifier for the plugin". One value is recorded under two keys on adjacent spans. Reconciliation (exemption-scope item 16): the file's other three agent-added keys also cross 0.5 on tokens. `release_it.prompt.name` scores 0.6 against `release_it.hook.name`, `release_it.package_name`, `release_it.gitlab.release.name`, and its own siblings. `release_it.prompt.enabled` and `release_it.prompt.type` score 0.6 against their siblings only. The semantic check clears all of them, because each names a different concept, so they add no FAIL. |
 | CDQ-001 | PASS. `span.end()` is in `finally` (L50–52). |
 | CDQ-002 | PASS. `trace.getTracer('release-it')` (L4) matches the package.json `name`. |
 | CDQ-003 | PASS. The catch uses `recordException(error)` + `setStatus({ code: SpanStatusCode.ERROR })` (L47–48), with no ad-hoc error attributes. |
@@ -351,11 +351,11 @@ Trace supplementation: unavailable (IS scoring not yet run)
 | NDS-004 | PASS. `export default GitRelease` (L94) is unchanged. The signatures of `isEnabled`, `getInitialOptions`, the `token` getter, `beforeRelease`, `processReleaseNotes`, and `afterRelease` are unchanged, and both instrumented methods are still `async`. |
 | NDS-005 | PASS. The original file had no try/catch/finally. The only error handling is the agent's own wrappers, which record the error and rethrow (L50–53, L73–76). There is no silent catch, so NDS-005b does not apply. |
 | COV-001 | PASS. The exported class has two async methods, `beforeRelease` (L34), a plugin lifecycle hook the runner calls, and `processReleaseNotes` (L60). Both have spans. `afterRelease` (L83) is synchronous and only logs. |
-| COV-002 | PASS. The file has no direct network or database call sites. The subprocess for a string `releaseNotes` runs through the `this.exec` → `this.shell.exec` wrapper (L71), inside the `process_release_notes` span. That span ends before the subprocess finishes (see Unrubriced findings). |
+| COV-002 | N/A (changed from PASS in reconciliation, per exemption-scope item 15). The file has no direct network or database call sites. The subprocess for a string `releaseNotes` runs through the `this.exec` → `this.shell.exec` wrapper (L71), inside the `process_release_notes` span. That span ends before the subprocess finishes (see Unrubriced findings). |
 | COV-003 | PASS (changed from FAIL in reconciliation). Both spans call `recordException` and `setStatus(ERROR)` in a catch and rethrow (L50–53, L73–76). Rejections from `this.exec(script)` (L71) and from a promise returned by a user `releaseNotes` function (L66) settle after `span.end()` and never reach the L73 catch. The span callback itself does not throw on those paths, so item 8's test does not apply, and exemption-scope item 9 assigns the missed rejection to the item-1 unrubriced findings below. The parent `before_release` span does record such a rejection, because L41 awaits `processReleaseNotes`. |
 | COV-004 | PASS. Both `async` functions have spans. No other function is async or contains `await`. |
 | COV-005 | PASS. The registry defines no required or recommended attributes per span. Domain attributes are present: `release_it.changelog.length` (L45), `release_it.git_release.script_type` (L63), and `release_it.hook.command` (L70). |
-| COV-006 | PASS. No auto-instrumentation library covers these operations. The subprocess is launched through release-it's own shell wrapper. |
+| COV-006 | N/A (changed from PASS in reconciliation, per exemption-scope item 15). No auto-instrumentation library covers these operations. The subprocess is launched through release-it's own shell wrapper. |
 | RST-001 | PASS. Both spanned functions are async and reach I/O, through `await this.processReleaseNotes` or `this.exec`. The synchronous `isEnabled`, `getInitialOptions`, and `afterRelease` are correctly left unspanned. |
 | RST-002 | PASS. The `token` getter (L29–32) has no span. |
 | RST-003 | PASS. Neither body is a single delegating `return`. `processReleaseNotes` branches between two returns on the script type, and its delegate `Plugin.exec` has no span of its own, because `lib/shell.js` failed instrumentation this run. |
@@ -482,7 +482,7 @@ Trace supplementation: unavailable (IS scoring not yet run)
 | SCH-001 | PASS. All nine span names are declared in `agent-extensions.yaml` as `span.release_it.gitlab.*`, follow `release_it.<area>.<op>` in snake case, and contain no dynamic values. The validator's advisory about `create_release` versus `release` does not hold, because `release()` orchestrates `this.step` around both upload and create, while `createRelease()` performs the API call. |
 | SCH-002 | PASS. `release_it.is_dry_run`, `release_it.is_ci`, `release_it.git.tag_name`, and `release_it.changelog.length` are registered in `attributes.yaml`, and each value matches its brief. `tag_name` here is the new tag (`tagName`), unlike GitHub.js L603. `release_it.gitlab.milestones_count`, `request.endpoint`, `release.name`, and `asset.name` are declared in `agent-extensions.yaml`, and each key names what it holds. |
 | SCH-003 | **FAIL**. L152 sets `release_it.gitlab.milestones_count` to `String(releaseMilestones.length)` while `agent-extensions.yaml` declares the key `type: int`. That is a literal type mismatch, and it is also a length-derived count cast to string (exemption-scope item 2). The other attributes conform: `is_dry_run` and `is_ci` come from the `Config` getters, which always return booleans (`Boolean(...)` in `lib/config.js` L60–61 and L80–81). `tag_name` and `release.name` are strings (`format()` in `lib/util.js` L68–79 always returns a string). `changelog.length` is a raw int. `endpoint` and `asset.name` are strings. No enum attributes are set. |
-| SCH-004 | PASS. None of the four agent-added keys has a token-level near-duplicate. `release_it.gitlab.asset.name` versus `release_it.github.assets_count` (the run-4 validator's match) is a different concept in a different domain. `request.endpoint` holds a path relative to `/api/v4`, so OTel `url.path` is not an obvious duplicate. |
+| SCH-004 | PASS (evidence corrected in reconciliation, per exemption-scope item 16; verdict unchanged). The token step flags two keys. `release_it.gitlab.release.name` and `release_it.gitlab.asset.name` score 0.8 against each other, and `release.name` also scores 0.6 against `release_it.hook.name`, `release_it.package_name`, and `release_it.prompt.name`. The semantic check clears every pair: a release title, an uploaded file name, a hook event, a package name, and a prompt identifier are different concepts. `milestones_count` and `request.endpoint` cross 0.5 against no key. `release_it.gitlab.asset.name` versus `release_it.github.assets_count` (the run-4 validator's match) is a different concept in a different domain. `request.endpoint` holds a path relative to `/api/v4`, so OTel `url.path` is not an obvious duplicate. |
 | CDQ-001 | PASS. `span.end()` is in `finally` on all nine spans (L77, L101, L125, L141, L204, L234, L293, L364, L429). |
 | CDQ-002 | PASS. `trace.getTracer('release-it')` (L15) matches the package.json `name`. |
 | CDQ-003 | PASS. Every catch uses `recordException(error)` + `setStatus({ code: SpanStatusCode.ERROR })`, with no ad-hoc error attributes. See Advisories about double recording. |
@@ -537,3 +537,70 @@ Per the rubric's evaluation scope note, coverage rules apply to instrumented fil
 ## Failed Files (4)
 
 `lib/plugin/GitBase.js` (LINT), `lib/plugin/git/Git.js` (LINT, a regression), `lib/plugin/npm/npm.js` (NDS-003 ×4), and `lib/shell.js` (SCH-002, a regression) never committed, so they are not scored here. Per the rubric's evaluation scope note, they are assessed in failure analysis. Root causes, attempt histories, and the un-awaited-return and sensitive-command-string findings from their debug dumps are in `failure-deep-dives.md`.
+
+---
+
+## Cross-File Reconciliation
+
+Completed 2026-10-08 by the coordinating session, after both per-file batches and correct-skip verification. Static-only; trace reconciliation is applied during IS scoring, once `trace-artifact.md` exists.
+
+### Rule-ID label audit
+
+Every row in all nine sections (252 rows: 28 rules × 9 files) was checked against its rule's mechanism in `docs/research/evaluation-rubric.md` (spiny-orb a55bd92). Each row's rule ID matches the rule its evidence argues. Three kinds of correction came out of the audit, and none of them turns a PASS into a FAIL or a FAIL into a PASS:
+
+1. **COV-002 and COV-006 used PASS and N/A inconsistently for the same situation.** Version.js, util.js, factory.js, and prompt.js scored "no outbound call site" and "no auto-instrumentation library covers this" as N/A, while config.js, Plugin.js, and GitRelease.js scored the same situations as PASS. All five PASS rows are now N/A, following taze run-17's convention (exemption-scope item 15). After the change, COV-002 is PASS in GitHub.js and GitLab.js (Octokit and `fetch` call sites, all inside spans) and N/A in the other seven files. COV-006 has the same split.
+2. **Three SCH-004 rows misstated the token-similarity step.** Every agent-added key was rerun through the rubric's delimiter-split Jaccard test against every key in `attributes.yaml` and `agent-extensions.yaml`. factory.js and GitLab.js said no key crossed 0.5, but four keys do. prompt.js discussed only `release_it.prompt.namespace`, but its other three keys cross 0.5 too. In every added case the semantic check clears the pair, so the verdicts stand (prompt.js FAIL, factory.js and GitLab.js PASS). The rows now record the scores (exemption-scope item 16).
+3. **The CDQ-011 rows cite package.json `name` as the canonical source.** The rubric takes the canonical name from `tracerName` or from the registry manifest's `name` normalized to hyphens (`release_it` → `release-it`). Both sources give `release-it`, so the nine PASS verdicts stand. The per-run note under "Per-Run Rules" now names the correct source.
+
+### Cross-file patterns
+
+Each pattern is recorded once here. The verdicts in the file sections agree with each other on every one.
+
+| Pattern | Files and rows | Reconciled reading |
+|---------|----------------|--------------------|
+| `release_it.is_ci` value source | config.js sets it from `options.ci`. Version.js, GitHub.js, and GitLab.js set it from the `Config.isCI` getter, which is also true for `--release-version` and `--changelog`. | Consistent: SCH-002 PASS in all four. The registry brief is "Whether the release ran in CI mode (non-interactive)", which covers both readings, so this is the generic-key case of exemption-scope item 13. The two sources still disagree on those two flags, and that goes to the handoff as an advisory. |
+| `release_it.plugin.namespace` and `release_it.prompt.namespace` | Plugin.js L69 and prompt.js L21 record the same `this.namespace` on adjacent spans. factory.js L30 records the raw module specifier under `plugin.namespace`. | Consistent: SCH-004 FAIL in prompt.js only, because only that agent added a duplicate key. SCH-002 FAIL in factory.js, because there the key holds a different concept (item 13). Plugin.js holds the brief's concept and passes. |
+| `release_it.version.increment` reachable `false` | config.js L124, Version.js L84 | Consistent: SCH-003 FAIL in both (item 5). |
+| Count attributes | `String(len)` casts: factory.js `enabled_count`/`external_count`, util.js `collection_size`, GitLab.js `milestones_count`. Raw ints: `changelog.length` in GitRelease.js, GitHub.js, and GitLab.js, and `commits_since_tag` in GitHub.js. | Consistent: SCH-003 FAIL on every cast, including util.js where the schema was retyped to `string` (item 2). PASS on every raw int. CDQ-006 PASS on every `String(x.length)` as a trivial conversion. |
+| `release_it.git.tag_name` | GitHub.js L603 holds the previous tag (`latestTag`). GitHub.js's five other sites and GitLab.js L311 hold the new tag. | Consistent: SCH-002 FAIL and CDQ-007 FAIL at GitHub.js L603 only. GitLab.js passes both. |
+| `release_it.prompt.name` guard | Plugin.js L70 guards it with `!= null`. prompt.js L22 does not. | Consistent: CDQ-007 FAIL in prompt.js only (item 11). |
+| `release_it.changelog.length` meaning | GitRelease.js L45, GitHub.js L636, and GitLab.js L315 all record the length of the final release notes, which is the changelog unless a `releaseNotes` script replaces it. | Consistent: SCH-002 PASS in all three. The brief ("Character length of the generated changelog text") is generic enough to cover release notes produced by a script. |
+| Un-awaited returns | GitRelease.js (2 sites), GitHub.js (5 sites) | Consistent: CDQ-001 PASS and COV-003 PASS, and every site is listed under Unrubriced findings (items 1 and 9). No other committed file has the pattern. |
+| Sync functions returning I/O promises | Plugin.js `exec`/`step`, Version.js `promptIncrementVersion`, util.js fs helpers, GitHub.js `uploadAsset`/`uploadAssets`, GitLab.js `uploadAssets` | Consistent: COV-004 PASS everywhere under the implemented rule (item 6). GitHub.js asset upload is the one case where the missing span loses a registered attribute (`assets_count`). |
+
+### Finding that corrects an earlier rationale
+
+Plugin.js L73–74 shipped the fix for the un-awaited-return pattern, and NDS-003 accepted it. The original `return this.prompt.show(options)` became `const result = await this.prompt.show(options); return result;`. spiny-orb's `reconcileReturnCaptures` (`src/languages/javascript/rules/nds003.ts`) removes a leading `await` before it matches a capture against the original return, so this form passes. Only the in-place `return await <expr>` edit fails, which is what npm.js tried (`failure-deep-dives.md`).
+
+Exemption-scope item 1, rule-fit item 1, and the 2026-10-07 Decision Log row all say "NDS-003 rejects the `await` that would fix it". That is true only of the in-place form. The single-line sites in GitRelease.js (L66, L71) could take the capture form with no rule change. The multi-line `return this.retry(async bail => {...})` and `return this.step({...})` sites in GitHub.js match on their first line under the same regexes, but that case was not tested. The handoff gap therefore narrows: the agent did not use the accepted capture form to fix span timing. NDS-003 does not block that fix. The scoring decision in item 1 is unchanged. Rule-fit item 1 now carries the narrowed wording.
+
+### Validator-driven outcomes (handoff)
+
+Four files ended worse because of how they responded to validator output, each observed once this run:
+- factory.js lost `load`'s error recording (COV-003 FAIL) after NDS-005 and NDS-007 flagged the outer recording catch.
+- GitLab.js records each error twice after COV-003 flagged inner catches that the outer catch already covered (rule-fit item 10).
+- config.js switched from `Boolean()` to `!!` to avoid the CDQ-006 pattern match.
+- util.js retyped `collection_size` to `string` to match its own cast (SCH-003 FAIL).
+
+### Notes-versus-code divergence
+
+Eight of nine companion `.instrumentation.md` files or agent notes contradict the committed code: Plugin.js, factory.js, Version.js, util.js, prompt.js, GitRelease.js, GitHub.js, and GitLab.js. In config.js, the agent's attribute brief never reached the registry. The most common forms are attribute types the code does not emit (`int` in the notes for values the code casts to strings), skip reasons that cite the wrong rule, and the log's attribute count, which counts only new schema keys. This goes to the handoff as one pattern.
+
+### Fix-verification confirmation (supersedes `run-summary.md`'s provisional table)
+
+- **RUN4-1 (LINT/NDS-003 indentation conflict)**: CONFIRMED PARTLY RESOLVED. prompt.js, GitRelease.js, and GitHub.js committed with token-identical Prettier reflows that NDS-003 accepted (item 10). GitBase.js, Git.js, and npm.js still fail (`failure-deep-dives.md`).
+- **RUN4-2 (PR body E2BIG)**: out of per-file scope. PR artifact evaluation verifies it.
+- **RUN4-3 (COV-003 `Promise.reject`)**: the verdict is taken from `failure-deep-dives.md` (fix fired, shell.js did not commit). No committed file exercises it.
+- **RUN4-4 (GitLab.js SCH-002 duplicate)**: CONFIRMED RECURRED during the run. It did not block the commit, because the agent deleted `release_it.gitlab.request.method` (GitLab.js Run-4 comparison).
+
+### Verdict changes in this pass
+
+| File | Rule | Before | After | Basis |
+|------|------|--------|-------|-------|
+| lib/config.js | COV-002 | PASS | N/A | item 15 |
+| lib/config.js | COV-006 | PASS | N/A | item 15 |
+| lib/plugin/Plugin.js | COV-002 | PASS | N/A | item 15 |
+| lib/plugin/GitRelease.js | COV-002 | PASS | N/A | item 15 |
+| lib/plugin/GitRelease.js | COV-006 | PASS | N/A | item 15 |
+
+No FAIL was added or removed. The failure count across the nine files is unchanged at 14 rule failures. Evidence was corrected without a verdict change in three SCH-004 rows (factory.js, prompt.js, GitLab.js) and in the CDQ-011 per-run note.

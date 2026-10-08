@@ -14,6 +14,8 @@ Confirmed in committed files before evaluation started: `lib/plugin/GitRelease.j
 
 **Rationale**: the template's standing "Unrubriced Findings" category exists for real failures with no matching rule. Keeping CDQ-001 literal keeps it comparable with runs 1-4, which likely contained the same pattern unscored. The fix work is carried by the handoff (`actionable-fix-output.md`) as two gaps: no validator rule detects a span ending before its returned promise settles, and NDS-003 rejects adding `await` to an original `return`, so the agent cannot fix the timing even when it notices it.
 
+**Correction from cross-file reconciliation (2026-10-08)**: the rationale's second gap is narrower than stated. NDS-003 rejects the in-place edit `return await <expr>`, but it accepts the capture form `const r = await <expr>; return r;`. `reconcileReturnCaptures` in `nds003.ts` strips a leading `await` before matching, and Plugin.js L73–74 committed that form in this run. The scoring decision above is unchanged.
+
 **Test for per-file agents to apply**: for every `return <expr>` inside a span callback's `try` block, determine whether `<expr>` can be a promise (an async method call, `this.exec(...)`, `this.retry(...)`, `this.step(...)`, `.then(...)` chains, a variable holding an un-awaited call, or a call to a user-supplied function) and is not preceded by `await`. If so, record it as an unrubriced finding with function name, instrumented-file line, the returned expression, and any span calls (`setAttribute`, `recordException`, `setStatus`) that execute inside the returned promise and therefore after `span.end()`. Returns of plain values, `await`ed expressions, and returns inside nested callbacks that are themselves awaited before the span's `finally` runs are not findings. Do not change the CDQ-001 verdict because of these sites.
 
 ## 2. SCH-003: length-derived counts cast to string FAIL regardless of declared schema type
@@ -148,13 +150,30 @@ Correct-skip verification for the ten skipped files surfaced one more reading. T
 
 **Rationale**: the rubric's evaluation scope note says coverage rules apply to instrumented files only, and a file that was never instrumented "cannot fail a coverage rule — it is a coverage gap for the run". Run-27 scored its questionable skip the same way.
 
+
+## Decisions added during cross-file reconciliation
+
+The rule-ID label audit surfaced two more readings. The coordinating session decided them under Whitney's 2026-10-07 delegation. Item 15 follows taze run-17's convention, and item 16 states the method prompt.js's row already used, so neither reverses a precedent.
+
+## 15. COV-002 and COV-006: N/A when the file has nothing the rule checks
+
+**Decision**: COV-002 is N/A for a file with no outbound HTTP, database, or queue call site in its own code. Calls through release-it's own wrappers (`this.exec`, `this.prompt.show`) and local config or file reads do not count. COV-006 is N/A when no auto-instrumentation library covers any operation the file's spans wrap. Both are PASS only when the file has a site the rule checks and that site passes. GitHub.js (Octokit) and GitLab.js (`fetch`) PASS both rules. The other seven files are N/A on both.
+
+**Rationale**: batch agents used N/A and PASS interchangeably for the same situation. Taze run-17 used N/A for every file without a covered call site, and N/A keeps those files out of the dimension denominators instead of passing them on a check with nothing to check.
+
+## 16. SCH-004: the token step flags candidates, and the semantic check decides
+
+**Decision**: compute the delimiter-split Jaccard similarity (split on `.` and `_`) of each agent-added key against every key in `attributes.yaml` and `agent-extensions.yaml`, including keys the same agent added. A score above 0.5 makes the pair a candidate. The pair FAILs only if the two keys hold the same concept, which is the semantic check. Each row records the candidates it cleared.
+
+**Rationale**: the shared `release_it` prefix contributes two tokens to every key, so any two keys with a short shared area or a shared last token score 0.6 or more. On its own the token step flags 8 of the 13 agent-added keys, most of them against sibling keys on the same span. prompt.js's FAIL already used both steps.
+
 ---
 
 ## Rule-fit issues for the handoff
 
 These go into `actionable-fix-output.md` (the spiny-orb handoff) and `lessons-for-run6.md`. They are places where a rule, or the documents describing it, does not fit what this run found.
 
-1. **CDQ-001 cannot see premature closes** (item 1). A span that ends before its returned promise settles passes the rule's literal finally-block mechanism. There is no validator rule for it, and NDS-003 rejects the `await` that would fix it.
+1. **CDQ-001 cannot see premature closes** (item 1). A span that ends before its returned promise settles passes the rule's literal finally-block mechanism. There is no validator rule for it. NDS-003 rejects the in-place `return await` fix, but it accepts the capture form (`const r = await <expr>; return r;`), which Plugin.js L73–74 committed this run. So the gap is that the agent does not use the accepted form to fix span timing, not that the validator blocks every fix (narrowed in cross-file reconciliation, item 1 correction note). Whether the capture form passes at the multi-line `this.retry(...)`/`this.step(...)` sites in GitHub.js was not tested.
 2. **CDQ-007 does not inspect value content** (item 3). Command strings and URLs that can carry credentials pass. Deep-dives found the same gap in the validator (shell.js, Git.js, GitBase.js, npm.js).
 3. **The research rubric's COV-004 mechanism has drifted from the implemented rule** (item 6). `docs/research/evaluation-rubric.md` still lists I/O-library calls, while `cov004.ts` and `rules-reference.md` exclude sync functions. Proposed rubric wording: "async functions and functions containing `await`; synchronous functions are not flagged even when they call I/O APIs".
 4. **RST-003's same-file narrowing leaves cross-file duplicate spans undetected by the validator** (item 7). Plugin.js `showPrompt` → `prompt.show` is the concrete case.
@@ -167,3 +186,5 @@ These go into `actionable-fix-output.md` (the spiny-orb handoff) and `lessons-fo
 11. **SCH-002's mechanism is about key names, and value-concept mismatches are scored through it** (item 13). The rubric does not state that a registered key can fail on what it holds.
 12. **The pre-scan's COV-001 entry-point test misses two common export forms** (item 14). `classifyFunctions` reads `isExported` from the declaring statement, so `const runTasks = async () => {}` followed by `export default runTasks` reads as unexported. It also never collects an anonymous `export default async () => {}`. Both release-it entry points (`lib/index.js`, `lib/cli.js`) are skipped this way, reproduced on a55bd92. The rubric's scope note keeps a skipped file out of coverage scoring, so only correct-skip verification catches it. Runs 3 and 4 labeled both files "synchronous only" or "pure sync"; whether the same gap caused those skips was not checked, so the spiny-orb team should confirm before counting it as a three-run recurrence.
 13. **The pre-scan's `process.exit()` carve-out drops an async function whose only exits are conditional** (item 14). `hasDirectProcessExit` counts `process.exit()` inside `if` branches within the `try` block as direct, and only an entry point overrides the carve-out. `lib/index.js` `runTasks` exits early on two flags (`--changelog`, `--release-version`) and otherwise runs the whole release, so the carve-out removes the orchestrator once rule-fit item 12 has already misclassified it.
+14. **SCH-004's 0.5 Jaccard threshold does not separate keys under a shared two-token namespace** (item 16). `release_it` splits into two tokens, so `release_it.<area>.<x>` against `release_it.<area>.<y>`, or against any key that ends in the same token, scores at least 0.6. 8 of 13 agent-added keys cross the threshold, and only one pair is a real duplicate (`prompt.namespace`/`plugin.namespace`). Splitting the namespace as one token, or excluding it, would make the threshold meaningful.
+15. **The research rubric's NDS-003 filter list has drifted from the implemented rule.** The rubric lists imports, tracer acquisition, span calls, and try/finally wrappers. `nds003.ts` also accepts defined-value guards around `setAttribute`, `isRecording()` guards, return-value captures (with an added `await`), and multi-line normalization. Run-5's PASS rows rely on three of these (config.js L123, GitRelease.js L44, GitLab.js L314 guards; Plugin.js L73–74 and GitHub.js L626–637 captures; item 10 reflows). The same drift appears in COV-004 (issue 3).
