@@ -252,6 +252,8 @@ The feature branch for this PRD (`feature/prd-100-evaluation-run-5-release-it`) 
 
   After baseline comparison: (1) add a row for run-5 to the release-it run history table in `README.md`; (2) update the "next run" sentence below the release-it run history table to reference run-6 and its primary goals.
 
+  **The table is two runs behind (checked 2026-10-08).** It stops at run-2, and the sentence below it still reads "Run-3 is next" with run-3's blockers. Add rows for run-3 and run-4 as well as run-5, so the table does not skip from run-2 to run-5. Take each row's figures from that run's `rubric-scores.md` Canonical Metrics (run-5's table also carries run-3 and run-4) and `evaluation/javascript/release-it/run-log.md`, in the README's existing columns (Quality, Gates, Files, Spans, Cost, Push/PR, IS). For run-5's Quality, use `21/27 (78%)` and footnote the shared-rule `18/24 (75%)`. Replace the run-3 blocker sentence entirely. The actionable fix output has not been written yet when this milestone runs, so take run-6's primary goals from the open rows of the "Failure Classification Across Runs" table in `baseline-comparison.md`: the remaining LINT/NDS-003 files (GitBase.js, Git.js, npm.js), the shell.js SCH-002 lexical check, and the schema-fidelity failures.
+
 - [ ] **Actionable fix output** *(user-facing checkpoint 2)*
 
   1. Run the cross-document audit agent to verify consistency across all run-5 evaluation artifacts.
