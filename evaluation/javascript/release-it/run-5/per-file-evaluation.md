@@ -274,14 +274,14 @@ Trace supplementation (2026-10-08): `release_it.util.reduce_until` exercised 5 t
 | CDQ-011 | PASS. `'release-it'` matches the canonical name. |
 
 **Failures**:
-- SCH-003, L109: `String(collection.length)` records a count as a string, with the schema retyped to `string` to match the cast.
+- SCH-003, L109: `String(collection.length)` records a count as a string, with the schema retyped to `string` to match the cast. (Corrected 2026-10-10: the `String()` cast and the `string` type come from spiny-orb's SCH-003 auto-fix running on the bare-ID default type before `*_count` keys are corrected to `int`, reproduced against `a55bd92`; the agent did not retype the schema. The verdict is unchanged. See `actionable-fix-output.md` RUN5-1.)
 
 **Unrubriced findings**: None. The only `return` inside the span's `try` is `return result;` (L115), a plain value. The user-supplied `fn(item)` is awaited inside the loop, so it settles before `finally` runs.
 
 **Advisories**:
 - The notes do not match the code. The agent notes in the log and in `lib/util.instrumentation.md` call `release_it.util.collection_size` "type: int" and say it "is set via direct property access on collection.length; for non-Array iterables this will be undefined and the OTel SDK will silently discard it, so no guard is needed." In the code the value is wrapped in `String(...)`, the registry declares `type: string`, and `String(undefined)` produces the literal string `"undefined"`, which the SDK records rather than drops. Attempt 2's thinking also describes the uncast value, so the cast and the schema retype went undocumented.
 - The span is on a generic helper that fires six times per release run, and the only attribute that tells the calls apart is `collection_size`, which is the same plugin count every time. An attribute naming which plugin method is being reduced (`getName`, `getLatestVersion`, and so on) would carry more information.
-- util.js's retype of `collection_size` to `string` affected a later file: factory.js's agent explicitly declined to reuse the key because it is string-typed.
+- util.js's retype of `collection_size` to `string` affected a later file: factory.js's agent explicitly declined to reuse the key because it is string-typed. (Corrected 2026-10-10: the `String()` cast and the `string` type come from spiny-orb's SCH-003 auto-fix running on the bare-ID default type before `*_count` keys are corrected to `int`, reproduced against `a55bd92`; the agent did not retype the schema. The verdict is unchanged. See `actionable-fix-output.md` RUN5-1.)
 
 **Run-4 comparison**: Run-4 committed this file in 1 attempt with the same span and attribute, and scored SCH-003 PASS while describing the value as a raw integer length. Run-5 took 2 attempts after an NDS-003 rejection of the `Array.isArray` guard, and now casts the value with `String()` and declares it `string`, which makes SCH-003 a FAIL.
 
@@ -582,11 +582,11 @@ Four files ended worse because of how they responded to validator output, each o
 - factory.js lost `load`'s error recording (COV-003 FAIL) after NDS-005 and NDS-007 flagged the outer recording catch.
 - GitLab.js records each error twice after COV-003 flagged inner catches that the outer catch already covered (rule-fit item 10).
 - config.js switched from `Boolean()` to `!!` to avoid the CDQ-006 pattern match.
-- util.js retyped `collection_size` to `string` to match its own cast (SCH-003 FAIL).
+- util.js retyped `collection_size` to `string` to match its own cast (SCH-003 FAIL). (Corrected 2026-10-10: the `String()` cast and the `string` type come from spiny-orb's SCH-003 auto-fix running on the bare-ID default type before `*_count` keys are corrected to `int`, reproduced against `a55bd92`; the agent did not retype the schema. The verdict is unchanged. See `actionable-fix-output.md` RUN5-1.)
 
 ### Notes-versus-code divergence
 
-Eight of nine companion `.instrumentation.md` files or agent notes contradict the committed code: Plugin.js, factory.js, Version.js, util.js, prompt.js, GitRelease.js, GitHub.js, and GitLab.js. In config.js, the agent's attribute brief never reached the registry. The most common forms are attribute types the code does not emit (`int` in the notes for values the code casts to strings), skip reasons that cite the wrong rule, and the log's attribute count, which counts only new schema keys. This goes to the handoff as one pattern.
+Eight of nine companion `.instrumentation.md` files or agent notes contradict the committed code: Plugin.js, factory.js, Version.js, util.js, prompt.js, GitRelease.js, GitHub.js, and GitLab.js. In config.js, the agent's attribute brief never reached the registry. The most common forms are attribute types the code does not emit (`int` in the notes for values the code casts to strings), skip reasons that cite the wrong rule, and the log's attribute count, which counts only new schema keys. This goes to the handoff as one pattern. (Corrected 2026-10-10: the `String()` cast and the `string` type come from spiny-orb's SCH-003 auto-fix running on the bare-ID default type before `*_count` keys are corrected to `int`, reproduced against `a55bd92`; the agent did not retype the schema. The verdict is unchanged. See `actionable-fix-output.md` RUN5-1.)
 
 ### Fix-verification confirmation (supersedes `run-summary.md`'s provisional table)
 
