@@ -16,7 +16,7 @@ Run-5 quality figures come from `rubric-scores.md`. Run-5 scores 27 rules, and r
 
 Run-5 is the first release-it run with an automatic PR. Q×F rose for the second consecutive run. Volume drove the gain: 9 files and 33 spans against 7 and 20, for $0.42 less. Quality fell, and most of the fall is not a regression (see "Quality Change" below).
 
-Run-4's cost is $6.97 in its own `rubric-scores.md` and `baseline-comparison.md`. Run-5's `run-summary.md` lists run-4 at "~$5–6". This table uses $6.97, the figure run-4's artifacts report.
+Run-4's cost is $6.97 in its own `rubric-scores.md` and `baseline-comparison.md`. Run-5's `run-summary.md` first listed run-4 at "~$5–6", an estimate, and now carries $6.97 with a note. This table uses $6.97, the figure run-4's artifacts report.
 
 ---
 
@@ -97,7 +97,7 @@ Four dimensions differ by exactly 1 point, so the 2-point total gap is spread ou
 
 Three failing rules are the same in both runs, and two of them have the same shape:
 
-- **SCH-003, integer counts cast to string.** Run-28 has 12 `String(...)`-wrapped counts on int-declared keys across 3 files (RUN27-3, open for 3 runs). Run-5 has the same shape in factory.js and GitLab.js, and util.js resolved the mismatch by retyping its schema entry to `string`, which `rubric-scores.md` notes matches taze run-17. Across three targets, this looks like one agent behavior rather than a target-specific defect. That is an observation from three single-run data points, to confirm in later runs.
+- **SCH-003, integer counts cast to string.** Run-28 has 12 `String(...)`-wrapped counts on int-declared keys across 3 files (RUN27-3, open for 3 runs). Run-5 has the same shape in factory.js and GitLab.js, and util.js resolved the mismatch by retyping its schema entry to `string`, which `rubric-scores.md` notes matches taze run-17. Across three targets, this looks like one agent behavior rather than a target-specific defect. Release-it and taze each show it in one run, and commit-story-v2 has repeat evidence across 3 runs, so treat the cross-target reading as an observation to confirm in later runs.
 - **SCH-002, a registered key reused for a related but different value.** Run-28's `dates_requested` holds a date count, a week count, and a month count. Run-5's `plugin.namespace`, `hook.command`, and `git.tag_name` each hold a neighboring concept. In run-28 the validator caught the reuse at reassembly. In run-5 the key names matched the registry, so the validator passed them.
 - **CDQ-007.** Different shapes: run-28 ships raw paths and a raw author name, and run-5 sets attributes from nullable values without a guard (prompt.js L22, GitHub.js L603).
 
@@ -166,9 +166,9 @@ Git.js and shell.js together cost 12 spans that run-4 had. With both committed, 
 | LINT/NDS-003 indentation-width conflict (RUN4-1) | Run-2 (LINT print-width) | **Reduced**: 3 of 5 run-4 files now commit; GitBase.js, npm.js still fail; Git.js newly fails | Runs 2, 4, 5 | Span wrapper adds 4 characters of indent; agent must emit Prettier-exact text |
 | PR body E2BIG (RUN4-2) | Run-4 | **Resolved** (auto PR #4) | 1 run | Live-check report inline in PR body |
 | COV-003 `Promise.reject` gap (RUN4-3) | Run-4 | **Fix fired** in shell.js attempt 1; no committed evidence | 1 run | Validator detected `throw` only |
-| GitLab.js SCH-002 cross-domain duplicate (RUN4-4) | Run-4 | **Recurred** on attempt 1, did not block commit; not evidenced as fixed | 2 runs | Duplicate detection has no namespace scoping |
+| GitLab.js SCH-002 cross-domain duplicate (RUN4-4) | Run-4 | **Recurred** on attempt 1, did not block commit; not evidenced as fixed | 2 runs | Duplicate detection has no namespace scoping (Corrected 2026-10-10: spiny-orb #1086 found the judge stage does scope to the all-but-last prefix; the normalization stage, underscore-only keys, and same-list peer extensions are unscoped.) |
 | Pre-scan false negatives (`lib/index.js`, `lib/cli.js`) | **Run-5** (identified in per-file evaluation; run-3's false negatives were plugin class methods, fixed in run-4) | **Open**; reproduces on `a55bd92` and causes the fragmented trace | 1 run identified | Pre-scan misses these async entry points |
-| SCH-003 counts cast to string | **Run-5** (this target) | New: factory.js, GitLab.js, util.js | 1 run | Agent's code and schema declarations disagree; same shape as CS-v2 RUN27-3 |
+| SCH-003 counts cast to string | **Run-5** (this target) | New: factory.js, GitLab.js, util.js | 1 run | Agent's code and schema declarations disagree; same shape as CS-v2 RUN27-3 (Corrected 2026-10-10: reproduced against `a55bd92`, the `String()` casts are inserted by spiny-orb's SCH-003 auto-fix, which runs against the bare-ID default type `string` before `*_count` keys are corrected to `int`; see `actionable-fix-output.md` RUN5-1.) |
 | SCH-003 boolean on a string enum or string declaration | **Run-5** | New: config.js, Version.js, prompt.js | 1 run | `!= null` guard admits `false`; agent declared `string` for a boolean |
 | SCH-002 registered key holding a different concept | **Run-5** | New: factory.js, GitRelease.js, GitHub.js | 1 run | Validator checks key names, not what the value is |
 | SCH-002 lexical meaning check (shell.js) | **Run-5** | New; caused the shell.js failure | 1 run | `sharesToken` compares identifiers, not values |

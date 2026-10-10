@@ -165,7 +165,7 @@ Three patterns, each consistent across files ("Cross-file patterns" in `per-file
 - **Reachable boolean on a string enum** (config.js, Version.js). `release_it.version.increment` is guarded only by `!= null`, which lets the documented `--no-increment` (`false`) through.
 - **Boolean against a string declaration** (prompt.js). The agent created `release_it.prompt.enabled` as `type: string` and records a boolean.
 
-**Root cause**: the agent's registry declarations and its code disagree, and in util.js the agent resolved the disagreement by changing the schema. Companion notes report `int` for values the code casts to strings ("Notes-versus-code divergence" in `per-file-evaluation.md`).
+**Root cause**: the agent's registry declarations and its code disagree, and in util.js the agent resolved the disagreement by changing the schema. Companion notes report `int` for values the code casts to strings ("Notes-versus-code divergence" in `per-file-evaluation.md`). (Corrected 2026-10-10: reproduced against `a55bd92`, the `String()` casts are inserted by spiny-orb's SCH-003 auto-fix, which runs against the bare-ID default type `string` before `*_count` keys are corrected to `int`; see `actionable-fix-output.md` RUN5-1.)
 
 ### SCH-002: registered keys holding a different concept
 

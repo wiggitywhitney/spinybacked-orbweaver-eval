@@ -26,8 +26,8 @@ Every fix-verification statement below is provisional. It comes from the run log
 | Attempts (committed files) | 17 | 11 |
 | Attempts (all files sent to the agent) | 28 | 26 |
 | Input tokens | 219.7K | 218.8K |
-| Output tokens | 254.8K (199.7K cached) | 334.7K (219.1K cached) |
-| Cost | $6.55 (claude-sonnet-4-6) | ~$5–6 |
+| Output tokens | 254.8K (199.7K cached, as spiny-orb's final summary labels it; the PR body's token table lists 199,693 as cache read, an input-side figure, plus 535,431 cache write) | 334.7K (219.1K cached) |
+| Cost | $6.55 (claude-sonnet-4-6) | $6.97 (from run-4's own `rubric-scores.md`; this row first read "~$5–6", an estimate) |
 | Push | SUCCEEDED, branch pushed to wiggitywhitney/release-it | SUCCEEDED |
 | PR | SUCCEEDED, PR #4 created automatically | FAILED (E2BIG) |
 | Live-check | "OK" with a partial warning: 1239 spans, 5555 advisory findings, 4 files failed instrumentation | OK, 2173 spans, 15389 advisory findings |
@@ -78,7 +78,7 @@ Corrected in per-file evaluation: 8 of the 10 are confirmed correct skips, and 2
 | RUN4-1 | LINT/NDS-003 indentation-width conflict | Partly resolved | 3 of 5 blocked files now commit (GitHub.js, GitRelease.js, prompt.js). GitBase.js still fails LINT and npm.js still fails NDS-003 (26 violations down to 4). Git.js newly fails LINT. |
 | RUN4-2 | PR body E2BIG | Resolved | PR #4 created automatically; the summary file was also written to disk. |
 | RUN4-3 | COV-003 `Promise.reject` gap | Fix fired (corrected from "not observed" after reading the log) | COV-003 flagged shell.js's inner `return Promise.reject(err)` catch on attempt 1, and the agent then added both `recordException` and `setStatus(ERROR)` to it. shell.js did not commit, so the evidence for those added calls is the log and the debug dump only. It still failed, later on SCH-002. See `failure-deep-dives.md`. |
-| RUN4-4 | GitLab.js SCH-002 cross-domain duplicate | Recurred during the run, did not block the commit (corrected in per-file evaluation) | GitLab.js attempt 1 failed SCH-002 ×2 on `release_it.gitlab.request.method` with the same "semantic duplicate" plus "not found in registry" pair as run-4. The agent deleted the attribute in attempt 2 and the file committed. The log has no validator message text, so whether the match was cross-domain or the legitimate OTel `http.request.method` is unconfirmed. The pre-run check found no namespace scoping in the duplicate detection. |
+| RUN4-4 | GitLab.js SCH-002 cross-domain duplicate | Recurred during the run, did not block the commit (corrected in per-file evaluation) | GitLab.js attempt 1 failed SCH-002 ×2 on `release_it.gitlab.request.method` with the same "semantic duplicate" plus "not found in registry" pair as run-4. The agent deleted the attribute in attempt 2 and the file committed. The log has no validator message text, so whether the match was cross-domain or the legitimate OTel `http.request.method` is unconfirmed. The pre-run check found no namespace scoping in the duplicate detection. (Corrected 2026-10-10: spiny-orb #1086 found the judge stage does scope to the all-but-last prefix; the normalization stage, underscore-only keys, and same-list peer extensions are unscoped.) |
 | RUN3-3 | HOME not forwarded to weaver | Workaround kept | `HOME="$HOME"` was in the instrument command; no weaver failure occurred. |
 
 "Fix mechanism fired" is established for RUN4-3 only, and only from the shell.js log and debug dump (`failure-deep-dives.md` has the evidence). It is not established for any other row. A file can pass because the agent wrote differently, not because a fix worked.
