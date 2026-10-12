@@ -149,6 +149,11 @@ The feature branch for this PRD **never merges to main**. The PR exists for Code
   Produces: `evaluation/<target-name>/run-1/per-file-evaluation.md`
   Style reference: `Read docs/templates/eval-run-style-reference/per-file-evaluation.md`
 
+  **Cascaded from release-it run-5** — apply all of the following during this milestone (full text in `docs/language-extension-plan.md` step 6):
+  - **Standing scoring readings** (apply unless this run's `exemption-scope.md` records a different call and why): where spiny-orb's research rubric (`docs/research/evaluation-rubric.md` in the spiny-orb repo) has drifted from the implemented rule (`src/languages/<language>/rules/<rule>.ts` and `docs/rules-reference.md`), score the implemented rule and record the drift as a rule-fit item for the handoff, except when the implemented rule narrows the rubric because of a visibility limit rather than a design choice (for example RST-003 checking same-file delegation only), where you score the rubric's mechanism. Score CDQ-011, not CDQ-008, which the rubric marks deleted. COV-002 and COV-006 are N/A, not PASS, for a file that contains nothing the rule checks. SCH-004's Jaccard step only flags candidate pairs; the semantic check decides the verdict.
+  - **Record interpretation calls yourself**: make these and any other exemption-scope interpretation calls without pausing for approval on each, and record each one in `evaluation/<target-name>/run-1/exemption-scope.md` before spawning the first per-file agent. Add that file to every per-file agent's required reading, because each agent is a separate context and will not see a decision it is not given. Never drop a rule clause to make a verdict fit. Where a rule does not fit what the run found, add the case to a "Rule-fit issues for the handoff" list in `exemption-scope.md`, and carry that list into the Actionable fix output.
+  - **Attribute types come from the OTLP export, not Datadog**: Datadog's span search shows boolean attributes as quoted strings (`is_ci: "true"`), indistinguishable from real string values. For SCH-003 type checks, read the attribute's `boolValue` / `intValue` / `stringValue` in the run's filtered `eval-traces-run<N>.json`; use Datadog for span structure and attribute values.
+
 - [ ] **PR artifact evaluation**
 
   Produces: `evaluation/<target-name>/run-1/pr-evaluation.md`
@@ -171,12 +176,14 @@ The feature branch for this PRD **never merges to main**. The PR exists for Code
 - [ ] **IS scoring run**
 
   1. **Prerequisites**: OTel Collector running with `evaluation/is/otelcol-config.yaml` (see `evaluation/is/README.md` for install and start instructions). No metrics-exporter override needed — MET rules are marked `not_applicable` by the scorer regardless.
-  2. **Action**: Run the target app with the Collector as OTLP receiver; collect `evaluation/is/eval-traces.json`; run `node evaluation/is/score-is.js evaluation/is/eval-traces.json > evaluation/<target-name>/run-1/is-score.md`
+  2. **Action** (follows `docs/language-extension-plan.md` step 9): record the run's start and end as nanosecond timestamps (`python3 -c 'import time; print(time.time_ns())'`), once immediately before and once immediately after running the target app, and write both into `run-summary.md`. Run the target app with the Collector as OTLP receiver, then `sleep 10` so the collector flushes. Do not score `evaluation/is/eval-traces.json` directly: it is append-only and holds spans from every target and earlier run (commit-story-v2 run-27 got a false 70/100 this way). Filter it with `node evaluation/is/filter-traces.js --input evaluation/is/eval-traces.json --output evaluation/<target-name>/run-1/eval-traces-run1.json --service <otel-service-name> --start-ns <start-ns> --end-ns <end-ns> --target <target-name>`, where `<otel-service-name>` is the target's `service.name` resource attribute. Do not filter by hand; output that loses the OTLP envelope scores as empty or wrong. Score the filtered file: `node evaluation/is/score-is.js evaluation/<target-name>/run-1/eval-traces-run1.json --target <target-name> > evaluation/<target-name>/run-1/is-score.md`. The per-file evaluation milestone reads SCH-003 attribute types from `eval-traces-run1.json`, so run this milestone before trace supplementation.
   3. **Output**: `evaluation/<target-name>/run-1/is-score.md` is written by the command above.
   4. **Note for k8s repos**: IS scoring requires a running cluster; see `evaluation/is/README.md` for the Kind-based workflow
-  Produces: `evaluation/<target-name>/run-1/is-score.md`
+  Produces: `evaluation/<target-name>/run-1/is-score.md`, `evaluation/<target-name>/run-1/eval-traces-run1.json`
 
 - [ ] **Actionable fix output**
+
+  **Rule-fit issues** (cascaded from release-it run-5): carry the "Rule-fit issues for the handoff" list from this run's `exemption-scope.md` into the handoff. Frame each item as a gap for the spiny-orb team to judge, not a prescribed change.
 
   1. Cross-document audit agent.
   2. *(User-facing checkpoint 2)* Interpreted summary. **Pause** until handoff confirmed.
