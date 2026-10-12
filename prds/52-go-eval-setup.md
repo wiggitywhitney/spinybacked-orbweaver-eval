@@ -176,10 +176,10 @@ The feature branch for this PRD **never merges to main**. The PR exists for Code
 - [ ] **IS scoring run**
 
   1. **Prerequisites**: OTel Collector running with `evaluation/is/otelcol-config.yaml` (see `evaluation/is/README.md` for install and start instructions). No metrics-exporter override needed — MET rules are marked `not_applicable` by the scorer regardless.
-  2. **Action**: Run the target app with the Collector as OTLP receiver; collect `evaluation/is/eval-traces.json`; run `node evaluation/is/score-is.js evaluation/is/eval-traces.json > evaluation/<target-name>/run-1/is-score.md`
+  2. **Action** (follows `docs/language-extension-plan.md` step 9): record the run's start and end as nanosecond timestamps (`python3 -c 'import time; print(time.time_ns())'`), once immediately before and once immediately after running the target app, and write both into `run-summary.md`. Run the target app with the Collector as OTLP receiver, then `sleep 10` so the collector flushes. Do not score `evaluation/is/eval-traces.json` directly: it is append-only and holds spans from every target and earlier run (commit-story-v2 run-27 got a false 70/100 this way). Filter it with `node evaluation/is/filter-traces.js --input evaluation/is/eval-traces.json --output evaluation/<target-name>/run-1/eval-traces-run1.json --service <otel-service-name> --start-ns <start-ns> --end-ns <end-ns> --target <target-name>`, where `<otel-service-name>` is the target's `service.name` resource attribute. Do not filter by hand; output that loses the OTLP envelope scores as empty or wrong. Score the filtered file: `node evaluation/is/score-is.js evaluation/<target-name>/run-1/eval-traces-run1.json --target <target-name> > evaluation/<target-name>/run-1/is-score.md`. The per-file evaluation milestone reads SCH-003 attribute types from `eval-traces-run1.json`, so run this milestone before trace supplementation.
   3. **Output**: `evaluation/<target-name>/run-1/is-score.md` is written by the command above.
   4. **Note for k8s repos**: IS scoring requires a running cluster; see `evaluation/is/README.md` for the Kind-based workflow
-  Produces: `evaluation/<target-name>/run-1/is-score.md`
+  Produces: `evaluation/<target-name>/run-1/is-score.md`, `evaluation/<target-name>/run-1/eval-traces-run1.json`
 
 - [ ] **Actionable fix output**
 
