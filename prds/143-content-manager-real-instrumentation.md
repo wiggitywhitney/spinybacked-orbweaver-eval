@@ -121,8 +121,10 @@ Evaluation artifacts live at `evaluation/content-manager/run-1/` in this repo (s
 
   **Exact command** (run from `~/Documents/Repositories/content-manager`):
   ```bash
-  caffeinate -s env -u ANTHROPIC_CUSTOM_HEADERS -u ANTHROPIC_BASE_URL vals exec -i -f .vals.yaml -- node ~/Documents/Repositories/spinybacked-orbweaver/bin/spiny-orb.js instrument src --verbose --thinking --debug-dump-dir ~/Documents/Repositories/spinybacked-orbweaver-eval/evaluation/content-manager/run-1/debug-dumps 2>&1 | tee ~/Documents/Repositories/spinybacked-orbweaver-eval/evaluation/content-manager/run-1/spiny-orb-output.log
+  set -o pipefail; caffeinate -s env -u ANTHROPIC_CUSTOM_HEADERS -u ANTHROPIC_BASE_URL vals exec -i -f .vals.yaml -- node ~/Documents/Repositories/spinybacked-orbweaver/bin/spiny-orb.js instrument src --verbose --thinking --debug-dump-dir ~/Documents/Repositories/spinybacked-orbweaver-eval/evaluation/content-manager/run-1/debug-dumps 2>&1 | tee ~/Documents/Repositories/spinybacked-orbweaver-eval/evaluation/content-manager/run-1/spiny-orb-output.log
   ```
+
+  `set -o pipefail` ensures a failure in the instrument command itself (not just `tee`) is reflected in the pipeline's exit status (cascaded from release-it run-5).
 
   **Pino bridge preservation check** (consequence of D-7): After the eval run, check whether spiny-orb overwrote `examples/instrumentation.js`. Run: `git -C ~/Documents/Repositories/content-manager show <instrument-branch>:examples/instrumentation.js | grep -c PinoInstrumentation`. If the count is 0, spiny-orb overwrote the file and the Pino bridge is gone — note this in `run-summary.md` and plan to restore it manually before the merge milestone. This is an expected friction point worth capturing for the learnings document.
 
@@ -147,6 +149,11 @@ Evaluation artifacts live at `evaluation/content-manager/run-1/` in this repo (s
   Style reference: `Read docs/templates/eval-run-style-reference/per-file-evaluation.md`
 
   **Exemption-scope pre-commitment** (cascaded from run-28 — **decide this before spawning the first batch below**, not during reconciliation): where a rubric rule's exemption conditions are ambiguous (e.g. CDQ-006's isRecording-guard exemption for entry-point spans), write down the chosen interpretation explicitly before any agent is spawned, and record it in `evaluation/content-manager/run-1/exemption-scope.md`. Apply it uniformly across every per-file evaluation agent in this run — a written-down decision the agents never see doesn't propagate, since each `Agent()` call is a separate context with no shared memory. Include `evaluation/content-manager/run-1/exemption-scope.md` in the required reading list below so every agent applies the same interpretation. Run-28 found this exemption applied inconsistently because it was never written down before agents started scoring — deciding it during reconciliation, after batches return, would repeat that gap.
+
+  **Cascaded from release-it run-5** — apply all of the following during this milestone (full text in `docs/language-extension-plan.md` step 6):
+  - **Standing scoring readings** (apply unless this run's `exemption-scope.md` records a different call and why): where spiny-orb's research rubric (`docs/research/evaluation-rubric.md` in the spiny-orb repo) has drifted from the implemented rule (`src/languages/<language>/rules/<rule>.ts` and `docs/rules-reference.md`), score the implemented rule and record the drift as a rule-fit item for the handoff, except when the implemented rule narrows the rubric because of a visibility limit rather than a design choice (for example RST-003 checking same-file delegation only), where you score the rubric's mechanism. Score CDQ-011, not CDQ-008, which the rubric marks deleted. COV-002 and COV-006 are N/A, not PASS, for a file that contains nothing the rule checks. SCH-004's Jaccard step only flags candidate pairs; the semantic check decides the verdict.
+  - **Record interpretation calls yourself**: make these and any other exemption-scope interpretation calls without pausing for approval on each, and record each one in `exemption-scope.md`. Never drop a rule clause to make a verdict fit. Where a rule does not fit what the run found, add the case to a "Rule-fit issues for the handoff" list in `exemption-scope.md`, and carry that list into the Actionable fix output.
+  - **Attribute types come from the OTLP export, not Datadog**: Datadog's span search shows boolean attributes as quoted strings (`is_ci: "true"`), indistinguishable from real string values. For SCH-003 type checks, read the attribute's `boolValue` / `intValue` / `stringValue` in the run's filtered `eval-traces-run<N>.json`; use Datadog for span structure and attribute values.
 
   **(D-2) Spawn per-file evaluation agents in batches of 5**: Create output directory first: `mkdir -p evaluation/content-manager/run-1/per-file-sections/`. Spawn individual background Agent() calls with `run_in_background: true` in batches of 5. **Before writing section files or clearing context, validate each batch's results**: confirm exactly one non-empty section came back for every file requested in that batch. If a result is missing, empty, duplicated, or covers the wrong file, re-spawn that specific file's agent before proceeding — do not clear context or start the next batch with an unresolved gap in the batch just completed. Once validated, write section files to disk immediately, then clear context before the next batch. At the start of each new batch, run `ls per-file-sections/` to see what's done and pick the next 5.
 
@@ -221,6 +228,9 @@ Evaluation artifacts live at `evaluation/content-manager/run-1/` in this repo (s
   Produces: `evaluation/content-manager/run-1/metrics-exploration.md`
 
 - [ ] **Actionable fix output** *(user-facing checkpoint 2)* — Primary handoff deliverable to the spiny-orb team.
+
+  **Rule-fit issues** (cascaded from release-it run-5): carry the "Rule-fit issues for the handoff" list from this run's `exemption-scope.md` into the handoff. Frame each item as a gap for the spiny-orb team to judge, not a prescribed change.
+
   1. Run the cross-document audit agent to verify consistency across all run-1 evaluation artifacts.
 
   **Handoff-confirmation depth**: When Whitney confirms handoff to the spiny-orb team, verify each finding's actual roadmap tier/sequencing (not just that an issue exists with acceptance criteria) against spiny-orb's `docs/ROADMAP.md`. A finding can be correctly filed and triaged while still not being scheduled to land before the next run — state this explicitly rather than treating an expected recurrence as a surprise.
