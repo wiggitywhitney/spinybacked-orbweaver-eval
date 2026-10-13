@@ -123,6 +123,8 @@ The feature branch for this PRD (`feature/prd-177-evaluation-run-6-release-it`) 
 
 - [ ] **Evaluation run-6**
 
+  **Record the agent model** (cascaded from the shared template, step 3): at the top of `run-summary.md`, record three lines in this exact form: `spiny-orb commit: <sha>`, `agent model: <id>`, `agent effort: <level>`. Take the SHA from `git -C ~/Documents/Repositories/spinybacked-orbweaver rev-parse HEAD` after the pre-run build. The log does not print the model or effort. Read the `agentModel` and `agentEffort` defaults from `src/config/schema.ts` at that spiny-orb commit (`git -C ~/Documents/Repositories/spinybacked-orbweaver show <sha>:src/config/schema.ts | grep -E 'agentModel|agentEffort'`), then check the target's `spiny-orb.yaml` for an `agentModel` or `agentEffort` override, which wins if present. Write the values you found, not the ones this PRD expects. Runs before 2026-10-12 did not record a model. The latest run of each target before then (commit-story-v2 run-28, taze run-17, release-it run-5) used `claude-sonnet-4-6`; spiny-orb's default from 2026-10-12 is `claude-opus-5-5`.
+
   Whitney runs `spiny-orb instrument` in her own terminal. **Do NOT run the command yourself.**
 
   Create `evaluation/javascript/release-it/run-6/debug-dumps/` before handing Whitney the command.
@@ -224,6 +226,8 @@ The feature branch for this PRD (`feature/prd-177-evaluation-run-6-release-it`) 
   Produces: `evaluation/javascript/release-it/run-6/is-score.md`, `evaluation/javascript/release-it/run-6/trace-artifact.md`, `evaluation/javascript/release-it/run-6/eval-traces-run6.json`
 
 - [ ] **Baseline comparison**
+
+  **Model change as a confound** (cascaded from the shared template, step 3): if the agent model recorded in `run-summary.md` differs from the model of a run you compare against (commit-story-v2 run-28, taze run-17, and release-it run-5 used `claude-sonnet-4-6`; earlier runs did not record a model), say so at the top of `baseline-comparison.md`. Label differences that may come from the model as observations to confirm, and compare attempts and tokens per committed file rather than dollar cost, because model pricing differs.
 
   Compare run-6 against run-5 and run-4, and against the most recent commit-story-v2 and taze runs (check each `run-log.md`). Use the shared-rule figures for the "more than 1 point" test, since rule sets differ across runs; leave CDQ-008 out of the shared set. Say which IS command each run used. Run-4's was never recorded, and run-5's 18 spans under-count what ran by at least one.
   Produces: `evaluation/javascript/release-it/run-6/baseline-comparison.md`
