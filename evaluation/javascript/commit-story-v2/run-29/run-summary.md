@@ -103,7 +103,7 @@ if (result.response_metadata?.model != null) {
 }
 ```
 
-The guard four lines above it, `if (result.usage_metadata != null) { span.setAttribute(...) }`, passed NDS-003 in the same file. The visible difference is the optional chaining in the condition. The working hypothesis is that NDS-003 recognizes `x != null` as an instrumentation guard but not `x?.y != null`, which would make this a validator false positive that discarded 6 spans. This is a single-run observation. The failure deep-dive must reproduce it against spiny-orb's `dist/` build and check whether a deterministic fixer touched these lines before it goes into the handoff.
+The guard four lines above it, `if (result.usage_metadata != null) { span.setAttribute(...) }`, passed NDS-003 in the same file. The visible difference is the optional chaining in the condition. The hypothesis was that NDS-003 recognizes `x != null` as an instrumentation guard but not `x?.y != null`, which would make this a validator false positive that discarded 6 spans. The checker behavior reproduces against spiny-orb's built `dist/` at `475eb3d` (`nds003-repro.mjs`, `nds003-repro2.mjs` in this directory): `result.usage_metadata != null` and `result.response_metadata != null` pass, and `result.response_metadata?.model != null` fails. The defined-value guard pattern in the NDS-003 allowlist has no `?.` support, while the truthy-guard pattern next to it does. The failure deep-dive still has to check whether a deterministic fixer touched these lines before the check ran.
 
 The agent's attempt 2 thinking says it would remove the `response_metadata` blocks; attempt 3 restored them. Run-28 never used `response_metadata`, so the new model adding one more `gen_ai.*` attribute may be what reached this gap (D-3, D-4).
 
