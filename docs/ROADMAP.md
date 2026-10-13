@@ -4,13 +4,13 @@ Execution order within each tier matters. Items are listed in dependency order �
 
 ## Short-term
 - Content Manager real instrumentation run: spiny-orb on a production project + template recommendation ([PRD #143](https://github.com/wiggitywhitney/spinybacked-orbweaver-eval/issues/143)) — first run where instrument branch merges; includes Pino log-trace correlation, span-based metrics exploration, and template recommendation for repeatable real-instrumentation runs
-- JS evaluation run-5: release-it — LINT/NDS-003 indentation conflict resolution ([PRD #100](https://github.com/wiggitywhitney/spinybacked-orbweaver-eval/issues/100))
-- JS evaluation run-6: release-it — schema fidelity, span timing, and the LINT/NDS-003 remainder ([PRD #177](https://github.com/wiggitywhitney/spinybacked-orbweaver-eval/issues/177)) — blocked by PRD #100's artifact copy to main; all fifteen run-5 spiny-orb issues are sequenced after the Go provider, so the Conservative projection is the default
+- JS evaluation run-6: release-it — schema fidelity, span timing, and the LINT/NDS-003 remainder ([PRD #177](https://github.com/wiggitywhitney/spinybacked-orbweaver-eval/issues/177)) — all fifteen run-5 spiny-orb issues are sequenced after the Go provider, so the Conservative projection is the default
 - JS evaluation run-29: commit-story-v2 — SCH-003 bidirectional check + CDQ-006/CDQ-007 consistency + PII severity investigation ([PRD #161](https://github.com/wiggitywhitney/spinybacked-orbweaver-eval/issues/161)) — verifies run-28's RUN28-1 through RUN28-4 findings; none confirmed scheduled to land before this run per spiny-orb's own roadmap tiers
 - TS evaluation run-18: taze — SCH-003 generalization + CDQ-007 path sanitization ([PRD #168](https://github.com/wiggitywhitney/spinybacked-orbweaver-eval/issues/168)) — primary goal: resolve SCH-003's count-cast pattern across the 5 files it broadened into and CDQ-007's unsanitized filesystem paths across 6 files; also verify IS SPA-002 orphan-span fix
 - Fix `score-is.js` silently doing nothing when run through a symlinked path ([#173](https://github.com/wiggitywhitney/spinybacked-orbweaver-eval/issues/173)) — one-line real-path comparison; the approach is already proven in `filter-traces.js`
 - Add `--instance-id` and `--redact-attribute` to the trace filter script so PRD #161 can use it ([#175](https://github.com/wiggitywhitney/spinybacked-orbweaver-eval/issues/175)) — #161's own filter is stricter than the script today, so it must not be switched until this lands
 
 ## Long-term (blocked by language providers)
-1. Python eval setup + Run-1: target selection from 3 candidates ([PRD #51](https://github.com/wiggitywhitney/spinybacked-orbweaver-eval/issues/51)) — depends on Python provider landing
-2. Go eval setup + Run-1: target selection from 3 candidates ([PRD #52](https://github.com/wiggitywhitney/spinybacked-orbweaver-eval/issues/52)) — depends on Go provider landing
+1. Move the Python and Go setup PRDs' run artifacts to the per-language path layout ([issue #179](https://github.com/wiggitywhitney/spinybacked-orbweaver-eval/issues/179)) — must land before either PRD's run-1 starts; blocked by the same language providers
+2. Python eval setup + Run-1: target selection from 3 candidates ([PRD #51](https://github.com/wiggitywhitney/spinybacked-orbweaver-eval/issues/51)) — depends on Python provider landing
+3. Go eval setup + Run-1: target selection from 3 candidates ([PRD #52](https://github.com/wiggitywhitney/spinybacked-orbweaver-eval/issues/52)) — depends on Go provider landing
