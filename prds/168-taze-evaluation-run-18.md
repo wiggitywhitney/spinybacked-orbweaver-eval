@@ -211,7 +211,7 @@ The eval execution branch (`feature/prd-168-taze-evaluation-run-18`) **never mer
 
 - [ ] **IS scoring run** — See `evaluation/is/README.md` for collector setup.
 
-  Record the run's start and end as nanosecond timestamps (`python3 -c 'import time; print(time.time_ns())'`), once immediately before the invocation below and once immediately after it, and write both values into `run-summary.md`. After the run, run `sleep 10` so the collector flushes before filtering.
+  Record the run's start and end as nanosecond timestamps (`python3 -c 'import time; print(time.time_ns())'`), once immediately before the invocation below and once immediately after it, and write both values into `run-summary.md`. Record the exact invocation below in `run-summary.md` alongside the timestamps, so run-19's span count is compared against the same command. Run-17 did not record its IS command, so state that rather than assuming the commands match. After the run, run `sleep 10` so the collector flushes before filtering.
 
   IS scoring invocation for taze:
   ```bash
