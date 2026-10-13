@@ -387,6 +387,28 @@ describe('command line', () => {
     expect(result.stderr).toMatch(/--end-ns/);
   });
 
+  it('fails when an option is followed by another option instead of a value', () => {
+    const input = writeInput();
+    const output = join(dir, 'x.json');
+
+    const result = fail(['--input', input, '--output', output, '--service', 'target-app', '--start-ns', '1000', '--end-ns', '2000', '--redact-attribute', '--target', 'release-it']);
+
+    expect(result.status).toBe(1);
+    expect(result.stderr).toMatch(/--redact-attribute needs a value/);
+    expect(existsSync(output)).toBe(false);
+  });
+
+  it.each(['--instance-id', '--redact-attribute'])('fails on an empty %s value', (flag) => {
+    const input = writeInput();
+    const output = join(dir, 'x.json');
+
+    const result = fail(['--input', input, '--output', output, '--service', 'target-app', '--start-ns', '1000', '--end-ns', '2000', flag, '']);
+
+    expect(result.status).toBe(1);
+    expect(result.stderr).toMatch(new RegExp(`${flag} needs a value`));
+    expect(existsSync(output)).toBe(false);
+  });
+
   it('fails on a start or end that is not an integer nanosecond count', () => {
     const input = writeInput();
 

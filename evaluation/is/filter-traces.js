@@ -139,9 +139,13 @@ function parseArgs(argv) {
     const flag = argv[i];
     const key = REQUIRED_OPTIONS[flag] ?? OPTIONAL_OPTIONS[flag] ?? REPEATABLE_OPTIONS[flag];
     if (!key) throw new Error(`Unknown option ${flag}`);
-    if (argv[i + 1] === undefined) throw new Error(`${flag} needs a value`);
-    if (REPEATABLE_OPTIONS[flag]) opts[key].push(argv[i + 1]);
-    else opts[key] = argv[i + 1];
+    // A value that is itself a recognized option means the real value was left out.
+    const value = argv[i + 1];
+    if (value === undefined || value === '' || REQUIRED_OPTIONS[value] || OPTIONAL_OPTIONS[value] || REPEATABLE_OPTIONS[value]) {
+      throw new Error(`${flag} needs a value`);
+    }
+    if (REPEATABLE_OPTIONS[flag]) opts[key].push(value);
+    else opts[key] = value;
   }
   for (const [flag, key] of Object.entries(REQUIRED_OPTIONS)) {
     if (opts[key] === undefined) throw new Error(`Missing required option ${flag}`);
