@@ -196,7 +196,7 @@ The **evaluation execution branch** created by `/prd-start` from main **never me
 
   **Exact command** (run from `~/Documents/Repositories/commit-story-v2`). The `node` path points at the worktree build, per D-7:
   ```bash
-  cd ~/Documents/Repositories/commit-story-v2 && set -o pipefail; caffeinate -s env -u ANTHROPIC_CUSTOM_HEADERS -u ANTHROPIC_BASE_URL vals exec -i -f .vals.yaml -- node ~/Documents/Repositories/spinybacked-orbweaver-main/bin/spiny-orb.js instrument src --verbose --thinking --debug-dump-dir ~/Documents/Repositories/spinybacked-orbweaver-eval/evaluation/javascript/commit-story-v2/run-29/debug-dumps 2>&1 | tee ~/Documents/Repositories/spinybacked-orbweaver-eval/evaluation/javascript/commit-story-v2/run-29/spiny-orb-output.log
+  cd ~/Documents/Repositories/commit-story-v2 && set -o pipefail && caffeinate -s env -u ANTHROPIC_CUSTOM_HEADERS -u ANTHROPIC_BASE_URL vals exec -i -f .vals.yaml -- node ~/Documents/Repositories/spinybacked-orbweaver-main/bin/spiny-orb.js instrument src --verbose --thinking --debug-dump-dir ~/Documents/Repositories/spinybacked-orbweaver-eval/evaluation/javascript/commit-story-v2/run-29/debug-dumps 2>&1 | tee ~/Documents/Repositories/spinybacked-orbweaver-eval/evaluation/javascript/commit-story-v2/run-29/spiny-orb-output.log
   ```
   The leading `cd` is part of the command because spiny-orb loads `spiny-orb.yaml` from the current directory (D-10). `set -o pipefail` ensures a failure in the instrument command itself (not just `tee`) is reflected in the pipeline's exit status.
 
