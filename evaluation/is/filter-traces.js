@@ -177,8 +177,8 @@ function main(argv) {
   mkdirSync(dirname(opts.output), { recursive: true });
   writeFileSync(opts.output, sanitized.join('\n') + '\n');
 
-  console.log(`Filtered "${opts.service}"${instance}: kept ${kept} of ${total} spans between ${opts.startNs} and ${opts.endNs} ns`);
-  if (opts.redactKeys.length > 0) console.log(`redacted attributes: ${opts.redactKeys.join(', ')}`);
+  console.log(`Filtered "${opts.service}"${instance}: kept ${kept} of ${total} spans between ${opts.startNs} and ${opts.endNs} ns`); // eslint-disable-line no-console
+  if (opts.redactKeys.length > 0) console.log(`redacted attributes: ${opts.redactKeys.join(', ')}`); // eslint-disable-line no-console
   console.log(`score before sanitizing: ${before.score}`);
   console.log(`score unchanged by sanitizing: ${after.score}`);
   console.log(`wrote ${opts.output}`);
