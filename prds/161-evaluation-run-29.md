@@ -347,6 +347,8 @@ The **evaluation execution branch** created by `/prd-start` from main **never me
 
 - [ ] **Actionable fix output** — Primary handoff deliverable.
 
+  **Tracking correction for the spiny-orb team** (found in pre-run verification): spiny-orb issue #1068's title says `summary-manager.js` applies the path-sanitization fallback "at only 4 of 7 sites", but run-28 found it applied at 3 of 7 with 4 raw (spiny-orb's ROADMAP repeats the title). Include this in `actionable-fix-output.md` so the team can correct the title, updated with run-29's own count for that file. Do not edit the spiny-orb issue from this repo.
+
   **Rule-fit issues** (cascaded from release-it run-5): carry the "Rule-fit issues for the handoff" list from this run's `exemption-scope.md` into the handoff. Frame each item as a gap for the spiny-orb team to judge, not a prescribed change.
 
   At milestone completion:
