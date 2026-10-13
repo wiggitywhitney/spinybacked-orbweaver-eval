@@ -44,6 +44,8 @@ Checked 2026-10-13.
 - **The instrument command should set its own working directory.** Run-29's first launch ran from the eval repo, loaded the eval repo's `spiny-orb.yaml`, failed the prerequisite check, and exited 2 in 0.7s. The PRD said where to run the command but the command did not `cd` there. The template's instrument command should start with `cd <target-checkout> && set -o pipefail &&`, chained with `&&` so the pipeline does not run if the `cd` fails (D-10).
 - **The log prints the model.** The `Total cost` line ends with the model ID, e.g. `$9.94 (claude-opus-5-5)`, and runs 26–28 show `claude-sonnet-4-6`. The template's model-recording step can cite the log as a cross-check, and earlier runs' models can be backfilled from their logs. Effort is not printed (D-10).
 - **A failed file's result line has no attempt count.** `❌ FAILED` prints the validation error but not the number of attempts, so a log parser must count the `Attempt N` headers in the Agent thinking section instead.
+- **The log-trace correlation query names a field the logs do not carry.** The post-run check's query `@otel_resource_attributes.service.instance.id:<id>` returns 0 logs; the logs carry the ID as `@service.instance.id`. The template should use `@service.instance.id`.
+- **The two correlation rates measure different things.** Run-28's ~82% was sampled across the whole run window, which mixes hook runs on partly instrumented code; the PRD's instance-scoped query measures only the final code. Run-29 shows 5/5 scoped and 71/165 (43%) window-wide. The template should name one as the baseline, and the instance-scoped rate is the one that reflects the instrumented code.
 
 ## Run Observations
 

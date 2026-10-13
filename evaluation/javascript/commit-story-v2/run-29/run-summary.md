@@ -118,3 +118,9 @@ Run-29 produced 35 spans against 41–49, and 47 attempts against 38–42. The s
 ### No interactive-prompt stall
 
 Total duration (45m 19.2s) matched the instrumentation work. The log went quiet for about 4 minutes after `pushBranch: urlChanged=true` (14:55) before the final lines; the process stayed alive throughout, and the push and PR completed.
+
+---
+
+## Post-run Datadog Verification
+
+The instrument branch HEAD (`860fcb1`) appears on `vcs.ref.head.revision` for process `a2a54d88-00c9-4a85-bc8a-64e11de35779`, the post-commit hook run for the branch's final commit (2026-10-13T19:59Z). Log-trace correlation is 5/5 for that process. Window-wide it is 71/165 (43%) against run-28's ~82%, because the window is dominated by hook runs on partly instrumented code; this is recorded as a watch item, not a regression. Details, the corrected log query field, and a `vcs.ref.head.revision: HEAD` watch item are in `trace-artifact.md`.
