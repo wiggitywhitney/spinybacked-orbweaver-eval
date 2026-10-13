@@ -1,14 +1,17 @@
 // ABOUTME: Vitest tests for the IS scoring script (evaluation/is/score-is.js).
 // ABOUTME: Covers all 9 applicable IS rules with 6 scenarios per the PRD spec.
 
-import { describe, it, expect } from 'vitest';
-import { readFileSync } from 'fs';
-import { fileURLToPath } from 'url';
+import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import { execFileSync } from 'child_process';
+import { readFileSync, mkdtempSync, rmSync, symlinkSync } from 'fs';
+import { tmpdir } from 'os';
+import { fileURLToPath, pathToFileURL } from 'url';
 import { dirname, join } from 'path';
 import { scoreIS } from './score-is.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const fixturesDir = join(__dirname, 'fixtures');
+const SCRIPT = join(__dirname, 'score-is.js');
 
 function loadFixture(name) {
   const content = readFileSync(join(fixturesDir, name), 'utf8');
@@ -97,5 +100,39 @@ describe('scoreIS', () => {
         expect(rule.status).toBe('not_applicable');
       }
     });
+  });
+});
+
+describe('command line', () => {
+  let dir;
+  beforeEach(() => {
+    dir = mkdtempSync(join(tmpdir(), 'score-is-'));
+  });
+  afterEach(() => {
+    rmSync(dir, { recursive: true, force: true });
+  });
+
+  const fixture = join(fixturesDir, 'all-pass.jsonl');
+  const run = (script) => execFileSync('node', [script, fixture, '--target', 'release-it'], { encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] });
+
+  it('prints the same score when invoked through a symlinked path instead of silently doing nothing', () => {
+    const linked = join(dir, 'linked-score-is.js');
+    symlinkSync(SCRIPT, linked);
+
+    const direct = run(SCRIPT);
+    const viaSymlink = run(linked);
+
+    expect(direct).toMatch(/IS Score: 100 \/ 100/);
+    expect(viaSymlink).toBe(direct);
+  });
+});
+
+describe('module loading without a script path', () => {
+  it.each(['score-is.js', 'filter-traces.js'])('imports %s from node -e without throwing', (name) => {
+    const url = pathToFileURL(join(__dirname, name)).href;
+
+    const stdout = execFileSync('node', ['--input-type=module', '-e', `await import(${JSON.stringify(url)}); console.log('loaded');`], { encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] });
+
+    expect(stdout.trim()).toBe('loaded');
   });
 });
