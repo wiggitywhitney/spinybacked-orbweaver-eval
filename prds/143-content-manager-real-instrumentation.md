@@ -115,6 +115,8 @@ Evaluation artifacts live at `evaluation/content-manager/run-1/` in this repo (s
 
 - [ ] **Evaluation run** — Whitney runs `spiny-orb instrument` in her own terminal. **Do NOT run the command yourself.** AI role: (1) confirm readiness with Whitney, (2) once Whitney provides the log, save it to `evaluation/content-manager/run-1/spiny-orb-output.log` using `git add -f` and write `evaluation/content-manager/run-1/run-summary.md`, (3) if auto PR creation failed, create the PR from the file spiny-orb already wrote: `gh pr create --body-file ~/Documents/Repositories/content-manager/spiny-orb-pr-summary.md --repo wiggitywhitney/content-manager --head <instrument-branch> --title "..."`.
 
+  **Record the agent model** (cascaded from the shared template, step 3): at the top of `run-summary.md`, record three lines in this exact form: `spiny-orb commit: <sha>`, `agent model: <id>`, `agent effort: <level>`. Take the SHA from `git -C <spiny-orb-checkout> rev-parse HEAD` after the pre-run build, where `<spiny-orb-checkout>` is the spiny-orb checkout the build used (`~/Documents/Repositories/spinybacked-orbweaver` unless pre-run verification built from another). The log does not print the model or effort. Read the `agentModel` and `agentEffort` defaults from `src/config/schema.ts` at that spiny-orb commit (`git -C <spiny-orb-checkout> show <sha>:src/config/schema.ts | grep -E 'agentModel|agentEffort'`), then check the target's `spiny-orb.yaml` for an `agentModel` or `agentEffort` override, which wins if present. Write the values you found, not the ones this PRD expects. Runs before 2026-10-12 did not record a model. The latest run of each target before then (commit-story-v2 run-28, taze run-17, release-it run-5) used `claude-sonnet-4-6`; spiny-orb's default from 2026-10-12 is `claude-opus-5-5`.
+
   AI must confirm `debug-dumps/` directory exists before handing Whitney the command. Extract the instrument branch name from the log (`grep -m1 'Branch:' spiny-orb-output.log`) when writing `run-summary.md` — do not write it from memory.
 
   **Hard prerequisite check** (cascaded from commit-story-v2 run-28, D-14): confirm the "Read prerequisite docs," "Pre-run setup," and "OTel SDK bootstrap" milestones are all fully complete — not just started — before handing Whitney the instrument command. Running out of order forecloses pre-run-only verification steps permanently.
@@ -204,6 +206,9 @@ Evaluation artifacts live at `evaluation/content-manager/run-1/` in this repo (s
   Produces: `evaluation/content-manager/run-1/is-score.md`
 
 - [ ] **Baseline comparison** — Compare run-1 against commit-story-v2 and taze as reference points (not as a sequential baseline — this is the first content-manager run). Note differences attributable to: (1) blank-slate schema (no deliberately designed gaps), (2) CJS vs ESM, (3) content-publishing domain vs developer-tooling domain.
+
+  **Model change as a confound** (cascaded from the shared template, step 3): if the agent model recorded in `run-summary.md` differs from the model of a run you compare against (commit-story-v2 run-28, taze run-17, and release-it run-5 used `claude-sonnet-4-6`; earlier runs did not record a model), say so at the top of `baseline-comparison.md`. Label differences that may come from the model as observations to confirm, and compare attempts and tokens per committed file rather than dollar cost, because model pricing differs.
+
   Produces: `evaluation/content-manager/run-1/baseline-comparison.md`
   Style reference: `Read docs/templates/eval-run-style-reference/baseline-comparison.md`
 

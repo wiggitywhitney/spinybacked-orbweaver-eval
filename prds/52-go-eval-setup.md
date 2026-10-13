@@ -127,6 +127,8 @@ The feature branch for this PRD **never merges to main**. The PR exists for Code
 
 - [ ] **Evaluation run-1**
 
+  **Record the agent model** (cascaded from the shared template, step 3): at the top of `run-summary.md`, record three lines in this exact form: `spiny-orb commit: <sha>`, `agent model: <id>`, `agent effort: <level>`. Take the SHA from `git -C <spiny-orb-checkout> rev-parse HEAD` after the pre-run build, where `<spiny-orb-checkout>` is the spiny-orb checkout the build used (`~/Documents/Repositories/spinybacked-orbweaver` unless pre-run verification built from another). The log does not print the model or effort. Read the `agentModel` and `agentEffort` defaults from `src/config/schema.ts` at that spiny-orb commit (`git -C <spiny-orb-checkout> show <sha>:src/config/schema.ts | grep -E 'agentModel|agentEffort'`), then check the target's `spiny-orb.yaml` for an `agentModel` or `agentEffort` override, which wins if present. Write the values you found, not the ones this PRD expects. Runs before 2026-10-12 did not record a model. The latest run of each target before then (commit-story-v2 run-28, taze run-17, release-it run-5) used `claude-sonnet-4-6`; spiny-orb's default from 2026-10-12 is `claude-opus-5-5`.
+
   Whitney runs `spiny-orb instrument`. **Do NOT run yourself.** Copy the command template from `docs/language-extension-plan.md` (line ~72). Replace `commit-story-v2` with the chosen target name, `run-N` with `run-1`, and `src` with the target's source directory (Go repos typically use `.`, `cmd/`, or `internal/` — check the forked repo's layout). Create `evaluation/<target>/run-1/debug-dumps/` before running.
 
   AI role: confirm readiness, save log, write run-summary.md, and **push the eval branch to origin immediately** (`git push -u origin feature/prd-52-go-eval-setup`) — the branch holds the only copy of run-1 artifacts until PRD #57's backfill lands.
@@ -169,7 +171,9 @@ The feature branch for this PRD **never merges to main**. The PR exists for Code
 
 - [ ] **Baseline comparison**
 
-  No prior Go baseline. Compare against most recent JS run for cross-language context. Compare: overall rubric score, per-dimension scores (NDS/COV/RST/API/SCH/CDQ), file counts, skip rate, and cost. Note Go-specific patterns (goroutine context propagation, interface dispatch, error return instrumentation).
+  **Model change as a confound** (cascaded from the shared template, step 3): if the agent model recorded in `run-summary.md` differs from the model of a run you compare against (commit-story-v2 run-28, taze run-17, and release-it run-5 used `claude-sonnet-4-6`; earlier runs did not record a model), say so at the top of `baseline-comparison.md`. Label differences that may come from the model as observations to confirm, and compare attempts and tokens per committed file rather than dollar cost, because model pricing differs.
+
+  No prior Go baseline. Compare against most recent JS run for cross-language context. Compare: overall rubric score, per-dimension scores (NDS/COV/RST/API/SCH/CDQ), file counts, skip rate, attempts and tokens per committed file, and cost. If the agent model differs from the JS run's, report dollar cost as context only and compare efficiency by attempts and tokens. Note Go-specific patterns (goroutine context propagation, interface dispatch, error return instrumentation).
   Produces: `evaluation/<target-name>/run-1/baseline-comparison.md`
   Style reference: `Read docs/templates/eval-run-style-reference/baseline-comparison.md` (adapt — focus on cross-language comparison)
 
