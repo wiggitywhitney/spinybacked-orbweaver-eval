@@ -80,6 +80,35 @@ filter-traces: Missing required option --end-ns
 filter-traces: No spans from service "taze" started between 1 and 2 ns in evaluation/is/eval-traces.json
 ```
 
+#### Narrowing to one instance and redacting extra attributes
+
+Two optional options cover targets that need more than a service name and a time window:
+
+- `--instance-id <id>` keeps only spans whose resource has this `service.instance.id`. Use it when another session of the same service could have run during your window. commit-story-v2 is one example, because it also runs on ordinary commits. Every OpenTelemetry SDK run gets its own `service.instance.id`, so this option excludes other runs of the same service that started during your window.
+- `--redact-attribute <key>` replaces the whole value of that attribute with `REDACTED` wherever it appears: on the resource, the scope, spans, span events, and span links. Use it for person-identifying attributes such as `commit_story.commit.author`. You can give it more than once, one key each time.
+
+The example below comes from running the script on the commit-story-v2 run-28 traces, using the output path a run-29 would use:
+
+```bash
+node evaluation/is/filter-traces.js --input evaluation/javascript/commit-story-v2/run-28/eval-traces-run28.json --output evaluation/javascript/commit-story-v2/run-29/eval-traces-run29.json --service commit-story --start-ns 1789680730491000000 --end-ns 1789680732636000000 --target commit-story-v2 --instance-id adf2caf8-aca4-4e93-a394-3d1c0c7210ab --redact-attribute commit_story.commit.author
+```
+
+```text
+Filtered "commit-story" with service.instance.id "adf2caf8-aca4-4e93-a394-3d1c0c7210ab": kept 31 of 31 spans between 1789680730491000000 and 1789680732636000000 ns
+redacted attributes: commit_story.commit.author
+score before sanitizing: 100
+score unchanged by sanitizing: 100
+wrote evaluation/javascript/commit-story-v2/run-29/eval-traces-run29.json
+```
+
+If no spans in the window come from that instance, the script exits with an error and writes nothing. The usual cause is a mistyped ID or one taken from a different run:
+
+```text
+filter-traces: No spans from service "commit-story" with service.instance.id "00000000-0000-0000-0000-000000000000" started between 1789680730491000000 and 1789680732636000000 ns in evaluation/javascript/commit-story-v2/run-28/eval-traces-run28.json
+```
+
+The before-and-after score check also applies to the keys you add. If redacting one of them changes the IS score, the script exits with `Sanitizing changed the IS score` and writes nothing. In practice, only `telemetry.sdk.language` and `process.runtime.version` can trigger this. The scorer reads those two values, while for every other attribute it checks only whether the attribute is present, and a redacted attribute is still present.
+
 Paths under other roots, such as `/workspace` or `/mnt`, are not redacted, because the match is deliberately limited so URL paths like `/api/users` are left alone. If a target records paths under another root, add the root to `LOCAL_PATH_PATTERN` in `filter-traces.js`. Before committing the output, check that it holds no local user name or home path:
 
 ```bash

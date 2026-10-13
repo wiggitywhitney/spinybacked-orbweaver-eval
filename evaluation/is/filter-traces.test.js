@@ -27,12 +27,12 @@ function span(name, startNs, attrs = []) {
   };
 }
 
-function resourceSpans(service, scopes, extraResourceAttrs = []) {
+function resourceSpans(service, scopes, extraResourceAttrs = [], instanceId = `${service}-instance`) {
   return {
     resource: {
       attributes: [
         str('service.name', service),
-        str('service.instance.id', `${service}-instance`),
+        str('service.instance.id', instanceId),
         str('telemetry.sdk.language', 'nodejs'),
         str('telemetry.sdk.version', '2.0.0'),
         str('process.runtime.version', '22.1.0'),
@@ -100,6 +100,26 @@ describe('filterTraces', () => {
     const out = filterTraces(lines, { service: 'target-app', startNs: big, endNs: big });
 
     expect(allSpans(out).map((s) => s.name)).toEqual(['exact']);
+  });
+
+  it('keeps only the resource whose service.instance.id matches when an instance ID is given', () => {
+    const lines = [
+      line(resourceSpans('target-app', [[span('concurrent', 1500)]], [], 'other-session')),
+      line(resourceSpans('target-app', [[span('mine', 1600)]], [], 'this-run')),
+    ];
+
+    const out = filterTraces(lines, { ...WINDOW, instanceId: 'this-run' });
+
+    expect(allSpans(out).map((s) => s.name)).toEqual(['mine']);
+  });
+
+  it('keeps every instance of the service when no instance ID is given', () => {
+    const lines = [
+      line(resourceSpans('target-app', [[span('concurrent', 1500)]], [], 'other-session')),
+      line(resourceSpans('target-app', [[span('mine', 1600)]], [], 'this-run')),
+    ];
+
+    expect(allSpans(filterTraces(lines, WINDOW)).map((s) => s.name)).toEqual(['concurrent', 'mine']);
   });
 
   it('throws when the window or service is missing', () => {
@@ -186,6 +206,49 @@ describe('sanitizeTraces', () => {
     expect(out.spans[0].links[0].attributes[0].value).toEqual({ stringValue: 'REDACTED' });
   });
 
+  it('redacts each extra attribute key in resource, scope, span, event, and link attributes', () => {
+    const author = str('app.commit.author', 'Jane Doe');
+    const email = str('app.commit.email', 'jane@example.com');
+    const resource = resourceSpans(
+      'target-app',
+      [[{ ...span('s', 1500, [author, email, str('app.name', 'plain')]), events: [{ name: 'e', attributes: [author] }], links: [{ traceId: 'b'.repeat(32), spanId: '1'.repeat(16), attributes: [email] }] }]],
+      [author],
+    );
+    resource.scopeSpans[0].scope = { name: 'scope-0', attributes: [email] };
+
+    const text = sanitizeTraces([line(resource)], { redactKeys: ['app.commit.author', 'app.commit.email'] })[0];
+
+    expect(text).not.toContain('Jane Doe');
+    expect(text).not.toContain('jane@example.com');
+    const rs = JSON.parse(text).resourceSpans[0];
+    const value = (attrs, key) => attrs.find((a) => a.key === key).value;
+    const out = rs.scopeSpans[0];
+    expect(value(rs.resource.attributes, 'app.commit.author')).toEqual({ stringValue: 'REDACTED' });
+    expect(value(rs.resource.attributes, 'service.name')).toEqual({ stringValue: 'target-app' });
+    expect(value(out.scope.attributes, 'app.commit.email')).toEqual({ stringValue: 'REDACTED' });
+    expect(value(out.spans[0].attributes, 'app.commit.author')).toEqual({ stringValue: 'REDACTED' });
+    expect(value(out.spans[0].attributes, 'app.commit.email')).toEqual({ stringValue: 'REDACTED' });
+    expect(value(out.spans[0].attributes, 'app.name')).toEqual({ stringValue: 'plain' });
+    expect(value(out.spans[0].events[0].attributes, 'app.commit.author')).toEqual({ stringValue: 'REDACTED' });
+    expect(value(out.spans[0].links[0].attributes, 'app.commit.email')).toEqual({ stringValue: 'REDACTED' });
+  });
+
+  it('redacts an extra attribute key nested inside a key-value-list value', () => {
+    const payload = { key: 'app.payload', value: { kvlistValue: { values: [{ key: 'app.commit.author', value: { stringValue: 'Jane Doe' } }, { key: 'app.name', value: { stringValue: 'plain' } }] } } };
+    const lines = [line(resourceSpans('target-app', [[span('s', 1500, [payload])]]))];
+
+    const [out] = parse(sanitizeTraces(lines, { redactKeys: ['app.commit.author'] }));
+    const values = out.resourceSpans[0].scopeSpans[0].spans[0].attributes[0].value.kvlistValue.values;
+
+    expect(values).toEqual([{ key: 'app.commit.author', value: { stringValue: 'REDACTED' } }, { key: 'app.name', value: { stringValue: 'plain' } }]);
+  });
+
+  it('leaves non-path span attributes alone when no extra keys are given', () => {
+    const lines = [line(resourceSpans('target-app', [[span('s', 1500, [str('app.commit.author', 'Jane Doe')])]]))];
+
+    expect(sanitizeTraces(lines)[0]).toContain('Jane Doe');
+  });
+
   it('does not mutate its input', () => {
     const original = line(resourceSpans('target-app', [[span('s', 1500)]], sensitive));
     const copy = JSON.stringify(JSON.parse(original));
@@ -253,6 +316,57 @@ describe('command line', () => {
     expect(existsSync(output)).toBe(true);
   });
 
+  function writeTwoInstanceInput() {
+    const input = join(dir, 'two-instances.json');
+    const author = str('app.commit.author', 'Jane Doe');
+    const lines = [
+      line(resourceSpans('target-app', [[span('concurrent', 1500, [author])]], [], 'other-session')),
+      line(resourceSpans('target-app', [[span('mine-a', 1500, [author]), span('mine-b', 1600)]], [], 'this-run')),
+    ];
+    writeFileSync(input, lines.join('\n') + '\n');
+    return input;
+  }
+
+  it('keeps only the given instance and redacts every repeated --redact-attribute key', () => {
+    const input = writeTwoInstanceInput();
+    const output = join(dir, 'instance.json');
+
+    const stdout = run([
+      '--input', input, '--output', output, '--service', 'target-app', '--start-ns', '1000', '--end-ns', '2000', '--target', 'release-it',
+      '--instance-id', 'this-run', '--redact-attribute', 'app.commit.author', '--redact-attribute', 'app.commit.email',
+    ]);
+
+    const lines = readFileSync(output, 'utf8').trim().split('\n');
+    expect(allSpans(lines).map((s) => s.name)).toEqual(['mine-a', 'mine-b']);
+    expect(lines.join('\n')).not.toContain('Jane Doe');
+    expect(stdout).toMatch(/kept 2 of 3 spans/);
+    expect(stdout).toMatch(/service\.instance\.id "this-run"/);
+    expect(stdout).toMatch(/redacted attributes: app\.commit\.author, app\.commit\.email/);
+  });
+
+  it('fails without writing the output when the instance ID matches no spans', () => {
+    const input = writeTwoInstanceInput();
+    const output = join(dir, 'no-instance.json');
+
+    const result = fail(['--input', input, '--output', output, '--service', 'target-app', '--start-ns', '1000', '--end-ns', '2000', '--target', 'release-it', '--instance-id', 'missing-run']);
+
+    expect(result.status).toBe(1);
+    expect(result.stderr).toMatch(/no spans/i);
+    expect(result.stderr).toMatch(/missing-run/);
+    expect(existsSync(output)).toBe(false);
+  });
+
+  it('fails without writing the output when a redacted key changes the IS score', () => {
+    const input = writeInput();
+    const output = join(dir, 'score-changed.json');
+
+    const result = fail(['--input', input, '--output', output, '--service', 'target-app', '--start-ns', '1000', '--end-ns', '2000', '--target', 'release-it', '--redact-attribute', 'telemetry.sdk.language']);
+
+    expect(result.status).toBe(1);
+    expect(result.stderr).toMatch(/changed the IS score/);
+    expect(existsSync(output)).toBe(false);
+  });
+
   it('fails without writing the output when no spans match', () => {
     const input = writeInput();
     const output = join(dir, 'none.json');
@@ -271,6 +385,28 @@ describe('command line', () => {
 
     expect(result.status).toBe(1);
     expect(result.stderr).toMatch(/--end-ns/);
+  });
+
+  it('fails when an option is followed by another option instead of a value', () => {
+    const input = writeInput();
+    const output = join(dir, 'x.json');
+
+    const result = fail(['--input', input, '--output', output, '--service', 'target-app', '--start-ns', '1000', '--end-ns', '2000', '--redact-attribute', '--target', 'release-it']);
+
+    expect(result.status).toBe(1);
+    expect(result.stderr).toMatch(/--redact-attribute needs a value/);
+    expect(existsSync(output)).toBe(false);
+  });
+
+  it.each(['--instance-id', '--redact-attribute'])('fails on an empty %s value', (flag) => {
+    const input = writeInput();
+    const output = join(dir, 'x.json');
+
+    const result = fail(['--input', input, '--output', output, '--service', 'target-app', '--start-ns', '1000', '--end-ns', '2000', flag, '']);
+
+    expect(result.status).toBe(1);
+    expect(result.stderr).toMatch(new RegExp(`${flag} needs a value`));
+    expect(existsSync(output)).toBe(false);
   });
 
   it('fails on a start or end that is not an integer nanosecond count', () => {

@@ -6,8 +6,8 @@
 // because spiny-orb produces no OTel metrics by design — this is a scope decision, not
 // an instrumentation failure.
 
-import { readFileSync } from 'fs';
-import { fileURLToPath, pathToFileURL } from 'url';
+import { readFileSync, realpathSync } from 'fs';
+import { fileURLToPath } from 'url';
 
 const WEIGHT_CRITICAL = 3;
 const WEIGHT_NORMAL = 1;
@@ -376,7 +376,10 @@ function formatOutput(result) {
 
 // ── CLI entry point ───────────────────────────────────────────────────────────
 
-if (import.meta.url === pathToFileURL(process.argv[1]).href) {
+// Compare real paths: node resolves symlinks for import.meta.url but leaves argv[1] as typed, so a plain
+// comparison silently skips the CLI when the script is run through a symlinked directory (/tmp on macOS).
+// argv[1] is undefined when the module is imported from node -e or the REPL.
+if (process.argv[1] && realpathSync(process.argv[1]) === fileURLToPath(import.meta.url)) {
   const filePath = process.argv[2];
   if (!filePath) {
     console.error('Usage: node score-is.js <path-to-otlp-json-file> [--target <target-name>]');
