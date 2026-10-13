@@ -77,20 +77,21 @@ export function filterTraces(lines, { service, startNs, endNs, instanceId } = {}
 }
 
 // Redacts local paths inside one OTLP attribute value, including values nested in arrays and key-value lists.
-function redactValue(value) {
+// A key-value-list entry whose key is in `redactKeys` has its whole value redacted.
+function redactValue(value, redactKeys) {
   if (!value) return value;
   if (typeof value.stringValue === 'string' && LOCAL_PATH_PATTERN.test(value.stringValue)) return REDACTED;
   if (value.arrayValue?.values) {
-    return { ...value, arrayValue: { ...value.arrayValue, values: value.arrayValue.values.map(redactValue) } };
+    return { ...value, arrayValue: { ...value.arrayValue, values: value.arrayValue.values.map((v) => redactValue(v, redactKeys)) } };
   }
   if (value.kvlistValue?.values) {
-    return { ...value, kvlistValue: { ...value.kvlistValue, values: value.kvlistValue.values.map((kv) => ({ ...kv, value: redactValue(kv.value) })) } };
+    return { ...value, kvlistValue: { ...value.kvlistValue, values: redactAttributes(value.kvlistValue.values, redactKeys) } };
   }
   return value;
 }
 
 function redactAttributes(attrs, redactKeys) {
-  return (attrs ?? []).map((a) => (redactKeys.has(a.key) ? { ...a, value: REDACTED } : { ...a, value: redactValue(a.value) }));
+  return (attrs ?? []).map((a) => (redactKeys.has(a.key) ? { ...a, value: REDACTED } : { ...a, value: redactValue(a.value, redactKeys) }));
 }
 
 // Redacts machine-identity resource attributes, the whole value of every key in `redactKeys` wherever it

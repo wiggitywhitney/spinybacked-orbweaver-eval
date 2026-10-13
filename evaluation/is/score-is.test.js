@@ -1,5 +1,5 @@
 // ABOUTME: Vitest tests for the IS scoring script (evaluation/is/score-is.js).
-// ABOUTME: Covers all 9 applicable IS rules with 6 scenarios per the PRD spec.
+// ABOUTME: Covers all 9 applicable IS rules, CLI runs through a symlinked path, and module import without a script path.
 
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { execFileSync } from 'child_process';

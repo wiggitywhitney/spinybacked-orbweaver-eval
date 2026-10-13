@@ -233,6 +233,16 @@ describe('sanitizeTraces', () => {
     expect(value(out.spans[0].links[0].attributes, 'app.commit.email')).toEqual({ stringValue: 'REDACTED' });
   });
 
+  it('redacts an extra attribute key nested inside a key-value-list value', () => {
+    const payload = { key: 'app.payload', value: { kvlistValue: { values: [{ key: 'app.commit.author', value: { stringValue: 'Jane Doe' } }, { key: 'app.name', value: { stringValue: 'plain' } }] } } };
+    const lines = [line(resourceSpans('target-app', [[span('s', 1500, [payload])]]))];
+
+    const [out] = parse(sanitizeTraces(lines, { redactKeys: ['app.commit.author'] }));
+    const values = out.resourceSpans[0].scopeSpans[0].spans[0].attributes[0].value.kvlistValue.values;
+
+    expect(values).toEqual([{ key: 'app.commit.author', value: { stringValue: 'REDACTED' } }, { key: 'app.name', value: { stringValue: 'plain' } }]);
+  });
+
   it('leaves non-path span attributes alone when no extra keys are given', () => {
     const lines = [line(resourceSpans('target-app', [[span('s', 1500, [str('app.commit.author', 'Jane Doe')])]]))];
 
