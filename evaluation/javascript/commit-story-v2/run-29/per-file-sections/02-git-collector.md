@@ -51,3 +51,10 @@ Both exported functions got a span: `getPreviousCommitTime` became `commit_story
 - RUN28-2: no recurrence in this file. Run-28's `String(parentCount > 1)` on the boolean key `commit_story.git.is_merge` no longer ships, because `getMergeInfo` has no span. The one boolean key, `commit_story.git.has_previous_commit` (declared `boolean`), receives a raw boolean expression at line 140. No count or length is cast to a string anywhere in the file. This is a source-level verdict; whether the value arrives as a boolean at runtime is unconfirmed (confirm against OTLP export).
 
 **Run-28 comparison**: Run-28 shipped 6 spans with full helper coverage, but failed SCH-003 (`is_merge` stringified) and CDQ-007 (author name at two sites). Run-29 clears both failures, but loses the four helper spans and their attributes through the function-level fallback, which trades those two failures for a COV-004 failure.
+
+**Trace evidence (D-2 supplement)**: post-run instance `a2a54d88-00c9-4a85-bc8a-64e11de35779`, trace `ae2d2354ca28cac29c9b79f1a2184be9` (2026-10-13T19:59:01Z to 19:59:05Z, the post-commit hook run for the instrument branch's final commit), queried as `service:commit-story @service.instance.id:a2a54d88-00c9-4a85-bc8a-64e11de35779` plus `resource_name:commit_story.git.*`. Provenance: instrument-branch evidence (exemption-scope section 7). Datadog renders booleans as quoted strings, so any SCH-003 type question still waits for the OTLP export in the IS scoring milestone.
+
+- `commit_story.git.get_commit_data` carries only `vcs.ref.head.revision: 860fcb13d0dcdba8ae387da833557f191b081fbc`, the resolved SHA from the line 176 override.
+- `commit_story.git.get_previous_commit_time` carries `commit_story.git.has_previous_commit: "true"` and `vcs.ref.head.revision: HEAD`. That confirms the unrubriced finding that line 135 records the raw input ref.
+- Neither span carries `commit_story.commit.author` or any person name or email. This is live confirmation that RUN28-4a is fixed for this file, and there is nothing to redact.
+- No spans exist for the unexported helpers, which matches the COV-004 FAIL.

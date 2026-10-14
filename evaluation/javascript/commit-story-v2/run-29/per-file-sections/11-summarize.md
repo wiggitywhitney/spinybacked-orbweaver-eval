@@ -66,3 +66,5 @@ The agent wrapped the three exported async CLI orchestrators, `runSummarize`, `r
 Run-28 shipped `String(result.generated.length)` and `String(result.failed.length)` on int keys, and a raw number on the string-typed `dates_requested`. Run-29 has no count cast to a string, no boolean on a string key, and no string on an int key. The runtime types still need confirmation against the OTLP export.
 
 **Run-28 comparison**: Run-28 committed this file as a partial with live SCH-002 (cross-function reuse of `dates_requested`) and SCH-003 (string-cast counts and a number on a string key) defects. Run-29 committed it in full in 2 attempts with neither defect. The SCH-002 retry pressure moved the semantic problem into the cross-file reuse of `daily_summaries_count`/`weekly_summaries_count`, which no rule scores.
+
+**Trace evidence (D-2 supplement)**: none. The post-run instance `a2a54d88-00c9-4a85-bc8a-64e11de35779` emitted 20 spans in one trace (`ae2d2354ca28cac29c9b79f1a2184be9`), all on the post-commit journal path, and the `summarize` CLI subcommand did not run. No verdict in this section depends on live evidence.

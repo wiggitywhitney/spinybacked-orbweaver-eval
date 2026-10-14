@@ -62,3 +62,5 @@ The agent added one span, `commit_story.context.save_context`, to the unexported
   - The thinking raised whether the MCP handler "deserves its own span too". The notes never settle that question for coverage. They only say `@traceloop/instrumentation-mcp` "would cover the tool call protocol layer" if active.
 
 **Run-28 comparison**: Run-28 shipped 0 spans for this file and its per-file evaluation listed it as a questionable coverage-regression skip. Run-29 restores the `saveContext` span with sound error handling and guarded, sanitized attributes. It still lacks run-27's second span on the MCP handler, and it adds a new count-cast defect on `text_length`.
+
+**Trace evidence (D-2 supplement)**: none. The post-run instance `a2a54d88-00c9-4a85-bc8a-64e11de35779` emitted 20 spans in one trace (`ae2d2354ca28cac29c9b79f1a2184be9`), all on the post-commit journal path, and the MCP context-capture tool is not on that path. No verdict in this section depends on live evidence.

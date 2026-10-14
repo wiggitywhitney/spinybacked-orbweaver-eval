@@ -109,6 +109,12 @@ These apply unchanged. Each one follows a precedent already scored, so none chan
 - **`journal-graph.js`**: record the D-3 `gen_ai.*` attributes per span (present, absent, or changed against run-28). Its agent notes say it dropped the response model and id attributes because "the validator treats added if statements as non-instrumentation code", so that absence is a validator interaction, not a model choice. D-3 is a watch item and is not scored.
 - **Attempt counts**: the log's "3 attempts" omits a fourth function-level pass for `git-collector.js` and `summary-manager.js`. Record attempts as the deep-dive states them.
 
+## 7. D-2 trace supplement readings
+
+- **Provenance is labeled per trace, not per span.** The post-run instance `a2a54d88-00c9-4a85-bc8a-64e11de35779` emitted one trace, `ae2d2354ca28cac29c9b79f1a2184be9`, with 20 spans. Three spans (`get_commit_data`, `generate_sections`, `save_entry`) carry `vcs.ref.head.revision` equal to the instrument branch HEAD `860fcb13d0dcdba8ae387da833557f191b081fbc`. Three (`cli.main`, `gather_for_commit`, `get_previous_commit_time`) carry the literal `HEAD`, and 14 carry no revision. A span-by-span reading would label 17 spans "unknown provenance" even though they ran in the same process and trace as the matching three. The trace is labeled instrument-branch evidence as a whole, because its SHA-carrying spans match the instrument branch and none matches main (`fa26743`, which appears only as the `git.commit.sha` tag on every span). The `HEAD` values are scored as the item 4 finding, not as a provenance signal.
+- **Resource prefixes follow the domain, not the file.** `commit_story.journal.*` spans come from `journal-graph.js`, `journal-manager.js`, `journal-paths.js`, and `summary-detector.js`. Each section was supplemented by its exact span names, mapped from `startActiveSpan` calls on the instrument branch, not by a prefix wildcard.
+- **Coverage of the trace.** The hook path exercised sections 01, 02, 03, 04, 08, 09, 12, 13, and 14. Sections 05, 06, 07, 10, 11, and 15 got a "none" note saying why. No trace value contradicts a section verdict, so no row changed in this pass.
+
 ---
 
 ## Rule-fit issues for the handoff

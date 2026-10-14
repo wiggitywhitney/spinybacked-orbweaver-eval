@@ -60,3 +60,9 @@ All three exported async orchestrators carry a `startActiveSpan` span: `triggerA
 No count is cast to a string, and no boolean or string reaches an int key. Run-28 had 6 `String(...)` count casts in this file.
 
 **Run-28 comparison**: Run-28 had the same three spans in one attempt, with 6 `String()` count casts on newly declared int keys (an SCH-003 FAIL). Run-29 ships raw numeric counts on reused registered keys and passes SCH-003. It took two extra attempts to get there and has less monthly coverage than run-28's `months_*` attributes.
+
+**Trace evidence (D-2 supplement)**: post-run instance `a2a54d88-00c9-4a85-bc8a-64e11de35779`, trace `ae2d2354ca28cac29c9b79f1a2184be9` (2026-10-13T19:59:01Z to 19:59:05Z, the post-commit hook run for the instrument branch's final commit), queried as `service:commit-story @service.instance.id:a2a54d88-00c9-4a85-bc8a-64e11de35779` plus `resource_name:commit_story.summarize.*`. Provenance: instrument-branch evidence (exemption-scope section 7). Datadog renders booleans as quoted strings, so any SCH-003 type question still waits for the OTLP export in the IS scoring milestone.
+
+- All three spans are present. `trigger_auto` carries `dates_count: 0`, `daily_summaries_count: 0`, `weekly_summaries_count: 0`, and `errors_count: 0`. Its children are `trigger_auto_weekly` (`weekly_summaries_count: 0`, `errors_count: 0`) and `trigger_auto_monthly` (`errors_count: 0` only), which confirms the COV-005 row's account of the monthly span live.
+- `weekly_summaries_count: 0` on both `trigger_auto` and `trigger_auto_weekly` is live evidence for reconciliation item 18.
+- In the same trace, `summary-detector.js` spans record `daily_summaries_count: 32` and `weekly_summaries_count: 15` as summaries found, while this file records 0 on the same keys as summaries generated. That is live evidence for reconciliation items 12 and 19.
