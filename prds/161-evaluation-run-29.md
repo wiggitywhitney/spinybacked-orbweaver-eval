@@ -232,7 +232,7 @@ The **evaluation execution branch** created by `/prd-start` from main **never me
 
   **Progress (2026-10-13)**: `run-29/exemption-scope.md` is written. It pre-commits the CDQ-006 call (D-12), the fixed row list every file table carries, and the readings carried from release-it run-5, and it holds the "Rule-fit issues for the handoff" list (11 items after batch 1). Batch 1 is done: `per-file-sections/01-claude-collector.md`, `02-git-collector.md`, `03-context-integrator.md`, `04-journal-graph.md`, `05-summary-graph-FAILED.md`.
 
-  **Progress (2026-10-14)**: Batch 2 is done: `06-context-capture-tool.md`, `07-mcp-server.md`, `08-journal-paths.md`, `09-journal-manager.md`, `10-summary-manager.md`. The rule-fit list has 18 items and the reconciliation queue has 15. Batch 2's results:
+  **Progress (2026-10-14)**: Batch 2 is done: `06-context-capture-tool.md`, `07-mcp-server.md`, `08-journal-paths.md`, `09-journal-manager.md`, `10-summary-manager.md`. The rule-fit list has 18 items and the reconciliation queue has 16. Batch 2's results:
   - `context-capture-tool.js` FAILs SCH-003 on `String(text.length)` (a RUN28-2 recurrence: PR #1097's count correction matches only `_count`/`.count` keys, and the coercion fixer casts the rest; rule-fit item 15). RUN28-5 did not recur.
   - `summary-manager.js` FAILs COV-004 for the unexported `_hasRealSummary` (rule-fit item 10). RUN28-1 is fixed for this file (8 of 8 expensive sites guarded, with all 50 `setAttribute` calls listed), RUN28-2 did not recur, and RUN28-3 passes (basename fallback at 6 of 7 `file_path` sites, the seventh repo-relative at every production call site).
   - `mcp/server.js`, `journal-paths.js`, and `journal-manager.js` have no failures.
