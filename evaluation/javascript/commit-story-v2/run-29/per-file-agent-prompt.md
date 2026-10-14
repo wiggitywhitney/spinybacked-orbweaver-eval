@@ -10,6 +10,7 @@ The prompt template used for every per-file evaluation agent in run-29. Batch 1 
 - `<specific checks>`: the file's entries from the PRD milestone's "Key watch items" list, plus these where they apply:
   - `summary-manager.js`: RUN28-1 (list every `setAttribute` with line and guarded or unguarded, per `exemption-scope.md` item 1) and RUN28-3 (list each `file_path` site with line, value expression, and whether the basename fallback is applied, per item 3).
   - `summarize.js`, `summary-detector.js`, `auto-summarize.js`: RUN28-2 (any SCH-003 mismatch in either direction).
+  - `summarize.js`: SCH-002 on `commit_story.journal.daily_summaries_count` and `weekly_summaries_count`. `summary-manager.js` (section 10) uses them for summaries read as generator input, and `summarize.js`'s notes say they count summaries generated. Apply the specific-wrong-noun test across both files (`reconciliation-notes.md` item 12).
   - `context-capture-tool.js`: RUN28-5 (does what the agent notes say diverge from what its thinking planned and from what shipped?).
   - `journal-manager.js`: any "correct type, wrong registered key" instance.
   - `index.js`: score it as committed code (D-11). Record `vcs.ref.head.revision` at line 472 as an unrubriced finding (`exemption-scope.md` item 4).
