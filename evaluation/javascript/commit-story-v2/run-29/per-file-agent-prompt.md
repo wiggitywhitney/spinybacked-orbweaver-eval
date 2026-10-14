@@ -16,6 +16,9 @@ The prompt template used for every per-file evaluation agent in run-29. Batch 1 
   - `index.js`: score it as committed code (D-11). Record `vcs.ref.head.revision` at line 472 as an unrubriced finding (`exemption-scope.md` item 4).
 - `<fix-verification line>`: include the "Fix verification" output field only for files named under a RUN28 item above, and name the item.
 - Run-28 section path: `EVAL/evaluation/javascript/commit-story-v2/run-28/per-file-sections/`. Run-28's numbering differs from run-29's, so match by file name.
+- Add these two notes to every agent's `<specific checks>` (carried from batch 2):
+  - The "Attributes" column in `run-summary.md` and the log's attribute figure count new schema extension keys, not `setAttribute` calls (rule-fit item 12). Count the `setAttribute` calls in the instrumented source before judging COV-005.
+  - COV-006 for direct `node:fs` calls is unresolved (reconciliation items 1 and 10). Score the row, then state in it which reading you used: `node:fs` calls covered by an auto-instrumentation library (PASS), or not covered (N/A). The reconciliation pass settles one reading for every file.
 
 The correct-skips section (15) uses a different task: for each of the 18 files `run-summary.md` labels a correct skip, grep that file's pre-instrumentation analysis block in `spiny-orb-output.log` for a COV-001 or COV-004 flag the final output did not act on, and judge `reflection-tool.js` (NDS-003 ×1 on attempt 1, then 0 spans on attempt 2) against `exemption-scope.md` item 5's questionable-skip reading. Its output is one table (file, skip reason, flags found, verdict) plus a "Questionable skips" list.
 
