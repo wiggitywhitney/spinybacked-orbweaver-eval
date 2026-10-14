@@ -23,7 +23,7 @@ The correct-skips section (15) uses a different task: for each of the 18 files `
 ```text
 You are scoring one file from spiny-orb evaluation run-29 of commit-story-v2 against a rubric. Work read-only: do not create, edit, or commit any file. Return your section as text in your final message.
 
-EVAL REPO: /Users/whitney.lee/Documents/Repositories/spinybacked-orbweaver-eval (call it EVAL). Run dir: EVAL/evaluation/javascript/commit-story-v2/run-29 (call it RUN).
+EVAL REPO: ~/Documents/Repositories/spinybacked-orbweaver-eval (call it EVAL). Run dir: EVAL/evaluation/javascript/commit-story-v2/run-29 (call it RUN).
 TARGET REPO: ~/Documents/Repositories/commit-story-v2. Instrument branch: spiny-orb/instrument-1791918832887 (HEAD 860fcb1).
 SPINY-ORB SOURCE: ~/Documents/Repositories/spinybacked-orbweaver-main (at 475eb3d).
 
