@@ -1,0 +1,127 @@
+# Exemption-Scope Pre-Commitment — commit-story-v2 Run-29
+
+Decided by the coordinating session on 2026-10-13, before the first per-file-evaluation batch, per the PRD #161 "Per-file evaluation" milestone. The PRD directs the session to make these interpretation calls itself and record them here. Every per-file agent reads this file and applies it to every section. A decision made here and not given to the agents does not count.
+
+Sources:
+
+- Research rubric: `docs/research/evaluation-rubric.md` in `~/Documents/Repositories/spinybacked-orbweaver-main` (at `475eb3d`, the commit run-29 was built from).
+- Implemented rules: `src/languages/javascript/rules/<rule>.ts` and `docs/rules-reference.md` in the same checkout.
+- Instrument branch: `spiny-orb/instrument-1791918832887` in `~/Documents/Repositories/commit-story-v2`, HEAD `860fcb13d0dcdba8ae387da833557f191b081fbc`. commit-story-v2 main at run time: `fa26743`.
+
+Where the research rubric and the implemented rule disagree, score the implemented rule and record the drift under "Rule-fit issues for the handoff". The exception is a narrowing caused by what the validator can see rather than a design choice, such as RST-003 checking same-file delegation only. In that case, score the rubric's mechanism.
+
+---
+
+## Rows every committed or partial file's table carries
+
+Each file table has one row per rule below, in this order. Write N/A with a reason when a rule has nothing to check. Never leave a row out.
+
+NDS-003, NDS-004, NDS-005, NDS-006, NDS-007, API-001, API-004, COV-001, COV-002, COV-003, COV-004, COV-005, COV-006, RST-001, RST-002, RST-003, RST-004, RST-005, SCH-001, SCH-002, SCH-003, SCH-004, CDQ-001, CDQ-002, CDQ-003, CDQ-005, CDQ-006, CDQ-007, CDQ-011.
+
+- **CDQ-011, not CDQ-008.** The rubric marks CDQ-008 deleted.
+- **NDS-005 covers structural breakage (NDS-005a) only. NDS-007 covers recording on expected-condition catches**, which is the implemented replacement for the rubric's NDS-005b. Do not score one defect under both rows.
+- **Implemented-only rules (CDQ-009, CDQ-010, RST-006) have no row.** If a file violates one, list it under an `**Other implemented-rule observations**` line below the table.
+- Check each row against the canonical definition of its rule ID before writing it. Run-28's tables carried rows whose verdict was right but whose evidence came from a different rule (an "NDS-003" row that checked span names, a "CDQ-006" row that checked NDS-006's concern). The reconciliation pass audits every row for this.
+
+---
+
+## 1. CDQ-006: no entry-point exemption; only trivial conversions are exempt
+
+**Ambiguity**: the PRD asks whether CDQ-006's isRecording-guard requirement is exempt for COV-001 entry-point spans whatever the computation costs, or only for cheap computations. The three sources disagree:
+
+- The research rubric has no entry-point exemption. It exempts only trivial conversions (`toISOString()`, `String()`, `Number()`, `Boolean()`, `toString()`, simple property access chains).
+- `docs/rules-reference.md` says "CDQ-006 does not apply to spans on COV-001 entry points" and adds that external source strings (API responses, file contents) must be guarded even with no transformation.
+- The implemented checker (`cdq006.ts`) has neither. It flags any `setAttribute` value containing a function or method call, or matching `JSON.stringify`/`.map`/`.reduce`/`.filter`/`.join`/`.flatMap`, without an enclosing `if (span.isRecording())` or a preceding `if (!span.isRecording()) return;`. Its trivial list is `String`, `Number`, `Boolean`, `get*String`, `.to*String`, `.toJSON`, `.toFixed`, `.toPrecision`, `.valueOf`, and a trivial call only counts as trivial when its argument and receiver are not themselves expensive. The entry-point heuristic (`isInsideEntryPoint`) survives only as documentation, and the code comment says it is "intentionally not called". The auto-fixer `fixIsRecordingGuards` guards every expensive call, entry point or not.
+
+**Decision**: the guard requirement applies at every span, including COV-001 entry points. Only the implemented trivial-conversion list and plain property access are exempt. An unguarded `setAttribute` whose value contains any other call or method chain is a CDQ-006 FAIL wherever it sits.
+
+**Rationale**: this is the implemented rule, and it is the stricter of the two readings the PRD offered. Run-28 applied an entry-point exemption in some sections and not others because nobody had written it down. The implemented checker has no entry-point concept, so there is nothing to apply inconsistently. Because `fixIsRecordingGuards` runs before every validation attempt, any unguarded expensive call that shipped is either a fixer miss or an attribute set through a shape the fixer skips (a side-effectful receiver, for example). Say which in the row when the source makes it clear.
+
+**Test for per-file agents to apply**: for each `span.setAttribute(key, value)`:
+
+1. Is `value` a literal, an identifier, or a plain property access (`a.b.c`, `arr.length`)? Then it is exempt. PASS.
+2. Is `value` a call to `String`/`Number`/`Boolean`, a `get*String` call, or a `.toISOString()`/`.toString()`/`.toJSON()`/`.toFixed()`/`.toPrecision()`/`.valueOf()` method call, whose argument and receiver are themselves exempt under step 1 or 2? Then it is exempt. PASS. A `new Date(<exempt>)` receiver also counts as exempt, because the implemented checker treats a `new` expression as non-expensive (clarified after batch 1). `String(entries.length)` is exempt. `String(entries.map(...).join(','))` is not.
+3. Otherwise the value is expensive. It needs an enclosing `if (span.isRecording()) { ... }` then-branch, or an earlier `if (!span.isRecording()) return;` in the same block. Without one, FAIL. List every failing line.
+
+The row states the count of guarded versus unguarded expensive sites. For `summary-manager.js` (RUN28-1), list every `setAttribute` in the file with its line and whether it is guarded, so the fix verification is complete rather than sampled.
+
+---
+
+## 2. SCH-003: judged from source this milestone; count casts and booleans as strings FAIL
+
+**Sequencing**: `eval-traces-run29.json` does not exist until the IS scoring milestone. During per-file evaluation, compare each `setAttribute` value expression's type with the key's declared type in the instrument branch's `semconv/agent-extensions.yaml` or `semconv/attributes.yaml` (`git show spiny-orb/instrument-1791918832887:semconv/<file>`). Mark any verdict that depends on the runtime type with `(confirm against OTLP export)`. Datadog shows booleans as quoted strings, so it cannot settle a type question.
+
+**Decisions** (carried from taze run-17, release-it run-5, and commit-story-v2 run-28):
+
+- A count or length cast to a string (`String(x.length)`, `String(count)`, `` `${n}` ``) FAILs, including when the agent declared the key `type: string`. A count is an int however the schema declares it.
+- A raw numeric value against an `int` key PASSES.
+- A boolean literal or boolean expression set on a key declared `type: string` FAILs. This is run-28's `commit_story.journal.summary_saved` case. A boolean set on a `boolean` key PASSES.
+- For an enum or string key, FAIL only if a non-string value (boolean, number, object) can reach the call on a reachable path. A string outside the listed members PASSES, because semantic-convention enums are open.
+- spiny-orb PR #1097 (the count-cast fix for #1072 and #1037) is in this build. A count-cast site that still ships is a recurrence of RUN28-2. Say so in the row.
+
+---
+
+## 3. CDQ-007: checked per call site, from source
+
+**Decisions**:
+
+- **Structural guarantee per call site.** For a path-valued attribute, read each function that sets it and trace where its value comes from at each actual call site. Do not infer safety from a parameter or variable name. A value that is provably a basename or a repo-relative path PASSES. An absolute filesystem path on a key outside OTel's `file.*` namespace FAILs. `commit_story.*.file_path` keys are not `file.*` keys. For `summary-manager.js` (RUN28-3), list each `file_path` site with its line, its value expression, and whether the basename fallback (`path.split(/[\\/]/).filter(Boolean).pop() ?? ''` or an equivalent) is applied.
+- **Person names are PII.** A key holding a person's name or email FAILs whatever it is called, which includes `commit_story.commit.author` (RUN28-4a). Check every call site of that key in `git-collector.js` and `context-integrator.js`, and grep the other committed files for it.
+- **Nullable input is judged by the value's source** (release-it run-5, item 11). A value is nullable when its source allows `null` or `undefined` on a reachable path where the operation still proceeds. Such a value set without a defined-value guard FAILs.
+- **Free-form strings that can carry credentials** (command lines, URLs, remotes) score on the literal mechanism, with an advisory note in the row naming the risk.
+- **PII redaction on citation.** Any live-trace value quoted as evidence for a PII finding is written redacted (`<redacted-person-name>`, `<redacted-email>`) in the same edit that adds it. Agents return redacted text, and the coordinating session writes only redacted text.
+
+---
+
+## 4. `vcs.ref.head.revision: HEAD` is an unrubriced finding
+
+**Ambiguity**: post-run traces show the literal string `HEAD` on `vcs.ref.head.revision` for `commit_story.cli.main`, `commit_story.context.gather_for_commit`, and `commit_story.git.get_previous_commit_time`. `index.js` defaults `commitRef` to `'HEAD'` (instrument branch line 66) and sets `span.setAttribute('vcs.ref.head.revision', String(commitRef))` (line 472). `context-integrator.js` sets the key from `commitRef` only (line 32). The semantic convention describes the attribute as the revision, a resolved commit in Git.
+
+**Decision**: SCH-002 PASSES, because the key is the right registered key for a revision, and a symbolic ref is still a Git revision expression (gitrevisions(7)). SCH-003 PASSES, because the value is a string. CDQ-007 does not apply: the value is not PII, is bounded, and is never undefined after the `'HEAD'` default. Record each site as an **unrubriced finding** in the file's section, with the file, line, value expression, and the span it lands on. For `git-collector.js`, establish from source whether `get_previous_commit_time` sets the key itself or inherits the value through the caller's input.
+
+**Rationale**: the defect is a data-quality problem (an unresolved ref where queries expect a SHA, including on `summarize` runs where no commit ref applies). None of the three rules that come close checks it, so a FAIL under any of them would stretch the rule. The gap goes on the rule-fit list.
+
+---
+
+## 5. Readings carried forward from release-it run-5 and taze run-17
+
+These apply unchanged. Each one follows a precedent already scored, so none changes an earlier run's verdict.
+
+- **COV-004** uses the implemented rule. It flags an `async` function, or a function containing `await`, that has no span and is not exempt (an RST-001 utility, or a direct top-level `process.exit()`). Synchronous functions are not flagged even when they call `fs.*Sync`.
+- **RST-004**: methods of an exported class without a `#` or `_` prefix count as exported. Unexported functions whose I/O happens through a library or a wrapper qualify for the I/O exemption. RST-004 FAILs only for a span on a private method, or on an unexported function with no I/O.
+- **RST-003** uses the rubric's mechanism across files. A span on a function whose body is a single delegating `return` FAILs when the callee, in any file, has its own span.
+- **COV-003**: FAIL when a failable operation can throw out of the span callback with no `recordException` and `setStatus(ERROR)` on that path. Graceful inner catches that do not rethrow are NDS-007's concern, not COV-003's.
+- **Un-awaited returns** inside a span's `try`/`finally`: CDQ-001 stays PASS. Record each site as an unrubriced finding (function, line, returned expression, and any span calls that run after `span.end()`).
+- **NDS-003**: a token-identical reflow of an original statement is equivalent to re-indentation and PASSES. The Prettier reformatting of whole files committed through the function-level fallback (`index.js`, `git-collector.js`, `summary-manager.js`) is not a semantic change and is not scored as NDS-003. The PR artifact evaluation measures its share of the diff. A token change in non-instrumentation code (a renamed identifier, a changed literal, a removed statement) still FAILs.
+- **SCH-002**: a registered key that names one concept and holds a different one FAILs (the "specific wrong noun" test). A generic key whose brief covers the value PASSES (the "generic reasonable term" test).
+- **SCH-004**: compute delimiter-split Jaccard (split on `.` and `_`) for each agent-added key against every other registry key, including the other keys the same agent added. A score above 0.5 makes the pair a candidate. The pair FAILs only if the two keys hold the same concept. Record the candidates cleared.
+- **COV-002 and COV-006** are N/A for a file with nothing the rule checks. COV-002 needs an outbound HTTP, database, queue, or LLM-client call site in the file's own code. COV-006 needs an operation that an auto-instrumentation library covers. Calls through commit-story's own modules do not count.
+- **COV-005** passes if each span carries at least one meaningful domain attribute. Attribute identity varying between runs is normal.
+- **A questionable skip is a handoff finding, not a COV-001 or COV-004 FAIL.** Coverage rules apply to instrumented files only. List a questionable skip in the "Correct Skips" section and carry it to the handoff.
+
+---
+
+## 6. Run-29 specifics from the failure deep-dives
+
+- **`index.js` is scored as committed code.** Its partial is an NDS-005 false positive, and the committed file is byte-identical to the flagged reassembly, so both functions' spans shipped. NDS-005 for this file is judged from the source: PASS if the original try/catch in `getPreviousCommitTime` is intact.
+- **`summary-graph.js` failed** and has no committed code. It gets no rule table. Its section records the D-3 `gen_ai.*` observations from the debug dump (`run-29/debug-dumps/src/generators/summary-graph.js`) and points to `failure-deep-dives.md`.
+- **`journal-graph.js`**: record the D-3 `gen_ai.*` attributes per span (present, absent, or changed against run-28). Its agent notes say it dropped the response model and id attributes because "the validator treats added if statements as non-instrumentation code", so that absence is a validator interaction, not a model choice. D-3 is a watch item and is not scored.
+- **Attempt counts**: the log's "3 attempts" omits a fourth function-level pass for `git-collector.js` and `summary-manager.js`. Record attempts as the deep-dive states them.
+
+---
+
+## Rule-fit issues for the handoff
+
+Items found before the batches started. Agents and later passes add to this list.
+
+1. **CDQ-006's documentation and implementation disagree** (item 1). `rules-reference.md` describes a COV-001 entry-point exemption and a guard requirement for external source strings. `cdq006.ts` implements neither, and its comment calls the entry-point heuristic "no longer load-bearing". The research rubric has the trivial-conversion exemption only. One of the three should change so the descriptions match.
+2. **NDS-003's defined-value guard pattern has no optional-chaining support.** `if (result.response_metadata?.model != null)` around a single `setAttribute` is rejected, while `if (result.usage_metadata != null)` passes. This failed `summary-graph.js` (6 spans lost), and per the deep-dive it likely drove `context-integrator.js` and `journal-graph.js` to drop attributes rather than guard them. Reproduced in `nds003-repro.mjs` and `nds003-repro2.mjs`.
+3. **NDS-005 compares a Prettier-normalized reassembly against the raw original.** It anchors on the first line of each try body, so a reformatted but intact try reads as missing. This caused `index.js`'s partial.
+4. **No rule checks that a revision attribute holds a resolved revision** (item 4). `vcs.ref.head.revision: HEAD` passes SCH-002, SCH-003, and CDQ-007.
+5. **The research rubric's NDS-003 filter list has drifted from the implemented rule** (carried from release-it run-5, rule-fit item 15). The implemented rule also accepts defined-value guards, `isRecording()` guards, return-value captures, and multi-line normalization.
+6. **The research rubric still describes NDS-005b**, which the implemented rules replaced with NDS-007. Run-29 scores NDS-007 for that concern (see "Rows every committed or partial file's table carries").
+7. **NDS-003's failure message prints a line number from text that exists only inside the validator** (found in batch 1, `summary-graph.js`). The message said "instrumented line 187", which numbers the stripped, Prettier-normalized text. The first failing guard is line 217 of the agent's output. Only the quoted line helps the agent find the problem (`failure-deep-dives.md`, "Open check 2").
+8. **CDQ-007 advisories in the instrumentation report do not say which sub-check fired** (found in batch 1, `context-integrator.js`). Four nullable-member-access advisories (check 3) rendered with text about PII names and filesystem paths, which sends a PR reviewer looking for a leak that does not exist. Check 3 also cannot see that a callee's return shape guarantees the property, so it fires on values that are always defined.
+9. **No rule checks that instrumentation adds no new throw paths** (found in batch 1, `claude-collector.js`). `new Date(x).toISOString()` inside the span's `try` throws `RangeError` on an Invalid Date, where the original code only made comparisons return false. `journal-manager.js` uses the same pattern.
+10. **The function-level fallback extracts exported functions only, so unexported helpers lose their spans whenever a file falls back** (found in batch 1, `git-collector.js`). The JavaScript provider calls `extractExportedFunctions(sourceFile)` with no options (`src/languages/javascript/index.ts:305`), and `includeNonExported` defaults to false. COV-004 reported the four missing helper spans, but nothing on that path can act on the advisory.
+11. **No rule checks that `gen_ai.*` request attributes sit only on spans where a model request is issued** (found in batch 1, `journal-graph.js`). Early-exit node spans claim a chat request that never ran. No rule considers wrapper spans that copy token usage already emitted by an auto-instrumented client span either.
