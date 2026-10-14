@@ -41,6 +41,7 @@ NDS-003, NDS-004, NDS-005, NDS-006, NDS-007, API-001, API-004, COV-001, COV-002,
 
 1. Is `value` a literal, an identifier, or a plain property access (`a.b.c`, `arr.length`)? Then it is exempt. PASS.
 2. Is `value` a call to `String`/`Number`/`Boolean`, a `get*String` call, or a `.toISOString()`/`.toString()`/`.toJSON()`/`.toFixed()`/`.toPrecision()`/`.valueOf()` method call, whose argument and receiver are themselves exempt under step 1 or 2? Then it is exempt. PASS. A `new Date(<exempt>)` receiver also counts as exempt, because the implemented checker treats a `new` expression as non-expensive (clarified after batch 1). `String(entries.length)` is exempt. `String(entries.map(...).join(','))` is not.
+   An expression with no call in it, such as arithmetic or a comparison over operands that are exempt under step 1 (`a.length + b.length`, `parsed.force === true`), is also exempt, because the implemented checker flags only call expressions (clarified after batch 3, rule-fit item 20).
 3. Otherwise the value is expensive. It needs an enclosing `if (span.isRecording()) { ... }` then-branch, or an earlier `if (!span.isRecording()) return;` in the same block. Without one, FAIL. List every failing line.
 
 The row states the count of guarded versus unguarded expensive sites. For `summary-manager.js` (RUN28-1), list every `setAttribute` in the file with its line and whether it is guarded, so the fix verification is complete rather than sampled.
