@@ -111,6 +111,8 @@ RUN28-1 (CDQ-006): fixed for this file. Every `setAttribute` in the file is list
 | 827 | generateAndSaveMonthlySummary | file_path | `path.split(...).filter(Boolean).pop() ?? ''` | yes | yes (826) |
 | 832 | generateAndSaveMonthlySummary | errors_count | `(result.errors \|\| []).length` | no (no call) | n/a |
 
+Each row's line is the `span.setAttribute(` call line. A multi-line call's value expression sits two lines below it, so the `entry_date` value at line 56 is the expression on line 58 that the CDQ-007 row and the unrubriced findings cite. "Guarded?" gives the `if (span.isRecording())` line. Defined-value guards such as `date != null` (line 54) are separate and appear in the NDS-003 and CDQ-007 rows. Coordinator check (2026-10-14): lines 54-58 on the instrument branch confirm this layout.
+
 The implemented checker's `isExpensiveValue` flags only call expressions and the `.map`/`.filter`/`.join`/`JSON.stringify` text patterns. That is why `(result.errors || []).length` at lines 540 and 832 is not expensive.
 
 RUN28-2 (SCH-003): no recurrence in this file. Run-28's boolean-on-string key `commit_story.journal.summary_saved` no longer appears. The one boolean key, `force`, is declared `type: boolean` and receives `Boolean(options.force)` at five sites. All four int keys receive raw `.length` values or the literal `0`. No `String(count)`, template-literal count, or stringified boolean ships. This verdict comes from source (confirm against OTLP export).
