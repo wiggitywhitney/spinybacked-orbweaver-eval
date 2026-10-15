@@ -2,6 +2,8 @@
 
 Working notes for the cross-file reconciliation pass. Each item is a verdict disagreement or a cross-file check that the per-file agents could not settle alone. Items are resolved in the reconciliation pass and the decision goes into `exemption-scope.md`.
 
+**Status (2026-10-15):** items 1-6, 8-22, and 24-27 are decided in `exemption-scope.md` section 8 (R1-R16). Item 7 waits for the OTLP export in the IS scoring milestone. Item 23 is checked in the rule-ID label audit.
+
 ## Open after batch 1 (sections 01–05)
 
 1. **COV-006 for a span that wraps a call an auto-instrumentation library covers.** `claude-collector.js` scored PASS (node `fs` sync calls), and `journal-graph.js` scored PASS (`@traceloop/instrumentation-langchain`). `context-integrator.js` and `git-collector.js` scored N/A. Decide whether fs sync calls count as "covered by an auto-instrumentation library" for this target (is `@opentelemetry/instrumentation-fs` registered anywhere in commit-story-v2?). Traceloop is registered (`src/traceloop-init.js`), so journal-graph's PASS follows release-it run-5 item 12.
